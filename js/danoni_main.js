@@ -214,6 +214,7 @@ const g_detailObj = {
 	boostData: [],
 	toolDif: [],
 	scoreMinimap: {},
+	scoreMinimapReverse: {},
 };
 
 const g_workObj = {
@@ -3354,14 +3355,14 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 	g_detailObj.playingFrame[_scoreId] = playingFrame;
 	g_detailObj.playingFrameWithBlank[_scoreId] = lastFrame - startFrame;
 
-	const generateMinimap = (_scoreId, _scoreObj, keyNum, playingFrame, firstArrowFrame) => {
+	const generateMinimap = (_scoreId, _scoreObj, _keyNum, _playingFrame, _firstArrowFrame, _isReverse = false) => {
 		// 高さを演奏時間に比例させる (例: 1フレーム = 0.5px)
 		const scale = 0.5;
 		const dpr = window.devicePixelRatio || 1; // デバイスのピクセル比を取得（通常 2〜3）
 
 		const timeMargin = 15; // 時間表示用の左マージン
 		const mmWidth = 120; // 任意の幅
-		const mmHeight = playingFrame * scale;
+		const mmHeight = _playingFrame * scale;
 		const mmMarginY = 2;
 
 		const canvas = document.createElement('canvas');
@@ -3370,7 +3371,16 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 		canvas.height = (mmHeight + mmMarginY * 2) * dpr;
 		ctx.scale(dpr, dpr);
 
-		const laneWidth = (mmWidth - timeMargin) / keyNum;
+		const laneWidth = (mmWidth - timeMargin) / _keyNum;
+
+		// --- Y座標計算用の関数 ---
+		// 通常：上(0)から下へ増える
+		// リバース：最大値(mmHeight)から上へ向かって減る
+		const getY = (frame) => {
+			const relativeFrame = frame - _firstArrowFrame;
+			const rawY = relativeFrame * scale;
+			return _isReverse ? (mmHeight - rawY + mmMarginY) : (rawY + mmMarginY);
+		};
 
 		// 時間表記用のフォーマット関数
 		const formatTime = (frame) => {
@@ -3387,12 +3397,11 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 
 		const interval = g_fps;
 		// 最初の1秒刻み地点を計算（例: firstArrowFrameが1234でintervalが60の場合、次の1秒刻みは1260フレーム）
-		let startPoint = Math.ceil(firstArrowFrame / interval) * interval;
+		let startPoint = Math.ceil(_firstArrowFrame / interval) * interval;
 
-		for (let currentFrame = startPoint; currentFrame <= firstArrowFrame + playingFrame; currentFrame += interval) {
+		for (let currentFrame = startPoint; currentFrame <= _firstArrowFrame + _playingFrame; currentFrame += interval) {
 			// 全体の開始(firstArrowFrame)からの相対距離を計算してy座標にする
-			const relativeFrame = currentFrame - firstArrowFrame;
-			const y = relativeFrame * scale;
+			const y = getY(currentFrame);
 
 			// ガイド線
 			ctx.beginPath();
@@ -3406,7 +3415,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 
 		// --- フリーズノートの描画 (先に描くことで通常ノートを上に重ねる) ---
 		ctx.fillStyle = 'rgba(0, 200, 255, 0.4)'; // フリーズノート（帯）の色
-		for (let j = 0; j < keyNum; j++) {
+		for (let j = 0; j < _keyNum; j++) {
 			const frz = _scoreObj.frzData[j];
 			for (let k = 0; k < frz.length; k += 2) {
 				const start = frz[k];
@@ -3414,36 +3423,43 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 
 				if (isNaN(start) || isNaN(end)) continue;
 
-				const yStart = ((start - firstArrowFrame) / playingFrame) * mmHeight + mmMarginY;
-				const yEnd = ((end - firstArrowFrame) / playingFrame) * mmHeight + mmMarginY;
+				const y1 = getY(start);
+				const y2 = getY(end);
 				const x = timeMargin + j * laneWidth;
 
-				// 始点から終点までを矩形（帯）で描画
-				ctx.fillRect(x + 2, yStart, laneWidth - 3, yEnd - yStart);
+				// リバース時は y2 (終点) の方が数値が小さくなるため、
+				// 描画開始y座標は 小さい方(Math.min)、高さは差分(Math.abs)で指定
+				ctx.fillRect(x + 2, Math.min(y1, y2), laneWidth - 3, Math.abs(y2 - y1));
 
-				// 終点側のライン（任意：終点であることを分かりやすくする）
 				ctx.strokeStyle = 'rgba(0, 200, 255, 0.8)';
-				ctx.strokeRect(x + 2, yStart, laneWidth - 3, yEnd - yStart);
+				ctx.strokeRect(x + 2, Math.min(y1, y2), laneWidth - 3, Math.abs(y2 - y1));
 			}
 		}
 
 		// --- 通常ノートの描画 ---
-		for (let j = 0; j < keyNum; j++) {
+		for (let j = 0; j < _keyNum; j++) {
 			ctx.fillStyle = g_dfColorObj.setColorType2[g_keyObj[`color${_keyCtrlPtn}_0`][j]] || '#ffffff';
 			_scoreObj.arrowData[j].forEach(note => {
-				if (isNaN(parseFloat(note))) return;
-				const y = ((note - firstArrowFrame) / playingFrame) * mmHeight + mmMarginY;
+				const val = parseFloat(note);
+				if (isNaN(val)) return;
+				const y = getY(val);
 				const x = timeMargin + j * laneWidth;
 				ctx.fillRect(x + 1, y - 1, laneWidth - 1, 1.5); // 視認性のため厚み1.5px
 			});
 		}
 
-		// 退避
-		g_detailObj.scoreMinimap[_scoreId] = canvas;
+		if (_isReverse) {
+			g_detailObj.scoreMinimapReverse[_scoreId] = canvas;
+		} else {
+			g_detailObj.scoreMinimap[_scoreId] = canvas;
+		}
 	};
 
 	// storeBaseData の中で呼び出す
-	generateMinimap(_scoreId, _scoreObj, keyNum, playingFrame, firstArrowFrame);
+	// 通常版を生成
+	generateMinimap(_scoreId, _scoreObj, keyNum, playingFrame, firstArrowFrame, false);
+	// リバース版を生成
+	generateMinimap(_scoreId, _scoreObj, keyNum, playingFrame, firstArrowFrame, true);
 };
 
 /**
@@ -7676,12 +7692,14 @@ const drawMinimap = _scoreId => {
 	const detailMiniMap = document.getElementById(`detailMiniMap`);
 	detailMiniMap.style.overflow = C_DIS_AUTO;
 	detailMiniMap.style.pointerEvents = C_DIS_AUTO;
-	detailMiniMap.scrollTop = `0px`;
+	detailMiniMap.scrollTop = g_stateObj.miniMapRevFlg ? detailMiniMap.scrollHeight - detailMiniMap.offsetHeight : 0;
 
 	// 再描画のため一度クリア
 	deleteChildspriteAll(`detailMiniMap`);
 
-	const savedCanvas = g_detailObj.scoreMinimap[_scoreId];
+	const savedCanvas = g_stateObj.miniMapRevFlg
+		? g_detailObj.scoreMinimapReverse[_scoreId]
+		: g_detailObj.scoreMinimap[_scoreId];
 
 	if (savedCanvas) {
 		// 退避したCanvasそのものをDOMに追加（再描画不要で高速）
@@ -7692,6 +7710,15 @@ const drawMinimap = _scoreId => {
 		savedCanvas.style.marginLeft = '25%';
 		savedCanvas.style.width = '75%'; // コンテナ幅に合わせる
 		savedCanvas.style.height = 'auto'; // アスペクト比維持
+	}
+
+	if (document.getElementById(`lnkMiniMapRev`) === null) {
+		scoreDetail.appendChild(
+			makeDifLblCssButton(`lnkMiniMapRev`, g_lblNameObj.s_rev, 8, () => {
+				g_stateObj.miniMapRevFlg = !g_stateObj.miniMapRevFlg;
+				drawMinimap(_scoreId);
+			}, g_lblPosObj.lnkMiniMapRev)
+		);
 	}
 };
 
@@ -8017,6 +8044,9 @@ const createOptionWindow = _sprite => {
 
 			$id(`detail${g_stateObj.scoreDetail}`).visibility = `visible`;
 			document.getElementById(`lnk${g_stateObj.scoreDetail}G`).classList.replace(g_cssObj.button_Default, g_cssObj.button_Setting);
+
+			document.getElementById(`lnkMiniMapRev`).style.visibility =
+				g_stateObj.scoreDetail === `MiniMap` && g_stateObj.scoreDetailViewFlg ? `visible` : `hidden`;
 		};
 
 		multiAppend(scoreDetail,
@@ -8060,6 +8090,8 @@ const createOptionWindow = _sprite => {
 		if (_resetFlg) {
 			g_shortcutObj.option.KeyQ.id = g_settings.scoreDetailCursors[0];
 		}
+		document.getElementById(`lnkMiniMapRev`).style.visibility =
+			g_stateObj.scoreDetail === `MiniMap` && g_stateObj.scoreDetailViewFlg ? `visible` : `hidden`;
 	};
 
 	// ---------------------------------------------------

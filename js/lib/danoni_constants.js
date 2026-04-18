@@ -513,6 +513,9 @@ const updateWindowSiz = () => {
         btnSpdCursorR: {
             x: 100, y: 180, w: 15, h: 20, siz: 12,
         },
+        lnkMiniMapRev: {
+            w: g_limitObj.difCoverWidth, h: 20, borderStyle: `solid`,
+        },
 
         /** ディスプレイ画面 */
         scMsg: {
@@ -1170,6 +1173,7 @@ const g_stateObj = {
     scoreDetailViewFlg: false,
     scoreDetail: `Speed`,
     settingSummaryVisible: false,
+    miniMapRevFlg: false,
 
     d_stepzone: C_FLG_ON,
     d_judgment: C_FLG_ON,
@@ -4436,6 +4440,8 @@ const g_lblNameObj = {
     s_time: `Time`,
     s_arrow: `Arrow`,
     s_frz: `Frz`,
+
+    s_rev: `Scroll Rev.`,
 
     d_StepZone: `StepZone`,
     d_Judgment: `Judgment`,
