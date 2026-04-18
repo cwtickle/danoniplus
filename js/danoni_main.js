@@ -213,6 +213,7 @@ const g_detailObj = {
 	speedData: [],
 	boostData: [],
 	toolDif: [],
+	scoreMinimap: {},
 };
 
 const g_workObj = {
@@ -3352,6 +3353,100 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 	g_detailObj.startFrame[_scoreId] = startFrame;
 	g_detailObj.playingFrame[_scoreId] = playingFrame;
 	g_detailObj.playingFrameWithBlank[_scoreId] = lastFrame - startFrame;
+
+	const generateMinimap = (_scoreId, _scoreObj, keyNum, playingFrame, firstArrowFrame) => {
+		// 1. 高さを演奏時間に比例させる (例: 1フレーム = 0.5px)
+		const scale = 0.5;
+		const dpr = window.devicePixelRatio || 1; // デバイスのピクセル比を取得（通常 2〜3）
+
+		const timeMargin = 15; // 時間表示用の左マージン
+		const mmWidth = 120; // 任意の幅
+		const mmHeight = playingFrame * scale;
+		const mmMarginY = 2;
+
+		const canvas = document.createElement('canvas');
+		const ctx = canvas.getContext('2d');
+		canvas.width = mmWidth * dpr;
+		canvas.height = (mmHeight + mmMarginY * 2) * dpr;
+		ctx.scale(dpr, dpr);
+
+		const laneWidth = (mmWidth - timeMargin) / keyNum;
+
+		// 時間表記用のフォーマット関数 (60fps想定)
+		const formatTime = (frame) => {
+			const totalSeconds = Math.floor(frame / g_fps);
+			const m = Math.floor(totalSeconds / g_fps).toString().padStart(2, '0');
+			const s = (totalSeconds % g_fps).toString().padStart(2, '0');
+			return `${m}:${s}`;
+		};
+
+		// --- 1. 時間軸・ガイドラインの描画 ---
+		ctx.strokeStyle = '#444';
+		ctx.fillStyle = '#aaa';
+		ctx.font = `5px ${getBasicFont()}`;
+		ctx.textAlign = 'right';
+		ctx.textBaseline = 'middle';
+
+		const interval = g_fps;
+		// 最初の5秒刻み地点を計算
+		// 例: firstArrowFrameが120なら、次は300(5秒)からスタート
+		let startPoint = Math.ceil(firstArrowFrame / interval) * interval;
+
+		for (let currentFrame = startPoint; currentFrame <= firstArrowFrame + playingFrame; currentFrame += interval) {
+			// 全体の開始(firstArrowFrame)からの相対距離を計算してy座標にする
+			const relativeFrame = currentFrame - firstArrowFrame;
+			const y = relativeFrame * scale;
+
+			// ガイド線
+			ctx.beginPath();
+			ctx.moveTo(timeMargin, y);
+			ctx.lineTo(mmWidth, y);
+			ctx.stroke();
+
+			// タイムスタンプ描画
+			ctx.fillText(formatTime(currentFrame), timeMargin, y);
+		}
+
+		// --- フリーズノートの描画 (先に描くことで通常ノートを上に重ねる) ---
+		ctx.fillStyle = 'rgba(0, 200, 255, 0.4)'; // フリーズノート（帯）の色
+		for (let j = 0; j < keyNum; j++) {
+			const frz = _scoreObj.frzData[j];
+			for (let k = 0; k < frz.length; k += 2) {
+				const start = frz[k];
+				const end = frz[k + 1];
+
+				if (isNaN(start) || isNaN(end)) continue;
+
+				const yStart = ((start - firstArrowFrame) / playingFrame) * mmHeight + mmMarginY;
+				const yEnd = ((end - firstArrowFrame) / playingFrame) * mmHeight + mmMarginY;
+				const x = timeMargin + j * laneWidth;
+
+				// 始点から終点までを矩形（帯）で描画
+				ctx.fillRect(x + 4, yStart, laneWidth - 8, yEnd - yStart);
+
+				// 終点側のライン（任意：終点であることを分かりやすくする）
+				ctx.strokeStyle = 'rgba(0, 200, 255, 0.8)';
+				ctx.strokeRect(x + 4, yStart, laneWidth - 8, yEnd - yStart);
+			}
+		}
+
+		// --- 通常ノートの描画 ---
+		for (let j = 0; j < keyNum; j++) {
+			ctx.fillStyle = g_dfColorObj.setColorType2[g_keyObj[`color${_keyCtrlPtn}_0`][j]] || '#ffffff';
+			_scoreObj.arrowData[j].forEach(note => {
+				if (isNaN(parseFloat(note))) return;
+				const y = ((note - firstArrowFrame) / playingFrame) * mmHeight + mmMarginY;
+				const x = timeMargin + j * laneWidth;
+				ctx.fillRect(x + 2, y - 1, laneWidth - 4, 1.5); // 視認性のため厚み1.5px
+			});
+		}
+
+		// 退避
+		g_detailObj.scoreMinimap[_scoreId] = canvas;
+	};
+
+	// storeBaseData の中で呼び出す
+	generateMinimap(_scoreId, _scoreObj, keyNum, playingFrame, firstArrowFrame);
 };
 
 /**
@@ -7580,6 +7675,29 @@ const makeHighScore = _scoreId => {
 	}
 };
 
+const drawMinimap = _scoreId => {
+	const detailMiniMap = document.getElementById(`detailMiniMap`);
+	detailMiniMap.style.overflow = C_DIS_AUTO;
+	detailMiniMap.style.pointerEvents = C_DIS_AUTO;
+	detailMiniMap.scrollTop = `0px`;
+
+	// 再描画のため一度クリア
+	deleteChildspriteAll(`detailMiniMap`);
+
+	const savedCanvas = g_detailObj.scoreMinimap[_scoreId];
+
+	if (savedCanvas) {
+		// 退避したCanvasそのものをDOMに追加（再描画不要で高速）
+		detailMiniMap.appendChild(savedCanvas);
+
+		// CSSで見た目を調整
+		savedCanvas.style.display = 'block';
+		savedCanvas.style.left = '25%';
+		savedCanvas.style.width = '75%'; // コンテナ幅に合わせる
+		savedCanvas.style.height = 'auto'; // アスペクト比維持
+	}
+};
+
 /**
  * 譜面初期化処理
  * - 譜面の基本設定（キー数、初期速度、リバース、ゲージ設定）をここで行う
@@ -7768,6 +7886,7 @@ const setDifficulty = (_initFlg) => {
 		drawDensityGraph(g_stateObj.scoreId);
 		makeDifInfo(g_stateObj.scoreId);
 		makeHighScore(g_stateObj.scoreId);
+		drawMinimap(g_stateObj.scoreId);
 	}
 
 	// 楽曲データの表示
@@ -7908,6 +8027,7 @@ const createOptionWindow = _sprite => {
 			createScoreDetail(`Density`),
 			createScoreDetail(`ToolDif`, false),
 			createScoreDetail(`HighScore`, false),
+			createScoreDetail(`MiniMap`, false),
 		);
 		g_settings.scoreDetails.forEach((sd, j) => {
 			scoreDetail.appendChild(
