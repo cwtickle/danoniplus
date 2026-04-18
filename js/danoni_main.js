@@ -3355,7 +3355,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 	g_detailObj.playingFrameWithBlank[_scoreId] = lastFrame - startFrame;
 
 	const generateMinimap = (_scoreId, _scoreObj, keyNum, playingFrame, firstArrowFrame) => {
-		// 1. 高さを演奏時間に比例させる (例: 1フレーム = 0.5px)
+		// 高さを演奏時間に比例させる (例: 1フレーム = 0.5px)
 		const scale = 0.5;
 		const dpr = window.devicePixelRatio || 1; // デバイスのピクセル比を取得（通常 2〜3）
 
@@ -3372,15 +3372,13 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 
 		const laneWidth = (mmWidth - timeMargin) / keyNum;
 
-		// 時間表記用のフォーマット関数 (60fps想定)
+		// 時間表記用のフォーマット関数
 		const formatTime = (frame) => {
-			const totalSeconds = Math.floor(frame / g_fps);
-			const m = Math.floor(totalSeconds / g_fps).toString().padStart(2, '0');
-			const s = (totalSeconds % g_fps).toString().padStart(2, '0');
-			return `${m}:${s}`;
+			const [m, s] = transFrameToTimer(frame).split(`:`);
+			return `${m.padStart(2, `0`)}:${s}`;
 		};
 
-		// --- 1. 時間軸・ガイドラインの描画 ---
+		// --- 時間軸・ガイドラインの描画 ---
 		ctx.strokeStyle = '#444';
 		ctx.fillStyle = '#aaa';
 		ctx.font = `5px ${getBasicFont()}`;
@@ -3388,8 +3386,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 		ctx.textBaseline = 'middle';
 
 		const interval = g_fps;
-		// 最初の5秒刻み地点を計算
-		// 例: firstArrowFrameが120なら、次は300(5秒)からスタート
+		// 最初の1秒刻み地点を計算（例: firstArrowFrameが1234でintervalが60の場合、次の1秒刻みは1260フレーム）
 		let startPoint = Math.ceil(firstArrowFrame / interval) * interval;
 
 		for (let currentFrame = startPoint; currentFrame <= firstArrowFrame + playingFrame; currentFrame += interval) {
@@ -7692,7 +7689,7 @@ const drawMinimap = _scoreId => {
 
 		// CSSで見た目を調整
 		savedCanvas.style.display = 'block';
-		savedCanvas.style.left = '25%';
+		savedCanvas.style.marginLeft = '25%';
 		savedCanvas.style.width = '75%'; // コンテナ幅に合わせる
 		savedCanvas.style.height = 'auto'; // アスペクト比維持
 	}
