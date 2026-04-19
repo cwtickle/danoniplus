@@ -7714,7 +7714,14 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 		savedCanvas.style.height = 'auto'; // アスペクト比維持
 	}
 	const scrollHeight = Math.max(detailMiniMap.scrollHeight - detailMiniMap.clientHeight, 0);
-	const fadeinScrollTop = scrollHeight * g_stateObj.fadein / 100;
+	const playingFrame = Math.max(g_detailObj.playingFrame[_scoreId], 1);
+	const lastFrame = g_detailObj.startFrame[_scoreId] + g_detailObj.playingFrameWithBlank[_scoreId];
+	const firstArrowFrame = lastFrame - g_detailObj.playingFrame[_scoreId];
+	const fadeinFrameOffset = Math.max(0, Math.min(
+		playingFrame,
+		getStartFrame(lastFrame, g_stateObj.fadein, _scoreId) - firstArrowFrame
+	));
+	const fadeinScrollTop = scrollHeight * fadeinFrameOffset / playingFrame;
 	detailMiniMap.scrollTop = g_stateObj.miniMapRevFlg
 		? (_initFlg ? scrollHeight - currentScrollTop : scrollHeight - fadeinScrollTop)
 		: (_initFlg ? scrollHeight - currentScrollTop : fadeinScrollTop);
@@ -8218,6 +8225,7 @@ const createOptionWindow = _sprite => {
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.textContent = `${g_stateObj.fadein}${g_lblNameObj.percent}`;
 		updateSettingSummary();
+		drawMinimap(g_stateObj.scoreId);
 	};
 
 	multiAppend(spriteList.fadein,
