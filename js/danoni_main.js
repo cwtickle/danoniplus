@@ -7748,10 +7748,12 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 
 	// --- ヘッダー部分 ---
 	const detailMiniMapHeader = createEmptySprite(detailMiniMap, `detailMiniMapHeader`, g_windowObj.detailMiniMapHeader);
+	$id(`detailMiniMapHeader`).top = (g_stateObj.miniMapRevFlg ? 230 : 0) + `px`;
 	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[_scoreId]);
 
 	// --- メイン（譜面）部分 ---
 	const detailMiniMapSub = createEmptySprite(detailMiniMap, `detailMiniMapSub`, g_windowObj.detailMiniMapSub);
+	$id(`detailMiniMapSub`).top = (g_stateObj.miniMapRevFlg ? 0 : 15) + `px`;
 
 	detailMiniMapSub.style.overflowX = 'hidden';
 	detailMiniMapSub.style.overflowY = 'auto';
@@ -7788,8 +7790,6 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 				lnkMiniMapRev.textContent = g_lblNameObj.s_rev + `${g_stateObj.miniMapRevFlg ? `↑` : `↓`}`;
 				drawMinimap(g_stateObj.scoreId, true);
 				createScText(lnkMiniMapRev, `MiniMapRev`, { targetLabel: `lnkMiniMapRev`, x: -12 });
-				$id(`detailMiniMapHeader`).top = (g_stateObj.miniMapRevFlg ? 230 : 0) + `px`;
-				$id(`detailMiniMapSub`).top = (g_stateObj.miniMapRevFlg ? 0 : 15) + `px`;
 			}, g_lblPosObj.lnkMiniMapRev)
 		);
 		createScText(lnkMiniMapRev, `MiniMapRev`, { targetLabel: `lnkMiniMapRev`, x: -12 });
