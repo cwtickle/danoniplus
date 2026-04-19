@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/04/13
+ * Revised : 2026/04/19
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 46.7.0`;
-const g_revisedDate = `2026/04/13`;
+const g_version = `Ver 47.0.0`;
+const g_revisedDate = `2026/04/19`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -213,6 +213,9 @@ const g_detailObj = {
 	speedData: [],
 	boostData: [],
 	toolDif: [],
+	scoreMinimap: {},
+	scoreMinimapReverse: {},
+	scoreMinimapHeader: {},
 };
 
 const g_workObj = {
@@ -3352,6 +3355,154 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 	g_detailObj.startFrame[_scoreId] = startFrame;
 	g_detailObj.playingFrame[_scoreId] = playingFrame;
 	g_detailObj.playingFrameWithBlank[_scoreId] = lastFrame - startFrame;
+
+	const generateMinimap = (_scoreId, _scoreObj, _keyNum, _playingFrame, _firstArrowFrame, _isReverse = false) => {
+		// 高さを演奏時間に比例させる (例: 1フレーム = 0.5px)
+		const scale = 1.5;
+		const dpr = window.devicePixelRatio || 1; // デバイスのピクセル比を取得（通常 2〜3）
+
+		const timeMargin = 35; // 時間表示用の左マージン
+		const mmWidth = (g_sWidth - 500) / 2 + 290; // 基準となるコマの横幅（親divより少し短くする）
+		const mmHeightTotal = _playingFrame * scale;
+		const mmMarginY = 2;
+		const laneWidth = Math.min(Math.floor((mmWidth - timeMargin) / _keyNum), 40);
+		const logicalWidth = timeMargin + (laneWidth * _keyNum);
+
+		// ヘッダー用キャンバスの作成
+		const canvasHeader = document.createElement(`canvas`);
+		const ctxHeader = canvasHeader.getContext(`2d`);
+		canvasHeader.width = logicalWidth * dpr;
+		canvasHeader.height = 15 * dpr;
+		canvasHeader.style.width = `${logicalWidth}px`;
+		canvasHeader.style.height = `15px`;
+		ctxHeader.scale(dpr, dpr);
+		ctxHeader.fillStyle = '#999';
+		ctxHeader.font = `10px ${getBasicFont()}`;
+		ctxHeader.textAlign = 'center';
+
+		for (let j = 0; j < _keyNum; j++) {
+			const x = timeMargin + j * laneWidth + laneWidth / 2;
+			ctxHeader.fillText(g_kCd[g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][0]], x, 10);
+			ctxHeader.strokeStyle = '#444';
+		}
+
+		g_detailObj.scoreMinimapHeader[_scoreId] = canvasHeader;
+
+		// 譜面全体のキャンバスの作成
+		const MAX_CANVAS_HEIGHT = 10000; // 1枚あたりの高さ制限（安全圏）
+		const canvasCount = Math.ceil((mmHeightTotal + mmMarginY * 2) / MAX_CANVAS_HEIGHT);
+		const canvases = [];
+
+		for (let i = 0; i < canvasCount; i++) {
+			const cvs = document.createElement('canvas');
+			const h = (i === canvasCount - 1)
+				? (mmHeightTotal + mmMarginY * 2) - (MAX_CANVAS_HEIGHT * i)
+				: MAX_CANVAS_HEIGHT;
+
+			cvs.width = logicalWidth * dpr;
+			cvs.height = h * dpr;
+			cvs.style.width = `${logicalWidth}px`;
+			cvs.style.height = `${h}px`;
+			cvs.style.display = 'block'; // 隙間防止
+			const ctx = cvs.getContext('2d');
+			ctx.scale(dpr, dpr);
+			canvases.push({ canvas: cvs, ctx: ctx, offsetTop: i * MAX_CANVAS_HEIGHT });
+		}
+
+		// --- 描画先を振り分けるヘルパー関数 ---
+		const drawOnTarget = (y, height, drawFunc) => {
+			canvases.forEach(item => {
+				// 描画要素がCanvasの範囲内に入っているか判定
+				if (y + height >= item.offsetTop && y <= item.offsetTop + (item.canvas.height / dpr)) {
+					item.ctx.save();
+					item.ctx.translate(0, -item.offsetTop);
+					drawFunc(item.ctx);
+					item.ctx.restore();
+				}
+			});
+		};
+
+		// --- Y座標計算用の関数 ---
+		// 通常：上(0)から下へ増える
+		// リバース：最大値(mmHeight)から上へ向かって減る
+		const getY = (frame) => {
+			const relativeFrame = frame - _firstArrowFrame;
+			const rawY = relativeFrame * scale;
+			return _isReverse ? (mmHeightTotal - rawY + mmMarginY) : (rawY + mmMarginY);
+		};
+
+		// 時間表記用のフォーマット関数
+		const formatTime = (frame) => {
+			const [m, s] = transFrameToTimer(frame).split(`:`);
+			return `${m.padStart(2, `0`)}:${s}`;
+		};
+
+		// --- 1. 時間軸・ガイドライン ---
+		const interval = g_fps;
+		let startPoint = Math.ceil(_firstArrowFrame / interval) * interval;
+		for (let currentFrame = startPoint; currentFrame <= _firstArrowFrame + _playingFrame; currentFrame += interval) {
+			const y = getY(currentFrame);
+			drawOnTarget(y - 5, 10, (ctx) => {
+				ctx.strokeStyle = '#444';
+				ctx.fillStyle = '#999';
+				ctx.font = `10px ${getBasicFont()}`;
+				ctx.textAlign = 'right';
+				ctx.textBaseline = 'middle';
+				ctx.beginPath();
+				ctx.moveTo(timeMargin, y);
+				ctx.lineTo(timeMargin + laneWidth * _keyNum, y);
+				ctx.stroke();
+				ctx.fillText(formatTime(currentFrame), timeMargin, y);
+			});
+		}
+
+		// --- 2. フリーズノート ---
+		for (let j = 0; j < _keyNum; j++) {
+			const frz = _scoreObj.frzData[j];
+			for (let k = 0; k < frz.length; k += 2) {
+				const start = frz[k], end = frz[k + 1];
+				if (isNaN(start) || isNaN(end)) continue;
+				const y1 = getY(start), y2 = getY(end);
+				const x = timeMargin + j * laneWidth;
+				const top = Math.min(y1, y2), h = Math.abs(y2 - y1);
+
+				drawOnTarget(top, h, (ctx) => {
+					ctx.fillStyle = 'rgba(0, 200, 255, 0.4)';
+					ctx.fillRect(x + 2, top, laneWidth - 3, h);
+					ctx.strokeStyle = 'rgba(0, 200, 255, 0.8)';
+					ctx.strokeRect(x + 2, top, laneWidth - 3, h);
+				});
+			}
+		}
+
+		// --- 3. 通常ノート ---
+		for (let j = 0; j < _keyNum; j++) {
+			const color = g_dfColorObj.setColorType2[g_keyObj[`color${_keyCtrlPtn}_0`][j]] || '#ffffff';
+			_scoreObj.arrowData[j].forEach(note => {
+				const val = parseFloat(note);
+				if (isNaN(val)) return;
+				const y = getY(val), x = timeMargin + j * laneWidth;
+				drawOnTarget(y - 1.5, 3, (ctx) => {
+					ctx.fillStyle = color;
+					ctx.fillRect(x + 1, y - 1.5, laneWidth - 1, 3);
+				});
+			});
+		}
+
+		// 保存（Canvasの配列を保存する）
+		const result = canvases.map(item => item.canvas);
+		if (_isReverse) {
+			g_detailObj.scoreMinimapReverse[_scoreId] = result;
+		} else {
+			g_detailObj.scoreMinimap[_scoreId] = result;
+		}
+	};
+
+	// storeBaseData の中で呼び出す
+	// 通常版を生成
+	generateMinimap(_scoreId, _scoreObj, keyNum, playingFrame, firstArrowFrame, false);
+	// リバース版を生成
+	generateMinimap(_scoreId, _scoreObj, keyNum, playingFrame, firstArrowFrame, true);
 };
 
 /**
@@ -4393,8 +4544,8 @@ const headerConvert = _dosObj => {
 		obj.playingLayout = g_presetObj.playingLayout ?? true;
 	}
 
-	// ジャストフレームの設定 (ローカル: 0フレーム, リモートサーバ上: 1フレーム以内)
-	obj.justFrames = (g_isLocal) ? 0 : 1;
+	// ジャストフレームの設定 (ローカル/デバッグ時: 0フレーム, 通常時: 1フレーム以内)
+	obj.justFrames = g_isDebug ? 0 : 1;
 
 	// リザルトデータのカスタマイズ
 	obj.resultFormat = escapeHtmlForEnabledTag(_dosObj.resultFormat ?? g_presetObj.resultFormat ?? g_templateObj.resultFormatDf);
@@ -7580,6 +7731,71 @@ const makeHighScore = _scoreId => {
 	}
 };
 
+const drawMinimap = (_scoreId, _initFlg = false) => {
+	const detailMiniMap = document.getElementById(`detailMiniMap`);
+	if (detailMiniMap === null) return;   // scoreDetailUse=false 等で未生成の場合は何もしない
+
+	const currentScrollTop = document.getElementById(`detailMiniMapSub`)
+		? document.getElementById(`detailMiniMapSub`).scrollTop : 0;
+
+	// 再描画のため一度クリア
+	deleteChildspriteAll(`detailMiniMap`);
+
+	// drawMinimap 内の Canvas 追加部分
+	const savedCanvases = g_stateObj.miniMapRevFlg
+		? g_detailObj.scoreMinimapReverse[_scoreId]
+		: g_detailObj.scoreMinimap[_scoreId];
+
+	// --- ヘッダー部分 ---
+	const detailMiniMapHeader = createEmptySprite(detailMiniMap, `detailMiniMapHeader`, g_windowObj.detailMiniMapHeader);
+	$id(`detailMiniMapHeader`).top = (g_stateObj.miniMapRevFlg ? 230 : 0) + `px`;
+	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[_scoreId]);
+
+	// --- メイン（譜面）部分 ---
+	const detailMiniMapSub = createEmptySprite(detailMiniMap, `detailMiniMapSub`, g_windowObj.detailMiniMapSub);
+	$id(`detailMiniMapSub`).top = (g_stateObj.miniMapRevFlg ? 0 : 15) + `px`;
+
+	detailMiniMapSub.style.overflowX = 'hidden';
+	detailMiniMapSub.style.overflowY = 'auto';
+	detailMiniMapSub.style.pointerEvents = 'auto';
+
+	if (savedCanvases && Array.isArray(savedCanvases)) {
+		// 退避したCanvasそのものをDOMに追加（再描画不要で高速）
+		detailMiniMapSub.style.overflow = C_DIS_AUTO;
+		detailMiniMapSub.style.pointerEvents = C_DIS_AUTO;
+		savedCanvases.forEach(canvas => {
+			canvas.style.position = 'static';
+			canvas.style.display = 'block';
+			canvas.style.height = 'auto';
+			detailMiniMapSub.appendChild(canvas);
+		});
+	}
+	const scrollHeight = Math.max(detailMiniMapSub.scrollHeight - detailMiniMapSub.clientHeight, 0);
+	const playingFrame = Math.max(g_detailObj.playingFrame[_scoreId], 1);
+	const lastFrame = g_detailObj.startFrame[_scoreId] + g_detailObj.playingFrameWithBlank[_scoreId];
+	const firstArrowFrame = lastFrame - g_detailObj.playingFrame[_scoreId];
+	const fadeinFrameOffset = Math.max(0, Math.min(
+		playingFrame,
+		getStartFrame(lastFrame, g_stateObj.fadein, _scoreId) - firstArrowFrame
+	));
+	const fadeinScrollTop = scrollHeight * fadeinFrameOffset / playingFrame;
+	detailMiniMapSub.scrollTop = g_stateObj.miniMapRevFlg
+		? (_initFlg ? scrollHeight - currentScrollTop : scrollHeight - fadeinScrollTop)
+		: (_initFlg ? scrollHeight - currentScrollTop : fadeinScrollTop);
+
+	if (document.getElementById(`lnkMiniMapRev`) === null) {
+		scoreDetail.appendChild(
+			makeDifLblCssButton(`lnkMiniMapRev`, g_lblNameObj.s_rev + `${g_stateObj.miniMapRevFlg ? `↑` : `↓`}`, 8, () => {
+				g_stateObj.miniMapRevFlg = !g_stateObj.miniMapRevFlg;
+				lnkMiniMapRev.textContent = g_lblNameObj.s_rev + `${g_stateObj.miniMapRevFlg ? `↑` : `↓`}`;
+				drawMinimap(g_stateObj.scoreId, true);
+				createScText(lnkMiniMapRev, `MiniMapRev`, { targetLabel: `lnkMiniMapRev`, x: -12 });
+			}, g_lblPosObj.lnkMiniMapRev)
+		);
+		createScText(lnkMiniMapRev, `MiniMapRev`, { targetLabel: `lnkMiniMapRev`, x: -12 });
+	}
+};
+
 /**
  * 譜面初期化処理
  * - 譜面の基本設定（キー数、初期速度、リバース、ゲージ設定）をここで行う
@@ -7768,6 +7984,7 @@ const setDifficulty = (_initFlg) => {
 		drawDensityGraph(g_stateObj.scoreId);
 		makeDifInfo(g_stateObj.scoreId);
 		makeHighScore(g_stateObj.scoreId);
+		drawMinimap(g_stateObj.scoreId);
 	}
 
 	// 楽曲データの表示
@@ -7901,6 +8118,9 @@ const createOptionWindow = _sprite => {
 
 			$id(`detail${g_stateObj.scoreDetail}`).visibility = `visible`;
 			document.getElementById(`lnk${g_stateObj.scoreDetail}G`).classList.replace(g_cssObj.button_Default, g_cssObj.button_Setting);
+
+			document.getElementById(`lnkMiniMapRev`).style.display =
+				g_stateObj.scoreDetail === `MiniMap` && g_stateObj.scoreDetailViewFlg ? C_DIS_INHERIT : C_DIS_NONE;
 		};
 
 		multiAppend(scoreDetail,
@@ -7908,6 +8128,7 @@ const createOptionWindow = _sprite => {
 			createScoreDetail(`Density`),
 			createScoreDetail(`ToolDif`, false),
 			createScoreDetail(`HighScore`, false),
+			createScoreDetail(`MiniMap`, false),
 		);
 		g_settings.scoreDetails.forEach((sd, j) => {
 			scoreDetail.appendChild(
@@ -7943,6 +8164,8 @@ const createOptionWindow = _sprite => {
 		if (_resetFlg) {
 			g_shortcutObj.option.KeyQ.id = g_settings.scoreDetailCursors[0];
 		}
+		document.getElementById(`lnkMiniMapRev`).style.display =
+			g_stateObj.scoreDetail === `MiniMap` && g_stateObj.scoreDetailViewFlg ? C_DIS_INHERIT : C_DIS_NONE;
 	};
 
 	// ---------------------------------------------------
@@ -8059,6 +8282,7 @@ const createOptionWindow = _sprite => {
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.textContent = `${g_stateObj.fadein}${g_lblNameObj.percent}`;
 		updateSettingSummary();
+		drawMinimap(g_stateObj.scoreId);
 	};
 
 	multiAppend(spriteList.fadein,
@@ -8077,6 +8301,7 @@ const createOptionWindow = _sprite => {
 	fadeinSlider.addEventListener(`input`, () => {
 		g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein, `fadein`);
 		updateSettingSummary();
+		drawMinimap(g_stateObj.scoreId);
 	}, false);
 
 	// ---------------------------------------------------
