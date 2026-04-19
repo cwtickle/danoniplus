@@ -3363,7 +3363,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 
 		const timeMargin = 35; // 時間表示用の左マージン
 		const mmWidth = (g_sWidth - 500) / 2 + 290; // 基準となるコマの横幅（親divより少し短くする）
-		const mmHeight = _playingFrame * scale;
+		const mmHeightTotal = _playingFrame * scale;
 		const mmMarginY = 2;
 		const laneWidth = Math.min(Math.floor((mmWidth - timeMargin) / _keyNum), 40);
 		const logicalWidth = timeMargin + (laneWidth * _keyNum);
@@ -3389,13 +3389,38 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 		g_detailObj.scoreMinimapHeader[_scoreId] = canvasHeader;
 
 		// 譜面全体のキャンバスの作成
-		const canvas = document.createElement(`canvas`);
-		const ctx = canvas.getContext(`2d`);
-		canvas.width = logicalWidth * dpr;
-		canvas.height = (mmHeight + mmMarginY * 2) * dpr;
-		canvas.style.width = `${logicalWidth}px`;
-		canvas.style.height = `${mmHeight + mmMarginY * 2}px`;
-		ctx.scale(dpr, dpr);
+		const MAX_CANVAS_HEIGHT = 10000; // 1枚あたりの高さ制限（安全圏）
+		const canvasCount = Math.ceil((mmHeightTotal + mmMarginY * 2) / MAX_CANVAS_HEIGHT);
+		const canvases = [];
+
+		for (let i = 0; i < canvasCount; i++) {
+			const cvs = document.createElement('canvas');
+			const h = (i === canvasCount - 1)
+				? (mmHeightTotal + mmMarginY * 2) - (MAX_CANVAS_HEIGHT * i)
+				: MAX_CANVAS_HEIGHT;
+
+			cvs.width = logicalWidth * dpr;
+			cvs.height = h * dpr;
+			cvs.style.width = `${logicalWidth}px`;
+			cvs.style.height = `${h}px`;
+			cvs.style.display = 'block'; // 隙間防止
+			const ctx = cvs.getContext('2d');
+			ctx.scale(dpr, dpr);
+			canvases.push({ canvas: cvs, ctx: ctx, offsetTop: i * MAX_CANVAS_HEIGHT });
+		}
+
+		// --- 描画先を振り分けるヘルパー関数 ---
+		const drawOnTarget = (y, height, drawFunc) => {
+			canvases.forEach(item => {
+				// 描画要素がCanvasの範囲内に入っているか判定
+				if (y + height >= item.offsetTop && y <= item.offsetTop + (item.canvas.height / dpr)) {
+					item.ctx.save();
+					item.ctx.translate(0, -item.offsetTop);
+					drawFunc(item.ctx);
+					item.ctx.restore();
+				}
+			});
+		};
 
 		// --- Y座標計算用の関数 ---
 		// 通常：上(0)から下へ増える
@@ -3403,7 +3428,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 		const getY = (frame) => {
 			const relativeFrame = frame - _firstArrowFrame;
 			const rawY = relativeFrame * scale;
-			return _isReverse ? (mmHeight - rawY + mmMarginY) : (rawY + mmMarginY);
+			return _isReverse ? (mmHeightTotal - rawY + mmMarginY) : (rawY + mmMarginY);
 		};
 
 		// 時間表記用のフォーマット関数
@@ -3412,70 +3437,64 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 			return `${m.padStart(2, `0`)}:${s}`;
 		};
 
-		// --- 時間軸・ガイドラインの描画 ---
-		ctx.strokeStyle = '#444';
-		ctx.fillStyle = '#999';
-		ctx.font = `10px ${getBasicFont()}`;
-		ctx.textAlign = 'right';
-		ctx.textBaseline = 'middle';
-
+		// --- 1. 時間軸・ガイドライン ---
 		const interval = g_fps;
-		// 最初の1秒刻み地点を計算（例: firstArrowFrameが1234でintervalが60の場合、次の1秒刻みは1260フレーム）
 		let startPoint = Math.ceil(_firstArrowFrame / interval) * interval;
-
 		for (let currentFrame = startPoint; currentFrame <= _firstArrowFrame + _playingFrame; currentFrame += interval) {
-			// 全体の開始(firstArrowFrame)からの相対距離を計算してy座標にする
 			const y = getY(currentFrame);
-
-			// ガイド線
-			ctx.beginPath();
-			ctx.moveTo(timeMargin, y);
-			ctx.lineTo(timeMargin + laneWidth * _keyNum, y);
-			ctx.stroke();
-
-			// タイムスタンプ描画
-			ctx.fillText(formatTime(currentFrame), timeMargin, y);
-		}
-
-		// --- フリーズノートの描画 (先に描くことで通常ノートを上に重ねる) ---
-		ctx.fillStyle = 'rgba(0, 200, 255, 0.4)'; // フリーズノート（帯）の色
-		for (let j = 0; j < _keyNum; j++) {
-			const frz = _scoreObj.frzData[j];
-			for (let k = 0; k < frz.length; k += 2) {
-				const start = frz[k];
-				const end = frz[k + 1];
-
-				if (isNaN(start) || isNaN(end)) continue;
-
-				const y1 = getY(start);
-				const y2 = getY(end);
-				const x = timeMargin + j * laneWidth;
-
-				// リバース時は y2 (終点) の方が数値が小さくなるため、
-				// 描画開始y座標は 小さい方(Math.min)、高さは差分(Math.abs)で指定
-				ctx.fillRect(x + 2, Math.min(y1, y2), laneWidth - 3, Math.abs(y2 - y1));
-
-				ctx.strokeStyle = 'rgba(0, 200, 255, 0.8)';
-				ctx.strokeRect(x + 2, Math.min(y1, y2), laneWidth - 3, Math.abs(y2 - y1));
-			}
-		}
-
-		// --- 通常ノートの描画 ---
-		for (let j = 0; j < _keyNum; j++) {
-			ctx.fillStyle = g_dfColorObj.setColorType2[g_keyObj[`color${_keyCtrlPtn}_0`][j]] || '#ffffff';
-			_scoreObj.arrowData[j].forEach(note => {
-				const val = parseFloat(note);
-				if (isNaN(val)) return;
-				const y = getY(val);
-				const x = timeMargin + j * laneWidth;
-				ctx.fillRect(x + 1, y - 1, laneWidth - 1, 3); // 視認性のため厚み3px
+			drawOnTarget(y - 5, 10, (ctx) => {
+				ctx.strokeStyle = '#444';
+				ctx.fillStyle = '#999';
+				ctx.font = `10px ${getBasicFont()}`;
+				ctx.textAlign = 'right';
+				ctx.textBaseline = 'middle';
+				ctx.beginPath();
+				ctx.moveTo(timeMargin, y);
+				ctx.lineTo(timeMargin + laneWidth * _keyNum, y);
+				ctx.stroke();
+				ctx.fillText(formatTime(currentFrame), timeMargin, y);
 			});
 		}
 
+		// --- 2. フリーズノート ---
+		for (let j = 0; j < _keyNum; j++) {
+			const frz = _scoreObj.frzData[j];
+			for (let k = 0; k < frz.length; k += 2) {
+				const start = frz[k], end = frz[k + 1];
+				if (isNaN(start) || isNaN(end)) continue;
+				const y1 = getY(start), y2 = getY(end);
+				const x = timeMargin + j * laneWidth;
+				const top = Math.min(y1, y2), h = Math.abs(y2 - y1);
+
+				drawOnTarget(top, h, (ctx) => {
+					ctx.fillStyle = 'rgba(0, 200, 255, 0.4)';
+					ctx.fillRect(x + 2, top, laneWidth - 3, h);
+					ctx.strokeStyle = 'rgba(0, 200, 255, 0.8)';
+					ctx.strokeRect(x + 2, top, laneWidth - 3, h);
+				});
+			}
+		}
+
+		// --- 3. 通常ノート ---
+		for (let j = 0; j < _keyNum; j++) {
+			const color = g_dfColorObj.setColorType2[g_keyObj[`color${_keyCtrlPtn}_0`][j]] || '#ffffff';
+			_scoreObj.arrowData[j].forEach(note => {
+				const val = parseFloat(note);
+				if (isNaN(val)) return;
+				const y = getY(val), x = timeMargin + j * laneWidth;
+				drawOnTarget(y - 1.5, 3, (ctx) => {
+					ctx.fillStyle = color;
+					ctx.fillRect(x + 1, y - 1.5, laneWidth - 1, 3);
+				});
+			});
+		}
+
+		// 保存（Canvasの配列を保存する）
+		const result = canvases.map(item => item.canvas);
 		if (_isReverse) {
-			g_detailObj.scoreMinimapReverse[_scoreId] = canvas;
+			g_detailObj.scoreMinimapReverse[_scoreId] = result;
 		} else {
-			g_detailObj.scoreMinimap[_scoreId] = canvas;
+			g_detailObj.scoreMinimap[_scoreId] = result;
 		}
 	};
 
@@ -7722,23 +7741,32 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 	// 再描画のため一度クリア
 	deleteChildspriteAll(`detailMiniMap`);
 
-	const savedCanvas = g_stateObj.miniMapRevFlg
+	// drawMinimap 内の Canvas 追加部分
+	const savedCanvases = g_stateObj.miniMapRevFlg
 		? g_detailObj.scoreMinimapReverse[_scoreId]
 		: g_detailObj.scoreMinimap[_scoreId];
 
+	// --- ヘッダー部分 ---
 	const detailMiniMapHeader = createEmptySprite(detailMiniMap, `detailMiniMapHeader`, g_windowObj.detailMiniMapHeader);
 	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[_scoreId]);
 
+	// --- メイン（譜面）部分 ---
 	const detailMiniMapSub = createEmptySprite(detailMiniMap, `detailMiniMapSub`, g_windowObj.detailMiniMapSub);
-	if (savedCanvas) {
+
+	detailMiniMapSub.style.overflowX = 'hidden';
+	detailMiniMapSub.style.overflowY = 'auto';
+	detailMiniMapSub.style.pointerEvents = 'auto';
+
+	if (savedCanvases && Array.isArray(savedCanvases)) {
 		// 退避したCanvasそのものをDOMに追加（再描画不要で高速）
 		detailMiniMapSub.style.overflow = C_DIS_AUTO;
 		detailMiniMapSub.style.pointerEvents = C_DIS_AUTO;
-		detailMiniMapSub.appendChild(savedCanvas);
-
-		// CSSで見た目を調整
-		savedCanvas.style.display = 'block';
-		savedCanvas.style.height = 'auto'; // アスペクト比維持
+		savedCanvases.forEach(canvas => {
+			canvas.style.position = 'static';
+			canvas.style.display = 'block';
+			canvas.style.height = 'auto';
+			detailMiniMapSub.appendChild(canvas);
+		});
 	}
 	const scrollHeight = Math.max(detailMiniMapSub.scrollHeight - detailMiniMapSub.clientHeight, 0);
 	const playingFrame = Math.max(g_detailObj.playingFrame[_scoreId], 1);
