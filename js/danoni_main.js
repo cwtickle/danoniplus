@@ -3357,21 +3357,23 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 
 	const generateMinimap = (_scoreId, _scoreObj, _keyNum, _playingFrame, _firstArrowFrame, _isReverse = false) => {
 		// 高さを演奏時間に比例させる (例: 1フレーム = 0.5px)
-		const scale = 0.5;
+		const scale = 1.5;
 		const dpr = window.devicePixelRatio || 1; // デバイスのピクセル比を取得（通常 2〜3）
 
-		const timeMargin = 15; // 時間表示用の左マージン
-		const mmWidth = 120; // 任意の幅
+		const timeMargin = 35; // 時間表示用の左マージン
+		const mmWidth = (g_sWidth - 500) / 2 + 290; // 基準となるコマの横幅（親divより少し短くする）
 		const mmHeight = _playingFrame * scale;
 		const mmMarginY = 2;
+		const laneWidth = Math.min(Math.floor((mmWidth - timeMargin) / _keyNum), 40);
+		const logicalWidth = timeMargin + (laneWidth * _keyNum);
 
 		const canvas = document.createElement('canvas');
 		const ctx = canvas.getContext('2d');
-		canvas.width = mmWidth * dpr;
+		canvas.width = logicalWidth * dpr;
 		canvas.height = (mmHeight + mmMarginY * 2) * dpr;
+		canvas.style.width = `${logicalWidth}px`;
+		canvas.style.height = `${mmHeight + mmMarginY * 2}px`;
 		ctx.scale(dpr, dpr);
-
-		const laneWidth = Math.min((mmWidth - timeMargin) / _keyNum, 20);
 
 		// --- Y座標計算用の関数 ---
 		// 通常：上(0)から下へ増える
@@ -3391,7 +3393,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 		// --- 時間軸・ガイドラインの描画 ---
 		ctx.strokeStyle = '#444';
 		ctx.fillStyle = '#999';
-		ctx.font = `5px ${getBasicFont()}`;
+		ctx.font = `10px ${getBasicFont()}`;
 		ctx.textAlign = 'right';
 		ctx.textBaseline = 'middle';
 
@@ -3406,7 +3408,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 			// ガイド線
 			ctx.beginPath();
 			ctx.moveTo(timeMargin, y);
-			ctx.lineTo(mmWidth, y);
+			ctx.lineTo(timeMargin + laneWidth * _keyNum, y);
 			ctx.stroke();
 
 			// タイムスタンプ描画
@@ -3444,7 +3446,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 				if (isNaN(val)) return;
 				const y = getY(val);
 				const x = timeMargin + j * laneWidth;
-				ctx.fillRect(x + 1, y - 1, laneWidth - 1, 1.5); // 視認性のため厚み1.5px
+				ctx.fillRect(x + 1, y - 1, laneWidth - 1, 3); // 視認性のため厚み3px
 			});
 		}
 
@@ -7692,9 +7694,8 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 	const detailMiniMap = document.getElementById(`detailMiniMap`);
 	if (detailMiniMap === null) return;   // scoreDetailUse=false 等で未生成の場合は何もしない
 
-	detailMiniMap.style.overflow = C_DIS_AUTO;
-	detailMiniMap.style.pointerEvents = C_DIS_AUTO;
-	const currentScrollTop = detailMiniMap.scrollTop;
+	const currentScrollTop = document.getElementById(`detailMiniMapSub`)
+		? document.getElementById(`detailMiniMapSub`).scrollTop : 0;
 
 	// 再描画のため一度クリア
 	deleteChildspriteAll(`detailMiniMap`);
@@ -7703,17 +7704,19 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 		? g_detailObj.scoreMinimapReverse[_scoreId]
 		: g_detailObj.scoreMinimap[_scoreId];
 
+	const detailMiniMapSub = createEmptySprite(detailMiniMap, `detailMiniMapSub`, g_windowObj.detailMiniMapSub);
+	console.log(detailMiniMapSub.style.width)
 	if (savedCanvas) {
 		// 退避したCanvasそのものをDOMに追加（再描画不要で高速）
-		detailMiniMap.appendChild(savedCanvas);
+		detailMiniMapSub.style.overflow = C_DIS_AUTO;
+		detailMiniMapSub.style.pointerEvents = C_DIS_AUTO;
+		detailMiniMapSub.appendChild(savedCanvas);
 
 		// CSSで見た目を調整
 		savedCanvas.style.display = 'block';
-		savedCanvas.style.marginLeft = '25%';
-		savedCanvas.style.width = '75%'; // コンテナ幅に合わせる
 		savedCanvas.style.height = 'auto'; // アスペクト比維持
 	}
-	const scrollHeight = Math.max(detailMiniMap.scrollHeight - detailMiniMap.clientHeight, 0);
+	const scrollHeight = Math.max(detailMiniMapSub.scrollHeight - detailMiniMapSub.clientHeight, 0);
 	const playingFrame = Math.max(g_detailObj.playingFrame[_scoreId], 1);
 	const lastFrame = g_detailObj.startFrame[_scoreId] + g_detailObj.playingFrameWithBlank[_scoreId];
 	const firstArrowFrame = lastFrame - g_detailObj.playingFrame[_scoreId];
@@ -7722,7 +7725,7 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 		getStartFrame(lastFrame, g_stateObj.fadein, _scoreId) - firstArrowFrame
 	));
 	const fadeinScrollTop = scrollHeight * fadeinFrameOffset / playingFrame;
-	detailMiniMap.scrollTop = g_stateObj.miniMapRevFlg
+	detailMiniMapSub.scrollTop = g_stateObj.miniMapRevFlg
 		? (_initFlg ? scrollHeight - currentScrollTop : scrollHeight - fadeinScrollTop)
 		: (_initFlg ? scrollHeight - currentScrollTop : fadeinScrollTop);
 
