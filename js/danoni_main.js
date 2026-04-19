@@ -7688,11 +7688,10 @@ const makeHighScore = _scoreId => {
 	}
 };
 
-const drawMinimap = _scoreId => {
+const drawMinimap = (_scoreId, _initFlg = false) => {
 	const detailMiniMap = document.getElementById(`detailMiniMap`);
 	detailMiniMap.style.overflow = C_DIS_AUTO;
 	detailMiniMap.style.pointerEvents = C_DIS_AUTO;
-	detailMiniMap.scrollTop = g_stateObj.miniMapRevFlg ? detailMiniMap.scrollHeight - detailMiniMap.offsetHeight : 0;
 
 	// 再描画のため一度クリア
 	deleteChildspriteAll(`detailMiniMap`);
@@ -7711,13 +7710,17 @@ const drawMinimap = _scoreId => {
 		savedCanvas.style.width = '75%'; // コンテナ幅に合わせる
 		savedCanvas.style.height = 'auto'; // アスペクト比維持
 	}
+	const currentScrollTop = detailMiniMap.scrollTop;
+	detailMiniMap.scrollTop = g_stateObj.miniMapRevFlg
+		? Math.max(detailMiniMap.scrollHeight - detailMiniMap.clientHeight, 0) - (_initFlg ? currentScrollTop : 0)
+		: 0 + (_initFlg ? Math.max(detailMiniMap.scrollHeight - detailMiniMap.clientHeight, 0) - currentScrollTop : 0);
 
 	if (document.getElementById(`lnkMiniMapRev`) === null) {
 		scoreDetail.appendChild(
 			makeDifLblCssButton(`lnkMiniMapRev`, g_lblNameObj.s_rev + `${g_stateObj.miniMapRevFlg ? `↑` : `↓`}`, 8, () => {
 				g_stateObj.miniMapRevFlg = !g_stateObj.miniMapRevFlg;
 				lnkMiniMapRev.textContent = g_lblNameObj.s_rev + `${g_stateObj.miniMapRevFlg ? `↑` : `↓`}`;
-				drawMinimap(g_stateObj.scoreId);
+				drawMinimap(g_stateObj.scoreId, true);
 				createScText(lnkMiniMapRev, `MiniMapRev`, { targetLabel: `lnkMiniMapRev`, x: -12 });
 			}, g_lblPosObj.lnkMiniMapRev)
 		);
@@ -8048,8 +8051,8 @@ const createOptionWindow = _sprite => {
 			$id(`detail${g_stateObj.scoreDetail}`).visibility = `visible`;
 			document.getElementById(`lnk${g_stateObj.scoreDetail}G`).classList.replace(g_cssObj.button_Default, g_cssObj.button_Setting);
 
-			document.getElementById(`lnkMiniMapRev`).style.visibility =
-				g_stateObj.scoreDetail === `MiniMap` && g_stateObj.scoreDetailViewFlg ? `visible` : `hidden`;
+			document.getElementById(`lnkMiniMapRev`).style.display =
+				g_stateObj.scoreDetail === `MiniMap` && g_stateObj.scoreDetailViewFlg ? C_DIS_INHERIT : C_DIS_NONE;
 		};
 
 		multiAppend(scoreDetail,
@@ -8093,8 +8096,8 @@ const createOptionWindow = _sprite => {
 		if (_resetFlg) {
 			g_shortcutObj.option.KeyQ.id = g_settings.scoreDetailCursors[0];
 		}
-		document.getElementById(`lnkMiniMapRev`).style.visibility =
-			g_stateObj.scoreDetail === `MiniMap` && g_stateObj.scoreDetailViewFlg ? `visible` : `hidden`;
+		document.getElementById(`lnkMiniMapRev`).style.display =
+			g_stateObj.scoreDetail === `MiniMap` && g_stateObj.scoreDetailViewFlg ? C_DIS_INHERIT : C_DIS_NONE;
 	};
 
 	// ---------------------------------------------------

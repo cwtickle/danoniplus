@@ -2760,6 +2760,7 @@ const g_shortcutObj = {
         Numpad5: { id: `lnkMiniMapG` },
         KeyQ: { id: `lnkDensityG` },
         KeyP: { id: `lnkDifInfo` },
+        KeyX: { id: `lnkMiniMapRev` },
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
         KeyC: { id: `lnkHighScore`, reset: true },
