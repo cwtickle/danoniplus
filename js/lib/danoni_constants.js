@@ -2721,6 +2721,7 @@ const g_shortcutObj = {
         Numpad5: { id: `lnkMiniMapG` },
         KeyQ: { id: `lnkDensityG` },
         KeyP: { id: `lnkDifInfo` },
+        KeyX: { id: `lnkMiniMapRev` },
         KeyZ: { id: `btnSave` },
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
@@ -4441,7 +4442,7 @@ const g_lblNameObj = {
     s_arrow: `Arrow`,
     s_frz: `Frz`,
 
-    s_rev: `Scroll Rev.`,
+    s_rev: `MapScroll`,
 
     d_StepZone: `StepZone`,
     d_Judgment: `Judgment`,

@@ -3390,7 +3390,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 
 		// --- 時間軸・ガイドラインの描画 ---
 		ctx.strokeStyle = '#444';
-		ctx.fillStyle = '#aaa';
+		ctx.fillStyle = '#999';
 		ctx.font = `5px ${getBasicFont()}`;
 		ctx.textAlign = 'right';
 		ctx.textBaseline = 'middle';
@@ -7714,11 +7714,14 @@ const drawMinimap = _scoreId => {
 
 	if (document.getElementById(`lnkMiniMapRev`) === null) {
 		scoreDetail.appendChild(
-			makeDifLblCssButton(`lnkMiniMapRev`, g_lblNameObj.s_rev, 8, () => {
+			makeDifLblCssButton(`lnkMiniMapRev`, g_lblNameObj.s_rev + `${g_stateObj.miniMapRevFlg ? `↑` : `↓`}`, 8, () => {
 				g_stateObj.miniMapRevFlg = !g_stateObj.miniMapRevFlg;
-				drawMinimap(_scoreId);
+				lnkMiniMapRev.textContent = g_lblNameObj.s_rev + `${g_stateObj.miniMapRevFlg ? `↑` : `↓`}`;
+				drawMinimap(g_stateObj.scoreId);
+				createScText(lnkMiniMapRev, `MiniMapRev`, { targetLabel: `lnkMiniMapRev`, x: -12 });
 			}, g_lblPosObj.lnkMiniMapRev)
 		);
+		createScText(lnkMiniMapRev, `MiniMapRev`, { targetLabel: `lnkMiniMapRev`, x: -12 });
 	}
 };
 
