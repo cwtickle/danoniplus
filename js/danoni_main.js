@@ -7690,8 +7690,11 @@ const makeHighScore = _scoreId => {
 
 const drawMinimap = (_scoreId, _initFlg = false) => {
 	const detailMiniMap = document.getElementById(`detailMiniMap`);
+	if (detailMiniMap === null) return;   // scoreDetailUse=false 等で未生成の場合は何もしない
+
 	detailMiniMap.style.overflow = C_DIS_AUTO;
 	detailMiniMap.style.pointerEvents = C_DIS_AUTO;
+	const currentScrollTop = detailMiniMap.scrollTop;
 
 	// 再描画のため一度クリア
 	deleteChildspriteAll(`detailMiniMap`);
@@ -7710,11 +7713,11 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 		savedCanvas.style.width = '75%'; // コンテナ幅に合わせる
 		savedCanvas.style.height = 'auto'; // アスペクト比維持
 	}
-	const currentScrollTop = detailMiniMap.scrollTop;
 	const scrollHeight = Math.max(detailMiniMap.scrollHeight - detailMiniMap.clientHeight, 0);
+	const fadeinScrollTop = scrollHeight * g_stateObj.fadein / 100;
 	detailMiniMap.scrollTop = g_stateObj.miniMapRevFlg
-		? scrollHeight - (_initFlg ? currentScrollTop : -scrollHeight * g_stateObj.fadein / 100)
-		: (_initFlg ? scrollHeight - currentScrollTop : scrollHeight * g_stateObj.fadein / 100);
+		? (_initFlg ? scrollHeight - currentScrollTop : scrollHeight - fadeinScrollTop)
+		: (_initFlg ? scrollHeight - currentScrollTop : fadeinScrollTop);
 
 	if (document.getElementById(`lnkMiniMapRev`) === null) {
 		scoreDetail.appendChild(
