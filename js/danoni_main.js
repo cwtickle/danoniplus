@@ -215,6 +215,7 @@ const g_detailObj = {
 	toolDif: [],
 	scoreMinimap: {},
 	scoreMinimapReverse: {},
+	scoreMinimapHeader: {},
 };
 
 const g_workObj = {
@@ -3367,8 +3368,29 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 		const laneWidth = Math.min(Math.floor((mmWidth - timeMargin) / _keyNum), 40);
 		const logicalWidth = timeMargin + (laneWidth * _keyNum);
 
-		const canvas = document.createElement('canvas');
-		const ctx = canvas.getContext('2d');
+		// ヘッダー用キャンバスの作成
+		const canvasHeader = document.createElement(`canvas`);
+		const ctxHeader = canvasHeader.getContext(`2d`);
+		canvasHeader.width = logicalWidth * dpr;
+		canvasHeader.height = 15 * dpr;
+		canvasHeader.style.width = `${logicalWidth}px`;
+		canvasHeader.style.height = `15px`;
+		ctxHeader.scale(dpr, dpr);
+		ctxHeader.fillStyle = '#999';
+		ctxHeader.font = `10px ${getBasicFont()}`;
+		ctxHeader.textAlign = 'center';
+
+		for (let j = 0; j < _keyNum; j++) {
+			const x = timeMargin + j * laneWidth + laneWidth / 2;
+			ctxHeader.fillText(g_kCd[g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][0]], x, 10);
+			ctxHeader.strokeStyle = '#444';
+		}
+
+		g_detailObj.scoreMinimapHeader[_scoreId] = canvasHeader;
+
+		// 譜面全体のキャンバスの作成
+		const canvas = document.createElement(`canvas`);
+		const ctx = canvas.getContext(`2d`);
 		canvas.width = logicalWidth * dpr;
 		canvas.height = (mmHeight + mmMarginY * 2) * dpr;
 		canvas.style.width = `${logicalWidth}px`;
@@ -7704,8 +7726,10 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 		? g_detailObj.scoreMinimapReverse[_scoreId]
 		: g_detailObj.scoreMinimap[_scoreId];
 
+	const detailMiniMapHeader = createEmptySprite(detailMiniMap, `detailMiniMapHeader`, g_windowObj.detailMiniMapHeader);
+	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[_scoreId]);
+
 	const detailMiniMapSub = createEmptySprite(detailMiniMap, `detailMiniMapSub`, g_windowObj.detailMiniMapSub);
-	console.log(detailMiniMapSub.style.width)
 	if (savedCanvas) {
 		// 退避したCanvasそのものをDOMに追加（再描画不要で高速）
 		detailMiniMapSub.style.overflow = C_DIS_AUTO;
@@ -7736,6 +7760,8 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 				lnkMiniMapRev.textContent = g_lblNameObj.s_rev + `${g_stateObj.miniMapRevFlg ? `↑` : `↓`}`;
 				drawMinimap(g_stateObj.scoreId, true);
 				createScText(lnkMiniMapRev, `MiniMapRev`, { targetLabel: `lnkMiniMapRev`, x: -12 });
+				$id(`detailMiniMapHeader`).top = (g_stateObj.miniMapRevFlg ? 230 : 0) + `px`;
+				$id(`detailMiniMapSub`).top = (g_stateObj.miniMapRevFlg ? 0 : 15) + `px`;
 			}, g_lblPosObj.lnkMiniMapRev)
 		);
 		createScText(lnkMiniMapRev, `MiniMapRev`, { targetLabel: `lnkMiniMapRev`, x: -12 });
