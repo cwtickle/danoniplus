@@ -3371,7 +3371,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 		canvas.height = (mmHeight + mmMarginY * 2) * dpr;
 		ctx.scale(dpr, dpr);
 
-		const laneWidth = (mmWidth - timeMargin) / _keyNum;
+		const laneWidth = Math.min((mmWidth - timeMargin) / _keyNum, 20);
 
 		// --- Y座標計算用の関数 ---
 		// 通常：上(0)から下へ増える
@@ -7711,9 +7711,10 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 		savedCanvas.style.height = 'auto'; // アスペクト比維持
 	}
 	const currentScrollTop = detailMiniMap.scrollTop;
+	const scrollHeight = Math.max(detailMiniMap.scrollHeight - detailMiniMap.clientHeight, 0);
 	detailMiniMap.scrollTop = g_stateObj.miniMapRevFlg
-		? Math.max(detailMiniMap.scrollHeight - detailMiniMap.clientHeight, 0) - (_initFlg ? currentScrollTop : 0)
-		: 0 + (_initFlg ? Math.max(detailMiniMap.scrollHeight - detailMiniMap.clientHeight, 0) - currentScrollTop : 0);
+		? scrollHeight - (_initFlg ? currentScrollTop : -scrollHeight * g_stateObj.fadein / 100)
+		: (_initFlg ? scrollHeight - currentScrollTop : scrollHeight * g_stateObj.fadein / 100);
 
 	if (document.getElementById(`lnkMiniMapRev`) === null) {
 		scoreDetail.appendChild(
@@ -8232,6 +8233,7 @@ const createOptionWindow = _sprite => {
 	fadeinSlider.addEventListener(`input`, () => {
 		g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein, `fadein`);
 		updateSettingSummary();
+		drawMinimap(g_stateObj.scoreId);
 	}, false);
 
 	// ---------------------------------------------------
