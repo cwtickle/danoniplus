@@ -213,6 +213,8 @@ const updateWindowSiz = () => {
         difFilter: { x: 0, y: 66, w: 140, h: 204 + g_sHeight - 500, overflow: C_DIS_AUTO, pointerEvents: C_DIS_AUTO },
         displaySprite: { x: 25, y: 30, w: (g_sWidth - 450) / 2, h: g_limitObj.setLblHeight * 5 },
         scoreDetail: { x: 20, y: 85, w: (g_sWidth - 500) / 2 + 420, h: 245, visibility: `hidden`, pointerEvents: C_DIS_AUTO },
+        detailMiniMapHeader: { x: 110, y: 0, w: (g_sWidth - 500) / 2 + 310, h: 15 },
+        detailMiniMapSub: { x: 110, y: 15, w: (g_sWidth - 500) / 2 + 310, h: 230, overflow: C_DIS_AUTO, pointerEvents: C_DIS_AUTO },
         detailObj: { w: (g_sWidth - 500) / 2 + 420, h: 230, visibility: `hidden` },
         keyconSprite: { y: 105, h: g_sHeight - 105, overflow: C_DIS_AUTO },
         loader: { y: g_sHeight - 10, h: 10, backgroundColor: `#333333` },
@@ -512,6 +514,9 @@ const updateWindowSiz = () => {
         },
         btnSpdCursorR: {
             x: 100, y: 180, w: 15, h: 20, siz: 12,
+        },
+        lnkMiniMapRev: {
+            w: g_limitObj.difCoverWidth, h: 20, borderStyle: `solid`,
         },
 
         /** ディスプレイ画面 */
@@ -1170,6 +1175,7 @@ const g_stateObj = {
     scoreDetailViewFlg: false,
     scoreDetail: `Speed`,
     settingSummaryVisible: false,
+    miniMapRevFlg: false,
 
     d_stepzone: C_FLG_ON,
     d_judgment: C_FLG_ON,
@@ -1329,7 +1335,7 @@ const g_settings = {
     opacitys: [10, 25, 50, 75, 100],
     opacityNum: 0,
 
-    scoreDetailDefs: [`Density`, `Speed`, `ToolDif`, `HighScore`],
+    scoreDetailDefs: [`Density`, `Speed`, `ToolDif`, `HighScore`, `MiniMap`],
     scoreDetails: [],
     scoreDetailCursors: [],
 
@@ -2709,12 +2715,15 @@ const g_shortcutObj = {
         Digit2: { id: `lnkSpeedG` },
         Digit3: { id: `lnkToolDifG` },
         Digit4: { id: `lnkHighScoreG` },
+        Digit5: { id: `lnkMiniMapG` },
         Numpad1: { id: `lnkDensityG` },
         Numpad2: { id: `lnkSpeedG` },
         Numpad3: { id: `lnkToolDifG` },
         Numpad4: { id: `lnkHighScoreG` },
+        Numpad5: { id: `lnkMiniMapG` },
         KeyQ: { id: `lnkDensityG` },
         KeyP: { id: `lnkDifInfo` },
+        KeyX: { id: `lnkMiniMapRev` },
         KeyZ: { id: `btnSave` },
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
@@ -2745,12 +2754,15 @@ const g_shortcutObj = {
         Digit2: { id: `lnkSpeedG` },
         Digit3: { id: `lnkToolDifG` },
         Digit4: { id: `lnkHighScoreG` },
+        Digit5: { id: `lnkMiniMapG` },
         Numpad1: { id: `lnkDensityG` },
         Numpad2: { id: `lnkSpeedG` },
         Numpad3: { id: `lnkToolDifG` },
         Numpad4: { id: `lnkHighScoreG` },
+        Numpad5: { id: `lnkMiniMapG` },
         KeyQ: { id: `lnkDensityG` },
         KeyP: { id: `lnkDifInfo` },
+        KeyX: { id: `lnkMiniMapRev` },
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
         KeyC: { id: `lnkHighScore`, reset: true },
@@ -4432,6 +4444,8 @@ const g_lblNameObj = {
     s_time: `Time`,
     s_arrow: `Arrow`,
     s_frz: `Frz`,
+
+    s_rev: `MapScroll`,
 
     d_StepZone: `StepZone`,
     d_Judgment: `Judgment`,
