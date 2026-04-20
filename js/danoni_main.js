@@ -7758,6 +7758,8 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 	detailMiniMapSub.style.overflowX = 'hidden';
 	detailMiniMapSub.style.overflowY = 'auto';
 	detailMiniMapSub.style.pointerEvents = 'auto';
+	detailMiniMapSub.style.display = 'block';
+	detailMiniMapSub.style.textAlign = 'left';
 
 	if (savedCanvases && Array.isArray(savedCanvases)) {
 		// 退避したCanvasそのものをDOMに追加（再描画不要で高速）
