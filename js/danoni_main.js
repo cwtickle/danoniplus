@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/04/19
+ * Revised : 2026/04/20
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 47.0.0`;
-const g_revisedDate = `2026/04/19`;
+const g_version = `Ver 47.0.1`;
+const g_revisedDate = `2026/04/20`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -7758,6 +7758,8 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 	detailMiniMapSub.style.overflowX = 'hidden';
 	detailMiniMapSub.style.overflowY = 'auto';
 	detailMiniMapSub.style.pointerEvents = 'auto';
+	detailMiniMapSub.style.display = 'block';
+	detailMiniMapSub.style.textAlign = 'left';
 
 	if (savedCanvases && Array.isArray(savedCanvases)) {
 		// 退避したCanvasそのものをDOMに追加（再描画不要で高速）
