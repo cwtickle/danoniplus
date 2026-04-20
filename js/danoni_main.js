@@ -2746,11 +2746,17 @@ const initialControl = async () => {
 	});
 
 	// キー定義でエラーになる場合は強制的にデフォルトキーへ変更して続行
+	let hasUndefinedKey = false;
 	for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
 		if (g_headerObj.undefinedKeyListFinal.includes(g_headerObj.keyLabels[j])) {
 			g_headerObj.keyLists = g_headerObj.keyLists.filter(key => key !== g_headerObj.keyLabels[j]);
-			g_headerObj.keyLabels[j] = `7`;
+			g_headerObj.keyLabels[j] = g_keyObj.initKeyLabel;
+			hasUndefinedKey = true;
 		}
+	}
+	if (hasUndefinedKey) {
+		g_headerObj.keyLists = makeDedupliArray(g_headerObj.keyLists, [g_keyObj.initKeyLabel])
+			.sort((a, b) => parseInt(a) - parseInt(b));
 	}
 
 	// デフォルトのカラー・シャッフルグループ設定を退避
@@ -4020,7 +4026,7 @@ const headerConvert = _dosObj => {
 			obj.lifeInits.push(lifeData(`Init`, 25));
 
 			// キー数
-			const keyLabel = difDetails[difpos.Key] || `7`;
+			const keyLabel = difDetails[difpos.Key] || g_keyObj.initKeyLabel;
 			obj.keyLabels.push(g_keyObj.keyTransPattern[keyLabel] ?? keyLabel);
 
 			// 譜面名、制作者名
@@ -4040,7 +4046,7 @@ const headerConvert = _dosObj => {
 		});
 	} else {
 		makeWarningWindow(g_msgInfoObj.E_0021);
-		obj.keyLabels = [`7`];
+		obj.keyLabels = [g_keyObj.initKeyLabel];
 		obj.difLabels = [`Normal`];
 		obj.initSpeeds = [3.5];
 		obj.lifeBorders = [`x`];
