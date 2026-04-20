@@ -3118,6 +3118,7 @@ const g_keyObj = {
 
     minKeyCtrlNum: 2,
     defaultKeyList: [],
+    initKeyLabel: `7`,
 
     // キー別ヘッダー
     // - 譜面データ中に出てくる矢印(ノーツ)の種類と順番(ステップゾーン表示順)を管理する
