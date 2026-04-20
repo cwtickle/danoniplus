@@ -2731,6 +2731,7 @@ const initialControl = async () => {
 
 	// 譜面ヘッダー、特殊キー情報の読込
 	Object.assign(g_headerObj, headerConvert(g_rootObj));
+	g_headerObj.undefinedKeyListFinal = [];
 	const importKeysData = _data => {
 		keysConvert(dosConvert(_data));
 		g_headerObj.undefinedKeyLists = g_headerObj.undefinedKeyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
@@ -2743,6 +2744,14 @@ const initialControl = async () => {
 	g_headerObj.keyExtraList = keysConvert(g_rootObj, {
 		keyExtraList: makeDedupliArray(g_headerObj.undefinedKeyLists, g_rootObj.keyExtraList?.split(`,`)),
 	});
+
+	// キー定義でエラーになる場合は強制的にデフォルトキーへ変更して続行
+	for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
+		if (g_headerObj.undefinedKeyListFinal.includes(g_headerObj.keyLabels[j])) {
+			g_headerObj.keyLists = g_headerObj.keyLists.filter(key => key !== g_headerObj.keyLabels[j]);
+			g_headerObj.keyLabels[j] = `7`;
+		}
+	}
 
 	// デフォルトのカラー・シャッフルグループ設定を退避
 	g_keycons.groups.forEach(type =>
@@ -5300,126 +5309,132 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 		g_keyObj.minPatterns = 1;
 		g_keyObj.dfPtnNum = 0;
 
-		// キーパターンの追記 (appendX)
-		if (setBoolVal(_dosObj[`append${newKey}`])) {
-			for (let j = 0; ; j++) {
-				if (g_keyObj[`${g_keyObj.defaultProp}${newKey}_${j}`] === undefined) {
-					break;
+		try {
+
+			// キーパターンの追記 (appendX)
+			if (setBoolVal(_dosObj[`append${newKey}`])) {
+				for (let j = 0; ; j++) {
+					if (g_keyObj[`${g_keyObj.defaultProp}${newKey}_${j}`] === undefined) {
+						break;
+					}
+					g_keyObj.dfPtnNum++;
 				}
-				g_keyObj.dfPtnNum++;
 			}
-		}
-		const dfPtnNum = g_keyObj.dfPtnNum;
+			const dfPtnNum = g_keyObj.dfPtnNum;
 
-		// キーの名前 (keyNameX)
-		g_keyObj[`keyName${newKey}`] = _dosObj[`keyName${newKey}`]?.split(`,`) ?? [newKey, `key`];
+			// キーの名前 (keyNameX)
+			g_keyObj[`keyName${newKey}`] = _dosObj[`keyName${newKey}`]?.split(`,`) ?? [newKey, `key`];
 
-		// キーの最小横幅 (minWidthX)
-		g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
+			// キーの最小横幅 (minWidthX)
+			g_keyObj[`minWidth${newKey}`] = _dosObj[`minWidth${newKey}`] ?? g_keyObj[`minWidth${newKey}`] ?? g_keyObj.minWidthDefault;
 
-		// 移動ロック (movLockX)
-		g_keyObj[`movLock${newKey}`] = setBoolVal(_dosObj[`movLock${newKey}`] ?? g_keyObj[`movLock${newKey}`], false);
+			// 移動ロック (movLockX)
+			g_keyObj[`movLock${newKey}`] = setBoolVal(_dosObj[`movLock${newKey}`] ?? g_keyObj[`movLock${newKey}`], false);
 
-		// 位置マニュアル化 (initManualX)
-		g_keyObj[`initManual${newKey}`] = setBoolVal(_dosObj[`initManual${newKey}`] ?? g_keyObj[`initManual${newKey}`], false);
+			// 位置マニュアル化 (initManualX)
+			g_keyObj[`initManual${newKey}`] = setBoolVal(_dosObj[`initManual${newKey}`] ?? g_keyObj[`initManual${newKey}`], false);
 
-		// キーコンフィグ (keyCtrlX_Y)
-		g_keyObj.minPatterns = newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, {
-			errCd: `E_0104`, baseCopyFlg: true,
-		});
+			// キーコンフィグ (keyCtrlX_Y)
+			g_keyObj.minPatterns = newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, {
+				errCd: `E_0104`, baseCopyFlg: true,
+			});
 
-		// 読込変数の接頭辞 (charaX_Y)
-		newKeyMultiParam(newKey, `chara`, toString);
+			// 読込変数の接頭辞 (charaX_Y)
+			newKeyMultiParam(newKey, `chara`, toString);
 
-		// 矢印色パターン (colorX_Y)
-		newKeyTripleParam(newKey, `color`);
+			// 矢印色パターン (colorX_Y)
+			newKeyTripleParam(newKey, `color`);
 
-		// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
-		newKeyTripleParam(newKey, `stepRtn`);
+			// 矢印の回転量指定、キャラクタパターン (stepRtnX_Y)
+			newKeyTripleParam(newKey, `stepRtn`);
 
-		// 各キーの区切り位置 (divX_Y)
-		_dosObj[`div${newKey}`]?.split(`$`).forEach((tmpDiv, k) => {
-			const tmpDivPtn = tmpDiv.split(`,`);
-			const ptnName = `${newKey}_${k + dfPtnNum}`;
+			// 各キーの区切り位置 (divX_Y)
+			_dosObj[`div${newKey}`]?.split(`$`).forEach((tmpDiv, k) => {
+				const tmpDivPtn = tmpDiv.split(`,`);
+				const ptnName = `${newKey}_${k + dfPtnNum}`;
 
-			if (g_keyObj[`div${tmpDivPtn[0]}`] !== undefined) {
-				// 既定キーパターンが指定された場合、存在すればその値を適用
-				g_keyObj[`div${ptnName}`] = g_keyObj[`div${tmpDivPtn[0]}`];
-				g_keyObj[`divMax${ptnName}`] = setVal(g_keyObj[`divMax${tmpDivPtn[0]}`], undefined, C_TYP_FLOAT);
-			} else if (!hasVal(tmpDivPtn[0]) && setIntVal(g_keyObj[`div${ptnName}`], -1) !== -1) {
-				// カスタムキー側のdivXが未定義だが、すでに初期設定で定義済みの場合はスキップ
-				return;
-			} else {
-				// それ以外の場合は指定された値を適用（未指定時はその後で指定）
-				g_keyObj[`div${ptnName}`] = setVal(tmpDivPtn[0], undefined, C_TYP_NUMBER);
-				g_keyObj[`divMax${ptnName}`] = setVal(getKeyPosNum(tmpDivPtn[1], g_keyObj[`div${ptnName}`]), undefined, C_TYP_FLOAT);
-			}
-		});
+				if (g_keyObj[`div${tmpDivPtn[0]}`] !== undefined) {
+					// 既定キーパターンが指定された場合、存在すればその値を適用
+					g_keyObj[`div${ptnName}`] = g_keyObj[`div${tmpDivPtn[0]}`];
+					g_keyObj[`divMax${ptnName}`] = setVal(g_keyObj[`divMax${tmpDivPtn[0]}`], undefined, C_TYP_FLOAT);
+				} else if (!hasVal(tmpDivPtn[0]) && setIntVal(g_keyObj[`div${ptnName}`], -1) !== -1) {
+					// カスタムキー側のdivXが未定義だが、すでに初期設定で定義済みの場合はスキップ
+					return;
+				} else {
+					// それ以外の場合は指定された値を適用（未指定時はその後で指定）
+					g_keyObj[`div${ptnName}`] = setVal(tmpDivPtn[0], undefined, C_TYP_NUMBER);
+					g_keyObj[`divMax${ptnName}`] = setVal(getKeyPosNum(tmpDivPtn[1], g_keyObj[`div${ptnName}`]), undefined, C_TYP_FLOAT);
+				}
+			});
 
-		// ステップゾーン位置 (posX_Y)
-		newKeyMultiParam(newKey, `pos`, toFloat, {
-			loopFunc: (k, keyheader) => {
-				g_keyObj[`${keyheader}_${k + dfPtnNum}`].forEach((val, j) =>
-					g_keyObj[`${keyheader}_${k + dfPtnNum}`][j] = getKeyPosNum(String(val), g_keyObj[`div${newKey}_${k + dfPtnNum}`]));
-			},
-		});
-
-		// charaX_Y, posX_Y, keyGroupX_Y, divX_Y, divMaxX_Yが未指定の場合はkeyCtrlX_Yを元に適用
-		for (let k = 0; k < g_keyObj.minPatterns; k++) {
-			setKeyDfVal(`${newKey}_${k + dfPtnNum}`);
-		}
-
-		// ステップゾーン間隔 (blankX_Y)
-		newKeySingleParam(newKey, `blank`, C_TYP_FLOAT, g_keyObj.blank_def);
-
-		// 矢印群の倍率 (scaleX_Y)
-		newKeySingleParam(newKey, `scale`, C_TYP_FLOAT, g_keyObj.scale_def);
-
-		// プレイ中ショートカット：リトライ (keyRetryX_Y)
-		newKeySingleParam(newKey, `keyRetry`, C_TYP_STRING, C_KEY_RETRY);
-
-		// プレイ中ショートカット：タイトルバック (keyTitleBackX_Y)
-		newKeySingleParam(newKey, `keyTitleBack`, C_TYP_STRING, C_KEY_TITLEBACK);
-
-		// 別キーフラグ (transKeyX_Y)
-		newKeySingleParam(newKey, `transKey`, C_TYP_STRING, ``);
-
-		// フラットモード (flatModeX_Y)
-		newKeySingleParam(newKey, `flatMode`, C_TYP_BOOLEAN, false);
-
-		// シャッフルグループ (shuffleX_Y)
-		newKeyTripleParam(newKey, `shuffle`);
-
-		// キーグループ (keyGroupX_Y)
-		newKeyMultiParam(newKey, `keyGroup`, toSplitArrayStr);
-
-		// キーグループの表示制御 (keyGroupOrderX_Y)
-		newKeyMultiParam(newKey, `keyGroupOrder`, toString);
-
-		// スクロールパターン (scrollX_Y)
-		// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
-		newKeyPairParam(newKey, `scroll`, `scrollDir`, C_FLG_HYPHEN, 1);
-
-		// アシストパターン (assistX_Y)
-		// |assist(newKey)=Onigiri::0,0,0,0,0,1/AA::0,0,0,1,1,1$...|
-		newKeyPairParam(newKey, `assist`, `assistPos`);
-
-		// レーンごとの割当レイヤーグループ (layerGroupX_Y)
-		newKeyMultiParam(newKey, `layerGroup`, toInt);
-
-		// レイヤーごとのアニメーション情報 (layerTransX_Y)
-		if (hasVal(_dosObj[`layerTrans${newKey}`])) {
-			_dosObj[`layerTrans${newKey}`] = _dosObj[`layerTrans${newKey}`]?.replaceAll(`,`, `___`);
-			newKeyMultiParam(newKey, `layerTrans`, toSplitArrayStr, {
+			// ステップゾーン位置 (posX_Y)
+			newKeyMultiParam(newKey, `pos`, toFloat, {
 				loopFunc: (k, keyheader) => {
-					g_keyObj[`${keyheader}_${k + dfPtnNum}`][0] = g_keyObj[`${keyheader}_${k + dfPtnNum}`]?.[0]?.map(val => val.replaceAll(`___`, `,`));
+					g_keyObj[`${keyheader}_${k + dfPtnNum}`].forEach((val, j) =>
+						g_keyObj[`${keyheader}_${k + dfPtnNum}`][j] = getKeyPosNum(String(val), g_keyObj[`div${newKey}_${k + dfPtnNum}`]));
 				},
 			});
-		}
 
-		// keyRetry, keyTitleBackのキー名をキーコードに変換
-		const keyTypePatterns = Object.keys(g_keyObj).filter(val => val.startsWith(`keyRetry${newKey}`) || val.startsWith(`keyTitleBack${newKey}`));
-		keyTypePatterns.forEach(name => g_keyObj[name] = getKeyCtrlVal(g_keyObj[name]));
+			// charaX_Y, posX_Y, keyGroupX_Y, divX_Y, divMaxX_Yが未指定の場合はkeyCtrlX_Yを元に適用
+			for (let k = 0; k < g_keyObj.minPatterns; k++) {
+				setKeyDfVal(`${newKey}_${k + dfPtnNum}`);
+			}
+
+			// ステップゾーン間隔 (blankX_Y)
+			newKeySingleParam(newKey, `blank`, C_TYP_FLOAT, g_keyObj.blank_def);
+
+			// 矢印群の倍率 (scaleX_Y)
+			newKeySingleParam(newKey, `scale`, C_TYP_FLOAT, g_keyObj.scale_def);
+
+			// プレイ中ショートカット：リトライ (keyRetryX_Y)
+			newKeySingleParam(newKey, `keyRetry`, C_TYP_STRING, C_KEY_RETRY);
+
+			// プレイ中ショートカット：タイトルバック (keyTitleBackX_Y)
+			newKeySingleParam(newKey, `keyTitleBack`, C_TYP_STRING, C_KEY_TITLEBACK);
+
+			// 別キーフラグ (transKeyX_Y)
+			newKeySingleParam(newKey, `transKey`, C_TYP_STRING, ``);
+
+			// フラットモード (flatModeX_Y)
+			newKeySingleParam(newKey, `flatMode`, C_TYP_BOOLEAN, false);
+
+			// シャッフルグループ (shuffleX_Y)
+			newKeyTripleParam(newKey, `shuffle`);
+
+			// キーグループ (keyGroupX_Y)
+			newKeyMultiParam(newKey, `keyGroup`, toSplitArrayStr);
+
+			// キーグループの表示制御 (keyGroupOrderX_Y)
+			newKeyMultiParam(newKey, `keyGroupOrder`, toString);
+
+			// スクロールパターン (scrollX_Y)
+			// |scroll(newKey)=Cross::1,1,-1,-1,-1,1,1/Split::1,1,1,-1,-1,-1,-1$...|
+			newKeyPairParam(newKey, `scroll`, `scrollDir`, C_FLG_HYPHEN, 1);
+
+			// アシストパターン (assistX_Y)
+			// |assist(newKey)=Onigiri::0,0,0,0,0,1/AA::0,0,0,1,1,1$...|
+			newKeyPairParam(newKey, `assist`, `assistPos`);
+
+			// レーンごとの割当レイヤーグループ (layerGroupX_Y)
+			newKeyMultiParam(newKey, `layerGroup`, toInt);
+
+			// レイヤーごとのアニメーション情報 (layerTransX_Y)
+			if (hasVal(_dosObj[`layerTrans${newKey}`])) {
+				_dosObj[`layerTrans${newKey}`] = _dosObj[`layerTrans${newKey}`]?.replaceAll(`,`, `___`);
+				newKeyMultiParam(newKey, `layerTrans`, toSplitArrayStr, {
+					loopFunc: (k, keyheader) => {
+						g_keyObj[`${keyheader}_${k + dfPtnNum}`][0] = g_keyObj[`${keyheader}_${k + dfPtnNum}`]?.[0]?.map(val => val.replaceAll(`___`, `,`));
+					},
+				});
+			}
+
+			// keyRetry, keyTitleBackのキー名をキーコードに変換
+			const keyTypePatterns = Object.keys(g_keyObj).filter(val => val.startsWith(`keyRetry${newKey}`) || val.startsWith(`keyTitleBack${newKey}`));
+			keyTypePatterns.forEach(name => g_keyObj[name] = getKeyCtrlVal(g_keyObj[name]));
+		} catch (e) {
+			g_headerObj.undefinedKeyListFinal.push(newKey);
+			console.warn(`Error in key pattern conversion: ${newKey}`, e);
+		}
 	});
 
 	return keyExtraList;
