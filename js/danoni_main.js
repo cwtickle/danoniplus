@@ -3394,7 +3394,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 	};
 
 	// ヘッダー生成
-	g_detailObj.scoreMinimapHeader[_scoreId] = createMinimapHeader(g_detailObj.miniMapParams[_scoreId], _keyCtrlPtn, keyNum);
+	g_detailObj.scoreMinimapHeader[_scoreId] = createMinimapHeader(g_detailObj.miniMapParams[_scoreId].config, _keyCtrlPtn, keyNum);
 
 	// Canvas保存用配列を空で初期化
 	g_detailObj.scoreMinimap[_scoreId] = null;
