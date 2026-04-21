@@ -4289,7 +4289,8 @@ const g_lang_msgInfoObj = {
         E_0051: `Displayオプションのデフォルト設定(XXXXChainOFF)で、<br>指定できない組み合わせが設定されています。(E-0051)`,
 
         E_0104: `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
-        |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|`,
+        |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|<br>
+        未定義のキーは7keyに割り当てられます。`,
 
         E_0201: `色変化データで指定した色変化対象が存在しません。[pattern={0}] (E-0201)`,
 
@@ -4337,7 +4338,8 @@ const g_lang_msgInfoObj = {
         E_0051: `In the default setting (XXXXChainOFF) of the Display option, <br>a combination that cannot be specified is set. (E-0051)`,
 
         E_0104: `New key: {0} [keyCtrl] is not set. (E-0104)<br>
-        |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|`,
+        |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|<br>
+        Undefined keymode is assigned to 7key.`,
 
         E_0201: `The color change target specified in the color change data does not exist. [pattern={0}] (E-0201)`,
 
