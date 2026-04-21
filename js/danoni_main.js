@@ -213,6 +213,7 @@ const g_detailObj = {
 	speedData: [],
 	boostData: [],
 	toolDif: [],
+	miniMapParams: {},
 	scoreMinimap: {},
 	scoreMinimapReverse: {},
 	scoreMinimapHeader: {},
@@ -3372,56 +3373,78 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 	g_detailObj.playingFrameWithBlank[_scoreId] = lastFrame - startFrame;
 
 	// --- ミニマップ設定 ---
-	const config = {
-		scale: 1.5,
-		dpr: window.devicePixelRatio || 1,
-		timeMargin: 35,
-		mmWidthBase: (g_sWidth - 500) / 2 + 290,
-		mmMarginY: 2,
-		maxHeight: 10000,
-		get laneWidth() {
-			return Math.min(Math.floor((this.mmWidthBase - this.timeMargin) / keyNum), 40);
+	g_detailObj.miniMapParams[_scoreId] = {
+		_scoreId, _scoreObj, _keyNum: keyNum,
+		_playingFrame: playingFrame,
+		_firstArrowFrame: firstArrowFrame,
+		_keyCtrlPtn,
+		config: {
+			scale: 1.5,
+			dpr: window.devicePixelRatio || 1,
+			timeMargin: 35,
+			mmWidthBase: (g_sWidth - 500) / 2 + 290,
+			mmMarginY: 2,
+			get laneWidth() {
+				return Math.min(Math.floor((this.mmWidthBase - this.timeMargin) / keyNum), 40);
+			},
+			get logicalWidth() {
+				return this.timeMargin + (this.laneWidth * keyNum);
+			}
 		},
-		get logicalWidth() {
-			return this.timeMargin + (this.laneWidth * keyNum);
-		}
-	};
-
-	const minimapParams = {
-		_scoreId, _scoreObj, _keyNum: keyNum, _playingFrame: playingFrame,
-		_firstArrowFrame: firstArrowFrame, _keyCtrlPtn, config
 	};
 
 	// ヘッダー生成
-	g_detailObj.scoreMinimapHeader[_scoreId] = createMinimapHeader(config, _keyCtrlPtn, keyNum);
+	g_detailObj.scoreMinimapHeader[_scoreId] = createMinimapHeader(g_detailObj.miniMapParams[_scoreId], _keyCtrlPtn, keyNum);
 
-	// 生成・保存
-	g_detailObj.scoreMinimap[_scoreId] = generateMinimapData(minimapParams, false);
-	g_detailObj.scoreMinimapReverse[_scoreId] = generateMinimapData(minimapParams, true);
+	// Canvas保存用配列を空で初期化
+	g_detailObj.scoreMinimap[_scoreId] = null;
+	g_detailObj.scoreMinimapReverse[_scoreId] = null;
 };
 
 /**
  * 指定された高さに基づいて分割されたCanvasリストを生成する
  * @param {number} _width
  * @param {number} _totalHeight
- * @param {number} _maxHeight
  * @param {number} _dpr
  * @return {object[]} 分割されたCanvasとそのコンテキスト、オフセット情報を含むリスト
  */
-const createSplitCanvases = (_width, _totalHeight, _maxHeight, _dpr) => {
-	const count = Math.ceil(_totalHeight / _maxHeight);
+const createSplitCanvases = (_width, _totalHeight, _dpr) => {
+	// バックバッファ（実際のピクセル数）の最大値を 8000 に設定（iOS Safari 8192px 対策）
+	const BACKING_STORE_LIMIT = 8000;
+
+	// 論理上の最大高さ（CSSピクセル）を計算
+	// dpr=2なら4000px、dpr=3なら2666px が1枚の限界になる
+	const maxLogicalHeight = Math.max(1, Math.floor(BACKING_STORE_LIMIT / _dpr));
+	if (_totalHeight <= 0) return [];
+
+	const count = Math.ceil(_totalHeight / maxLogicalHeight);
 	const list = [];
+
 	for (let i = 0; i < count; i++) {
 		const cvs = document.createElement('canvas');
-		const h = (i === count - 1) ? _totalHeight - (_maxHeight * i) : _maxHeight;
+		// 残りの高さを計算
+		const logicalH = (i === count - 1)
+			? _totalHeight - (maxLogicalHeight * i)
+			: maxLogicalHeight;
+
+		// 実際の描画解像度をセット
 		cvs.width = _width * _dpr;
-		cvs.height = h * _dpr;
+		cvs.height = logicalH * _dpr;
+
+		// ブラウザ上の表示サイズをセット
 		cvs.style.width = `${_width}px`;
-		cvs.style.height = `${h}px`;
+		cvs.style.height = `${logicalH}px`;
 		cvs.style.display = 'block';
+
 		const ctx = cvs.getContext('2d');
 		ctx.scale(_dpr, _dpr);
-		list.push({ canvas: cvs, ctx: ctx, offsetTop: i * _maxHeight });
+
+		list.push({
+			canvas: cvs,
+			ctx: ctx,
+			offsetTop: i * maxLogicalHeight,
+			logicalHeight: logicalH
+		});
 	}
 	return list;
 };
@@ -3436,7 +3459,7 @@ const createSplitCanvases = (_width, _totalHeight, _maxHeight, _dpr) => {
  */
 const distributeDrawing = (_canvases, _y, _h, _dpr, _drawFunc) => {
 	_canvases.forEach(item => {
-		const canvasHeight = item.canvas.height / _dpr;
+		const canvasHeight = item.logicalHeight;
 		if (_y + _h >= item.offsetTop && _y <= item.offsetTop + canvasHeight) {
 			item.ctx.save();
 			item.ctx.translate(0, -item.offsetTop);
@@ -3512,10 +3535,10 @@ const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
  */
 const generateMinimapData = (_params, _isReverse) => {
 	const { _scoreObj, _keyNum, _playingFrame, _firstArrowFrame, _keyCtrlPtn, config } = _params;
-	const { scale, dpr, timeMargin, laneWidth, logicalWidth, mmMarginY, maxHeight } = config;
+	const { scale, dpr, timeMargin, laneWidth, logicalWidth, mmMarginY } = config;
 
 	const mmHeightTotal = _playingFrame * scale + mmMarginY * 2;
-	const canvases = createSplitCanvases(logicalWidth, mmHeightTotal, maxHeight, dpr);
+	const canvases = createSplitCanvases(logicalWidth, mmHeightTotal, dpr);
 
 	const getY = (frame) => {
 		const relativeFrame = frame - _firstArrowFrame;
@@ -3546,11 +3569,24 @@ const generateMinimapData = (_params, _isReverse) => {
 	for (let j = 0; j < _keyNum; j++) {
 		const frz = _scoreObj.frzData[j];
 		for (let k = 0; k < frz.length; k += 2) {
-			const y1 = getY(frz[k]), y2 = getY(frz[k + 1]);
-			const top = Math.min(y1, y2), h = Math.abs(y2 - y1);
+			const start = frz[k];
+			const end = frz[k + 1];
+
+			// 終了地点がない、またはどちらかが数値でない場合はスキップ
+			if (end === undefined || isNaN(start) || isNaN(end)) {
+				console.warn(`Minimap: Incomplete freeze note pair at lane ${j}, index ${k}`);
+				continue;
+			}
+			const y1 = getY(start);
+			const y2 = getY(end);
+			const top = Math.min(y1, y2);
+			const h = Math.abs(y2 - y1);
+			const x = timeMargin + j * laneWidth;
 			distributeDrawing(canvases, top, h, dpr, (ctx) => {
 				ctx.fillStyle = 'rgba(0, 200, 255, 0.4)';
-				ctx.fillRect(timeMargin + j * laneWidth + 2, top, laneWidth - 3, h);
+				ctx.fillRect(x + 2, top, laneWidth - 3, h);
+				ctx.strokeStyle = 'rgba(0, 200, 255, 0.8)';
+				ctx.strokeRect(x + 2, top, laneWidth - 3, h);
 			});
 		}
 	}
@@ -7813,9 +7849,23 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 	deleteChildspriteAll(`detailMiniMap`);
 
 	// drawMinimap 内の Canvas 追加部分
-	const savedCanvases = g_stateObj.miniMapRevFlg
+	const isRev = g_stateObj.miniMapRevFlg;
+	let savedCanvases = isRev
 		? g_detailObj.scoreMinimapReverse[_scoreId]
 		: g_detailObj.scoreMinimap[_scoreId];
+
+	if (!savedCanvases) {
+		// 未作成の場合のみミニマップを生成（Lazy Generation）
+		const params = g_detailObj.miniMapParams[_scoreId];
+		savedCanvases = generateMinimapData(params, isRev);
+
+		// 生成したものをキャッシュに保存
+		if (isRev) {
+			g_detailObj.scoreMinimapReverse[_scoreId] = savedCanvases;
+		} else {
+			g_detailObj.scoreMinimap[_scoreId] = savedCanvases;
+		}
+	}
 
 	// --- ヘッダー部分 ---
 	const detailMiniMapHeader = createEmptySprite(detailMiniMap, `detailMiniMapHeader`, g_windowObj.detailMiniMapHeader);
