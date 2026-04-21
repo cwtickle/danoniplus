@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/04/19 (v47.0.0)
+ * Revised : 2026/04/21 (v47.1.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3118,6 +3118,7 @@ const g_keyObj = {
 
     minKeyCtrlNum: 2,
     defaultKeyList: [],
+    initKeyLabel: `7`,
 
     // キー別ヘッダー
     // - 譜面データ中に出てくる矢印(ノーツ)の種類と順番(ステップゾーン表示順)を管理する
@@ -4288,7 +4289,8 @@ const g_lang_msgInfoObj = {
         E_0051: `Displayオプションのデフォルト設定(XXXXChainOFF)で、<br>指定できない組み合わせが設定されています。(E-0051)`,
 
         E_0104: `新しいキー:{0}の[keyCtrl]が未定義です。(E-0104)<br>
-        |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|`,
+        |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|<br>
+        未定義のキーは7keyに割り当てられます。`,
 
         E_0201: `色変化データで指定した色変化対象が存在しません。[pattern={0}] (E-0201)`,
 
@@ -4336,7 +4338,8 @@ const g_lang_msgInfoObj = {
         E_0051: `In the default setting (XXXXChainOFF) of the Display option, <br>a combination that cannot be specified is set. (E-0051)`,
 
         E_0104: `New key: {0} [keyCtrl] is not set. (E-0104)<br>
-        |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|`,
+        |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|<br>
+        Undefined keymode is assigned to 7key.`,
 
         E_0201: `The color change target specified in the color change data does not exist. [pattern={0}] (E-0201)`,
 
