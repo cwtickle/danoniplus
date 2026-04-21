@@ -4339,7 +4339,7 @@ const g_lang_msgInfoObj = {
 
         E_0104: `New key: {0} [keyCtrl] is not set. (E-0104)<br>
         |keyCtrl{0}=S,D,E/R,F,Space,J,M/Comma,K,L|<br>
-        Undefined keymodes are assigned to 7key.`,
+        Undefined keymode is assigned to 7key.`,
 
         E_0201: `The color change target specified in the color change data does not exist. [pattern={0}] (E-0201)`,
 
