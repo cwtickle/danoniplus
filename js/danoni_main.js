@@ -3529,7 +3529,6 @@ const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
  * @param {number} _params.config.laneWidth レーンの幅
  * @param {number} _params.config.logicalWidth キャンバスの論理幅
  * @param {number} _params.config.mmMarginY ミニマップの上下マージン
- * @param {number} _params.config.maxHeight 分割するキャンバスの最大高さ
  * @param {boolean} _isReverse ミニマップのリバース表示フラグ
  * @returns {HTMLCanvasElement[]} ミニマップ用のキャンバス要素の配列
  */
