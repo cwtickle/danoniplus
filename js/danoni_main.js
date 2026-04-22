@@ -7837,18 +7837,37 @@ const makeHighScore = _scoreId => {
 	}
 };
 
-const drawMinimap = (_scoreId, _initFlg = false) => {
+/**
+ * 譜面ミニマップを描画し、適切なスクロール位置へ調整する。
+ * デフォルトはスクロール反転で、現在位置を保つように上下反転する。
+ * @param {string} _scoreId - 描画対象の譜面ID
+ * @param {object} [_options={}] - オプションパラメータ
+ * @param {boolean} [_options._initFlg=false] - 譜面切替モード
+ * - 前の譜面での演奏進行度（時間軸の比率）を算出し、新しい譜面でも同じ進行位置を表示する。
+ *   位置記憶がない場合はフェードイン設定に基づく初期位置を表示。
+ * @param {boolean} [_options._fadeinFlg=false] - フェードインモード。フェードイン設定値を優先して移動する。
+ */
+const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) => {
 	const detailMiniMap = document.getElementById(`detailMiniMap`);
 	if (detailMiniMap === null) return;   // scoreDetailUse=false 等で未生成の場合は何もしない
 
-	const currentScrollTop = document.getElementById(`detailMiniMapSub`)
-		? document.getElementById(`detailMiniMapSub`).scrollTop : 0;
+	const isRev = g_stateObj.miniMapRevFlg;
+	const subEl = document.getElementById(`detailMiniMapSub`);
+	const currentScrollTop = subEl ? subEl.scrollTop : 0;
+
+	// 前の譜面での「スクロール位置の比率」を計算
+	// 完全に一番上のときは 0、一番下のときは 1 となる比率
+	let progressRatio = 0;
+	if (subEl && subEl.scrollHeight > subEl.clientHeight) {
+		const rawRatio = currentScrollTop / (subEl.scrollHeight - subEl.clientHeight);
+		// リバース時は「上が終点」なので、進行度としては反転させる
+		progressRatio = isRev ? (1.0 - rawRatio) : rawRatio;
+	}
 
 	// 再描画のため一度クリア
 	deleteChildspriteAll(`detailMiniMap`);
 
-	// drawMinimap 内の Canvas 追加部分
-	const isRev = g_stateObj.miniMapRevFlg;
+	// --- ミニマップ生成/取得 (Lazy Generation) ---
 	let savedCanvases = isRev
 		? g_detailObj.scoreMinimapReverse[_scoreId]
 		: g_detailObj.scoreMinimap[_scoreId];
@@ -7875,20 +7894,18 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 	const detailMiniMapSub = createEmptySprite(detailMiniMap, `detailMiniMapSub`, g_windowObj.detailMiniMapSub);
 	$id(`detailMiniMapSub`).top = (g_stateObj.miniMapRevFlg ? 0 : 15) + `px`;
 
-	detailMiniMapSub.style.overflowX = 'hidden';
-	detailMiniMapSub.style.overflowY = 'auto';
-	detailMiniMapSub.style.pointerEvents = 'auto';
-	detailMiniMapSub.style.display = 'block';
-	detailMiniMapSub.style.textAlign = 'left';
+	Object.assign(detailMiniMapSub.style, {
+		overflowX: 'hidden',
+		overflowY: 'auto',
+		pointerEvents: 'auto',
+		display: 'block',
+		textAlign: 'left',
+	});
 
 	if (savedCanvases && Array.isArray(savedCanvases)) {
 		// 退避したCanvasそのものをDOMに追加（再描画不要で高速）
-		detailMiniMapSub.style.overflow = C_DIS_AUTO;
-		detailMiniMapSub.style.pointerEvents = C_DIS_AUTO;
 		savedCanvases.forEach(canvas => {
-			canvas.style.position = 'static';
-			canvas.style.display = 'block';
-			canvas.style.height = 'auto';
+			Object.assign(canvas.style, { position: 'static', display: 'block', height: 'auto' });
 			detailMiniMapSub.appendChild(canvas);
 		});
 	}
@@ -7901,16 +7918,36 @@ const drawMinimap = (_scoreId, _initFlg = false) => {
 		getStartFrame(lastFrame, g_stateObj.fadein, _scoreId) - firstArrowFrame
 	));
 	const fadeinScrollTop = scrollHeight * fadeinFrameOffset / playingFrame;
-	detailMiniMapSub.scrollTop = g_stateObj.miniMapRevFlg
-		? (_initFlg ? scrollHeight - currentScrollTop : scrollHeight - fadeinScrollTop)
-		: (_initFlg ? scrollHeight - currentScrollTop : fadeinScrollTop);
+	const visualFadeinPos = isRev ? scrollHeight - fadeinScrollTop : fadeinScrollTop;
+
+	// --- スクロール位置の決定ロジック
+	let targetScrollTop = 0;
+
+	if (_fadeinFlg) {
+		// 【最優先】フェードイン操作時：設定値を強制適用
+		targetScrollTop = visualFadeinPos;
+	} else if (_initFlg) {
+		// 【譜面切替時】
+		if (currentScrollTop > 0) {
+			// 以前の進行度を継承
+			const visualRatio = isRev ? (1.0 - progressRatio) : progressRatio;
+			targetScrollTop = scrollHeight * visualRatio;
+		} else {
+			// 初回はフェードイン位置
+			targetScrollTop = visualFadeinPos;
+		}
+	} else {
+		// 【リバース切替時】物理反転
+		targetScrollTop = scrollHeight - currentScrollTop;
+	}
+	detailMiniMapSub.scrollTop = targetScrollTop;
 
 	if (document.getElementById(`lnkMiniMapRev`) === null) {
 		scoreDetail.appendChild(
 			makeDifLblCssButton(`lnkMiniMapRev`, g_lblNameObj.s_rev + `${g_stateObj.miniMapRevFlg ? `↑` : `↓`}`, 8, () => {
 				g_stateObj.miniMapRevFlg = !g_stateObj.miniMapRevFlg;
 				lnkMiniMapRev.textContent = g_lblNameObj.s_rev + `${g_stateObj.miniMapRevFlg ? `↑` : `↓`}`;
-				drawMinimap(g_stateObj.scoreId, true);
+				drawMinimap(g_stateObj.scoreId);
 				createScText(lnkMiniMapRev, `MiniMapRev`, { targetLabel: `lnkMiniMapRev`, x: -12 });
 			}, g_lblPosObj.lnkMiniMapRev)
 		);
@@ -8106,7 +8143,7 @@ const setDifficulty = (_initFlg) => {
 		drawDensityGraph(g_stateObj.scoreId);
 		makeDifInfo(g_stateObj.scoreId);
 		makeHighScore(g_stateObj.scoreId);
-		drawMinimap(g_stateObj.scoreId);
+		drawMinimap(g_stateObj.scoreId, { _initFlg: true });
 	}
 
 	// 楽曲データの表示
@@ -8404,7 +8441,7 @@ const createOptionWindow = _sprite => {
 		fadeinSlider.value = g_stateObj.fadein;
 		lnkFadein.textContent = `${g_stateObj.fadein}${g_lblNameObj.percent}`;
 		updateSettingSummary();
-		drawMinimap(g_stateObj.scoreId);
+		drawMinimap(g_stateObj.scoreId, { _fadeinFlg: true });
 	};
 
 	multiAppend(spriteList.fadein,
@@ -8423,7 +8460,7 @@ const createOptionWindow = _sprite => {
 	fadeinSlider.addEventListener(`input`, () => {
 		g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein, `fadein`);
 		updateSettingSummary();
-		drawMinimap(g_stateObj.scoreId);
+		drawMinimap(g_stateObj.scoreId, { _fadeinFlg: true });
 	}, false);
 
 	// ---------------------------------------------------
