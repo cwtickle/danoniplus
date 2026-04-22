@@ -7855,10 +7855,13 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 	const subEl = document.getElementById(`detailMiniMapSub`);
 	const currentScrollTop = subEl ? subEl.scrollTop : 0;
 
+	// 前の譜面でスクロール可能な状態だったかを判定
+	const hasPreviousScrollRange = subEl && subEl.scrollHeight > subEl.clientHeight;
+
 	// 前の譜面での「スクロール位置の比率」を計算
 	// 完全に一番上のときは 0、一番下のときは 1 となる比率
 	let progressRatio = 0;
-	if (subEl && subEl.scrollHeight > subEl.clientHeight) {
+	if (hasPreviousScrollRange) {
 		const rawRatio = currentScrollTop / (subEl.scrollHeight - subEl.clientHeight);
 		// リバース時は「上が終点」なので、進行度としては反転させる
 		progressRatio = isRev ? (1.0 - rawRatio) : rawRatio;
@@ -7928,7 +7931,7 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 		targetScrollTop = visualFadeinPos;
 	} else if (_initFlg) {
 		// 【譜面切替時】
-		if (currentScrollTop > 0) {
+		if (hasPreviousScrollRange) {
 			// 以前の進行度を継承
 			const visualRatio = isRev ? (1.0 - progressRatio) : progressRatio;
 			targetScrollTop = scrollHeight * visualRatio;
