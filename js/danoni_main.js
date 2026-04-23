@@ -3451,7 +3451,11 @@ const createSplitCanvases = (_width, _totalHeight, _dpr) => {
 
 /**
  * 描画対象のCanvasを判定して描画を実行する
- * @param {HTMLCanvasElement[]} _canvases
+ * @param {object[]} _canvases
+ * @param {HTMLCanvasElement} _canvases[].canvas 分割されたCanvas要素
+ * @param {CanvasRenderingContext2D} _canvases[].ctx Canvasの描画コンテキスト
+ * @param {number} _canvases[].offsetTop Canvasの論理上のオフセット位置
+ * @param {number} _canvases[].logicalHeight Canvasの論理上の高さ
  * @param {number} _y
  * @param {number} _h
  * @param {number} _dpr
