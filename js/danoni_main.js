@@ -15432,8 +15432,12 @@ const resultInit = () => {
 	for (let j = 0; j < 2; j++) {
 		const canvas = document.createElement(`canvas`);
 		canvas.id = `graphGaugeTransition${j > 0 ? j + 1 : ``}`;
-		canvas.width = g_limitObj.gaugeTransitionWidth;
-		canvas.height = g_limitObj.gaugeTransitionHeight;
+		const dpr = window.devicePixelRatio || 1;
+		canvas.width = g_limitObj.gaugeTransitionWidth * dpr;
+		canvas.height = g_limitObj.gaugeTransitionHeight * dpr;
+		canvas.style.width = wUnit(g_limitObj.gaugeTransitionWidth);
+		canvas.style.height = wUnit(g_limitObj.gaugeTransitionHeight);
+		canvas.getContext(`2d`).scale(dpr, dpr);
 		canvas.style.left = wUnit(0);
 		canvas.style.top = wUnit(0);
 		canvas.style.position = `absolute`;
@@ -15560,13 +15564,14 @@ const resultInit = () => {
 
 		const canvas = document.getElementById(`graphGaugeTransition2`);
 		const ctx = canvas.getContext(`2d`);
-		const x = cursorFrame / playingFrame * canvas.width;
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		const [w, h] = [parseInt(canvas.style.width), parseInt(canvas.style.height)];
+		const x = cursorFrame / playingFrame * w;
+		ctx.clearRect(0, 0, w, h);
 
 		// 縦線
 		ctx.beginPath();
 		ctx.moveTo(x, 0);
-		ctx.lineTo(x, canvas.height);
+		ctx.lineTo(x, h);
 		ctx.strokeStyle = "#009999";
 		ctx.lineWidth = 1.5;
 		ctx.stroke();
@@ -15575,10 +15580,10 @@ const resultInit = () => {
 		const timer = transFrameToTimer(cursorFrame + startFrame);
 		ctx.font = `14px ${getBasicFont()}`;
 		ctx.fillStyle = "#009999";
-		ctx.textAlign = x > canvas.width * 0.8 ? C_ALIGN_RIGHT : C_ALIGN_LEFT;
+		ctx.textAlign = x > w * 0.8 ? C_ALIGN_RIGHT : C_ALIGN_LEFT;
 		ctx.fillText(
 			`${timer}`,
-			x > canvas.width * 0.8 ? x - 5 : x + 5,
+			x > w * 0.8 ? x - 5 : x + 5,
 			g_limitObj.gaugeTransitionHeight - 35
 		);
 	};
