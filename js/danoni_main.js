@@ -7895,7 +7895,7 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 
 	// --- ヘッダー部分 ---
 	const detailMiniMapHeader = createEmptySprite(detailMiniMap, `detailMiniMapHeader`, g_windowObj.detailMiniMapHeader);
-	$id(`detailMiniMapHeader`).top = (g_stateObj.miniMapRevFlg ? 230 : 0) + `px`;
+	$id(`detailMiniMapHeader`).top = (g_stateObj.miniMapRevFlg ? 230 + g_sHeight - 500 : 0) + `px`;
 	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[_scoreId]);
 
 	// --- メイン（譜面）部分 ---
