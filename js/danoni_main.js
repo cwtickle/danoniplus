@@ -7290,6 +7290,7 @@ const drawSpeedGraph = _scoreId => {
 		speed: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.speed },
 		boost: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.boost }
 	};
+	const dpr = window.devicePixelRatio || 1;
 
 	const tmpSpeedPoint = [0];
 	Object.keys(speedObj).forEach(speedType => {
@@ -8233,13 +8234,18 @@ const createOptionWindow = _sprite => {
 				const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
 
 				graphObj.id = `graph${_name}${j > 0 ? j + 1 : ``}`;
-				graphObj.width = g_limitObj.graphWidth;
-				graphObj.height = g_limitObj.graphHeight;
+				const dpr = window.devicePixelRatio || 1;
+				graphObj.width = g_limitObj.graphWidth * dpr;
+				graphObj.height = g_limitObj.graphHeight * dpr;
+				graphObj.style.width = wUnit(g_limitObj.graphWidth);
+				graphObj.style.height = wUnit(g_limitObj.graphHeight);
 				graphObj.style.left = wUnit(125);
 				graphObj.style.top = wUnit(0);
 				graphObj.style.position = `absolute`;
 				graphObj.style.background = j === 0 ? bkColor : `#ffffff00`;
 				graphObj.style.border = `dotted ${wUnit(2)}`;
+				const ctx = graphObj.getContext(`2d`);
+				ctx.scale(dpr, dpr);
 
 				detailObj.appendChild(graphObj);
 			}
@@ -15737,15 +15743,19 @@ const resultInit = () => {
 		tmpDiv.style.background = `#000000cc`;
 		const canvas = document.createElement(`canvas`);
 		const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
+		const dpr = window.devicePixelRatio || 1;
 
 		canvas.id = `resultImage`;
-		canvas.width = 400;
-		canvas.height = g_sHeight - 90;
-		canvas.style.left = wUnit((g_sWidth - canvas.width) / 2);
+		canvas.width = 400 * dpr;
+		canvas.height = (g_sHeight - 90) * dpr;
+		canvas.style.width = wUnit(400);
+		canvas.style.height = wUnit(g_sHeight - 90);
+		canvas.style.left = wUnit((g_sWidth - parseFloat(canvas.style.width)) / 2);
 		canvas.style.top = wUnit(20);
 		canvas.style.position = `absolute`;
 
 		const context = canvas.getContext(`2d`);
+		context.scale(dpr, dpr);
 		const drawText = (_text, { x = 30, dy = 0, hy, siz = 15, color = `#cccccc`, align = C_ALIGN_LEFT, font } = {}) => {
 			context.font = `${wUnit(siz)} ${getBasicFont(font)}`;
 			context.fillStyle = color;
