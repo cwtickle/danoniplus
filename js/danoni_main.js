@@ -15744,12 +15744,14 @@ const resultInit = () => {
 		const canvas = document.createElement(`canvas`);
 		const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
 		const dpr = window.devicePixelRatio || 1;
+		const logicalWidth = 400;
+		const logicalHeight = g_sHeight - 90;
 
 		canvas.id = `resultImage`;
-		canvas.width = 400 * dpr;
-		canvas.height = (g_sHeight - 90) * dpr;
-		canvas.style.width = wUnit(400);
-		canvas.style.height = wUnit(g_sHeight - 90);
+		canvas.width = logicalWidth * dpr;
+		canvas.height = logicalHeight * dpr;
+		canvas.style.width = wUnit(logicalWidth);
+		canvas.style.height = wUnit(logicalHeight);
 		canvas.style.left = wUnit((g_sWidth - parseFloat(canvas.style.width)) / 2);
 		canvas.style.top = wUnit(20);
 		canvas.style.position = `absolute`;
@@ -15762,7 +15764,7 @@ const resultInit = () => {
 			context.textAlign = align;
 			context.fillText(_text, x, 35 + hy * 18 + dy);
 		};
-		makeBgCanvas(context, { h: canvas.height });
+		makeBgCanvas(context, { w: logicalWidth, h: logicalHeight });
 
 		drawText(`R`, { dy: -5, hy: 0, siz: 40, color: `#9999ff` });
 		drawText(`ESULT`, { x: 57, dy: -5, hy: 0, siz: 25 });
