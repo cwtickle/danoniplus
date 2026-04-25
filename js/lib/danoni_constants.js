@@ -4343,7 +4343,8 @@ const g_lang_msgInfoObj = {
         Undefined keymode is assigned to 7key.`,
 
         E_0201: `The color change target specified in the color change data does not exist. [pattern={0}] (E-0201)`,
-        E_0202: `Due to a velocity change (reverse playback), the order in which notes appear has been altered in some sections. Please review the velocity changes in the chart. (E-0202)<br>{0}`,
+        E_0202: `Due to a velocity change (reverse playback), the order in which notes appear has been altered in some sections. <br>` +
+            `Please review the velocity changes in the chart. (E-0202)<br>{0}`,
 
         I_0001: `Your result data is copied to the clipboard!`,
         I_0002: `The specified key cannot be assigned. Please specify another key.`,
