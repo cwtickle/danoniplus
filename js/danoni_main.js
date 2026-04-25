@@ -10757,7 +10757,12 @@ const loadingScoreInit = async () => {
 	calcLifeVals(g_fullArrows);
 
 	// 矢印・フリーズアロー・速度/色変化格納処理
+	g_workObj.arrowReversalList = [];
 	pushArrows(g_scoreObj, speedOnFrame, arrivalFrame);
+	if (g_workObj.arrowReversalList.length > 0) {
+		makeWarningWindow(g_msgInfoObj.E_0202.split(`{0}`).join(g_workObj.arrowReversalList.join(`<br>`)), { backBtnUse: true });
+		return;
+	}
 
 	// メインに入る前の最終初期化処理
 	getArrowSettings();
@@ -11858,6 +11863,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 		g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
 		g_workObj.initBoostY[frmPrev] = calcInitBoostY(frmPrev);
+		let minNotesFrame = startPoint[lastk];
 
 		if (_frzFlg) {
 			g_workObj[`mk${camelHeader}Length`][_j] = [];
@@ -11904,6 +11910,23 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 				g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
 				g_workObj.initBoostY[frmPrev] = calcInitBoostY(frmPrev);
+			}
+
+			// --- 逆転検知ロジック ---
+			// 後ろからループしているため、minNotesFrameには「自分より譜面上後ろにあるノーツ」の
+			// 最小生成フレーム（最も早く出現するもの）が入っている。
+
+			// 「自分より後ろのノーツ」の方が、「自分」よりも早く出現する場合、
+			// 配列の順序と出現時間の順序が入れ替わっている（逆転）とみなす。
+			if (minNotesFrame < startPoint[k]) {
+				const target = `Lane: ${g_keyObj[`chara${g_keyObj.currentKey}_0`][_j]}_data, Index: ${k / setcnt + 1}, Frame: ${arrowArrivalFrm}`;
+				console.warn(`[${g_msgObj.reversalAlert}] ${target}`);
+				g_workObj.arrowReversalList.push(target);
+			}
+
+			// 最小値を更新
+			if (startPoint[k] < minNotesFrame) {
+				minNotesFrame = startPoint[k];
 			}
 
 			// 出現タイミングを保存
