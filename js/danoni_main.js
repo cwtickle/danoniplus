@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/04/22
+ * Revised : 2026/04/25
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 47.2.0`;
-const g_revisedDate = `2026/04/22`;
+const g_version = `Ver 47.3.0`;
+const g_revisedDate = `2026/04/25`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -3451,7 +3451,11 @@ const createSplitCanvases = (_width, _totalHeight, _dpr) => {
 
 /**
  * 描画対象のCanvasを判定して描画を実行する
- * @param {HTMLCanvasElement[]} _canvases
+ * @param {object[]} _canvases
+ * @param {HTMLCanvasElement} _canvases[].canvas 分割されたCanvas要素
+ * @param {CanvasRenderingContext2D} _canvases[].ctx Canvasの描画コンテキスト
+ * @param {number} _canvases[].offsetTop Canvasの論理上のオフセット位置
+ * @param {number} _canvases[].logicalHeight Canvasの論理上の高さ
  * @param {number} _y
  * @param {number} _h
  * @param {number} _dpr
@@ -7286,6 +7290,7 @@ const drawSpeedGraph = _scoreId => {
 		speed: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.speed },
 		boost: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.boost }
 	};
+	const dpr = window.devicePixelRatio || 1;
 
 	const tmpSpeedPoint = [0];
 	Object.keys(speedObj).forEach(speedType => {
@@ -7890,7 +7895,7 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 
 	// --- ヘッダー部分 ---
 	const detailMiniMapHeader = createEmptySprite(detailMiniMap, `detailMiniMapHeader`, g_windowObj.detailMiniMapHeader);
-	$id(`detailMiniMapHeader`).top = (g_stateObj.miniMapRevFlg ? 230 : 0) + `px`;
+	$id(`detailMiniMapHeader`).top = (g_stateObj.miniMapRevFlg ? 230 + g_sHeight - 500 : 0) + `px`;
 	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[_scoreId]);
 
 	// --- メイン（譜面）部分 ---
@@ -8229,13 +8234,18 @@ const createOptionWindow = _sprite => {
 				const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
 
 				graphObj.id = `graph${_name}${j > 0 ? j + 1 : ``}`;
-				graphObj.width = g_limitObj.graphWidth;
-				graphObj.height = g_limitObj.graphHeight;
+				const dpr = window.devicePixelRatio || 1;
+				graphObj.width = g_limitObj.graphWidth * dpr;
+				graphObj.height = g_limitObj.graphHeight * dpr;
+				graphObj.style.width = wUnit(g_limitObj.graphWidth);
+				graphObj.style.height = wUnit(g_limitObj.graphHeight);
 				graphObj.style.left = wUnit(125);
 				graphObj.style.top = wUnit(0);
 				graphObj.style.position = `absolute`;
 				graphObj.style.background = j === 0 ? bkColor : `#ffffff00`;
 				graphObj.style.border = `dotted ${wUnit(2)}`;
+				const ctx = graphObj.getContext(`2d`);
+				ctx.scale(dpr, dpr);
 
 				detailObj.appendChild(graphObj);
 			}
@@ -10747,7 +10757,13 @@ const loadingScoreInit = async () => {
 	calcLifeVals(g_fullArrows);
 
 	// 矢印・フリーズアロー・速度/色変化格納処理
+	g_workObj.arrowReversalList = [];
 	pushArrows(g_scoreObj, speedOnFrame, arrivalFrame);
+	if (g_workObj.arrowReversalList.length > 0) {
+		const escapedList = g_workObj.arrowReversalList.map(s => escapeHtml(s)).join(`<br>`);
+		makeWarningWindow(g_msgInfoObj.E_0202.split(`{0}`).join(escapedList), { backBtnUse: true });
+		return;
+	}
 
 	// メインに入る前の最終初期化処理
 	getArrowSettings();
@@ -11848,6 +11864,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 		g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
 		g_workObj.initBoostY[frmPrev] = calcInitBoostY(frmPrev);
+		let minNotesFrame = startPoint[lastk];
 
 		if (_frzFlg) {
 			g_workObj[`mk${camelHeader}Length`][_j] = [];
@@ -11894,6 +11911,25 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
 				g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
 				g_workObj.initBoostY[frmPrev] = calcInitBoostY(frmPrev);
+			}
+
+			// --- 逆転検知ロジック ---
+			// 後ろからループしているため、minNotesFrameには「自分より譜面上後ろにあるノーツ」の
+			// 最小生成フレーム（最も早く出現するもの）が入っている。
+
+			// 「自分より後ろのノーツ」の方が、「自分」よりも早く出現する場合、
+			// 配列の順序と出現時間の順序が入れ替わっている（逆転）とみなす。
+			if (minNotesFrame < startPoint[k]) {
+				const laneName = g_keyObj[`chara${g_keyObj.currentKey}_${g_keyObj.currentPtn}`]?.[_j]
+					?? g_keyObj[`chara${g_keyObj.currentKey}_0`]?.[_j] ?? _j;
+				const target = escapeHtml(`Lane: ${laneName}_data, Index: ${k / setcnt + 1}, Frame: ${arrowArrivalFrm}`);
+				console.warn(`[${g_msgObj.reversalAlert}] ${target}`);
+				g_workObj.arrowReversalList.push(`- ${target}`);
+			}
+
+			// 最小値を更新
+			if (startPoint[k] < minNotesFrame) {
+				minNotesFrame = startPoint[k];
 			}
 
 			// 出現タイミングを保存
@@ -15422,8 +15458,12 @@ const resultInit = () => {
 	for (let j = 0; j < 2; j++) {
 		const canvas = document.createElement(`canvas`);
 		canvas.id = `graphGaugeTransition${j > 0 ? j + 1 : ``}`;
-		canvas.width = g_limitObj.gaugeTransitionWidth;
-		canvas.height = g_limitObj.gaugeTransitionHeight;
+		const dpr = window.devicePixelRatio || 1;
+		canvas.width = g_limitObj.gaugeTransitionWidth * dpr;
+		canvas.height = g_limitObj.gaugeTransitionHeight * dpr;
+		canvas.style.width = wUnit(g_limitObj.gaugeTransitionWidth);
+		canvas.style.height = wUnit(g_limitObj.gaugeTransitionHeight);
+		canvas.getContext(`2d`).scale(dpr, dpr);
 		canvas.style.left = wUnit(0);
 		canvas.style.top = wUnit(0);
 		canvas.style.position = `absolute`;
@@ -15550,13 +15590,14 @@ const resultInit = () => {
 
 		const canvas = document.getElementById(`graphGaugeTransition2`);
 		const ctx = canvas.getContext(`2d`);
-		const x = cursorFrame / playingFrame * canvas.width;
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		const [w, h] = [parseInt(canvas.style.width), parseInt(canvas.style.height)];
+		const x = cursorFrame / playingFrame * w;
+		ctx.clearRect(0, 0, w, h);
 
 		// 縦線
 		ctx.beginPath();
 		ctx.moveTo(x, 0);
-		ctx.lineTo(x, canvas.height);
+		ctx.lineTo(x, h);
 		ctx.strokeStyle = "#009999";
 		ctx.lineWidth = 1.5;
 		ctx.stroke();
@@ -15565,10 +15606,10 @@ const resultInit = () => {
 		const timer = transFrameToTimer(cursorFrame + startFrame);
 		ctx.font = `14px ${getBasicFont()}`;
 		ctx.fillStyle = "#009999";
-		ctx.textAlign = x > canvas.width * 0.8 ? C_ALIGN_RIGHT : C_ALIGN_LEFT;
+		ctx.textAlign = x > w * 0.8 ? C_ALIGN_RIGHT : C_ALIGN_LEFT;
 		ctx.fillText(
 			`${timer}`,
-			x > canvas.width * 0.8 ? x - 5 : x + 5,
+			x > w * 0.8 ? x - 5 : x + 5,
 			g_limitObj.gaugeTransitionHeight - 35
 		);
 	};
@@ -15733,22 +15774,28 @@ const resultInit = () => {
 		tmpDiv.style.background = `#000000cc`;
 		const canvas = document.createElement(`canvas`);
 		const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
+		const dpr = window.devicePixelRatio || 1;
+		const logicalWidth = 400;
+		const logicalHeight = g_sHeight - 90;
 
 		canvas.id = `resultImage`;
-		canvas.width = 400;
-		canvas.height = g_sHeight - 90;
-		canvas.style.left = wUnit((g_sWidth - canvas.width) / 2);
+		canvas.width = logicalWidth * dpr;
+		canvas.height = logicalHeight * dpr;
+		canvas.style.width = wUnit(logicalWidth);
+		canvas.style.height = wUnit(logicalHeight);
+		canvas.style.left = wUnit((g_sWidth - parseFloat(canvas.style.width)) / 2);
 		canvas.style.top = wUnit(20);
 		canvas.style.position = `absolute`;
 
 		const context = canvas.getContext(`2d`);
+		context.scale(dpr, dpr);
 		const drawText = (_text, { x = 30, dy = 0, hy, siz = 15, color = `#cccccc`, align = C_ALIGN_LEFT, font } = {}) => {
 			context.font = `${wUnit(siz)} ${getBasicFont(font)}`;
 			context.fillStyle = color;
 			context.textAlign = align;
 			context.fillText(_text, x, 35 + hy * 18 + dy);
 		};
-		makeBgCanvas(context, { h: canvas.height });
+		makeBgCanvas(context, { w: logicalWidth, h: logicalHeight });
 
 		drawText(`R`, { dy: -5, hy: 0, siz: 40, color: `#9999ff` });
 		drawText(`ESULT`, { x: 57, dy: -5, hy: 0, siz: 25 });
