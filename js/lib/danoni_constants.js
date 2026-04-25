@@ -4293,7 +4293,6 @@ const g_lang_msgInfoObj = {
         未定義のキーは7keyに割り当てられます。`,
 
         E_0201: `色変化データで指定した色変化対象が存在しません。[pattern={0}] (E-0201)`,
-        E_0202: `速度変化(逆走)により、ノーツの生成順序が入れ替わっている箇所があります。<br>譜面の速度変化を見直してください。(E-0202)<br>{0}`,
 
         I_0001: `リザルトデータをクリップボードにコピーしました！`,
         I_0002: `入力したキーは割り当てできません。他のキーを指定してください。`,
@@ -4343,8 +4342,6 @@ const g_lang_msgInfoObj = {
         Undefined keymode is assigned to 7key.`,
 
         E_0201: `The color change target specified in the color change data does not exist. [pattern={0}] (E-0201)`,
-        E_0202: `Due to a velocity change (reverse playback), the order in which notes appear has been altered in some sections. <br>` +
-            `Please review the velocity changes in the chart. (E-0202)<br>{0}`,
 
         I_0001: `Your result data is copied to the clipboard!`,
         I_0002: `The specified key cannot be assigned. Please specify another key.`,
@@ -4868,7 +4865,6 @@ const g_lang_msgObj = {
         pickColorReset: `矢印・フリーズアローの配色を元に戻します。`,
 
         customFunctionError: `初回の実行エラーが発生しました。修正されるまでこの処理は無視されます。`,
-        reversalAlert: `矢印生成位置逆転アラート`,
     },
 
     En: {
@@ -4969,7 +4965,6 @@ const g_lang_msgObj = {
         pickColorReset: `Restore the color scheme for arrows and freeze arrows.`,
 
         customFunctionError: `An error occurred during the first execution. This process will be ignored until the error is resolved.`,
-        reversalAlert: `Arrow Generation Position Reversal Alert`,
     },
 
 };
