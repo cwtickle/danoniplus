@@ -10757,13 +10757,7 @@ const loadingScoreInit = async () => {
 	calcLifeVals(g_fullArrows);
 
 	// 矢印・フリーズアロー・速度/色変化格納処理
-	g_workObj.arrowReversalList = [];
 	pushArrows(g_scoreObj, speedOnFrame, arrivalFrame);
-	if (g_workObj.arrowReversalList.length > 0) {
-		const escapedList = g_workObj.arrowReversalList.map(s => escapeHtml(s)).join(`<br>`);
-		makeWarningWindow(g_msgInfoObj.E_0202.split(`{0}`).join(escapedList), { backBtnUse: true });
-		return;
-	}
 
 	// メインに入る前の最終初期化処理
 	getArrowSettings();
@@ -11919,12 +11913,28 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 
 			// 「自分より後ろのノーツ」の方が、「自分」よりも早く出現する場合、
 			// 配列の順序と出現時間の順序が入れ替わっている（逆転）とみなす。
+			// 逆転している場合は、最小生成フレームまでさらに遡って、出現フレームを再計算する。
 			if (minNotesFrame < startPoint[k]) {
-				const laneName = g_keyObj[`chara${g_keyObj.currentKey}_${g_keyObj.currentPtn}`]?.[_j]
-					?? g_keyObj[`chara${g_keyObj.currentKey}_0`]?.[_j] ?? _j;
-				const target = escapeHtml(`Lane: ${laneName}_data, Index: ${k / setcnt + 1}, Frame: ${arrowArrivalFrm}`);
-				console.warn(`[${g_msgObj.reversalAlert}] ${target}`);
-				g_workObj.arrowReversalList.push(`- ${target}`);
+
+				const getAdjArrowStartFrame = (_obj, _speedOnFrame, _targetFrame) => {
+					while (_obj.frm > _targetFrame) {
+						_obj.startY += _speedOnFrame[_obj.frm - 1];
+
+						if (_speedOnFrame[_obj.frm - 1] !== 0) {
+							_obj.motionFrm++;
+						}
+						_obj.frm--;
+						_obj.arrivalFrm++;
+					}
+					return _obj;
+				};
+				tmpObj = getAdjArrowStartFrame(tmpObj, _speedOnFrame, minNotesFrame);
+				startPoint[k] = tmpObj.frm;
+				frmPrev = tmpObj.frm;
+				g_workObj.initY[frmPrev] = tmpObj.startY;
+				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
+				g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
+				g_workObj.initBoostY[frmPrev] = calcInitBoostY(frmPrev);
 			}
 
 			// 最小値を更新
