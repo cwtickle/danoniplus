@@ -10757,13 +10757,7 @@ const loadingScoreInit = async () => {
 	calcLifeVals(g_fullArrows);
 
 	// 矢印・フリーズアロー・速度/色変化格納処理
-	g_workObj.arrowReversalList = [];
 	pushArrows(g_scoreObj, speedOnFrame, arrivalFrame);
-	if (g_workObj.arrowReversalList.length > 0) {
-		const escapedList = g_workObj.arrowReversalList.map(s => escapeHtml(s)).join(`<br>`);
-		makeWarningWindow(g_msgInfoObj.E_0202.split(`{0}`).join(escapedList), { backBtnUse: true });
-		return;
-	}
 
 	// メインに入る前の最終初期化処理
 	getArrowSettings();
