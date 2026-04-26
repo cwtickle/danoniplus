@@ -11784,6 +11784,24 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 	/** Motionの適用フレーム数 */
 	g_workObj.motionFrame = [];
 
+	const boostData = [];
+	if (hasArrayList(_dataObj.boostData, 2)) {
+		const _data = _dataObj.boostData.concat();
+		for (let k = 0; k < _data.length; k += 2) {
+			boostData.push({ frame: _data[k], spd: getSpeedFactor(_data[k + 1]) });
+		}
+		if (boostData.length > 0 && boostData[0].frame > 0) {
+			boostData.unshift({ frame: 0, spd: 1 });
+		}
+	}
+	const getSpdByFrame = _targetFrame => {
+		// targetFrame 以下の frame を持つ要素の中で、最後（最新）のものを見つける
+		const result = boostData.findLast((item) => _targetFrame >= item.frame);
+
+		// 該当するものがない場合（frame: 0 未満など）のフォールバック
+		return result ? result.spd : 1;
+	};
+
 	/**
 	 * 矢印・フリーズアローのデータ格納処理
 	 * @param {number} _j 
@@ -11797,9 +11815,14 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 	 * @param {number} object.arrivalFrame
 	 * @param {number} object.motionFrame 
 	 */
-	const setNotes = (_j, _k, _data, _startPoint, _header, _frzFlg = false, { initY, initBoostY, arrivalFrame, motionFrame } = {}) => {
+	const setNotes = (_j, _k, _data, _startPoint, _header, _frzFlg = false, { initY, initBoostY, arrivalFrame, motionFrame, boostSpd } = {}) => {
 		if (_startPoint >= 0) {
-			const arrowAttrs = { pos: _j, initY, initBoostY, arrivalFrame, motionFrame };
+			const arrowAttrs = {
+				pos: _j, initY, initBoostY, arrivalFrame, motionFrame, boostSpd,
+				get boostDir() {
+					return this.boostSpd / Math.abs(this.boostSpd);
+				}
+			};
 			if (g_workObj[`mk${_header}Arrow`][_startPoint] === undefined) {
 				g_workObj[`mk${_header}Arrow`][_startPoint] = [arrowAttrs];
 			} else {
@@ -11863,8 +11886,10 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 		if (_frzFlg) {
 			g_workObj[`mk${camelHeader}Length`][_j] = [];
 		}
-		setNotes(_j, lastk, _data, startPoint[lastk], camelHeader, _frzFlg,
-			{ initY: tmpObj.startY, initBoostY: g_workObj.initBoostY[frmPrev], arrivalFrame: tmpObj.arrivalFrm, motionFrame: tmpObj.motionFrm });
+		setNotes(_j, lastk, _data, startPoint[lastk], camelHeader, _frzFlg, {
+			initY: tmpObj.startY, initBoostY: g_workObj.initBoostY[frmPrev],
+			arrivalFrame: tmpObj.arrivalFrm, motionFrame: tmpObj.motionFrm, boostSpd: getSpdByFrame(arrowArrivalFrm)
+		});
 
 		// 矢印は1つずつ、フリーズアローは2つで1セット
 		for (let k = lastk - setcnt; k >= 0; k -= setcnt) {
@@ -11943,9 +11968,10 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 			}
 
 			// 出現タイミングを保存
-			setNotes(_j, k, _data, startPoint[k], camelHeader, _frzFlg,
-				{ initY: tmpObj.startY, initBoostY: g_workObj.initBoostY[frmPrev], arrivalFrame: tmpObj.arrivalFrm, motionFrame: tmpObj.motionFrm }
-			);
+			setNotes(_j, k, _data, startPoint[k], camelHeader, _frzFlg, {
+				initY: tmpObj.startY, initBoostY: g_workObj.initBoostY[frmPrev],
+				arrivalFrame: tmpObj.arrivalFrm, motionFrame: tmpObj.motionFrm, boostSpd: getSpdByFrame(arrowArrivalFrm)
+			});
 		}
 	};
 
@@ -11959,30 +11985,6 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 		calcNotes(j, _dataObj.frzData[j], `frz`, true);
 		calcNotes(j, _dataObj.dummyFrzData[j], `dummyFrz`, true);
 	}
-
-	// 個別加速のタイミング更新
-	const calcBoostData = _data => {
-		if (hasArrayList(_data, 2)) {
-			let delIdx = 0;
-			for (let k = _data.length - 2; k >= 0; k -= 2) {
-				const tmpObj = getArrowStartFrame(_data[k], _speedOnFrame);
-				if (tmpObj.frm < g_scoreObj.frameNum) {
-					_data[k] = g_scoreObj.frameNum;
-					delIdx = k;
-					break;
-				} else {
-					_data[k] = tmpObj.frm;
-				}
-				_data[k + 1] = getSpeedFactor(_data[k + 1]);
-			}
-			for (let k = 0; k < delIdx; k++) {
-				_data.shift();
-			}
-			return _data;
-		}
-		return [];
-	};
-	g_workObj.boostData = calcBoostData(_dataObj.boostData);
 
 	/**
 	 * 色変化・モーションデータ・スクロール反転データのタイミング更新
@@ -13044,10 +13046,8 @@ const mainInit = () => {
 	// EffectのArrowEffect追加処理
 	g_effectFunc.get(g_stateObj.effect)();
 
-	// 現在の矢印・フリーズアローの速度、個別加算速度の初期化 (速度変化時に直す)
+	// 現在の矢印・フリーズアローの速度の初期化 (速度変化時に直す)
 	g_workObj.currentSpeed = 2;
-	g_workObj.boostSpd = 1;
-	g_workObj.boostDir = 1;
 
 	// 開始位置、楽曲再生位置の設定
 	const firstFrame = g_scoreObj.frameNum;
@@ -13718,8 +13718,8 @@ const mainInit = () => {
 
 		const arrowName = `${_name}${_j}_${_arrowCnt}`;
 		const stepY = C_STEP_Y + g_posObj.reverseStepY * dividePos;
-		const firstPosY = stepY + (_attrs.initY * g_workObj.boostSpd +
-			_attrs.initBoostY * g_workObj.boostDir) * g_workObj.scrollDir[_j];
+		const firstPosY = stepY + (_attrs.initY * _attrs.boostSpd +
+			_attrs.initBoostY * _attrs.boostDir) * g_workObj.scrollDir[_j];
 
 		const arrowRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], arrowName, {
 			x: 0, y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH,
@@ -13733,13 +13733,13 @@ const mainInit = () => {
 			// 生存フレーム数 (ストップ分除去、個別加速/Motionオプション用)
 			boostCnt: _attrs.motionFrame,
 			// 個別加速量
-			boostSpd: g_workObj.boostSpd,
+			boostSpd: _attrs.boostSpd,
 			// ステップゾーン位置 (0: デフォルト, 1: リバース)
 			dividePos: dividePos,
 			// スクロール方向 (1: デフォルト, -1: リバース)
 			dir: g_workObj.scrollDir[_j],
 			// 個別加速方向 (1: 順方向加速, -1: 逆方向加速)
-			boostDir: g_workObj.boostDir,
+			boostDir: _attrs.boostDir,
 			// 前フレーム時の位置 (判定で使用)
 			prevY: firstPosY,
 			// 現フレーム時の位置
@@ -13834,9 +13834,9 @@ const mainInit = () => {
 		const frzNo = `${_j}_${_arrowCnt}`;
 		const frzName = `${_name}${frzNo}`;
 		const stepY = C_STEP_Y + g_posObj.reverseStepY * dividePos;
-		const firstPosY = stepY + (_attrs.initY * g_workObj.boostSpd +
-			_attrs.initBoostY * g_workObj.boostDir) * g_workObj.scrollDir[_j];
-		const firstBarLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2] * g_workObj.boostSpd;
+		const firstPosY = stepY + (_attrs.initY * _attrs.boostSpd +
+			_attrs.initBoostY * _attrs.boostDir) * g_workObj.scrollDir[_j];
+		const firstBarLength = g_workObj[`mk${toCapitalize(_name)}Length`][_j][(_arrowCnt - 1) * 2] * _attrs.boostSpd;
 
 		const frzRoot = createEmptySprite(arrowSprite[g_workObj.dividePos[_j]], frzName, {
 			x: 0, y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH + firstBarLength,
@@ -13864,13 +13864,13 @@ const mainInit = () => {
 			// キーを離していたフレーム数 (基準値超えでNG判定)
 			keyUpFrame: 0,
 			// 個別加速量
-			boostSpd: g_workObj.boostSpd,
+			boostSpd: _attrs.boostSpd,
 			// ステップゾーン位置 (0: デフォルト, 1: リバース)
 			dividePos: dividePos,
 			// スクロール方向 (1: デフォルト, -1: リバース)
 			dir: g_workObj.scrollDir[_j],
 			// 個別加速方向 (1: 順方向加速, -1: 逆方向加速)
-			boostDir: g_workObj.boostDir,
+			boostDir: _attrs.boostDir,
 			// 現フレーム時のフリーズアロー本体の位置
 			y: firstPosY,
 			// フリーズアロー(帯)の相対位置
@@ -14081,11 +14081,6 @@ const mainInit = () => {
 		while (currentFrame >= g_workObj.speedData?.[speedCnts]) {
 			g_workObj.currentSpeed = g_workObj.speedData[speedCnts + 1];
 			speedCnts += 2;
-		}
-		while (currentFrame >= g_workObj.boostData?.[boostCnts]) {
-			g_workObj.boostSpd = g_workObj.boostData[boostCnts + 1];
-			g_workObj.boostDir = (g_workObj.boostSpd > 0 ? 1 : -1);
-			boostCnts += 2;
 		}
 
 		objList.forEach(header => {
