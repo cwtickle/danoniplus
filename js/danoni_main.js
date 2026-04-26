@@ -11820,7 +11820,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 			const arrowAttrs = {
 				pos: _j, initY, initBoostY, arrivalFrame, motionFrame, boostSpd,
 				get boostDir() {
-					return this.boostSpd / Math.abs(this.boostSpd);
+					return Math.sign(this.boostSpd);
 				}
 			};
 			if (g_workObj[`mk${_header}Arrow`][_startPoint] === undefined) {
