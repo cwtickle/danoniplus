@@ -3388,7 +3388,8 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 				return Math.min((this.mmWidthBase - this.timeMargin) / keyNum, 40);
 			},
 			get logicalWidth() {
-				return this.timeMargin + (this.laneWidth * keyNum);
+				const logicalWidth = this.timeMargin + (this.laneWidth * keyNum);
+				return Math.ceil(logicalWidth * this.dpr) / this.dpr;
 			}
 		},
 	};
