@@ -3394,9 +3394,6 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 		},
 	};
 
-	// ヘッダー生成
-	g_detailObj.scoreMinimapHeader[_scoreId] = createMinimapHeader(g_detailObj.miniMapParams[_scoreId].config, _keyCtrlPtn, keyNum);
-
 	// Canvas保存用配列を空で初期化
 	g_detailObj.scoreMinimap[_scoreId] = null;
 	g_detailObj.scoreMinimapReverse[_scoreId] = null;
@@ -7880,9 +7877,14 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 		? g_detailObj.scoreMinimapReverse[_scoreId]
 		: g_detailObj.scoreMinimap[_scoreId];
 
+	const params = g_detailObj.miniMapParams[_scoreId];
+	const kPtn = params._keyCtrlPtn;
+	if (!g_detailObj.scoreMinimapHeader[kPtn]) {
+		// ヘッダーはキー種ごとに共通なので、未作成の場合のみ生成してキャッシュ
+		g_detailObj.scoreMinimapHeader[kPtn] = createMinimapHeader(params.config, kPtn, params._keyNum);
+	}
 	if (!savedCanvases) {
 		// 未作成の場合のみミニマップを生成（Lazy Generation）
-		const params = g_detailObj.miniMapParams[_scoreId];
 		savedCanvases = generateMinimapData(params, isRev);
 
 		// 生成したものをキャッシュに保存
@@ -7896,7 +7898,7 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 	// --- ヘッダー部分 ---
 	const detailMiniMapHeader = createEmptySprite(detailMiniMap, `detailMiniMapHeader`, g_windowObj.detailMiniMapHeader);
 	$id(`detailMiniMapHeader`).top = (g_stateObj.miniMapRevFlg ? 230 + g_sHeight - 500 : 0) + `px`;
-	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[_scoreId]);
+	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[kPtn]);
 
 	// --- メイン（譜面）部分 ---
 	const detailMiniMapSub = createEmptySprite(detailMiniMap, `detailMiniMapSub`, g_windowObj.detailMiniMapSub);
