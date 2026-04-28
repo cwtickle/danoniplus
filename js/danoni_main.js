@@ -3385,7 +3385,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 			mmWidthBase: (g_sWidth - 500) / 2 + 290,
 			mmMarginY: 2,
 			get laneWidth() {
-				return Math.min(Math.floor((this.mmWidthBase - this.timeMargin) / keyNum), 40);
+				return Math.min((this.mmWidthBase - this.timeMargin) / keyNum, 40);
 			},
 			get logicalWidth() {
 				return this.timeMargin + (this.laneWidth * keyNum);
@@ -3510,7 +3510,7 @@ const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
 	for (let j = 0; j < _keyNum; j++) {
 		// config.laneWidth を使って中央座標を計算
 		const x = timeMargin + j * laneWidth + laneWidth / 2;
-		const keyText = g_kCd[g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][0]];
+		const keyText = g_kCd[g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][0]].split(` `).join(``);
 
 		ctx.fillText(keyText, x, headerHeight / 2 + 2); // 視覚的な中央調整で +2px
 	}
