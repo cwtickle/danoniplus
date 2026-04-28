@@ -8243,7 +8243,6 @@ const createOptionWindow = _sprite => {
 				graphObj.style.top = wUnit(0);
 				graphObj.style.position = `absolute`;
 				graphObj.style.background = j === 0 ? bkColor : `#ffffff00`;
-				graphObj.style.border = `dotted ${wUnit(2)}`;
 				const ctx = graphObj.getContext(`2d`);
 				ctx.scale(dpr, dpr);
 
