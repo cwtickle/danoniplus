@@ -7290,7 +7290,6 @@ const drawSpeedGraph = _scoreId => {
 		speed: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.speed },
 		boost: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.boost }
 	};
-	const dpr = window.devicePixelRatio || 1;
 
 	const tmpSpeedPoint = [0];
 	Object.keys(speedObj).forEach(speedType => {
@@ -7509,7 +7508,7 @@ const updateScoreDetailLabel = (_name, _label, _value, _pos = 0, _labelname = _l
 	const baseLabel = (_bLabel, _bLabelname, _bAlign) =>
 		document.getElementById(`detail${_name}`).appendChild(
 			createDivCss2Label(_bLabel, _bLabelname, {
-				x: 10, y: 110 + _pos * 20, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: _bAlign,
+				x: 10, y: 130 + _pos * 16, w: 100, h: 16, siz: g_limitObj.difSelectorSiz, align: _bAlign,
 			})
 		);
 	if (document.getElementById(`data${_label}`) === null) {

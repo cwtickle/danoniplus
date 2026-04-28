@@ -489,31 +489,31 @@ const updateWindowSiz = () => {
             x: 290, y: 145, w: 120, h: 20, siz: 50, align: C_ALIGN_CENTER,
         },
         lblSpdHeader: {
-            x: 5, y: 180, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
+            x: 5, y: 190, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: C_ALIGN_LEFT,
         },
         lblSpdBase: {
-            x: 0, y: 200, w: 40, h: 20, siz: 11.5, fontWeight: `bold`,
+            x: 0, y: 210, w: 40, h: 20, siz: 11.5, fontWeight: `bold`,
         },
         lblSpdOverall: {
-            x: 40, y: 200, w: 40, h: 20, siz: 11.5,
+            x: 40, y: 210, w: 40, h: 20, siz: 11.5,
             color: g_graphColorObj.speedChara, fontWeight: `bold`,
         },
         lblSpdBoost: {
-            x: 80, y: 200, w: 40, h: 20, siz: 11.5,
+            x: 80, y: 210, w: 40, h: 20, siz: 11.5,
             color: g_graphColorObj.boostChara, fontWeight: `bold`,
         },
         lblSpdTotal: {
-            x: 5, y: 215, w: 100, h: 20, siz: g_limitObj.difSelectorSiz,
+            x: 5, y: 225, w: 100, h: 20, siz: g_limitObj.difSelectorSiz,
             align: C_ALIGN_LEFT, fontWeight: `bold`,
         },
         lblSpdFrame: {
-            x: 70, y: 218, w: 50, h: 20, siz: 12, fontWeight: `bold`,
+            x: 70, y: 228, w: 50, h: 20, siz: 12, fontWeight: `bold`,
         },
         btnSpdCursorL: {
-            x: 85, y: 180, w: 15, h: 20, siz: 12,
+            x: 85, y: 190, w: 15, h: 20, siz: 12,
         },
         btnSpdCursorR: {
-            x: 100, y: 180, w: 15, h: 20, siz: 12,
+            x: 100, y: 190, w: 15, h: 20, siz: 12,
         },
         lnkMiniMapRev: {
             w: g_limitObj.difCoverWidth, h: 20, borderStyle: `solid`,
