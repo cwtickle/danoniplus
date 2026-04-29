@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/04/26
+ * Revised : 2026/04/29
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 47.4.0`;
-const g_revisedDate = `2026/04/26`;
+const g_version = `Ver 47.4.1`;
+const g_revisedDate = `2026/04/29`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -3385,16 +3385,14 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 			mmWidthBase: (g_sWidth - 500) / 2 + 290,
 			mmMarginY: 2,
 			get laneWidth() {
-				return Math.min(Math.floor((this.mmWidthBase - this.timeMargin) / keyNum), 40);
+				return Math.min((this.mmWidthBase - this.timeMargin) / keyNum, 40);
 			},
 			get logicalWidth() {
-				return this.timeMargin + (this.laneWidth * keyNum);
+				const logicalWidth = this.timeMargin + (this.laneWidth * keyNum);
+				return Math.ceil(logicalWidth * this.dpr) / this.dpr;
 			}
 		},
 	};
-
-	// ヘッダー生成
-	g_detailObj.scoreMinimapHeader[_scoreId] = createMinimapHeader(g_detailObj.miniMapParams[_scoreId].config, _keyCtrlPtn, keyNum);
 
 	// Canvas保存用配列を空で初期化
 	g_detailObj.scoreMinimap[_scoreId] = null;
@@ -3510,7 +3508,7 @@ const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
 	for (let j = 0; j < _keyNum; j++) {
 		// config.laneWidth を使って中央座標を計算
 		const x = timeMargin + j * laneWidth + laneWidth / 2;
-		const keyText = g_kCd[g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][0]];
+		const keyText = g_kCd[g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][0]].split(` `).join(``);
 
 		ctx.fillText(keyText, x, headerHeight / 2 + 2); // 視覚的な中央調整で +2px
 	}
@@ -7290,7 +7288,6 @@ const drawSpeedGraph = _scoreId => {
 		speed: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.speed },
 		boost: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.boost }
 	};
-	const dpr = window.devicePixelRatio || 1;
 
 	const tmpSpeedPoint = [0];
 	Object.keys(speedObj).forEach(speedType => {
@@ -7509,7 +7506,7 @@ const updateScoreDetailLabel = (_name, _label, _value, _pos = 0, _labelname = _l
 	const baseLabel = (_bLabel, _bLabelname, _bAlign) =>
 		document.getElementById(`detail${_name}`).appendChild(
 			createDivCss2Label(_bLabel, _bLabelname, {
-				x: 10, y: 110 + _pos * 20, w: 100, h: 20, siz: g_limitObj.difSelectorSiz, align: _bAlign,
+				x: 10, y: 130 + _pos * 16, w: 100, h: 16, siz: g_limitObj.difSelectorSiz, align: _bAlign,
 			})
 		);
 	if (document.getElementById(`data${_label}`) === null) {
@@ -7880,9 +7877,14 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 		? g_detailObj.scoreMinimapReverse[_scoreId]
 		: g_detailObj.scoreMinimap[_scoreId];
 
+	const params = g_detailObj.miniMapParams[_scoreId];
+	const kPtn = params._keyCtrlPtn;
+	if (!g_detailObj.scoreMinimapHeader[kPtn]) {
+		// ヘッダーはキー種ごとに共通なので、未作成の場合のみ生成してキャッシュ
+		g_detailObj.scoreMinimapHeader[kPtn] = createMinimapHeader(params.config, kPtn, params._keyNum);
+	}
 	if (!savedCanvases) {
 		// 未作成の場合のみミニマップを生成（Lazy Generation）
-		const params = g_detailObj.miniMapParams[_scoreId];
 		savedCanvases = generateMinimapData(params, isRev);
 
 		// 生成したものをキャッシュに保存
@@ -7896,7 +7898,7 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 	// --- ヘッダー部分 ---
 	const detailMiniMapHeader = createEmptySprite(detailMiniMap, `detailMiniMapHeader`, g_windowObj.detailMiniMapHeader);
 	$id(`detailMiniMapHeader`).top = (g_stateObj.miniMapRevFlg ? 230 + g_sHeight - 500 : 0) + `px`;
-	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[_scoreId]);
+	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[kPtn]);
 
 	// --- メイン（譜面）部分 ---
 	const detailMiniMapSub = createEmptySprite(detailMiniMap, `detailMiniMapSub`, g_windowObj.detailMiniMapSub);
@@ -8243,7 +8245,6 @@ const createOptionWindow = _sprite => {
 				graphObj.style.top = wUnit(0);
 				graphObj.style.position = `absolute`;
 				graphObj.style.background = j === 0 ? bkColor : `#ffffff00`;
-				graphObj.style.border = `dotted ${wUnit(2)}`;
 				const ctx = graphObj.getContext(`2d`);
 				ctx.scale(dpr, dpr);
 
@@ -12956,7 +12957,6 @@ const mainInit = () => {
 	const dummyArrowCnts = fillArray(keyNum);
 	const dummyFrzCnts = fillArray(keyNum);
 	let speedCnts = 0;
-	let boostCnts = 0;
 	let keychCnts = 0;
 
 	g_workObj.flatMode = g_stateObj.d_stepzone === `FlatBar` ||
@@ -13557,6 +13557,10 @@ const mainInit = () => {
 			}
 		},
 
+		get dummyArrowON() {
+			return this.dummyArrowOFF;
+		},
+
 		// フリーズアロー(成功時)
 		frzOK: (_j, _k, _frzName, _cnt) => {
 			judgeKita(_cnt);
@@ -13600,10 +13604,11 @@ const mainInit = () => {
 
 		// ダミーフリーズアロー(キーを離したときの処理)
 		// ※処理上通ることはないが、統一のために定義
-		dummyFrzKeyUp: (_j, _k, _frzName, _cnt) => { },
+		get dummyFrzKeyUp() {
+			return this.dummyFrzNG;
+		}
 
 	};
-	judgeMotionFunc.dummyArrowON = (_j, _arrowName, _cnt) => judgeMotionFunc.dummyArrowOFF(_j, _arrowName, _cnt);
 
 	/**
 	 * 次矢印・フリーズアローへ判定を移すかチェック
@@ -13641,8 +13646,12 @@ const mainInit = () => {
 		},
 
 		arrowON: (_j, _k, _cnt) => true,
-		dummyArrowOFF: (_j, _k, _cnt) => true,
-		dummyArrowON: (_j, _k, _cnt) => true,
+		get dummyArrowOFF() {
+			return this.arrowON;
+		},
+		get dummyArrowON() {
+			return this.arrowON;
+		},
 
 		frzOFF: (_j, _k, _cnt) => {
 
@@ -13682,10 +13691,8 @@ const mainInit = () => {
 				changeHitFrz(_j, _k, `dummyFrz`);
 			}
 		},
-		dummyFrzON: (_j, _k, _cnt) => {
-			if (_cnt === 0) {
-				changeHitFrz(_j, _k, `dummyFrz`);
-			}
+		get dummyFrzON() {
+			return this.dummyFrzOFF;
 		},
 	};
 
