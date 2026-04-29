@@ -12957,7 +12957,6 @@ const mainInit = () => {
 	const dummyArrowCnts = fillArray(keyNum);
 	const dummyFrzCnts = fillArray(keyNum);
 	let speedCnts = 0;
-	let boostCnts = 0;
 	let keychCnts = 0;
 
 	g_workObj.flatMode = g_stateObj.d_stepzone === `FlatBar` ||
@@ -13558,6 +13557,10 @@ const mainInit = () => {
 			}
 		},
 
+		get dummyArrowON() {
+			return this.dummyArrowOFF;
+		},
+
 		// フリーズアロー(成功時)
 		frzOK: (_j, _k, _frzName, _cnt) => {
 			judgeKita(_cnt);
@@ -13604,7 +13607,6 @@ const mainInit = () => {
 		dummyFrzKeyUp: (_j, _k, _frzName, _cnt) => { },
 
 	};
-	judgeMotionFunc.dummyArrowON = (_j, _arrowName, _cnt) => judgeMotionFunc.dummyArrowOFF(_j, _arrowName, _cnt);
 
 	/**
 	 * 次矢印・フリーズアローへ判定を移すかチェック
@@ -13642,8 +13644,12 @@ const mainInit = () => {
 		},
 
 		arrowON: (_j, _k, _cnt) => true,
-		dummyArrowOFF: (_j, _k, _cnt) => true,
-		dummyArrowON: (_j, _k, _cnt) => true,
+		get dummyArrowOFF() {
+			return this.arrowON;
+		},
+		get dummyArrowON() {
+			return this.arrowON;
+		},
 
 		frzOFF: (_j, _k, _cnt) => {
 
@@ -13683,10 +13689,8 @@ const mainInit = () => {
 				changeHitFrz(_j, _k, `dummyFrz`);
 			}
 		},
-		dummyFrzON: (_j, _k, _cnt) => {
-			if (_cnt === 0) {
-				changeHitFrz(_j, _k, `dummyFrz`);
-			}
+		get dummyFrzON() {
+			return this.dummyFrzOFF;
 		},
 	};
 
