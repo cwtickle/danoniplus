@@ -13604,7 +13604,9 @@ const mainInit = () => {
 
 		// ダミーフリーズアロー(キーを離したときの処理)
 		// ※処理上通ることはないが、統一のために定義
-		dummyFrzKeyUp: (_j, _k, _frzName, _cnt) => { },
+		get dummyFrzKeyUp() {
+			return this.dummyFrzNG;
+		}
 
 	};
 
