@@ -13123,7 +13123,7 @@ const mainInit = () => {
 
 	const makerView = g_headerObj.makerView ? ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})` : ``;
 	const transKeyName = getTransKeyName();
-	const autoAll = g_stateObj.autoAll ? ` &gt; AutoPlay` : ``;
+	const autoAll = g_stateObj.autoAll === C_FLG_ON ? ` &gt; AutoPlay` : ``;
 	let difName = `[${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${shuffleName}${makerView}${autoAll}]`;
 	let creditName = `${musicTitle} / ${artistName}`;
 	if (checkMusicSiz(creditName, g_limitObj.musicTitleSiz) < 12) {
