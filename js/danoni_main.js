@@ -8280,7 +8280,7 @@ const createOptionWindow = _sprite => {
 				resetDifWindow();
 			}
 			g_currentPage = `scoreDetail`;
-			setShortcutEvent(g_currentPage);
+			setShortcutEvent(g_currentPage, () => true, { displayFlg: false });
 			g_stateObj.scoreDetailViewFlg = true;
 			scoreDetail.style.visibility = `visible`;
 			visibleSettingSummary(false);
@@ -8340,11 +8340,11 @@ const createOptionWindow = _sprite => {
 		detailObj.style.visibility = visibles[Number(g_stateObj.scoreDetailViewFlg)];
 		visibleSettingSummary(g_stateObj.scoreDetailViewFlg ? false : g_stateObj.settingSummaryVisible);
 
-		g_currentPage = (_resetFlg || !g_stateObj.scoreDetailViewFlg) ? `option` : `scoreDetail`;
-		setShortcutEvent(g_currentPage);
+		g_currentPage = g_stateObj.scoreDetailViewFlg ? `scoreDetail` : `option`;
+		setShortcutEvent(g_currentPage, () => true, { displayFlg: false });
 
-		// Qキーを押したときのカーソル位置を先頭に初期化
-		if (_resetFlg) {
+		// Qキーのカーソル位置は、ハードリセットまたはスコア明細を閉じるときに先頭へ戻す
+		if (_resetFlg || !g_stateObj.scoreDetailViewFlg) {
 			[`option`, `difSelector`, `scoreDetail`].forEach(page => g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[0]);
 		}
 		document.getElementById(`lnkMiniMapRev`).style.display =
