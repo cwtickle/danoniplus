@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/04/29 (v47.4.1)
+ * Revised : 2026/05/02 (v47.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2762,7 +2762,6 @@ const g_shortcutObj = {
         Numpad5: { id: `lnkMiniMapG` },
         KeyQ: { id: `lnkDensityG` },
         KeyP: { id: `lnkDifInfo` },
-        KeyX: { id: `lnkMiniMapRev` },
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
         KeyC: { id: `lnkHighScore`, reset: true },
@@ -2771,6 +2770,53 @@ const g_shortcutObj = {
         Space: { id: `btnKeyConfig` },
         Enter: { id: `lnkDifficulty` },
         NumpadEnter: { id: `lnkDifficulty` },
+        ShiftLeft_Tab: { id: `btnBack` },
+        ShiftRight_Tab: { id: `btnBack` },
+        Tab: { id: `btnDisplay` },
+        KeyU: { id: `btnSettingSummary` },
+    },
+    scoreDetail: {
+        ShiftLeft_KeyD: { id: `lnkDifficultyL` },
+        ShiftRight_KeyD: { id: `lnkDifficultyL` },
+        KeyD: { id: `lnkDifficultyR` },
+        KeyL: { id: `lnkDifficulty` },
+
+        ShiftLeft_ArrowRight: { id: `lnkSpeedR` },
+        ShiftRight_ArrowRight: { id: `lnkSpeedR` },
+        AltLeft_ArrowRight: { id: `lnkSpeedHR` },
+        AltRight_ArrowRight: { id: `lnkSpeedHR` },
+        ArrowRight: { id: `lnkSpeedRR` },
+        ShiftLeft_ArrowLeft: { id: `lnkSpeedL` },
+        ShiftRight_ArrowLeft: { id: `lnkSpeedL` },
+        AltLeft_ArrowLeft: { id: `lnkSpeedHL` },
+        AltRight_ArrowLeft: { id: `lnkSpeedHL` },
+        ArrowLeft: { id: `lnkSpeedLL` },
+
+        ArrowDown: { id: `lnkDensityG` },
+        ArrowUp: { id: `lnkDensityG` },
+
+        KeyI: { id: `btnGraph` },
+        Digit1: { id: `lnkDensityG` },
+        Digit2: { id: `lnkSpeedG` },
+        Digit3: { id: `lnkToolDifG` },
+        Digit4: { id: `lnkHighScoreG` },
+        Digit5: { id: `lnkMiniMapG` },
+        Numpad1: { id: `lnkDensityG` },
+        Numpad2: { id: `lnkSpeedG` },
+        Numpad3: { id: `lnkToolDifG` },
+        Numpad4: { id: `lnkHighScoreG` },
+        Numpad5: { id: `lnkMiniMapG` },
+        KeyQ: { id: `lnkDensityG` },
+        KeyP: { id: `lnkDifInfo` },
+        KeyX: { id: `lnkMiniMapRev` },
+        ControlLeft_KeyC: { id: `` },
+        ControlRight_KeyC: { id: `` },
+        KeyC: { id: `lnkHighScore`, reset: true },
+
+        Escape: { id: `btnBack` },
+        Space: { id: `btnKeyConfig` },
+        Enter: { id: `btnPlay` },
+        NumpadEnter: { id: `btnPlay` },
         ShiftLeft_Tab: { id: `btnBack` },
         ShiftRight_Tab: { id: `btnBack` },
         Tab: { id: `btnDisplay` },
@@ -2987,7 +3033,8 @@ const g_btnPatterns = {
     dataMgt: { Back: 0, Environment: -35, Highscores: -35, CustomKey: -35, Others: -35 },
     precondition: { Back: 0 },
     option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25, SettingSummary: -10 },
-    difSelector: { SettingSummary: -10 },
+    difSelector: {},
+    scoreDetail: {},
     settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Save: -10, Settings: -5, SettingSummary: -10 },
     exSetting: { Back: 0, KeyConfig: 0, Play: 0, exSetting: -5, Save: -10, SettingSummary: -10 },
     loadingIos: { Play: 0 },
