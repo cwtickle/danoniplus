@@ -4610,8 +4610,11 @@ const headerConvert = _dosObj => {
 
 	g_stateObj.scoreDetail = g_settings.scoreDetails[0] || ``;
 	g_settings.scoreDetailCursors = g_settings.scoreDetails.map(val => `lnk${val}G`);
+	g_settings.scoreDetailCursorsOrg = g_settings.scoreDetailCursors.concat();
 	g_settings.scoreDetailCursors.push(`btnGraphB`);
-	[`option`, `difSelector`].forEach(page => g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[0]);
+	[`option`, `difSelector`, `scoreDetail`].forEach(page => g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[0]);
+	g_shortcutObj.scoreDetail.ArrowDown.id = g_settings.scoreDetailCursorsOrg[0];
+	g_shortcutObj.scoreDetail.ArrowUp.id = g_settings.scoreDetailCursorsOrg[nextPos(0, -1, g_settings.scoreDetailCursorsOrg.length)];
 
 	// 判定位置をBackgroundのON/OFFと連動してリセットする設定
 	obj.jdgPosReset = setBoolVal(_dosObj.jdgPosReset, true);
@@ -8276,6 +8279,8 @@ const createOptionWindow = _sprite => {
 			if (g_currentPage === `difSelector`) {
 				resetDifWindow();
 			}
+			g_currentPage = `scoreDetail`;
+			setShortcutEvent(g_currentPage);
 			g_stateObj.scoreDetailViewFlg = true;
 			scoreDetail.style.visibility = `visible`;
 			visibleSettingSummary(false);
@@ -8287,7 +8292,9 @@ const createOptionWindow = _sprite => {
 			// 選択先を表示、ボタン色を選択中に変更
 			// Qキーを押したときのリンク先を次の明細へ変更
 			g_stateObj.scoreDetail = g_settings.scoreDetails[_val];
-			[`option`, `difSelector`].forEach(page => g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[(_val + 1) % g_settings.scoreDetailCursors.length]);
+			[`option`, `difSelector`, `scoreDetail`].forEach(page => g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[nextPos(_val, 1, g_settings.scoreDetailCursors.length)]);
+			g_shortcutObj.scoreDetail.ArrowDown.id = g_settings.scoreDetailCursorsOrg[nextPos(_val, 1, g_settings.scoreDetailCursorsOrg.length)];
+			g_shortcutObj.scoreDetail.ArrowUp.id = g_settings.scoreDetailCursorsOrg[nextPos(_val, -1, g_settings.scoreDetailCursorsOrg.length)];
 
 			$id(`detail${g_stateObj.scoreDetail}`).visibility = `visible`;
 			document.getElementById(`lnk${g_stateObj.scoreDetail}G`).classList.replace(g_cssObj.button_Default, g_cssObj.button_Setting);
@@ -8333,9 +8340,12 @@ const createOptionWindow = _sprite => {
 		detailObj.style.visibility = visibles[Number(g_stateObj.scoreDetailViewFlg)];
 		visibleSettingSummary(g_stateObj.scoreDetailViewFlg ? false : g_stateObj.settingSummaryVisible);
 
+		g_currentPage = (_resetFlg || !g_stateObj.scoreDetailViewFlg) ? `option` : `scoreDetail`;
+		setShortcutEvent(g_currentPage);
+
 		// Qキーを押したときのカーソル位置を先頭に初期化
 		if (_resetFlg) {
-			g_shortcutObj.option.KeyQ.id = g_settings.scoreDetailCursors[0];
+			[`option`, `difSelector`, `scoreDetail`].forEach(page => g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[0]);
 		}
 		document.getElementById(`lnkMiniMapRev`).style.display =
 			g_stateObj.scoreDetail === `MiniMap` && g_stateObj.scoreDetailViewFlg ? C_DIS_INHERIT : C_DIS_NONE;
