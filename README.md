@@ -129,7 +129,7 @@ If you would like to cooperate with the development, please see below. Even if y
 - [ダンおに波形解析ツール](https://github.com/suzme/danoni-waveform) @suzme
 - [danoni_stepViewer](https://github.com/ittn-exe/danoni_stepViewer) @ittn-exe
 
-#### CustomJs / カスタマイズ
+#### CustomJS / カスタマイズ
 
 - [Dancing☆Onigiri 9tkey](https://github.com/suzme/danoni-9t) @suzme
 - [danoni-key-change](https://github.com/suzme/danoni-key-change) @suzme
