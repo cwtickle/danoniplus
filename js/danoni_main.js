@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/05/02
+ * Revised : 2026/05/03
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 47.5.0`;
-const g_revisedDate = `2026/05/02`;
+const g_version = `Ver 47.5.1`;
+const g_revisedDate = `2026/05/03`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -4613,7 +4613,7 @@ const headerConvert = _dosObj => {
 	g_settings.scoreDetailCursorsOrg = g_settings.scoreDetailCursors.concat();
 	g_settings.scoreDetailCursors.push(`btnGraphB`);
 	[`option`, `difSelector`, `scoreDetail`].forEach(page => g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[0]);
-	g_shortcutObj.scoreDetail.ArrowDown.id = g_settings.scoreDetailCursorsOrg[0];
+	g_shortcutObj.scoreDetail.ArrowDown.id = g_settings.scoreDetailCursorsOrg[nextPos(0, 1, g_settings.scoreDetailCursorsOrg.length)];
 	g_shortcutObj.scoreDetail.ArrowUp.id = g_settings.scoreDetailCursorsOrg[nextPos(0, -1, g_settings.scoreDetailCursorsOrg.length)];
 
 	// 判定位置をBackgroundのON/OFFと連動してリセットする設定

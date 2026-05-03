@@ -127,6 +127,12 @@ If you would like to cooperate with the development, please see below. Even if y
 - [ダンおに矢印色ツール](https://github.com/suzme/danoni-colorpicker) @suzme
 - [ダンおにゲージ計算機 (Gauge Calculator)](http://www.omission0.com/other/gauge_calculator/) @goe0
 - [ダンおに波形解析ツール](https://github.com/suzme/danoni-waveform) @suzme
+- [danoni_stepViewer](https://github.com/ittn-exe/danoni_stepViewer) @ittn-exe
+
+#### CustomJS / カスタマイズ
+
+- [Dancing☆Onigiri 9tkey](https://github.com/suzme/danoni-9t) @suzme
+- [danoni-key-change](https://github.com/suzme/danoni-key-change) @suzme
 
 #### Conversion Tool from Legacy Flash Environments / 旧Flashからの変換ツール
 
