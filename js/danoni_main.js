@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/05/03
+ * Revised : 2026/05/04
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 47.5.1`;
-const g_revisedDate = `2026/05/03`;
+const g_version = `Ver 47.5.2`;
+const g_revisedDate = `2026/05/04`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -8146,7 +8146,7 @@ const setDifficulty = (_initFlg) => {
 		lnkExcessive.style.display = C_DIS_INHERIT;
 	} else {
 		g_stateObj.excessiveChgFlg = false;
-		lblExcessive.style.display = (g_stateObj.excessive === C_FLG_ON ? C_DIS_INHERIT : C_DIS_NONE);
+		lblExcessive.style.display = (g_headerObj.excessiveJdgUses[g_stateObj.scoreId] ? C_DIS_INHERIT : C_DIS_NONE);
 		lnkExcessive.style.display = C_DIS_NONE;
 	}
 
@@ -8429,6 +8429,7 @@ const createOptionWindow = _sprite => {
 			title: g_msgObj.excessive, cxtFunc: evt => setExcessive(evt.target),
 		}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.excessive}`])
 	);
+	createScText(lnkExcessive, `Excessive`, { x: -13, targetLabel: `lnkExcessive` });
 
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)

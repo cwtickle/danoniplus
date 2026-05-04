@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/05/02 (v47.5.0)
+ * Revised : 2026/05/04 (v47.5.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -434,10 +434,10 @@ const updateWindowSiz = () => {
             x: 160, y: 0, w: 90, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
         },
         lblExcessive: {
-            x: 5, y: 27, w: 90, h: 18, siz: 12,
+            x: 0, y: 27, w: 100, h: 18, siz: 12,
         },
         btnExcessive: {
-            x: 5, y: 25, w: 90, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
+            x: 0, y: 25, w: 100, h: 21, siz: g_limitObj.difSelectorSiz, borderStyle: `solid`,
         },
         lblGauge2: {
             x: g_limitObj.setLblLeft - 55, y: g_limitObj.setLblHeight,
@@ -4838,10 +4838,10 @@ const g_lang_msgObj = {
 
         difficulty: `譜面を選択します。`,
         speed: `矢印の流れる速度を設定します。\n外側のボタンは1x単位、内側は0.25x単位で変更できます。`,
-        motion: `矢印の速度を一定ではなく、\n変動させるモーションをつけるか設定します。`,
+        motion: `矢印の速度を一定ではなく、変動させるモーションをつけるか設定します。`,
         reverse: `矢印の流れる向きを設定します。`,
         scroll: `各レーンのスクロール方向をパターンに沿って設定します。\nReverse:ONでスクロール方向を反転します。`,
-        shuffle: `譜面を左右反転したり、ランダムにします。\nランダムにした場合は別譜面扱いとなり、ハイスコアは保存されません。`,
+        shuffle: `譜面を左右反転したり、ランダムにします。ランダムにした場合は別譜面扱いとなります。\nハイスコアは保存されるのはOFF,Mirror,X-Mirrorのみです。`,
         autoPlay: `オートプレイや一部キーを自動で打たせる設定を行います。\nオートプレイ時はハイスコアを保存しません。`,
         gauge: `クリア条件を設定します。\n[Start] ゲージ初期値, [Border] クリア条件(ハイフン時は0),\n[Recovery] 回復量, [Damage] ダメージ量, [Accuracy] クリアに必要な正確率、許容ミス数`,
         excessive: `空押し判定を行うか設定します。`,
@@ -4854,14 +4854,15 @@ const g_lang_msgObj = {
         toDisplay: `プレイ画面上のオブジェクトの\n表示・非表示（一部透明度）を設定します。`,
         toSettings: `その他の拡張設定を設定します。`,
 
-        d_stepzone: `ステップゾーンの表示`,
+        d_stepzone: `ステップゾーンの表示\n[FlatBar] ステップゾーンをフラットな帯状にします`,
         d_judgment: `判定キャラクタ・コンボの表示`,
         d_fastslow: `Fast/Slow表示`,
         d_lifegauge: `ライフゲージの表示`,
         d_score: `現時点の判定数を表示`,
         d_musicinfo: `音楽情報（時間表示含む）`,
         d_filterline: `Hidden+, Sudden+使用時のフィルターの境界線表示`,
-        d_velocity: `途中変速、個別加速の有効化設定`,
+        d_velocity: `途中変速、個別加速の有効化設定\n[Extreme] 全体変速、個別加速について速度変化（の絶対値）が\n1倍より大きい場合は1.5倍、小さい場合は0.75倍します\n` +
+            `[Soft] 全体変速、個別加速について速度変化の振れ幅が緩くなります（Extremeと逆の効果）`,
         d_color: `色変化の有効化設定`,
         d_lyrics: `歌詞表示の有効化設定`,
         d_background: `背景・マスクモーションの有効化設定`,
@@ -4941,7 +4942,7 @@ const g_lang_msgObj = {
         motion: `Set whether to turn on acceleration or deceleration\nin the middle of the sequence.`,
         reverse: `Set the flow direction of the sequences.`,
         scroll: `Set the scroll direction for each lane according to the pattern.\nIf "Reverse:ON" sets, reverse the scroll direction.`,
-        shuffle: `Flip the chart left and right or make it random.\nIf you make it random, it will be treated as other charts and the high score will not be saved.`,
+        shuffle: `Flip the chart left and right or make it random.\nIf you make it random, it will be treated as a different chart.\nOnly when OFF, Mirror, or X-Mirror is selected, the high score will be saved.`,
         autoPlay: `Set to auto play and to hit some keys automatically.\nHigh score is not saved during auto play.`,
         gauge: `Set the clear condition.\n[Start] initial value, [Border] borderline value (hyphen means zero),\n[Recovery] recovery amount, [Damage] damage amount,\n[Accuracy] accuracy required to clear and the number of allowed mistakes`,
         excessive: `Set whether to use excessive miss judgment.`,
@@ -4954,14 +4955,15 @@ const g_lang_msgObj = {
         toDisplay: `Set the display or non-display (partial transparency) of objects on the play screen.`,
         toSettings: `Set other extended settings.`,
 
-        d_stepzone: `Display step zone`,
+        d_stepzone: `Display step zone\n[FlatBar] Make the step zone a flat bar shape.`,
         d_judgment: `Display judgment and combo counts`,
         d_fastslow: `Display fast and slow `,
         d_lifegauge: `Display lifegauge`,
         d_score: `Display the current number of judgments`,
         d_musicinfo: `Display the music credits and current time`,
         d_filterline: `Filter border display when using "Hidden+" or "Sudden+"`,
-        d_velocity: `Enable velocity change settings`,
+        d_velocity: `Enable velocity change settings\n[Extreme] For overall speed change and individual acceleration, \nif the speed change (absolute value) is greater than 1x, it will be 1.5x, \nand if it is less than 1x, it will be 0.75x.\n` +
+            `[Soft] For overall speed change and individual acceleration, \nthe fluctuation of speed change is softened (opposite effect to Extreme).`,
         d_color: `Enable color change settings`,
         d_lyrics: `Enable lyrics display`,
         d_background: `Enable background images and animations`,
