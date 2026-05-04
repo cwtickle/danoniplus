@@ -8146,7 +8146,7 @@ const setDifficulty = (_initFlg) => {
 		lnkExcessive.style.display = C_DIS_INHERIT;
 	} else {
 		g_stateObj.excessiveChgFlg = false;
-		lblExcessive.style.display = (g_stateObj.excessive === C_FLG_ON ? C_DIS_INHERIT : C_DIS_NONE);
+		lblExcessive.style.display = (g_headerObj.excessiveJdgUses[g_stateObj.scoreId] ? C_DIS_INHERIT : C_DIS_NONE);
 		lnkExcessive.style.display = C_DIS_NONE;
 	}
 
@@ -8429,6 +8429,7 @@ const createOptionWindow = _sprite => {
 			title: g_msgObj.excessive, cxtFunc: evt => setExcessive(evt.target),
 		}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.excessive}`])
 	);
+	createScText(lnkExcessive, `Excessive`, { x: -13, targetLabel: `lnkExcessive` });
 
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
