@@ -63,12 +63,9 @@ We welcome contributions of all kinds—from bug reports to new features!
 - [Contributors](https://github.com/cwtickle/danoniplus/blob/develop/CONTRIBUTORS.md)
 - Discussion: Join the `#ソース` channel on [Discord](https://discord.gg/YVWUdUGyMy).
 
-## Portal Site / ポータルサイト
+## Portal Site & Community
 
 - [Dancing☆Onigiri Wiki](https://wikiwiki.jp/danoniplus/)
-
-## Community / コミュニティ
-
 - [Dancing☆Onigiri Discord server](https://discord.gg/TegbHFY7zg)
 - [X #danoni](https://x.com/search?q=%23danoni&src=typed_query&f=live)
 
@@ -157,6 +154,7 @@ Dancing☆Onigiri (CW Edition)に関する機能要望・不具合報告につ�
 
 ## 関連ポータル・コミュニティ
 - [Dancing☆Onigiri Wiki](https://wikiwiki.jp/danoniplus/)
+- [Dancing☆Onigiri Discord server](https://discord.gg/TegbHFY7zg)
 - [X (旧Twitter) #danoni](https://x.com/search?q=%23danoni&src=typed_query&f=live)
 
 ## 関連ツール・リポジトリ
