@@ -12,8 +12,8 @@
 [ **English** | [**日本語**](#Japanese) ]
 
 *Dancing☆Onigiri (CW Edition)* is a high-performance, keyboard-based rhythm game engine that runs natively in web browsers.  
-👉 [**How to Play**](https://github.com/cwtickle/danoniplus-docs/wiki/)
-👉 [**Game system overview**](https://github.com/cwtickle/danoniplus-docs/wiki/AboutGameSystem)
+👉 [**How to Play**](https://github.com/cwtickle/danoniplus-docs/wiki/) / 
+👉 [**Game system overview**](https://github.com/cwtickle/danoniplus-docs/wiki/AboutGameSystem) / 
 👉 [**Shortcut**](https://github.com/cwtickle/danoniplus-docs/wiki/Shortcut)
 
 [![Download](https://dl-danoniplus.qu7-52m.workers.dev/dl-button/danoniplus/)](https://dl-danoniplus.qu7-52m.workers.dev/danoniplus/latest/archive.zip)
@@ -112,8 +112,8 @@ This software is released under the MIT License, see LICENSE.
 [ **[English](#top)** | **日本語** ]
 
 *Dancing☆Onigiri (CW Edition)* は、Webブラウザ上で動作するキーボード操作のリズムゲームエンジンです。  
-👉 [**遊び方**](https://github.com/cwtickle/danoniplus/wiki/)
-👉 [**操作説明**](https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem)
+👉 [**遊び方**](https://github.com/cwtickle/danoniplus/wiki/) / 
+👉 [**操作説明**](https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem) / 
 👉 [**ショートカット一覧**](https://github.com/cwtickle/danoniplus/wiki/Shortcut)
 
 [![Download](https://dl-danoniplus.qu7-52m.workers.dev/dl-button/danoniplus/)](https://dl-danoniplus.qu7-52m.workers.dev/danoniplus/latest/archive.zip)
