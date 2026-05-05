@@ -77,7 +77,7 @@ We welcome contributions of all kinds—from bug reports to new features!
 ### Dancing☆Onigiri
 
 - [Dancing☆Onigiri Preview](https://danonicw.skr.jp/) ([Repository](https://github.com/cwtickle/danoniplus-preview)) @cwtickle
-- [Dancing☆Onigiri エディター(CW Edition 対応)](https://github.com/superkuppabros/danoni-editor) @superkuppabros
+- [Dancing☆Onigiri Editor(for CW Edition)](https://github.com/superkuppabros/danoni-editor) @superkuppabros
 - [Tool for Converting Dan-Oni Song Data to JS file](https://github.com/suzme/danoni-base64) @suzme
 - [Dan-Oni Arrow Color Tool](https://github.com/suzme/danoni-colorpicker) @suzme
 - [Gauge Calculator for Dan-Oni](http://www.omission0.com/other/gauge_calculator/) @goe0
