@@ -17,7 +17,7 @@
 [![Download](https://dl-danoniplus.qu7-52m.workers.dev/dl-button/danoniplus/)](https://dl-danoniplus.qu7-52m.workers.dev/danoniplus/latest/archive.zip)
 
 - 📹 [Introducing Dancing☆Onigiri (Twitch)](https://www.twitch.tv/videos/1601561414?collection=svxqeEFHGBfVdg)
-- 📹 [Introducing Keymode (YouTube)](https://www.youtube.com/watch?v=ESTdqf8hpos)
+- 📹 [Introducing Dancing☆Onigiri (YouTube)](https://www.youtube.com/watch?v=ESTdqf8hpos)
 
 ## Features
 
