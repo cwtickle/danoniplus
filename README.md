@@ -8,116 +8,165 @@
 [![GitHub All Releases](https://dl-danoniplus.qu7-52m.workers.dev/badge/danoniplus/total/)](https://github.com/cwtickle/danoniplus/releases)
 [![GitHub](https://img.shields.io/github/license/cwtickle/danoniplus)](https://github.com/cwtickle/danoniplus/blob/develop/LICENSE)  
 ![AboutDanOni](http://cw7.sakura.ne.jp/danoni/wiki/danonitop.png)
- 
-*Dancing Onigiri "CW Edition"* is a rhythm game. 
-You can create original game data by combining a set of published sources with music files and sequences (text file). See the [wiki](https://github.com/cwtickle/danoniplus-docs/wiki) for details.
 
-The source released here is the **HTML5 (HTML Living Standard) version** of the rhythm game *"Dancing Onigiri"* that was previously released as Flash.
+[ **English** | [**日本語**](#Japanese) ]
 
-Dancing☆Onigiri (CW Edition)は、ブラウザで動作するキーボードを使ったリズムゲームです。  
-公開しているソース一式と、音楽ファイル・譜面データ(テキスト)を組み合わせることで  
-オリジナルのゲームデータを作ることができます。詳細は[Wiki](https://github.com/cwtickle/danoniplus/wiki)をご覧ください。 
-
-ここで公開しているソースは、以前Flashとして公開していたリズムゲーム  
-「Dancing☆Onigiri」の **HTML5 (HTML Living Standard)** 版です。  
-これまでのParaFla版に比べ、さまざまな機能強化を行っています。  
+*Dancing☆Onigiri (CW Edition)* is a high-performance, keyboard-based rhythm game engine that runs natively in web browsers.  
+👉 [**How to Play**](https://github.com/cwtickle/danoniplus-docs/wiki/) / 
+👉 [**Game system overview**](https://github.com/cwtickle/danoniplus-docs/wiki/AboutGameSystem) / 
+👉 [**Shortcut**](https://github.com/cwtickle/danoniplus-docs/wiki/Shortcut)
 
 [![Download](https://dl-danoniplus.qu7-52m.workers.dev/dl-button/danoniplus/)](https://dl-danoniplus.qu7-52m.workers.dev/danoniplus/latest/archive.zip)
 
-## Demo
+- 📹 [Introducing Dancing☆Onigiri (Twitch)](https://www.twitch.tv/videos/1601561414?collection=svxqeEFHGBfVdg)
+- 📹 [Introducing Dancing☆Onigiri (YouTube)](https://www.youtube.com/watch?v=ESTdqf8hpos)
 
-- [Demo1](https://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / Kinoshita Tamaki
-- [Demo2](https://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) シャイニングスター / MaouDamashii
-- [Demo3](https://cw7.sakura.ne.jp/danoni/2018/0315_PetitMagie.html) プチ・マギエ / Napi
+## Features
 
-## How to Play / 遊び方
+- **Multi-Platform:** Works on any modern web browser. Using keyboard.
+- **Flexible Key Modes:** Supports 5-key, 7-key, 9-key, and more.   
+In addition to **20+ standard modes**, you can define your own **Custom Key Modes**!
+- **Easy Deployment:** No complex backend required. Just upload to your web server.
+- **Highly Customizable:** Highly extensible via advanced chart settings and custom JavaScript (safe execution support).
 
-This is a rhythm game, using Keyboard on the website.   
-There are many playstyles in the *Dancing Onigiri*. For example, 5keys, 7keys, 11keys, etc.  
-The details are as follows.  
--> [How to Play](https://github.com/cwtickle/danoniplus-docs/wiki/AboutGameSystem)
+## Quick Start
 
-リズムに合わせてやってくる矢印・フリーズアローを、ステップゾーン上で押すリズムゲームです。  
-キーボードを使って遊びます。  
-下記は7keyの例ですが、他にも5keyや11keyなど多様なプレイスタイルがあります。  
+1. Download the latest version from [Releases](https://github.com/cwtickle/danoniplus/releases).
+2. Open `danoni/danoni1.html` in your browser.
+3. Enjoy the pre-installed songs immediately!
 
-詳細は下記をご覧ください。  
--> [How to Play](https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem)
+## Documentation (Wiki)
 
-![HowtoPlay](http://cw7.sakura.ne.jp/danoni/wiki/howtoplay1.png)  
-(The image is under development. / 画像は開発中のものです）
+For more details, please refer to the Wiki:
 
-### Rule / ゲームのルール
+- [🚀 Creating chart Using the Preview Site](https://github.com/cwtickle/danoniplus-docs/wiki/HowToUsePreview-Example)
+- [📝 How to make chart overview](https://github.com/cwtickle/danoniplus-docs/wiki/HowtoMake)
 
-When you press the keyboard with good timing *:D Perfect!!* *:) O.K.* and life will go up.
-On the other hand, if you remove the timing *:( Bad*, *:_( Miss*, *:( N.G.* will be, life falls.
-If the life of the life gauge remains by the end of the game or it is over the quota, the game is cleared.
+Need help? Join our community on [Discord (Dancing☆Onigiri Server)](https://discord.gg/YVWUdUGyMy)!
 
-タイミング良くキーボードを押すと(・∀・)ｲｲ!!や(ﾟ∀ﾟ)ｷﾀｰ!!となり、ライフが上がります。  
-一方、タイミングを外すと(´・ω・\`)ｼｮﾎﾞｰﾝ、(\`Д´)ｳﾜｧﾝ、(・A・)ｲｸﾅｲとなり、ライフが下がります。  
-ゲーム終了までにライフゲージのライフが残っているか、ノルマ以上であればゲームクリアです。  
+## Playable Demos
+Experience *Dancing☆Onigiri* in action:
 
-## Works / 公開作品
+- [Demo1 (7key, 11key)](https://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) Cllema / Kinoshita Tamaki
+- [Demo2 (9Akey)](https://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) Shining star  / MaouDamashii
+- [Demo3 (11Wkey)](https://cw7.sakura.ne.jp/danoni/2018/0315_PetitMagie.html) Petit Magie / Napi
+
+## Ecosystem & Works
+
+- [Dancing☆Onigiri Difficulty Table for.js](http://dodl4.g3.xrea.com/) 
+- [The danoni database for minor keymodes](http://apoi108.sakura.ne.jp/danoni/ta/)
+- [The danoni database for simpler keymodes](https://apoi108.sakura.ne.jp/danoni/danoni_all_list/)
+- [Dancing☆Onigiri Site List](https://cw7.sakura.ne.jp/danonidb/)
+
+## How to Contribute  
+We welcome contributions of all kinds—from bug reports to new features!
+
+- [Contribution Guide](https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md)
+- [Contributors](https://github.com/cwtickle/danoniplus/blob/develop/CONTRIBUTORS.md)
+- Discussion: Join the `#ソース` channel on [Discord](https://discord.gg/YVWUdUGyMy).
+
+## Portal Site & Community
+
+- [Dancing☆Onigiri Wiki](https://wikiwiki.jp/danoniplus/)
+- [Dancing☆Onigiri Discord server](https://discord.gg/TegbHFY7zg)
+- [X #danoni](https://x.com/search?q=%23danoni&src=typed_query&f=live)
+
+## Related Tools Repository
+
+### Dancing☆Onigiri
+
+- [Dancing☆Onigiri Preview](https://danonicw.skr.jp/) ([Repository](https://github.com/cwtickle/danoniplus-preview)) @cwtickle
+- [Dancing☆Onigiri Editor(for CW Edition)](https://github.com/superkuppabros/danoni-editor) @superkuppabros
+- [Tool for Converting Dan-Oni Song Data to JS file](https://github.com/suzme/danoni-base64) @suzme
+- [Dan-Oni Arrow Color Tool](https://github.com/suzme/danoni-colorpicker) @suzme
+- [Gauge Calculator for Dan-Oni](http://www.omission0.com/other/gauge_calculator/) @goe0
+- [Waveform Analysis Tool for Dan-Oni](https://github.com/suzme/danoni-waveform) @suzme
+- [Dan-Oni StepViewer](https://github.com/ittn-exe/danoni_stepViewer) @ittn-exe
+
+#### CustomJS
+
+- [Dancing☆Onigiri 9tkey](https://github.com/suzme/danoni-9t) @suzme
+- [danoni-key-change](https://github.com/suzme/danoni-key-change) @suzme
+
+### Kirizma / Keyboard Rhythmer
+
+- [Kirizma (CW Edition)](https://github.com/cwtickle/kirizma-cw) @cwtickle
+- [Chart character converter from Dan-Oni](https://github.com/suzme/kirizma-converter) @suzme
+- [Kirizma Lyrics Display Generator](https://github.com/prlg25/kirizma_lyric) @prlg25
+- [The difficulty table for Kirizma](https://github.com/suzme/kirizma) @suzme
+
+### Punching◇Panels
+
+- [Punching◇Panels](https://github.com/cwtickle/punching-panels) @cwtickle
+- [Punching◇Panels Editor](https://github.com/suzme/punpane-editor) @suzme
+- [The difficulty table for Punching◇Panels](https://github.com/suzme/punpane) @suzme
+
+## License / ライセンス
+
+This software is released under the MIT License, see LICENSE.  
+
+---
+
+<a id="Japanese"></a>
+
+[ **[English](#top)** | **日本語** ]
+
+*Dancing☆Onigiri (CW Edition)* は、Webブラウザ上で動作するキーボード操作のリズムゲームエンジンです。  
+👉 [**遊び方**](https://github.com/cwtickle/danoniplus/wiki/) / 
+👉 [**操作説明**](https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem) / 
+👉 [**ショートカット一覧**](https://github.com/cwtickle/danoniplus/wiki/Shortcut)
+
+[![Download](https://dl-danoniplus.qu7-52m.workers.dev/dl-button/danoniplus/)](https://dl-danoniplus.qu7-52m.workers.dev/danoniplus/latest/archive.zip)
+
+- 📹 [Dancing☆Onigiriの紹介 (Twitch)](https://www.twitch.tv/videos/1601561414?collection=svxqeEFHGBfVdg)
+- 📹 [Dancing☆Onigiriの紹介 (YouTube)](https://www.youtube.com/watch?v=ESTdqf8hpos)
+
+## 特徴
+- **マルチプラットフォーム:** モダンなブラウザがあれば、PCでもスマホでも動作します。
+- **多彩なキーモード:** 5key、7key、9Akeyなど、20種類以上の標準モードに加え、独自の**カスタムキーモード**も作成可能です。
+- **容易な起動:** サーバーにファイルをアップロードするだけで、すぐに自分の譜面を公開できます。
+- **高度なカスタマイズ性:** 豊富な譜面設定やカスタムJavaScript（安全な実行環境をサポート）により、自由度の高い演出が可能です。
+
+## クイックスタート
+1. [リリースページ](https://github.com/cwtickle/danoniplus/releases) から最新版をダウンロードします。
+2. `danoni/danoni1.html` をブラウザで開きます。
+3. プリセット曲ですぐに動作を確認できます。
+
+## ドキュメント (Wiki)
+詳細な使い方は公式Wikiを確認してください：
+- [🚀 プレビューサイトを使った譜面作成](https://github.com/cwtickle/danoniplus/wiki/HowToUsePreview-Example)
+- [📝 譜面制作の概要](https://github.com/cwtickle/danoniplus/wiki/HowtoMake)
+
+質問や交流は [Dancing☆Onigiri Discord サーバー](https://discord.gg/YVWUdUGyMy) の「#一般」チャンネルへどうぞ！
+
+## デモ
+Dancing☆Onigiriを実際にプレイしてみましょう！
+
+- [Demo1 (7key, 11key)](https://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / Kinoshita Tamaki
+- [Demo2 (9Akey)](https://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) シャイニングスター / 魔王魂
+- [Demo3 (11Wkey)](https://cw7.sakura.ne.jp/danoni/2018/0315_PetitMagie.html) プチ・マギエ / Napi
+
+## 公開作品
+数多くの作品が公開されています。自分に合った難易度から始めていきましょう！
 
 - [Dancing☆Onigiri 難易度表 for.js](http://dodl4.g3.xrea.com/) 
 - [多鍵データベース](http://apoi108.sakura.ne.jp/danoni/ta/)
 - [メジャー多鍵データベース](https://apoi108.sakura.ne.jp/danoni/danoni_all_list/)
-- [Dancing☆Onigiri サイト一覧](https://cw7.sakura.ne.jp/danonidb/)  
-- [Dancing☆Onigiri 作品一覧](https://cw7.sakura.ne.jp/lst/)  
+- [Dancing☆Onigiri サイト一覧](https://cw7.sakura.ne.jp/danonidb/)
 
-## How to Make / 作り方
+## リポジトリへの貢献方法  
+Dancing☆Onigiri (CW Edition)に関する機能要望・不具合報告については下記をご覧ください。参加歓迎です。
 
-- [How to make chart overview](https://github.com/cwtickle/danoniplus-docs/wiki/HowtoMake) / [譜面の作成概要](https://github.com/cwtickle/danoniplus/wiki/HowtoMake)
-- [Creating chart Using the Preview Site](https://github.com/cwtickle/danoniplus-docs/wiki/HowToUsePreview-Example) / [プレビューサイトを使った譜面の作成](https://github.com/cwtickle/danoniplus/wiki/HowToUsePreview-Example)
-- [ParaFla!ソース利用者向け移行方法 (Japanese Only)](https://github.com/cwtickle/danoniplus/wiki/forParaFlaUser)
+- [Contribution Guide](https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md)
+- [Contributors](https://github.com/cwtickle/danoniplus/blob/develop/CONTRIBUTORS.md)
+- [Dancing☆Onigiri Discord サーバー](https://discord.gg/YVWUdUGyMy)の`#ソース`チャンネルで各種要望・不具合報告を受け付けています。
 
-### How to Install / 導入方法
-
-- Download from [Changelog](https://github.com/cwtickle/danoniplus-docs/wiki/Changelog-latest). You can also install from npm.
-  - [Releases](https://github.com/cwtickle/danoniplus/releases)からダウンロードします。npmからの導入も可能です。
-```
-npm i danoniplus
-```
-- When directly specifying the version name, specify the version after @ as shown below.
-  - バージョン名を直接指定するときは下記のように @以降をバージョン指定します。
-```
-npm i danoniplus@26.1.2
-```
-
-## System requirements / 動作環境
-
-- Windows, Mac OS, Linux, Android, iPad OS
-- Google Chrome, Microsoft Edge, Opera, Vivaldi, Safari (WebKit), Firefox (Gecko) 
-
-## Difference from Flash Version / Flash版との差異 (Japanese Only)
-
-*Dancing Onigiri "CW Edition"* basically conforms to the specifications of *ParaFla!* Version, but the details are different from the conventional ones. See below for details.
-
-Dancing☆Onigiri (CW Edition)では基本的にParaFla!版の仕様に準拠していますが、  
-細かい点が従来と異なります。詳細は下記をご覧ください。
-
-- [Difference from Flash Version / Flash版との差異 (Japanese)](https://github.com/cwtickle/danoniplus/wiki/DifferenceFromFlashVer)  
-
-## How to Contribute / 開発者の方へ  
-
-If you would like to cooperate with the development, please see below. Even if you don't have a GitHub account, you can cooperate!
-
-開発にご協力いただける方は、下記をご覧ください。GitHubアカウントの無い方でも協力できます！
-
-- [How to Contribute / 貢献の仕方](https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md)   
-- [GitLab community for requests and bug reports / 要望・不具合報告(GitLab Issues)](https://gitlab.com/cwtickle/danonicw/-/issues)
-- [Contributors / コントリビューター](https://github.com/cwtickle/danoniplus/blob/develop/CONTRIBUTORS.md)
-
-## Portal Site / ポータルサイト
-
+## 関連ポータル・コミュニティ
 - [Dancing☆Onigiri Wiki](https://wikiwiki.jp/danoniplus/)
-
-## Community / コミュニティ
-
 - [Dancing☆Onigiri Discord server](https://discord.gg/TegbHFY7zg)
-- [X #danoni](https://x.com/search?q=%23danoni&src=typed_query&f=live)
+- [X (旧Twitter) #danoni](https://x.com/search?q=%23danoni&src=typed_query&f=live)
 
-## Related Tools Repository / 関連リポジトリ・ツール
+## 関連ツール・リポジトリ
 
 ### Dancing☆Onigiri
 
@@ -127,14 +176,14 @@ If you would like to cooperate with the development, please see below. Even if y
 - [ダンおに矢印色ツール](https://github.com/suzme/danoni-colorpicker) @suzme
 - [ダンおにゲージ計算機 (Gauge Calculator)](http://www.omission0.com/other/gauge_calculator/) @goe0
 - [ダンおに波形解析ツール](https://github.com/suzme/danoni-waveform) @suzme
-- [danoni_stepViewer](https://github.com/ittn-exe/danoni_stepViewer) @ittn-exe
+- [ダンおに譜面ビューア](https://github.com/ittn-exe/danoni_stepViewer) @ittn-exe
 
-#### CustomJS / カスタマイズ
+#### カスタムスクリプト
 
 - [Dancing☆Onigiri 9tkey](https://github.com/suzme/danoni-9t) @suzme
 - [danoni-key-change](https://github.com/suzme/danoni-key-change) @suzme
 
-#### Conversion Tool from Legacy Flash Environments / 旧Flashからの変換ツール
+#### 旧Flashからの変換ツール
 
 - [Dancing☆Onigiri Chart Reverser](https://github.com/cwtickle/danoniplus-reverser) @cwtickle
 - [Dancing☆Onigiri Chart Converter](https://github.com/cwtickle/danoniplus-converter) @cwtickle
@@ -152,6 +201,5 @@ If you would like to cooperate with the development, please see below. Even if y
 - [Punching◇Panels エディター](https://github.com/suzme/punpane-editor) @suzme
 - [Punching◇Panels 難易度表](https://github.com/suzme/punpane) @suzme
 
-## License / ライセンス
-
-This software is released under the MIT License, see LICENSE.  
+## ライセンス (License)
+このソフトウェアは **MIT License** のもとで公開されています。詳細は LICENSE ファイルをご確認ください。
