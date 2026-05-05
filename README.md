@@ -23,7 +23,7 @@
 
 - **Multi-Platform:** Works on any modern web browser. Using keyboard.
 - **Flexible Key Modes:** Supports 5-key, 7-key, 9-key, and more.   
-In addition to 20+ standard modes, you can define your own **Custom Key Modes**!
+In addition to **20+ standard modes**, you can define your own **Custom Key Modes**!
 - **Easy Deployment:** No complex backend required. Just upload to your web server.
 - **Highly Customizable:** Highly extensible via advanced chart settings and custom JavaScript (safe execution support).
 
