@@ -43,7 +43,7 @@ For more details, please refer to the Wiki:
 Need help? Join our community on [Discord (Dancing☆Onigiri Server)](https://discord.gg/YVWUdUGyMy)!
 
 ## Playable Demos
-Experience *danoniplus* in action:
+Experience *Dancing☆Onigiri* in action:
 
 - [Demo1 (7key, 11key)](https://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) Cllema / Kinoshita Tamaki
 - [Demo2 (9Akey)](https://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) Shining star  / MaouDamashii
@@ -132,6 +132,28 @@ This software is released under the MIT License, see LICENSE.
 - [📝 譜面制作の概要](https://github.com/cwtickle/danoniplus/wiki/HowtoMake)
 
 質問や交流は [Dancing☆Onigiri Discord サーバー](https://discord.gg/YVWUdUGyMy) の「#一般」チャンネルへどうぞ！
+
+## デモ
+Dancing☆Onigiriを実際にプレイしてみましょう！
+
+- [Demo1 (7key, 11key)](https://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / Kinoshita Tamaki
+- [Demo2 (9Akey)](https://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) シャイニングスター / 魔王魂
+- [Demo3 (11Wkey)](https://cw7.sakura.ne.jp/danoni/2018/0315_PetitMagie.html) プチ・マギエ / Napi
+
+## 公開作品
+数多くの作品が公開されています。自分に合った難易度から始めていきましょう！
+
+- [Dancing☆Onigiri 難易度表 for.js](http://dodl4.g3.xrea.com/) 
+- [多鍵データベース](http://apoi108.sakura.ne.jp/danoni/ta/)
+- [メジャー多鍵データベース](https://apoi108.sakura.ne.jp/danoni/danoni_all_list/)
+- [Dancing☆Onigiri サイト一覧](https://cw7.sakura.ne.jp/danonidb/)
+
+## リポジトリへの貢献方法  
+Dancing☆Onigiri (CW Edition)に関する機能要望・不具合報告については下記をご覧ください。参加歓迎です。
+
+- [Contribution Guide](https://github.com/cwtickle/danoniplus/blob/develop/.github/CONTRIBUTING.md)
+- [Contributors](https://github.com/cwtickle/danoniplus/blob/develop/CONTRIBUTORS.md)
+- [Dancing☆Onigiri Discord サーバー](https://discord.gg/YVWUdUGyMy)の`#ソース`チャンネルで各種要望・不具合報告を受け付けています。
 
 ## 関連ポータル・コミュニティ
 - [Dancing☆Onigiri Wiki](https://wikiwiki.jp/danoniplus/)
