@@ -103,7 +103,7 @@ We welcome contributions of all kinds—from bug reports to new features!
 - [Punching◇Panels Editor](https://github.com/suzme/punpane-editor) @suzme
 - [The difficulty table for Punching◇Panels](https://github.com/suzme/punpane) @suzme
 
-## License / ライセンス
+## License
 
 This software is released under the MIT License, see LICENSE.  
 
