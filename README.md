@@ -149,7 +149,7 @@ This software is released under the MIT License, see LICENSE.
 ## 🎮 デモ
 Dancing☆Onigiriを実際にプレイしてみましょう！
 
-- [Demo1 (7key, 11key)](https://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / Kinoshita Tamaki
+- [Demo1 (7key, 11key)](https://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) クレマ / 木下たまき
 - [Demo2 (9Akey)](https://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) シャイニングスター / 魔王魂
 - [Demo3 (11Wkey)](https://cw7.sakura.ne.jp/danoni/2018/0315_PetitMagie.html) プチ・マギエ / Napi
 
