@@ -29,8 +29,7 @@ In addition to **20+ standard modes**, you can define your own **Custom Key Mode
 - **Easy Deployment:** No complex backend required. Just upload to your web server.
 - **Highly Customizable:** Highly extensible via advanced chart settings and custom JavaScript (safe execution support).
 
-<img src="https://user-images.githubusercontent.com/44026291/193052877-fc0b5dc6-307c-4311-befa-22ba29580413.png" width="45%">
-<img src="https://user-images.githubusercontent.com/44026291/226273587-7804ca76-c1a5-490b-9f29-d8f370217d08.png" width="45%">
+<img src="https://user-images.githubusercontent.com/44026291/193052877-fc0b5dc6-307c-4311-befa-22ba29580413.png" width="45%"><img src="https://user-images.githubusercontent.com/44026291/226273587-7804ca76-c1a5-490b-9f29-d8f370217d08.png" width="45%">
 
 ## Quick Start
 
@@ -130,8 +129,7 @@ This software is released under the MIT License, see LICENSE.
 - **容易な起動:** サーバーにファイルをアップロードするだけで、すぐに自分の譜面を公開できます。
 - **高度なカスタマイズ性:** 豊富な譜面設定やカスタムJavaScript（安全な実行環境をサポート）により、自由度の高い演出が可能です。
 
-<img src="https://user-images.githubusercontent.com/44026291/193052877-fc0b5dc6-307c-4311-befa-22ba29580413.png" width="45%">
-<img src="https://user-images.githubusercontent.com/44026291/226273587-7804ca76-c1a5-490b-9f29-d8f370217d08.png" width="45%">
+<img src="https://user-images.githubusercontent.com/44026291/193052561-235aa8b9-43a3-4045-a417-26fbced5beb0.png" width="45%"><img src="https://user-images.githubusercontent.com/44026291/226273658-7afdc349-4e0c-4ae8-9d70-2f30eb80ab5f.png" width="45%">
 
 ## クイックスタート
 1. [リリースページ](https://github.com/cwtickle/danoniplus/releases) から最新版をダウンロードします。
