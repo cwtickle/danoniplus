@@ -50,7 +50,7 @@ Need help? Join our community on [Discord (Dancing☆Onigiri Server)](https://di
 Experience *Dancing☆Onigiri* in action:
 
 - [Demo1 (7key, 11key)](https://cw7.sakura.ne.jp/danoni/2013/0237_Cllema.html) Cllema / Kinoshita Tamaki
-- [Demo2 (9Akey)](https://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) Shining star  / MaouDamashii
+- [Demo2 (9Akey)](https://cw7.sakura.ne.jp/danoni/2017/0305_ShiningStar.html) Shining Star  / MaouDamashii
 - [Demo3 (11Wkey)](https://cw7.sakura.ne.jp/danoni/2018/0315_PetitMagie.html) Petit Magie / Napi
 
 ## 🌐 Ecosystem & Works
