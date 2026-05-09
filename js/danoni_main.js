@@ -13220,6 +13220,10 @@ const mainInit = () => {
 		jdgY[0] += g_diffObj.arrowJdgY;
 		jdgY[1] += g_diffObj.frzJdgY;
 	}
+	if (g_stateObj.playWindow === `SideScroll`) {
+		jdgX[0] += 30;
+		jdgX[1] -= 60;
+	}
 
 	jdgGroups.forEach((jdg, j) => {
 		// キャラクタ表示
