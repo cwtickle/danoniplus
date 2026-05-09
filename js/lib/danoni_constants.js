@@ -2728,8 +2728,6 @@ const g_shortcutObj = {
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
         KeyC: { id: `lnkHighScore`, reset: true },
-        Comma: { id: `btnSpdCursorL` },
-        Period: { id: `btnSpdCursorR` },
 
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
@@ -2812,6 +2810,8 @@ const g_shortcutObj = {
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
         KeyC: { id: `lnkHighScore`, reset: true },
+        Comma: { id: `btnSpdCursorL` },
+        Period: { id: `btnSpdCursorR` },
 
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
