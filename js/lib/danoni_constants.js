@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/05/04 (v47.5.2)
+ * Revised : 2026/05/09 (v47.5.3)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2728,8 +2728,6 @@ const g_shortcutObj = {
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
         KeyC: { id: `lnkHighScore`, reset: true },
-        Comma: { id: `btnSpdCursorL` },
-        Period: { id: `btnSpdCursorR` },
 
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
@@ -2812,6 +2810,8 @@ const g_shortcutObj = {
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
         KeyC: { id: `lnkHighScore`, reset: true },
+        Comma: { id: `btnSpdCursorL` },
+        Period: { id: `btnSpdCursorR` },
 
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
