@@ -12593,7 +12593,7 @@ const getArrowSettings = () => {
 	if (g_workObj.stepX_df.length === 0) {
 		g_workObj.stepX_df = structuredClone(g_workObj.stepX);
 	}
-	if (g_stateObj.swapping.endsWith(`Mirror`)) {
+	if (g_settings.swappingSubs.includes(g_stateObj.swapping)) {
 
 		// Swappingにおけるグループ単位での入れ替えでは、上下でステップゾーンが分かれている場合は分離してシャッフルする
 		let _style = structuredClone(Object.values(g_workObj.shuffleGroupMap));
@@ -12613,11 +12613,11 @@ const getArrowSettings = () => {
 		});
 		const _styleTransDf = structuredClone(Object.values(_styleTrans));
 
-		if (g_stateObj.swapping === `Mirror`) {
+		if (g_stateObj.swapping === `Mirror` || g_stateObj.swapping === `OuterSwap`) {
 			_styleTrans.map(_group => _group.reverse());
-
-		} else if (g_stateObj.swapping === `X-Mirror`) {
-			// X-Mirrorの場合、グループの内側だけ入れ替える
+		}
+		if (g_stateObj.swapping.endsWith(`Swap`)) {
+			// グループの内側だけ入れ替える
 			_styleTrans.forEach((group, i) => {
 				g_settings.swapPattern.forEach(val => {
 					swapGroupNums(_styleTrans, group, i, val);

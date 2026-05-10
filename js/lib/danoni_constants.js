@@ -1396,8 +1396,10 @@ const g_settings = {
     camoufrageTypes: [C_FLG_HYPHEN, `FrzArrow`],
     camoufrageTypeNum: 0,
 
-    swappings: [C_FLG_OFF, `Mirror`, `X-Mirror`, `Mirror+`],
+    swappings: [C_FLG_OFF, `InnerSwap`, `OuterSwap`, `Mirror`, `Mirror+`],
     swappingNum: 0,
+
+    swappingSubs: [`InnerSwap`, `OuterSwap`, `Mirror`],
 
     judgRanges: [`Normal`, `Narrow`, `Hard`, `ExHard`],
     judgRangeNum: 0,
@@ -4554,6 +4556,8 @@ const g_lblNameObj = {
     'u_Random+': `Random+`,
     'u_S-Random': `S-Random`,
     'u_S-Random+': `S-Random+`,
+    'u_InnerSwap': `InnerSwap`,
+    'u_OuterSwap': `OuterSwap`,
     'u_Mirror+': `Mirror+`,
     'u_(S)': `(S)`,
 
