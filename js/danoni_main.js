@@ -10853,7 +10853,7 @@ const keyconfigKeyboardPreview = (() => {
 			btn.textContent = _state.visible ? `↑ Preview` : `↓ Preview`;
 		}, {
 			x: btnX, y: BTN_Y, w: btnW, h: BTN_H,
-			title: `キーボードレイアウトのプレビューを表示/非表示`,
+			title: g_msgObj.kcPreview,
 		}, g_cssObj.button_Setting);
 		btn.style.fontSize = `${BTN_FS}px`;
 		divRoot.appendChild(btn);
