@@ -10771,7 +10771,7 @@ const keyconfigKeyboardPreview = (() => {
 		ctx.fillStyle = C_COLOR.legendText;
 		ctx.fillText(g_lblNameObj.unallocated, 22, ly + 5);
 
-		roundRect(ctx, 95, ly - 5, 10, 10, 2);
+		roundRect(ctx, 95, ly, 10, 10, 2);
 		ctx.fillStyle = C_COLOR.mappedFill;
 		ctx.fill();
 		ctx.strokeStyle = C_COLOR.mappedStroke;
@@ -10780,7 +10780,7 @@ const keyconfigKeyboardPreview = (() => {
 		ctx.fillStyle = C_COLOR.legendText;
 		ctx.fillText(g_lblNameObj.allocated, 109, ly + 5);
 
-		roundRect(ctx, 195, ly - 5, 10, 10, 2);
+		roundRect(ctx, 195, ly, 10, 10, 2);
 		ctx.fillStyle = C_COLOR.altFill;
 		ctx.fill();
 		ctx.strokeStyle = C_COLOR.altStroke;
