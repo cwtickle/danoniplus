@@ -10194,6 +10194,9 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	// カーソル位置の初期化
 	appearConfigSteps(g_keycons.keySwitchNum);
 
+	keyconfigKeyboardPreview.dispose();
+	keyconfigKeyboardPreview.init(divRoot);
+
 	// ラベル・ボタン描画
 	multiAppend(divRoot,
 
@@ -10341,6 +10344,577 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	document.onkeyup = evt => commonKeyUp(evt);
 	document.oncontextmenu = () => false;
 };
+
+/**
+ * キーボードレイアウトプレビュー（Canvas版）
+ *
+ * キーコンフィグ画面(divRoot)配下に以下の要素を追加する:
+ *   - [Preview] ボタン (createCss2Button)
+ *   - プレビュー用コンテナ div (createEmptySprite)
+ *     ├ キーボード背景 canvas  (_state.canvasBase)  ← 起動時のみ描画
+ *     └ マッピング強調 canvas  (_state.canvasMap)   ← キー変更・表示時に再描画
+ *
+ * 前提:
+ *   - g_kCd         : グローバル定義済み。ロケール切替後は g_lang_kCd がマージ済み。
+ *                     未設定キーは空文字列 `""` で初期化。
+ *                     右Shift/Ctrl/Alt は 256/257/258 の独自コードで定義。
+ *   - g_btnWidth()  : 画面の横幅(px)を返すグローバル関数。
+ *   - g_sHeight     : 画面の縦幅(px)を保持するグローバル変数。
+ *   - createCss2Button, createEmptySprite : danoniplus 本体のグローバル関数。
+ *
+ * 使い方:
+ *   【初期化時】
+ *     keyconfigKeyboardPreview.init(divRoot);
+ *
+ *   【キー割り当てが変わった時】
+ *     keyconfigKeyboardPreview.refresh();
+ *     ※ g_keyObj.currentKey / currentPtn から自動取得する
+ *
+ *   【キーコンフィグ画面を離脱する時】
+ *     keyconfigKeyboardPreview.dispose();
+ */
+
+const keyconfigKeyboardPreview = (() => {
+
+	// -------------------------------------------------------------------------
+	// 定数
+	// -------------------------------------------------------------------------
+	const C_PREVIEW_ID = `kbPreviewArea`;
+	const C_BTN_ID = `btnKbPreview`;
+	const C_CANVAS_BASE_ID = `kbCanvasBase`;
+	const C_CANVAS_MAP_ID = `kbCanvasMap`;
+
+	// 色定義（既存ゲームの配色に合わせたダーク系）
+	const C_COLOR = {
+		keyFill: `#1a1a2e`,
+		keyStroke: `#555577`,
+		keyText: `#ccccdd`,
+		keySubText: `#888899`,
+		mappedFill: `#003366`,
+		mappedStroke: `#4488ff`,
+		mappedText: `#aaddff`,
+		bgFill: `#0d0d1a`,
+		legendText: `#888899`,
+	};
+
+	// ボタン配置
+	// X・W は init() 内で動的計算（g_btnWidth() 依存）
+	// Y: KeyConfig テキスト上の余白に収まるよう小さく設定
+	const BTN_H = 18;   // ボタン高さ
+	const BTN_Y = 3;    // divRoot 内 Y 座標
+	const BTN_FS = 11;   // ボタンのフォントサイズ(px)
+
+	// プレビューエリア
+	// X: canvas をdivRoot 内で水平センタリング（init で動的計算）
+	// Y: g_sHeight に対して垂直センタリング（init で動的計算）
+
+	// 凡例エリアの高さ
+	const LEGEND_H = 22;
+
+	// -------------------------------------------------------------------------
+	// キーレイアウト定義
+	//
+	// 構造: SECTIONS の配列。各セクションは独立した描画ブロック。
+	//   - rows  : キー行の配列
+	//   - offX  : セクション原点からの X オフセット（単位: KEY_W + KEY_GAP）
+	//             ※ スケール後に適用するためキー単位で持つ
+	//
+	// 各キー:
+	//   kc    : keyCode（数値）
+	//   w     : 幅倍率（KEY_W 基準）
+	//   label : 省略時は g_kCd[kc] を参照。空文字のキーや左右区別したいキーに指定。
+	//
+	// 右Shift/Ctrl/Alt は danoniplus 独自コード 256〜258 を使用。
+	// -------------------------------------------------------------------------
+
+	// メインキーボード部（Fnキー行 + 数字行 + QWERTY + ASDF + ZXCV + スペース行）
+	//
+	// offsetX: 各行の左端を「数字行の左端」を 0 とした相対オフセット（基準KEY_W単位）
+	//   数字行  offset=0    (229キーが左端)
+	//   QWERTY  offset=0    (Tabが左端、幅1.5だが左端位置は揃える)
+	//   ASDF    offset=0    ← CapsLk左端 = L)Shiftの左端に揃える
+	//   ZXCV    offset=0    (L)Shift左端)
+	//   Space   offset=0
+	//   Fn行    offset=0    (Escが左端)
+	//
+	// 実際のキーボードの行オフセット（標準JIS/US準拠）を px 単位で offsetX に持つ。
+	// 単位は BASE_KEY_W。正の値 = 右にずらす。
+	//
+	// 標準的なオフセット比較（1u = 1キー幅）:
+	//   数字行: 0u
+	//   QWERTY: 0u  (Tabは1.5uだが左端は揃う)
+	//   ASDF  : 0u  (CapsLkは1.75u。L)Shiftは2.25u → 差は0.5u)
+	//             → CapsLk左端をL)Shift左端に合わせるには offsetX=0 のまま、
+	//               ASDF行の先頭キー幅を 2.25 にすればよい
+	//   ZXCV  : 0u
+	const MAIN_ROWS = [
+		// Row0: Fn キー行
+		{
+			offsetX: 0,
+			keys: [
+				{ kc: 27, w: 1 },                   // Esc
+				{ kc: -1, w: 0.5 },                   // スペーサー
+				{ kc: 112, w: 1 }, { kc: 113, w: 1 }, { kc: 114, w: 1 }, { kc: 115, w: 1 },
+				{ kc: -1, w: 0.25 },                   // スペーサー
+				{ kc: 116, w: 1 }, { kc: 117, w: 1 }, { kc: 118, w: 1 }, { kc: 119, w: 1 },
+				{ kc: -1, w: 0.25 },                   // スペーサー
+				{ kc: 120, w: 1 }, { kc: 121, w: 1 }, { kc: 122, w: 1 }, { kc: 123, w: 1 },
+			],
+		},
+		// Row1: 数字行
+		{
+			offsetX: 0,
+			keys: [
+				{ kc: 229, w: 1 },
+				{ kc: 49, w: 1 }, { kc: 50, w: 1 }, { kc: 51, w: 1 },
+				{ kc: 52, w: 1 }, { kc: 53, w: 1 }, { kc: 54, w: 1 },
+				{ kc: 55, w: 1 }, { kc: 56, w: 1 }, { kc: 57, w: 1 },
+				{ kc: 48, w: 1 }, { kc: 189, w: 1 }, { kc: 222, w: 1 },
+				{ kc: 8, w: 1.75 },
+			],
+		},
+		// Row2: QWERTY  (Tab=1.5u、左端は数字行と揃う)
+		{
+			offsetX: 0,
+			keys: [
+				{ kc: 9, w: 1.5 },
+				{ kc: 81, w: 1 }, { kc: 87, w: 1 }, { kc: 69, w: 1 },
+				{ kc: 82, w: 1 }, { kc: 84, w: 1 }, { kc: 89, w: 1 },
+				{ kc: 85, w: 1 }, { kc: 73, w: 1 }, { kc: 79, w: 1 },
+				{ kc: 80, w: 1 }, { kc: 192, w: 1 }, { kc: 219, w: 1 },
+				{ kc: 13, w: 1.25 },
+			],
+		},
+		// Row3: ASDF
+		// CapsLk幅を 2.25 にすることで左端が L)Shift(2.25u) と揃う
+		{
+			offsetX: 0,
+			keys: [
+				{ kc: 20, w: 2.25, label: `CapsLk` },  // L)Shiftと幅を揃えて左端を一致させる
+				{ kc: 65, w: 1 }, { kc: 83, w: 1 }, { kc: 68, w: 1 },
+				{ kc: 70, w: 1 }, { kc: 71, w: 1 }, { kc: 72, w: 1 },
+				{ kc: 74, w: 1 }, { kc: 75, w: 1 }, { kc: 76, w: 1 },
+				{ kc: 187, w: 1 }, { kc: 186, w: 1 },
+			],
+		},
+		// Row4: ZXCV
+		// 標準キーボードではZXCV行はASDF行より約0.25u右にオフセットされる
+		// L)Shiftを2.5uに拡大してその分右へずらすことで再現
+		{
+			offsetX: 0.25,
+			keys: [
+				{ kc: 16, w: 2.5 },
+				{ kc: 90, w: 1 }, { kc: 88, w: 1 }, { kc: 67, w: 1 },
+				{ kc: 86, w: 1 }, { kc: 66, w: 1 }, { kc: 78, w: 1 },
+				{ kc: 77, w: 1 }, { kc: 188, w: 1 }, { kc: 190, w: 1 },
+				{ kc: 191, w: 1 }, { kc: 226, w: 1 },
+				{ kc: 256, w: 1.25 },
+			],
+		},
+		// Row5: スペースバー行
+		{
+			offsetX: 0,
+			keys: [
+				{ kc: 17, w: 1.25 },
+				{ kc: 91, w: 1 },
+				{ kc: 18, w: 1 },
+				{ kc: 32, w: 5.25 },
+				{ kc: 258, w: 1 },
+				{ kc: 91, w: 1 },
+				{ kc: 257, w: 1.25 },
+			],
+		},
+	];
+
+	// 編集キークラスター（Insert/Delete/Home/End/PgUp/PgDn + 矢印）
+	const NAV_ROWS = [
+		{ offsetX: 0, keys: [{ kc: 45, w: 1 }, { kc: 36, w: 1 }, { kc: 33, w: 1 }] },  // Insert Home PgUp
+		{ offsetX: 0, keys: [{ kc: 46, w: 1 }, { kc: 35, w: 1 }, { kc: 34, w: 1 }] },  // Delete End  PgDn
+		{ offsetX: 0, keys: [] },                                                           // QWERTY行：空
+		{ offsetX: 0, keys: [] },                                                           // ASDF行：空
+		{ offsetX: 0, keys: [{ kc: -1, w: 1 }, { kc: 38, w: 1 }, { kc: -1, w: 1 }] },  // ↑
+		{ offsetX: 0, keys: [{ kc: 37, w: 1 }, { kc: 40, w: 1 }, { kc: 39, w: 1 }] },  // ← ↓ →
+	];
+
+	// -------------------------------------------------------------------------
+	// 内部状態
+	// -------------------------------------------------------------------------
+	const _state = {
+		visible: false,
+		mappedSet: new Set(),
+		canvasBase: null,
+		canvasMap: null,
+		keyRects: [],     // { kc, x, y, w, h, label } — drawMap で照合するキャッシュ
+		scale: 1,      // KEY_W/KEY_H に掛けるスケール係数
+		cvsW: 500,    // 実際の Canvas 幅（スケール計算後）
+		cvsH: 240,    // 実際の Canvas 高さ（スケール計算後）
+	};
+
+	// -------------------------------------------------------------------------
+	// スケール計算
+	// -------------------------------------------------------------------------
+
+	/**
+	 * g_btnWidth() / g_sHeight を元にスケール係数と Canvas サイズを算出して
+	 * _state に書き込む。init 時に呼ぶ。
+	 *
+	 * フルキーボード（メイン + ナビ）の基準サイズ:
+	 *   横: MAIN最大行幅 + GAP + NAV幅(3キー)
+	 *   縦: 行数 6行 × (KEY_H + KEY_GAP) + LEGEND_H
+	 * KEY_W = KEY_H = 28px(基準)、KEY_GAP = 3px を基準に比率を求める。
+	 */
+	const BASE_KEY_W = 28;
+	const BASE_KEY_H = 28;
+	const BASE_KEY_GAP = 3;
+
+	// MAIN_ROWS で最も横幅が広い行の幅を計算（スペーサー kc:-1 含む）
+	const calcRowBaseW = row =>
+		row.keys.reduce((acc, k) => acc + k.w * BASE_KEY_W + BASE_KEY_GAP, -BASE_KEY_GAP);
+
+	const BASE_MAIN_W = Math.max(...MAIN_ROWS.map(calcRowBaseW));
+	const BASE_NAV_W = 3 * BASE_KEY_W + 2 * BASE_KEY_GAP;  // 3列
+	const BASE_TOTAL_W = BASE_MAIN_W + BASE_KEY_GAP * 2 + BASE_NAV_W + BASE_KEY_GAP * 2;
+	const BASE_TOTAL_H = MAIN_ROWS.length * (BASE_KEY_H + BASE_KEY_GAP) - BASE_KEY_GAP;
+
+	const calcScale = () => {
+		// 横: divRoot 全幅をキャンバス幅として使用
+		const availW = g_btnWidth();
+		// 縦: g_sHeight - 200 を上限（凡例含む）
+		const availH = g_sHeight - 200 - LEGEND_H;
+
+		const scaleW = availW / BASE_TOTAL_W;
+		const scaleH = availH / BASE_TOTAL_H;
+		_state.scale = Math.min(scaleW, scaleH, 1.5);  // 最大1.5倍まで拡大可
+
+		_state.cvsW = Math.floor(BASE_TOTAL_W * _state.scale);
+		_state.cvsH = Math.floor(BASE_TOTAL_H * _state.scale) + LEGEND_H;
+	};
+
+	// -------------------------------------------------------------------------
+	// ラベル取得
+	// -------------------------------------------------------------------------
+
+	/**
+	 * keyCode に対応する [primaryLabel, subLabel] を返す。
+	 * kc が -1（スペーサー）の場合は [``, ``] を返す。
+	 *
+	 * @param {number}           kc
+	 * @param {string|undefined} forcedLabel
+	 * @returns {string[]} [primary, sub]
+	 */
+	const getKeyLabels = (kc, forcedLabel) => {
+		if (kc < 0) return [``, ``];
+		if (forcedLabel !== undefined) return [forcedLabel, ``];
+
+		const raw = g_kCd[kc];
+		if (raw && raw !== `- - -` && raw !== `Unknown`) {
+			const parts = raw.split(` `);
+			return [parts[0] || ``, parts[1] || ``];
+		}
+		return [`?`, ``];
+	};
+
+	// -------------------------------------------------------------------------
+	// Canvas ヘルパー
+	// -------------------------------------------------------------------------
+
+	const kw = w => Math.floor(w * BASE_KEY_W * _state.scale + (w - 1) * BASE_KEY_GAP * _state.scale);
+	const kh = () => Math.floor(BASE_KEY_H * _state.scale);
+	const kg = () => Math.max(1, Math.round(BASE_KEY_GAP * _state.scale));
+	const kr = () => Math.max(2, Math.round(4 * _state.scale));
+
+	const roundRect = (ctx, x, y, w, h, r) => {
+		ctx.beginPath();
+		ctx.moveTo(x + r, y);
+		ctx.lineTo(x + w - r, y);
+		ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+		ctx.lineTo(x + w, y + h - r);
+		ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+		ctx.lineTo(x + r, y + h);
+		ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+		ctx.lineTo(x, y + r);
+		ctx.quadraticCurveTo(x, y, x + r, y);
+		ctx.closePath();
+	};
+
+	const drawKeyLabel = (ctx, x, y, keyW, keyH, primary, sub, textColor, subColor) => {
+		const fs = primary.length >= 5
+			? Math.max(6, Math.floor(8 * _state.scale))
+			: Math.max(7, Math.floor(11 * _state.scale));
+
+		if (sub) {
+			ctx.fillStyle = subColor;
+			ctx.font = `bold ${Math.max(6, Math.floor(8 * _state.scale))}px monospace`;
+			ctx.textAlign = `right`;
+			ctx.textBaseline = `top`;
+			ctx.fillText(sub, x + keyW - 2, y + 2);
+		}
+		ctx.fillStyle = textColor;
+		ctx.font = `bold ${fs}px monospace`;
+		ctx.textAlign = `center`;
+		ctx.textBaseline = `middle`;
+		ctx.fillText(primary, x + keyW / 2, y + keyH / 2 + (sub ? 2 : 0));
+	};
+
+	const drawOneKey = (ctx, x, y, keyW, fill, stroke, lw, primary, sub, textColor, subColor) => {
+		const keyH = kh();
+		roundRect(ctx, x + 0.5, y + 0.5, keyW - 1, keyH - 1, kr());
+		ctx.fillStyle = fill;
+		ctx.strokeStyle = stroke;
+		ctx.lineWidth = lw;
+		ctx.fill();
+		ctx.stroke();
+		drawKeyLabel(ctx, x, y, keyW, keyH, primary, sub, textColor, subColor);
+	};
+
+	// -------------------------------------------------------------------------
+	// レイアウト計算・描画
+	// -------------------------------------------------------------------------
+
+	/**
+	 * ROWS 配列から各キーの矩形座標を計算し、
+	 * canvas に描画しながら keyRects へキャッシュする。
+	 *
+	 * @param {CanvasRenderingContext2D} ctx
+	 * @param {Array}  rows    - MAIN_ROWS または NAV_ROWS（{offsetX, keys} 形式）
+	 * @param {number} originX - セクション左端の X 座標（canvas 座標）
+	 * @param {number} originY - セクション上端の Y 座標（canvas 座標）
+	 */
+	const layoutSection = (ctx, rows, originX, originY) => {
+		const gap = kg();
+		const keyH = kh();
+
+		rows.forEach((rowDef, rowIdx) => {
+			if (rowDef.keys.length === 0) return;
+
+			const rowY = originY + rowIdx * (keyH + gap);
+			const startX = originX + Math.floor(rowDef.offsetX * BASE_KEY_W * _state.scale);
+			let curX = startX;
+
+			rowDef.keys.forEach(keyDef => {
+				const keyW = kw(keyDef.w);
+
+				if (keyDef.kc >= 0) {
+					_state.keyRects.push({
+						kc: keyDef.kc,
+						x: curX,
+						y: rowY,
+						w: keyW,
+						h: keyH,
+						label: keyDef.label,
+					});
+					const [primary, sub] = getKeyLabels(keyDef.kc, keyDef.label);
+					drawOneKey(
+						ctx, curX, rowY, keyW,
+						C_COLOR.keyFill, C_COLOR.keyStroke, 1,
+						primary, sub, C_COLOR.keyText, C_COLOR.keySubText
+					);
+				}
+
+				curX += keyW + gap;
+			});
+		});
+	};
+
+	/**
+	 * キーボード背景レイヤーを描画し keyRects をキャッシュする。
+	 * init 時に呼ぶ。
+	 */
+	const drawBase = () => {
+		const canvas = _state.canvasBase;
+		if (!canvas) return;
+
+		const dpr = window.devicePixelRatio || 1;
+		canvas.style.top = wUnit(40);
+		canvas.width = _state.cvsW * dpr;
+		canvas.height = _state.cvsH * dpr;
+		canvas.style.width = wUnit(_state.cvsW);
+		canvas.style.height = wUnit(_state.cvsH);
+
+		const ctx = canvas.getContext(`2d`);
+		ctx.scale(dpr, dpr);
+		ctx.clearRect(0, 0, _state.cvsW, _state.cvsH);
+		ctx.fillStyle = C_COLOR.bgFill;
+		ctx.fillRect(0, 0, _state.cvsW, _state.cvsH);
+
+		_state.keyRects = [];
+
+		const gap = kg();
+		const mainW = Math.floor(BASE_MAIN_W * _state.scale);
+
+		// Fn行（Row0）の高さのみ微小に小さくして隙間を設ける（実装簡略化のため同一高で可）
+		const originY = gap;
+		const navOriginX = mainW + gap * 3;
+
+		// メインキーボード描画
+		layoutSection(ctx, MAIN_ROWS, 0, originY);
+
+		// ナビゲーションクラスター描画
+		layoutSection(ctx, NAV_ROWS, navOriginX, originY);
+
+		// 凡例
+		const ly = _state.cvsH - 10;
+		ctx.font = `${Math.max(9, Math.floor(10 * _state.scale))}px ${getBasicFont()}`;
+		ctx.textAlign = `left`;
+		ctx.textBaseline = `middle`;
+
+		roundRect(ctx, 8, ly, 10, 10, 2);
+		ctx.fillStyle = C_COLOR.keyFill;
+		ctx.fill();
+		ctx.strokeStyle = C_COLOR.keyStroke;
+		ctx.lineWidth = 1;
+		ctx.stroke();
+		ctx.fillStyle = C_COLOR.legendText;
+		ctx.fillText(g_lblNameObj.unallocated, 22, ly + 5);
+
+		roundRect(ctx, 95, ly, 10, 10, 2);
+		ctx.fillStyle = C_COLOR.mappedFill;
+		ctx.fill();
+		ctx.strokeStyle = C_COLOR.mappedStroke;
+		ctx.lineWidth = 1;
+		ctx.stroke();
+		ctx.fillStyle = C_COLOR.legendText;
+		ctx.fillText(g_lblNameObj.allocated, 109, ly + 5);
+	};
+
+	/**
+	 * マッピング強調レイヤーを再描画する。
+	 * _state.keyRects と _state.mappedSet を照合して強調表示する。
+	 */
+	const drawMap = () => {
+		const canvas = _state.canvasMap;
+		if (!canvas) return;
+
+		const dpr = window.devicePixelRatio || 1;
+		canvas.style.top = wUnit(40);
+		canvas.width = _state.cvsW * dpr;
+		canvas.height = _state.cvsH * dpr;
+		canvas.style.width = wUnit(_state.cvsW);
+		canvas.style.height = wUnit(_state.cvsH);
+
+		const ctx = canvas.getContext(`2d`);
+		ctx.scale(dpr, dpr);
+		ctx.clearRect(0, 0, _state.cvsW, _state.cvsH);
+
+		_state.keyRects.forEach(rect => {
+			if (!_state.mappedSet.has(rect.kc)) return;
+			const [primary, sub] = getKeyLabels(rect.kc, rect.label);
+			roundRect(ctx, rect.x + 0.5, rect.y + 0.5, rect.w - 1, rect.h - 1, kr());
+			ctx.fillStyle = C_COLOR.mappedFill;
+			ctx.strokeStyle = C_COLOR.mappedStroke;
+			ctx.lineWidth = 1.5;
+			ctx.fill();
+			ctx.stroke();
+			drawKeyLabel(
+				ctx, rect.x, rect.y, rect.w, rect.h,
+				primary, sub, C_COLOR.mappedText, C_COLOR.mappedText
+			);
+		});
+	};
+
+	// -------------------------------------------------------------------------
+	// 公開 API
+	// -------------------------------------------------------------------------
+
+	/**
+	 * キーボードプレビューを初期化し、ボタンと Canvas コンテナを divRoot に追加する。
+	 *
+	 * @param {HTMLElement} divRoot - キーコンフィグ画面のルート div
+	 */
+	const init = divRoot => {
+		calcScale();
+
+		// ボタン: キャンバス横幅中央に配置、小さいサイズ
+		const btnW = 80;
+		const btnX = Math.floor((g_btnWidth() - btnW) / 2);
+
+		// "↓ Preview" → 展開、"↑ Preview" → 閉じる のトグルボタン
+		const btn = createCss2Button(C_BTN_ID, `↓ Preview`, () => {
+			togglePreview();
+			btn.textContent = _state.visible ? `↑ Preview` : `↓ Preview`;
+		}, {
+			x: btnX, y: BTN_Y, w: btnW, h: BTN_H,
+			title: `キーボードレイアウトのプレビューを表示/非表示`,
+		}, g_cssObj.button_Setting);
+		btn.style.fontSize = `${BTN_FS}px`;
+		divRoot.appendChild(btn);
+
+		// プレビューエリア: 水平・垂直センタリング
+		const areaX = Math.floor((g_btnWidth() - _state.cvsW) / 2);
+		const areaY = 130;
+
+		const areaDiv = createEmptySprite(divRoot, C_PREVIEW_ID, {
+			x: areaX, y: areaY - 60, w: _state.cvsW, h: _state.cvsH + 80, pointerEvents: C_DIS_AUTO,
+			background: `#00000080`,
+		});
+		areaDiv.style.display = `none`;
+		areaDiv.style.position = `absolute`;
+		areaDiv.style.overflow = `hidden`;
+
+		const canvasBase = document.createElement(`canvas`);
+		canvasBase.id = C_CANVAS_BASE_ID;
+		canvasBase.style.cssText = `position:absolute;left:0;top:0;`;
+		areaDiv.appendChild(canvasBase);
+		_state.canvasBase = canvasBase;
+
+		const canvasMap = document.createElement(`canvas`);
+		canvasMap.id = C_CANVAS_MAP_ID;
+		canvasMap.style.cssText = `position:absolute;left:0;top:0;`;
+		areaDiv.appendChild(canvasMap);
+		_state.canvasMap = canvasMap;
+
+		drawBase();
+	};
+
+	/**
+	 * プレビューの表示 / 非表示を切り替える。
+	 * 表示するたびにマッピングレイヤーを最新化する。
+	 */
+	const togglePreview = () => {
+		const area = document.getElementById(C_PREVIEW_ID);
+		if (!area) return;
+
+		_state.visible = !_state.visible;
+		area.style.display = _state.visible ? `block` : `none`;
+
+		if (_state.visible) refresh();
+	};
+
+	/**
+	 * g_keyObj から現在のキー割り当てを取得して mappedSet を更新し、
+	 * プレビューが表示中なら即時再描画する。
+	 *
+	 * g_keyObj[`keyCtrl${currentKey}_${currentPtn}`] は二次元配列:
+	 *   [ [矢印0のkeyCode, 代替keyCode, ...], [矢印1のkeyCode, ...], ... ]
+	 * flat() して 0 より大きい値のみ Set に格納する。
+	 */
+	const refresh = () => {
+		const tkObj = getKeyInfo();
+		const configKeyGroupList = g_headerObj.keyGroupOrder[g_stateObj.scoreId] ??
+			g_keyObj[`keyGroupOrder${tkObj.keyCtrlPtn}`] ?? tkObj.keyGroupList;
+		const ctrl = g_keyObj[`keyCtrl${tkObj.keyCtrlPtn}`]
+			.filter((val, idx) => tkObj.keyGroupMaps[idx].includes(configKeyGroupList[g_keycons.keySwitchNum]));
+		_state.mappedSet = ctrl
+			? new Set(ctrl.flat().filter(v => v > 0))
+			: new Set();
+		if (_state.visible) drawMap();
+	};
+
+	/**
+	 * プレビューを強制非表示にしてリセットする。
+	 * キーコンフィグ画面の離脱時に呼ぶ。
+	 */
+	const dispose = () => {
+		_state.visible = false;
+		_state.mappedSet = new Set();
+		_state.keyRects = [];
+		_state.canvasBase = null;
+		_state.canvasMap = null;
+	};
+
+	return { init, refresh, togglePreview, dispose };
+
+})();
 
 /**
  * 回転できないオブジェクトの場合に設定の自動絞り込みを行う

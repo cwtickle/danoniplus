@@ -4736,6 +4736,9 @@ const g_lang_lblNameObj = {
         'u_±120deg': `±120°`,
         'u_±360deg': `±360°`,
 
+        unallocated: `未割当`,
+        allocated: `割当済`,
+
         j_ii: "(・∀・)ｲｲ!!",
         j_shakin: "(`・ω・)ｼｬｷﾝ",
         j_matari: "( ´∀`)ﾏﾀｰﾘ",
@@ -4786,6 +4789,9 @@ const g_lang_lblNameObj = {
         'u_Pendulum': `Pendulum`,
         'u_±120deg': `±120deg`,
         'u_±360deg': `±360deg`,
+
+        unallocated: `Unallocated`,
+        allocated: `Allocated`,
 
         j_ii: ":D Perfect!!",
         j_shakin: ":) Great!",
