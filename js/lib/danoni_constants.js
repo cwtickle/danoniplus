@@ -4738,6 +4738,7 @@ const g_lang_lblNameObj = {
 
         unallocated: `未割当`,
         allocated: `割当済`,
+        altAllocated: `代替キー`,
 
         j_ii: "(・∀・)ｲｲ!!",
         j_shakin: "(`・ω・)ｼｬｷﾝ",
@@ -4792,6 +4793,7 @@ const g_lang_lblNameObj = {
 
         unallocated: `Unallocated`,
         allocated: `Allocated`,
+        altAllocated: `Alternate Keys`,
 
         j_ii: ":D Perfect!!",
         j_shakin: ":) Great!",

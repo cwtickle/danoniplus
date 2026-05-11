@@ -10394,6 +10394,9 @@ const keyconfigKeyboardPreview = (() => {
 		mappedStroke: `#4488ff`,
 		mappedText: `#aaddff`,
 		bgFill: `#0d0d1a`,
+		altFill: `#3e3e1a`,
+		altStroke: `#777755`,
+		altText: `#eeeecc`,
 		legendText: `#888899`,
 	};
 
@@ -10409,7 +10412,7 @@ const keyconfigKeyboardPreview = (() => {
 	// Y: g_sHeight に対して垂直センタリング（init で動的計算）
 
 	// 凡例エリアの高さ
-	const LEGEND_H = 22;
+	const LEGEND_H = 25;
 
 	// -------------------------------------------------------------------------
 	// キーレイアウト定義
@@ -10482,7 +10485,7 @@ const keyconfigKeyboardPreview = (() => {
 				{ kc: 82, w: 1 }, { kc: 84, w: 1 }, { kc: 89, w: 1 },
 				{ kc: 85, w: 1 }, { kc: 73, w: 1 }, { kc: 79, w: 1 },
 				{ kc: 80, w: 1 }, { kc: 192, w: 1 }, { kc: 219, w: 1 },
-				{ kc: 13, w: 1.25 },
+				{ kc: 13, w: 1.25, h: () => g_localeObj.val === `Ja` ? 2 : 1 },  // Enter（日本語配列は縦長）
 			],
 		},
 		// Row3: ASDF
@@ -10541,7 +10544,8 @@ const keyconfigKeyboardPreview = (() => {
 	// -------------------------------------------------------------------------
 	const _state = {
 		visible: false,
-		mappedSet: new Set(),
+		mappedSet: new Set(),   // メインキー（各矢印の index 0）
+		altSet: new Set(),   // 代替キー（各矢印の index 1 以降）
 		canvasBase: null,
 		canvasMap: null,
 		keyRects: [],     // { kc, x, y, w, h, label } — drawMap で照合するキャッシュ
@@ -10619,7 +10623,7 @@ const keyconfigKeyboardPreview = (() => {
 	// -------------------------------------------------------------------------
 
 	const kw = w => Math.floor(w * BASE_KEY_W * _state.scale + (w - 1) * BASE_KEY_GAP * _state.scale);
-	const kh = () => Math.floor(BASE_KEY_H * _state.scale);
+	const kh = h => Math.floor(h * BASE_KEY_H * _state.scale + (h - 1) * BASE_KEY_GAP * _state.scale);
 	const kg = () => Math.max(1, Math.round(BASE_KEY_GAP * _state.scale));
 	const kr = () => Math.max(2, Math.round(4 * _state.scale));
 
@@ -10656,8 +10660,7 @@ const keyconfigKeyboardPreview = (() => {
 		ctx.fillText(primary, x + keyW / 2, y + keyH / 2 + (sub ? 2 : 0));
 	};
 
-	const drawOneKey = (ctx, x, y, keyW, fill, stroke, lw, primary, sub, textColor, subColor) => {
-		const keyH = kh();
+	const drawOneKey = (ctx, x, y, keyW, keyH, fill, stroke, lw, primary, sub, textColor, subColor) => {
 		roundRect(ctx, x + 0.5, y + 0.5, keyW - 1, keyH - 1, kr());
 		ctx.fillStyle = fill;
 		ctx.strokeStyle = stroke;
@@ -10682,17 +10685,18 @@ const keyconfigKeyboardPreview = (() => {
 	 */
 	const layoutSection = (ctx, rows, originX, originY) => {
 		const gap = kg();
-		const keyH = kh();
+		const baseKeyH = kh(1);
 
 		rows.forEach((rowDef, rowIdx) => {
 			if (rowDef.keys.length === 0) return;
 
-			const rowY = originY + rowIdx * (keyH + gap);
+			const rowY = originY + rowIdx * (baseKeyH + gap);
 			const startX = originX + Math.floor(rowDef.offsetX * BASE_KEY_W * _state.scale);
 			let curX = startX;
 
 			rowDef.keys.forEach(keyDef => {
 				const keyW = kw(keyDef.w);
+				const keyH = kh(typeof keyDef.h === C_TYP_FUNCTION ? keyDef.h() : keyDef.h || 1);
 
 				if (keyDef.kc >= 0) {
 					_state.keyRects.push({
@@ -10705,7 +10709,7 @@ const keyconfigKeyboardPreview = (() => {
 					});
 					const [primary, sub] = getKeyLabels(keyDef.kc, keyDef.label);
 					drawOneKey(
-						ctx, curX, rowY, keyW,
+						ctx, curX, rowY, keyW, keyH,
 						C_COLOR.keyFill, C_COLOR.keyStroke, 1,
 						primary, sub, C_COLOR.keyText, C_COLOR.keySubText
 					);
@@ -10767,7 +10771,7 @@ const keyconfigKeyboardPreview = (() => {
 		ctx.fillStyle = C_COLOR.legendText;
 		ctx.fillText(g_lblNameObj.unallocated, 22, ly + 5);
 
-		roundRect(ctx, 95, ly, 10, 10, 2);
+		roundRect(ctx, 95, ly - 5, 10, 10, 2);
 		ctx.fillStyle = C_COLOR.mappedFill;
 		ctx.fill();
 		ctx.strokeStyle = C_COLOR.mappedStroke;
@@ -10775,11 +10779,21 @@ const keyconfigKeyboardPreview = (() => {
 		ctx.stroke();
 		ctx.fillStyle = C_COLOR.legendText;
 		ctx.fillText(g_lblNameObj.allocated, 109, ly + 5);
+
+		roundRect(ctx, 195, ly - 5, 10, 10, 2);
+		ctx.fillStyle = C_COLOR.altFill;
+		ctx.fill();
+		ctx.strokeStyle = C_COLOR.altStroke;
+		ctx.lineWidth = 1;
+		ctx.stroke();
+		ctx.fillStyle = C_COLOR.legendText;
+		ctx.fillText(g_lblNameObj.altAllocated, 209, ly + 5);
 	};
 
 	/**
 	 * マッピング強調レイヤーを再描画する。
-	 * _state.keyRects と _state.mappedSet を照合して強調表示する。
+	 * メインキー（mappedSet）と代替キー（altSet）を色分けして描画する。
+	 * 同一キーにメインと代替が重なる場合はメインを優先する。
 	 */
 	const drawMap = () => {
 		const canvas = _state.canvasMap;
@@ -10796,20 +10810,25 @@ const keyconfigKeyboardPreview = (() => {
 		ctx.scale(dpr, dpr);
 		ctx.clearRect(0, 0, _state.cvsW, _state.cvsH);
 
-		_state.keyRects.forEach(rect => {
-			if (!_state.mappedSet.has(rect.kc)) return;
+		// 代替キーを先に描画し、メインキーを上書きすることで優先度を表現
+		const drawKey = (fill, stroke, text) => rect => {
 			const [primary, sub] = getKeyLabels(rect.kc, rect.label);
 			roundRect(ctx, rect.x + 0.5, rect.y + 0.5, rect.w - 1, rect.h - 1, kr());
-			ctx.fillStyle = C_COLOR.mappedFill;
-			ctx.strokeStyle = C_COLOR.mappedStroke;
+			ctx.fillStyle = fill;
+			ctx.strokeStyle = stroke;
 			ctx.lineWidth = 1.5;
 			ctx.fill();
 			ctx.stroke();
-			drawKeyLabel(
-				ctx, rect.x, rect.y, rect.w, rect.h,
-				primary, sub, C_COLOR.mappedText, C_COLOR.mappedText
-			);
-		});
+			drawKeyLabel(ctx, rect.x, rect.y, rect.w, rect.h, primary, sub, text, text);
+		};
+
+		_state.keyRects
+			.filter(rect => _state.altSet.has(rect.kc) && !_state.mappedSet.has(rect.kc))
+			.forEach(drawKey(C_COLOR.altFill, C_COLOR.altStroke, C_COLOR.altText));
+
+		_state.keyRects
+			.filter(rect => _state.mappedSet.has(rect.kc))
+			.forEach(drawKey(C_COLOR.mappedFill, C_COLOR.mappedStroke, C_COLOR.mappedText));
 	};
 
 	// -------------------------------------------------------------------------
@@ -10894,9 +10913,12 @@ const keyconfigKeyboardPreview = (() => {
 			g_keyObj[`keyGroupOrder${tkObj.keyCtrlPtn}`] ?? tkObj.keyGroupList;
 		const ctrl = g_keyObj[`keyCtrl${tkObj.keyCtrlPtn}`]
 			.filter((val, idx) => tkObj.keyGroupMaps[idx].includes(configKeyGroupList[g_keycons.keySwitchNum]));
-		_state.mappedSet = ctrl
-			? new Set(ctrl.flat().filter(v => v > 0))
-			: new Set();
+
+		// index 0 がメインキー、index 1 以降が代替キー
+		_state.mappedSet = new Set(ctrl.map(arr => arr[0]).filter(v => v > 0));
+		_state.altSet = new Set(
+			ctrl.flatMap(arr => arr.slice(1)).filter(v => v > 0)
+		);
 		if (_state.visible) drawMap();
 	};
 
@@ -10907,6 +10929,7 @@ const keyconfigKeyboardPreview = (() => {
 	const dispose = () => {
 		_state.visible = false;
 		_state.mappedSet = new Set();
+		_state.altSet = new Set();
 		_state.keyRects = [];
 		_state.canvasBase = null;
 		_state.canvasMap = null;
