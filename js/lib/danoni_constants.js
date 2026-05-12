@@ -2294,6 +2294,7 @@ for (let j = 0; j < 260; j++) {
 // キーボード配列の言語設定
 const g_lang_kCd = {
     Ja: {
+        13: `Enter`,
         48: `0`,
         49: `1`,
         50: `2`,
@@ -2319,6 +2320,7 @@ const g_lang_kCd = {
         229: `IME`,
     },
     En: {
+        13: `Return`,
         48: `0 )`,
         49: `1 !`,
         50: `2 @`,
@@ -2435,6 +2437,7 @@ g_kCd[134] = `FN`;
 g_kCd[144] = `NumLk`;
 g_kCd[145] = `SL`;
 g_kCd[240] = `CapsLk`;
+g_kCd[242] = `Kana`;
 g_kCd[256] = `R)Shift`;
 g_kCd[257] = `R)Ctrl`;
 g_kCd[258] = `R)Alt`;
@@ -2554,6 +2557,7 @@ g_kCdN[222] = `Equal`;
 g_kCdN[226] = `IntlRo`;
 g_kCdN[229] = `Backquote`;
 g_kCdN[240] = `CapsLock`;
+g_kCdN[242] = `KanaMode`;
 g_kCdN[256] = `ShiftRight`;
 g_kCdN[257] = `ControlRight`;
 g_kCdN[258] = `AltRight`;

@@ -10440,91 +10440,154 @@ const keyconfigKeyboardPreview = (() => {
 	//   ASDF    0u  CapsLk を 2.25u にして L)Shift 左端と揃える
 	//   ZXCV    0.25u  標準キーボードの行オフセットを offsetX + L)Shift 拡大で再現
 	//   スペース行 0u
-	const MAIN_ROWS = [
-		// Row0: Fn キー行
-		{
-			offsetX: 0,
-			keys: [
-				{ kc: 27, w: 1 },                   // Esc
-				{ kc: -1, w: 0.5 },                   // スペーサー
-				{ kc: 112, w: 1 }, { kc: 113, w: 1 }, { kc: 114, w: 1 }, { kc: 115, w: 1 },
-				{ kc: -1, w: 0.25 },                   // スペーサー
-				{ kc: 116, w: 1 }, { kc: 117, w: 1 }, { kc: 118, w: 1 }, { kc: 119, w: 1 },
-				{ kc: -1, w: 0.25 },                   // スペーサー
-				{ kc: 120, w: 1 }, { kc: 121, w: 1 }, { kc: 122, w: 1 }, { kc: 123, w: 1 },
-			],
-		},
-		// Row1: 数字行
-		{
-			offsetX: 0,
-			keys: [
-				{ kc: 229, w: 1 },
-				{ kc: 49, w: 1 }, { kc: 50, w: 1 }, { kc: 51, w: 1 },
-				{ kc: 52, w: 1 }, { kc: 53, w: 1 }, { kc: 54, w: 1 },
-				{ kc: 55, w: 1 }, { kc: 56, w: 1 }, { kc: 57, w: 1 },
-				{ kc: 48, w: 1 }, { kc: 189, w: 1 }, { kc: 222, w: 1 }, { kc: 220, w: 0.75 },
-				{ kc: 8, w: 1.5 },
-			],
-		},
-		// Row2: QWERTY（Tab=1.5u、左端は数字行と揃う）
-		{
-			offsetX: 0,
-			keys: [
-				{ kc: 9, w: 1.5 },
-				{ kc: 81, w: 1 }, { kc: 87, w: 1 }, { kc: 69, w: 1 },
-				{ kc: 82, w: 1 }, { kc: 84, w: 1 }, { kc: 89, w: 1 },
-				{ kc: 85, w: 1 }, { kc: 73, w: 1 }, { kc: 79, w: 1 },
-				{ kc: 80, w: 1 }, { kc: 192, w: 1 }, { kc: 219, w: 1 }, { kc: -1, w: 0.5 },
-				{ kc: 13, w: 1.25, h: () => g_localeObj.val === `Ja` ? 2 : 1 },  // JIS配列は縦長
-			],
-		},
-		// Row3: ASDF（CapsLk を 2.25u にして L)Shift 左端と揃える）
-		{
-			offsetX: 0,
-			keys: [
-				{ kc: 20, w: 2.25, label: `CapsLk` },
-				{ kc: 65, w: 1 }, { kc: 83, w: 1 }, { kc: 68, w: 1 },
-				{ kc: 70, w: 1 }, { kc: 71, w: 1 }, { kc: 72, w: 1 },
-				{ kc: 74, w: 1 }, { kc: 75, w: 1 }, { kc: 76, w: 1 },
-				{ kc: 187, w: 1 }, { kc: 186, w: 1 }, { kc: 221, w: 1 },
-			],
-		},
-		// Row4: ZXCV（標準配列は ASDF より約 0.25u 右にオフセット）
-		{
-			offsetX: 0.25,
-			keys: [
-				{ kc: 16, w: 2.5 },
-				{ kc: 90, w: 1 }, { kc: 88, w: 1 }, { kc: 67, w: 1 },
-				{ kc: 86, w: 1 }, { kc: 66, w: 1 }, { kc: 78, w: 1 },
-				{ kc: 77, w: 1 }, { kc: 188, w: 1 }, { kc: 190, w: 1 },
-				{ kc: 191, w: 1 }, { kc: 226, w: 1 },
-				{ kc: 256, w: 1.25 },
-			],
-		},
-		// Row5: スペースバー行
-		{
-			offsetX: 0,
-			keys: [
-				{ kc: 17, w: 1.25 },
-				{ kc: 91, w: 1 },
-				{ kc: 18, w: 1 },
-				{ kc: 32, w: 7.25 },
-				{ kc: 258, w: 1 },
-				{ kc: 91, w: 1 },
-				{ kc: 257, w: 1.25 },
-			],
-		},
-	];
-
+	//
+	// JIS と US の主な違い:
+	//   数字行: JIS は intlYen(220) あり、US はなし（BackSpace が広い）
+	//   QWERTY: JIS は [ の右にスペーサー、US はなし（Enter が横長）
+	//   ASDF  : JIS は ¥(221) あり、US はなし（Enter が横長）
+	//   ZXCV  : JIS は intlRo(226) あり、US はなし（R)Shift が広い）
+	//   Enter : JIS は縦長(h=2)、US は横長(h=1, w=2.25)
+	/**
+	 * g_localeObj.val に応じた MAIN_ROWS を生成して返す。
+	 * drawBase / calcScale の都度呼び出し、locale 変化を反映する。
+	 *
+	 * @returns {Array} MAIN_ROWS 相当の配列
+	 */
+	const buildMainRows = () => {
+		const isJa = g_localeObj.val === `Ja`;
+		return [
+			// Row0: Fn キー行（JIS/US 共通）
+			{
+				offsetX: 0,
+				keys: [
+					{ kc: 27, w: 1 },                   // Esc
+					{ kc: -1, w: 0.5 },                   // スペーサー
+					{ kc: 112, w: 1 }, { kc: 113, w: 1 }, { kc: 114, w: 1 }, { kc: 115, w: 1 },
+					{ kc: -1, w: 0.25 },                   // スペーサー
+					{ kc: 116, w: 1 }, { kc: 117, w: 1 }, { kc: 118, w: 1 }, { kc: 119, w: 1 },
+					{ kc: -1, w: 0.25 },                   // スペーサー
+					{ kc: 120, w: 1 }, { kc: 121, w: 1 }, { kc: 122, w: 1 }, { kc: 123, w: 1 },
+				],
+			},
+			// Row1: 数字行
+			// JIS: ..., 222, 220(intlYen, 0.75u), BS(1.5u)
+			// US : ..., 222,                      BS(2.25u)
+			{
+				offsetX: 0,
+				keys: [
+					{ kc: 229, w: 1 },
+					{ kc: 49, w: 1 }, { kc: 50, w: 1 }, { kc: 51, w: 1 },
+					{ kc: 52, w: 1 }, { kc: 53, w: 1 }, { kc: 54, w: 1 },
+					{ kc: 55, w: 1 }, { kc: 56, w: 1 }, { kc: 57, w: 1 },
+					{ kc: 48, w: 1 }, { kc: 189, w: 1 }, { kc: 222, w: 1 },
+					...(isJa
+						? [{ kc: 220, w: 0.75 }, { kc: 8, w: 1.5 }]  // JIS: intlYen + BS
+						: [{ kc: 8, w: 2.25 }]   // US : BS のみ（広い）
+					),
+				],
+			},
+			// Row2: QWERTY
+			// JIS: ..., [, スペーサー(0.5u), Enter(縦長 h=2, w=1.25)
+			// US : ..., [, ]
+			{
+				offsetX: 0,
+				keys: [
+					{ kc: 9, w: 1.5 },
+					{ kc: 81, w: 1 }, { kc: 87, w: 1 }, { kc: 69, w: 1 },
+					{ kc: 82, w: 1 }, { kc: 84, w: 1 }, { kc: 89, w: 1 },
+					{ kc: 85, w: 1 }, { kc: 73, w: 1 }, { kc: 79, w: 1 },
+					{ kc: 80, w: 1 }, { kc: 192, w: 1 },
+					...(isJa
+						? [{ kc: 219, w: 1 }, { kc: -1, w: 0.5 }, { kc: 13, w: 1.25, h: 2 }]  // JIS: [, スペーサー, Enter縦長
+						: [{ kc: 219, w: 1 }, { kc: 221, w: 1 }]  // US : [, ]
+					),
+				],
+			},
+			// Row3: ASDF
+			// JIS: ..., L, ;, ', ¥(221)
+			// US : ..., L, ;, '      ← ¥なし（Enter が下まで伸びる縦長分を吸収）
+			{
+				offsetX: 0,
+				keys: [
+					{ kc: 20, w: 2.25, label: `CapsLk` },
+					{ kc: 65, w: 1 }, { kc: 83, w: 1 }, { kc: 68, w: 1 },
+					{ kc: 70, w: 1 }, { kc: 71, w: 1 }, { kc: 72, w: 1 },
+					{ kc: 74, w: 1 }, { kc: 75, w: 1 }, { kc: 76, w: 1 },
+					{ kc: 187, w: 1 }, { kc: 186, w: 1 },
+					...(isJa
+						? [{ kc: 221, w: 1 }]  // JIS: ¥
+						: [{ kc: 13, w: 2.25 }] // US : Enter横長
+					),
+				],
+			},
+			// Row4: ZXCV（標準配列は ASDF より約 0.25u 右にオフセット）
+			// JIS: ..., /, intlRo(226), R)Shift(1.25u)
+			// US : ..., /,              R)Shift(2.5u)
+			{
+				offsetX: 0.25,
+				keys: [
+					{ kc: 16, w: 2.5 },
+					{ kc: 90, w: 1 }, { kc: 88, w: 1 }, { kc: 67, w: 1 },
+					{ kc: 86, w: 1 }, { kc: 66, w: 1 }, { kc: 78, w: 1 },
+					{ kc: 77, w: 1 }, { kc: 188, w: 1 }, { kc: 190, w: 1 },
+					{ kc: 191, w: 1 },
+					...(isJa
+						? [{ kc: 226, w: 1 }, { kc: 256, w: 1.25 }]  // JIS: intlRo + R)Shift
+						: [{ kc: 256, w: 2.5 }]   // US : R)Shift のみ（広い）
+					),
+				],
+			},
+			// Row5: スペースバー行（JIS/US 共通）
+			{
+				offsetX: 0,
+				keys: [
+					{ kc: 17, w: 1.25 },
+					{ kc: 91, w: 1 },
+					{ kc: 18, w: 1 },
+					...(isJa
+						? [
+							{ kc: 29, w: 1 },
+							{ kc: 32, w: 5.25 },
+							{ kc: 28, w: 1 },
+							{ kc: 242, w: 1 },
+						]
+						: [
+							{ kc: 32, w: 8.25 },
+						]
+					),
+					{ kc: 258, w: 1 },
+					{ kc: 91, w: 1 },
+					{ kc: 257, w: 1.25 },
+				],
+			},
+		];
+	};
 	// 編集キークラスター（Insert/Delete/Home/End/PgUp/PgDn + 矢印キー）
 	// MAIN_ROWS と行インデックスを揃えて配置する。空行はスキップされる。
 	const NAV_ROWS = [
+		{ offsetX: 0, keys: [{ kc: 44, w: 1, label: `PrintSc` }, { kc: 145, w: 1, label: `ScrollLk` }, { kc: 19, w: 1 }] },  // PrintSc ScrollLk Pause
 		{ offsetX: 0, keys: [{ kc: 45, w: 1 }, { kc: 36, w: 1 }, { kc: 33, w: 1 }] },  // Insert Home PgUp
 		{ offsetX: 0, keys: [{ kc: 46, w: 1 }, { kc: 35, w: 1 }, { kc: 34, w: 1 }] },  // Delete End  PgDn
-		{ offsetX: 0, keys: [] },                                                          // QWERTY行：空
 		{ offsetX: 0, keys: [] },                                                          // ASDF行：空
 		{ offsetX: 0, keys: [{ kc: -1, w: 1 }, { kc: 38, w: 1 }, { kc: -1, w: 1 }] },  // ↑
 		{ offsetX: 0, keys: [{ kc: 37, w: 1 }, { kc: 40, w: 1 }, { kc: 39, w: 1 }] },  // ← ↓ →
+	];
+
+	// テンキー（Space行の下に余白を空けて横に羅列）
+	// kc は g_kCd 定義に従う: 96〜111=テンキー各種, 144=NumLk
+	// 標準テンキーレイアウト:
+	//   [NumLk] [T/] [T*] [T-]
+	//   [T7][T8][T9] [T+]
+	//   [T4][T5][T6] [T+]  ← T+ は縦2u
+	//   [T1][T2][T3] [TEnter]
+	//   [  T0  ][T_] [TEnter]  ← T0 は横2u、TEnter は縦2u
+	const NUM_ROWS = [
+		{ offsetX: 0, keys: [] },
+		{ offsetX: 0, keys: [{ kc: 144, w: 1 }, { kc: 111, w: 1 }, { kc: 106, w: 1 }, { kc: 109, w: 1 }] },  // NumLk T/ T* T-
+		{ offsetX: 0, keys: [{ kc: 103, w: 1 }, { kc: 104, w: 1 }, { kc: 105, w: 1 }, { kc: 107, w: 1, h: 2 }] },  // T7 T8 T9 T+(縦2u)
+		{ offsetX: 0, keys: [{ kc: 100, w: 1 }, { kc: 101, w: 1 }, { kc: 102, w: 1 }] },                           // T4 T5 T6
+		{ offsetX: 0, keys: [{ kc: 97, w: 1 }, { kc: 98, w: 1 }, { kc: 99, w: 1 }, { kc: 108, w: 1, h: 2 }] }, // T1 T2 T3 TEnter(縦2u)
+		{ offsetX: 0, keys: [{ kc: 96, w: 2 }, { kc: 110, w: 1 }] },                           // T0(横2u) T.
 	];
 
 	// -------------------------------------------------------------------------
@@ -10558,26 +10621,39 @@ const keyconfigKeyboardPreview = (() => {
 	const BASE_KEY_W = 28;
 	const BASE_KEY_H = 28;
 	const BASE_KEY_GAP = 3;
+	const MAIN_ROWS_LEN = 6;  // MAIN_ROWS の行数（Fn行を含む）
 
-	// MAIN_ROWS で最も横幅が広い行の幅を計算（スペーサー含む）
+	// 行幅計算（スペーサー含む）
 	const calcRowBaseW = row =>
 		row.keys.reduce((acc, k) => acc + k.w * BASE_KEY_W + BASE_KEY_GAP, -BASE_KEY_GAP);
 
-	const BASE_MAIN_W = Math.max(...MAIN_ROWS.map(calcRowBaseW));
 	const BASE_NAV_W = 3 * BASE_KEY_W + 2 * BASE_KEY_GAP;  // NAV は 3列固定
-	const BASE_TOTAL_W = BASE_MAIN_W + BASE_KEY_GAP * 2 + BASE_NAV_W + BASE_KEY_GAP * 2;
-	const BASE_TOTAL_H = MAIN_ROWS.length * (BASE_KEY_H + BASE_KEY_GAP) - BASE_KEY_GAP;
+	const BASE_ROW_H = MAIN_ROWS_LEN * (BASE_KEY_H + BASE_KEY_GAP) - BASE_KEY_GAP;  // MAIN+NAV 分の高さ
+	const NUM_ROWS_LEN = 6;  // テンキーの行数
+	const NUM_GAP_H = BASE_KEY_H * 0.4;  // テンキー上部の余白（基準キー高の40%）
+	const BASE_NUM_ROW_H = NUM_ROWS_LEN * (BASE_KEY_H + BASE_KEY_GAP) - BASE_KEY_GAP;  // テンキー部の高さ
+	const BASE_NUM_W = 4 * BASE_KEY_W + 3 * BASE_KEY_GAP;  // テンキー横幅（4列固定）
 
 	const calcScale = () => {
+		// locale に依存した行幅を毎回計算する
+		const rows = buildMainRows();
+		const baseMainW = Math.max(...rows.map(calcRowBaseW));
+		// 横幅: メイン + NAV + テンキー + 余白
+		const totalW = baseMainW + BASE_KEY_GAP * 2 + BASE_NAV_W + BASE_KEY_GAP * 2
+			+ BASE_KEY_GAP * 3 + BASE_NUM_W;
+
 		const availW = g_btnWidth();
 		const availH = g_sHeight - 200 - LEGEND_H;  // 下部 UI ぶんを除いた高さ
 
-		const scaleW = availW / BASE_TOTAL_W;
-		const scaleH = availH / BASE_TOTAL_H;
+		// 縦幅基準: MAIN/NAV 高さ と テンキー高さ（余白込み）の大きい方
+		const totalH = Math.max(BASE_ROW_H, BASE_NUM_ROW_H + Math.ceil(NUM_GAP_H));
+
+		const scaleW = availW / totalW;
+		const scaleH = availH / totalH;
 		_state.scale = Math.min(scaleW, scaleH, 1.5);  // 最大 1.5 倍まで拡大可
 
-		_state.cvsW = Math.floor(BASE_TOTAL_W * _state.scale);
-		_state.cvsH = Math.floor(BASE_TOTAL_H * _state.scale) + LEGEND_H;
+		_state.cvsW = Math.floor(totalW * _state.scale);
+		_state.cvsH = Math.floor(totalH * _state.scale) + LEGEND_H;
 	};
 
 	// -------------------------------------------------------------------------
@@ -10731,13 +10807,23 @@ const keyconfigKeyboardPreview = (() => {
 
 		_state.keyRects = [];
 
+		const mainRows = buildMainRows();
 		const gap = kg();
-		const mainW = Math.floor(BASE_MAIN_W * _state.scale);
+		const baseMainW = Math.max(...mainRows.map(calcRowBaseW));
+		const mainW = Math.floor(baseMainW * _state.scale);
 		const originY = gap;
 		const navOriginX = mainW + gap * 3;
 
-		layoutSection(ctx, MAIN_ROWS, 0, originY);
+		// テンキー: NAV クラスターの右に gap*3 の余白を空けて配置
+		const numOriginX = navOriginX + Math.floor(BASE_NAV_W * _state.scale) + gap * 3;
+		// テンキーは MAIN 全体に対して縦方向センタリング
+		const numH = Math.floor(BASE_NUM_ROW_H * _state.scale);
+		const mainH = Math.floor(BASE_ROW_H * _state.scale);
+		const numOriginY = originY + Math.floor((mainH - numH) / 2);
+
+		layoutSection(ctx, mainRows, 0, originY);
 		layoutSection(ctx, NAV_ROWS, navOriginX, originY);
+		layoutSection(ctx, NUM_ROWS, numOriginX, numOriginY);
 
 		// 凡例
 		const ly = _state.cvsH - 10;
