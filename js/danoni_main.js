@@ -10423,8 +10423,8 @@ const keyconfigKeyboardPreview = (() => {
 	//
 	// 各キー: { kc, w, h?, label? }
 	//   kc    : keyCode（数値）。-1 はスペーサー（描画・キャッシュなし）。
-	//   w     : 幅倍率（BASE_KEY_W 基準）
-	//   h     : 高さ倍率（省略時 1）。関数を渡すと呼び出し結果を使用。
+	//   w     : 幅倍率（BASE_KEY_W 基準。省略時 1）
+	//   h     : 高さ倍率（省略時 1）
 	//   label : 省略時は g_kCd[kc] を参照。g_kCd が空文字のキーや
 	//           左右を区別したいキーに指定する。
 	//
