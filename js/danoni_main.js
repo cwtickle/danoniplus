@@ -10423,8 +10423,8 @@ const keyconfigKeyboardPreview = (() => {
 	//
 	// 各キー: { kc, w, h?, label? }
 	//   kc    : keyCode（数値）。-1 はスペーサー（描画・キャッシュなし）。
-	//   w     : 幅倍率（BASE_KEY_W 基準）
-	//   h     : 高さ倍率（省略時 1）。関数を渡すと呼び出し結果を使用。
+	//   w     : 幅倍率（BASE_KEY_W 基準。省略時 1）
+	//   h     : 高さ倍率（省略時 1）
 	//   label : 省略時は g_kCd[kc] を参照。g_kCd が空文字のキーや
 	//           左右を区別したいキーに指定する。
 	//
@@ -10460,13 +10460,13 @@ const keyconfigKeyboardPreview = (() => {
 			{
 				offsetX: 0,
 				keys: [
-					{ kc: 27, w: 1 },                   // Esc
+					{ kc: 27 },                   // Esc
 					{ kc: -1, w: 0.5 },                   // スペーサー
-					{ kc: 112, w: 1 }, { kc: 113, w: 1 }, { kc: 114, w: 1 }, { kc: 115, w: 1 },
+					{ kc: 112 }, { kc: 113 }, { kc: 114 }, { kc: 115 },
 					{ kc: -1, w: 0.25 },                   // スペーサー
-					{ kc: 116, w: 1 }, { kc: 117, w: 1 }, { kc: 118, w: 1 }, { kc: 119, w: 1 },
+					{ kc: 116 }, { kc: 117 }, { kc: 118 }, { kc: 119 },
 					{ kc: -1, w: 0.25 },                   // スペーサー
-					{ kc: 120, w: 1 }, { kc: 121, w: 1 }, { kc: 122, w: 1 }, { kc: 123, w: 1 },
+					{ kc: 120 }, { kc: 121 }, { kc: 122 }, { kc: 123 },
 				],
 			},
 			// Row1: 数字行
@@ -10475,11 +10475,11 @@ const keyconfigKeyboardPreview = (() => {
 			{
 				offsetX: 0,
 				keys: [
-					{ kc: 229, w: 1 },
-					{ kc: 49, w: 1 }, { kc: 50, w: 1 }, { kc: 51, w: 1 },
-					{ kc: 52, w: 1 }, { kc: 53, w: 1 }, { kc: 54, w: 1 },
-					{ kc: 55, w: 1 }, { kc: 56, w: 1 }, { kc: 57, w: 1 },
-					{ kc: 48, w: 1 }, { kc: 189, w: 1 }, { kc: 222, w: 1 },
+					{ kc: 229 },
+					{ kc: 49 }, { kc: 50 }, { kc: 51 },
+					{ kc: 52 }, { kc: 53 }, { kc: 54 },
+					{ kc: 55 }, { kc: 56 }, { kc: 57 },
+					{ kc: 48 }, { kc: 189 }, { kc: 222 },
 					...(isJa
 						? [{ kc: 220, w: 0.75 }, { kc: 8, w: 1.5 }]  // JIS: intlYen + BS
 						: [{ kc: 8, w: 2.25 }]   // US : BS のみ（広い）
@@ -10493,13 +10493,13 @@ const keyconfigKeyboardPreview = (() => {
 				offsetX: 0,
 				keys: [
 					{ kc: 9, w: 1.5 },
-					{ kc: 81, w: 1 }, { kc: 87, w: 1 }, { kc: 69, w: 1 },
-					{ kc: 82, w: 1 }, { kc: 84, w: 1 }, { kc: 89, w: 1 },
-					{ kc: 85, w: 1 }, { kc: 73, w: 1 }, { kc: 79, w: 1 },
-					{ kc: 80, w: 1 }, { kc: 192, w: 1 },
+					{ kc: 81 }, { kc: 87 }, { kc: 69 },
+					{ kc: 82 }, { kc: 84 }, { kc: 89 },
+					{ kc: 85 }, { kc: 73 }, { kc: 79 },
+					{ kc: 80 }, { kc: 192 },
 					...(isJa
-						? [{ kc: 219, w: 1 }, { kc: -1, w: 0.5 }, { kc: 13, w: 1.25, h: 2 }]  // JIS: [, スペーサー, Enter縦長
-						: [{ kc: 219, w: 1 }, { kc: 221, w: 1 }]  // US : [, ]
+						? [{ kc: 219 }, { kc: -1, w: 0.5 }, { kc: 13, w: 1.25, h: 2 }]  // JIS: [, スペーサー, Enter縦長
+						: [{ kc: 219 }, { kc: 221 }]  // US : [, ]
 					),
 				],
 			},
@@ -10510,12 +10510,12 @@ const keyconfigKeyboardPreview = (() => {
 				offsetX: 0,
 				keys: [
 					{ kc: 20, w: 2.25, label: `CapsLk` },
-					{ kc: 65, w: 1 }, { kc: 83, w: 1 }, { kc: 68, w: 1 },
-					{ kc: 70, w: 1 }, { kc: 71, w: 1 }, { kc: 72, w: 1 },
-					{ kc: 74, w: 1 }, { kc: 75, w: 1 }, { kc: 76, w: 1 },
-					{ kc: 187, w: 1 }, { kc: 186, w: 1 },
+					{ kc: 65 }, { kc: 83 }, { kc: 68 },
+					{ kc: 70 }, { kc: 71 }, { kc: 72 },
+					{ kc: 74 }, { kc: 75 }, { kc: 76 },
+					{ kc: 187 }, { kc: 186 },
 					...(isJa
-						? [{ kc: 221, w: 1 }]  // JIS: ¥
+						? [{ kc: 221 }]  // JIS: ¥
 						: [{ kc: 13, w: 2.25 }] // US : Enter横長
 					),
 				],
@@ -10527,12 +10527,12 @@ const keyconfigKeyboardPreview = (() => {
 				offsetX: 0.25,
 				keys: [
 					{ kc: 16, w: 2.5 },
-					{ kc: 90, w: 1 }, { kc: 88, w: 1 }, { kc: 67, w: 1 },
-					{ kc: 86, w: 1 }, { kc: 66, w: 1 }, { kc: 78, w: 1 },
-					{ kc: 77, w: 1 }, { kc: 188, w: 1 }, { kc: 190, w: 1 },
-					{ kc: 191, w: 1 },
+					{ kc: 90 }, { kc: 88 }, { kc: 67 },
+					{ kc: 86 }, { kc: 66 }, { kc: 78 },
+					{ kc: 77 }, { kc: 188 }, { kc: 190 },
+					{ kc: 191 },
 					...(isJa
-						? [{ kc: 226, w: 1 }, { kc: 256, w: 1.25 }]  // JIS: intlRo + R)Shift
+						? [{ kc: 226 }, { kc: 256, w: 1.25 }]  // JIS: intlRo + R)Shift
 						: [{ kc: 256, w: 2.5 }]   // US : R)Shift のみ（広い）
 					),
 				],
@@ -10542,21 +10542,21 @@ const keyconfigKeyboardPreview = (() => {
 				offsetX: 0,
 				keys: [
 					{ kc: 17, w: 1.25 },
-					{ kc: 91, w: 1 },
-					{ kc: 18, w: 1 },
+					{ kc: 91 },
+					{ kc: 18 },
 					...(isJa
 						? [
-							{ kc: 29, w: 1 },
+							{ kc: 29 },
 							{ kc: 32, w: 5.25 },
-							{ kc: 28, w: 1 },
-							{ kc: 242, w: 1 },
+							{ kc: 28 },
+							{ kc: 242 },
 						]
 						: [
 							{ kc: 32, w: 8.25 },
 						]
 					),
-					{ kc: 258, w: 1 },
-					{ kc: 91, w: 1 },
+					{ kc: 258 },
+					{ kc: 91 },
 					{ kc: 257, w: 1.25 },
 				],
 			},
@@ -10565,12 +10565,12 @@ const keyconfigKeyboardPreview = (() => {
 	// 編集キークラスター（Insert/Delete/Home/End/PgUp/PgDn + 矢印キー）
 	// MAIN_ROWS と行インデックスを揃えて配置する。空行はスキップされる。
 	const NAV_ROWS = [
-		{ offsetX: 0, keys: [{ kc: 44, w: 1, label: `PrintSc` }, { kc: 145, w: 1, label: `ScrollLk` }, { kc: 19, w: 1 }] },  // PrintSc ScrollLk Pause
-		{ offsetX: 0, keys: [{ kc: 45, w: 1 }, { kc: 36, w: 1 }, { kc: 33, w: 1 }] },  // Insert Home PgUp
-		{ offsetX: 0, keys: [{ kc: 46, w: 1 }, { kc: 35, w: 1 }, { kc: 34, w: 1 }] },  // Delete End  PgDn
+		{ offsetX: 0, keys: [{ kc: 44, label: `PrintSc` }, { kc: 145, label: `ScrollLk` }, { kc: 19 }] },  // PrintSc ScrollLk Pause
+		{ offsetX: 0, keys: [{ kc: 45 }, { kc: 36 }, { kc: 33 }] },  // Insert Home PgUp
+		{ offsetX: 0, keys: [{ kc: 46 }, { kc: 35 }, { kc: 34 }] },  // Delete End  PgDn
 		{ offsetX: 0, keys: [] },                                                          // ASDF行：空
-		{ offsetX: 0, keys: [{ kc: -1, w: 1 }, { kc: 38, w: 1 }, { kc: -1, w: 1 }] },  // ↑
-		{ offsetX: 0, keys: [{ kc: 37, w: 1 }, { kc: 40, w: 1 }, { kc: 39, w: 1 }] },  // ← ↓ →
+		{ offsetX: 0, keys: [{ kc: -1 }, { kc: 38 }, { kc: -1 }] },  // ↑
+		{ offsetX: 0, keys: [{ kc: 37 }, { kc: 40 }, { kc: 39 }] },  // ← ↓ →
 	];
 
 	// テンキー（Space行の下に余白を空けて横に羅列）
@@ -10583,11 +10583,11 @@ const keyconfigKeyboardPreview = (() => {
 	//   [  T0  ][T_] [TEnter]  ← T0 は横2u、TEnter は縦2u
 	const NUM_ROWS = [
 		{ offsetX: 0, keys: [] },
-		{ offsetX: 0, keys: [{ kc: 144, w: 1 }, { kc: 111, w: 1 }, { kc: 106, w: 1 }, { kc: 109, w: 1 }] },  // NumLk T/ T* T-
-		{ offsetX: 0, keys: [{ kc: 103, w: 1 }, { kc: 104, w: 1 }, { kc: 105, w: 1 }, { kc: 107, w: 1, h: 2 }] },  // T7 T8 T9 T+(縦2u)
-		{ offsetX: 0, keys: [{ kc: 100, w: 1 }, { kc: 101, w: 1 }, { kc: 102, w: 1 }] },                           // T4 T5 T6
-		{ offsetX: 0, keys: [{ kc: 97, w: 1 }, { kc: 98, w: 1 }, { kc: 99, w: 1 }, { kc: 108, w: 1, h: 2 }] }, // T1 T2 T3 TEnter(縦2u)
-		{ offsetX: 0, keys: [{ kc: 96, w: 2 }, { kc: 110, w: 1 }] },                           // T0(横2u) T.
+		{ offsetX: 0, keys: [{ kc: 144 }, { kc: 111 }, { kc: 106 }, { kc: 109 }] },  // NumLk T/ T* T-
+		{ offsetX: 0, keys: [{ kc: 103 }, { kc: 104 }, { kc: 105 }, { kc: 107, h: 2 }] },  // T7 T8 T9 T+(縦2u)
+		{ offsetX: 0, keys: [{ kc: 100 }, { kc: 101 }, { kc: 102 }] },                           // T4 T5 T6
+		{ offsetX: 0, keys: [{ kc: 97 }, { kc: 98 }, { kc: 99 }, { kc: 108, h: 2 }] }, // T1 T2 T3 TEnter(縦2u)
+		{ offsetX: 0, keys: [{ kc: 96, w: 2 }, { kc: 110 }] },                           // T0(横2u) T.
 	];
 
 	// -------------------------------------------------------------------------
@@ -10625,7 +10625,7 @@ const keyconfigKeyboardPreview = (() => {
 
 	// 行幅計算（スペーサー含む）
 	const calcRowBaseW = row =>
-		row.keys.reduce((acc, k) => acc + k.w * BASE_KEY_W + BASE_KEY_GAP, -BASE_KEY_GAP);
+		row.keys.reduce((acc, k) => acc + (k.w || 1) * BASE_KEY_W + BASE_KEY_GAP, -BASE_KEY_GAP);
 
 	const BASE_NAV_W = 3 * BASE_KEY_W + 2 * BASE_KEY_GAP;  // NAV は 3列固定
 	const BASE_ROW_H = MAIN_ROWS_LEN * (BASE_KEY_H + BASE_KEY_GAP) - BASE_KEY_GAP;  // MAIN+NAV 分の高さ
@@ -10759,8 +10759,8 @@ const keyconfigKeyboardPreview = (() => {
 			let curX = startX;
 
 			rowDef.keys.forEach(keyDef => {
-				const keyW = kw(keyDef.w);
-				const keyH = kh(typeof keyDef.h === C_TYP_FUNCTION ? keyDef.h() : keyDef.h || 1);
+				const keyW = kw(keyDef.w || 1);
+				const keyH = kh(keyDef.h || 1);
 
 				if (keyDef.kc >= 0) {
 					_state.keyRects.push({
