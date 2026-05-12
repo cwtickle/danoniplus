@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/05/09 (v47.5.3)
+ * Revised : 2026/05/12 (v47.6.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1396,8 +1396,10 @@ const g_settings = {
     camoufrageTypes: [C_FLG_HYPHEN, `FrzArrow`],
     camoufrageTypeNum: 0,
 
-    swappings: [C_FLG_OFF, `Mirror`, `X-Mirror`, `Mirror+`],
+    swappings: [C_FLG_OFF, `InnerSwap`, `OuterSwap`, `Mirror`, `Mirror+`],
     swappingNum: 0,
+
+    swappingSubs: [`InnerSwap`, `OuterSwap`, `Mirror`],
 
     judgRanges: [`Normal`, `Narrow`, `Hard`, `ExHard`],
     judgRangeNum: 0,
@@ -2292,6 +2294,7 @@ for (let j = 0; j < 260; j++) {
 // キーボード配列の言語設定
 const g_lang_kCd = {
     Ja: {
+        13: `Enter`,
         48: `0`,
         49: `1`,
         50: `2`,
@@ -2317,6 +2320,7 @@ const g_lang_kCd = {
         229: `IME`,
     },
     En: {
+        13: `Return`,
         48: `0 )`,
         49: `1 !`,
         50: `2 @`,
@@ -2433,6 +2437,7 @@ g_kCd[134] = `FN`;
 g_kCd[144] = `NumLk`;
 g_kCd[145] = `SL`;
 g_kCd[240] = `CapsLk`;
+g_kCd[242] = `Kana`;
 g_kCd[256] = `R)Shift`;
 g_kCd[257] = `R)Ctrl`;
 g_kCd[258] = `R)Alt`;
@@ -2552,6 +2557,7 @@ g_kCdN[222] = `Equal`;
 g_kCdN[226] = `IntlRo`;
 g_kCdN[229] = `Backquote`;
 g_kCdN[240] = `CapsLock`;
+g_kCdN[242] = `KanaMode`;
 g_kCdN[256] = `ShiftRight`;
 g_kCdN[257] = `ControlRight`;
 g_kCdN[258] = `AltRight`;
@@ -4554,6 +4560,8 @@ const g_lblNameObj = {
     'u_Random+': `Random+`,
     'u_S-Random': `S-Random`,
     'u_S-Random+': `S-Random+`,
+    'u_InnerSwap': `InnerSwap`,
+    'u_OuterSwap': `OuterSwap`,
     'u_Mirror+': `Mirror+`,
     'u_(S)': `(S)`,
 
@@ -4732,6 +4740,10 @@ const g_lang_lblNameObj = {
         'u_±120deg': `±120°`,
         'u_±360deg': `±360°`,
 
+        unallocated: `未割当`,
+        allocated: `割当済`,
+        altAllocated: `代替キー`,
+
         j_ii: "(・∀・)ｲｲ!!",
         j_shakin: "(`・ω・)ｼｬｷﾝ",
         j_matari: "( ´∀`)ﾏﾀｰﾘ",
@@ -4782,6 +4794,10 @@ const g_lang_lblNameObj = {
         'u_Pendulum': `Pendulum`,
         'u_±120deg': `±120deg`,
         'u_±360deg': `±360deg`,
+
+        unallocated: `Unallocated`,
+        allocated: `Allocated`,
+        altAllocated: `Alternate Keys`,
 
         j_ii: ":D Perfect!!",
         j_shakin: ":) Great!",
@@ -4884,7 +4900,8 @@ const g_lang_msgObj = {
         effect: `矢印・フリーズアローにエフェクトをかけます。\n[Dizzy/Spin] 矢印が回転します\n[Wave/Storm] 矢印の軌道が左右に揺れます\n[Blinking] 矢印が点滅します\n[Squids] 矢印が伸び縮みします`,
         camoufrage: `ステップの見た目が配置は同じでランダムに変わります。`,
         camoufrageType: `[FrzArrow] フリーズアローの帯部分を初期表示のみ非表示にし、矢印のみで表示します（ヒット/失敗時は帯を再表示）`,
-        swapping: `ステップゾーンの位置を入れ替える設定です。\n[Mirror] ステップゾーンの位置をグループ単位で入れ替えます。\n[X-Mirror] ステップゾーンの中央部分のみグループ単位で入れ替えます。\n[Mirror+] ステップゾーンの位置をグループに関係なく全体的に反転します。`,
+        swapping: `ステップゾーンの位置を入れ替える設定です。\n[InnerSwap] ステップゾーンの中央部分のみグループ単位で入れ替えます。\n[OuterSwap] InnerSwapの逆側（外側）をグループ単位で入れ替えます。\n` +
+            `[Mirror] ステップゾーンの位置をグループ単位で入れ替えます。\n[Mirror+] ステップゾーンの位置をグループに関係なく全体的に反転します。`,
         judgRange: `判定の許容範囲を設定します。\n[Normal] 通常、[Narrow/Hard] 辛判定、[ExHard] 激辛判定`,
         autoRetry: `自動リトライの条件を設定します。\n[Miss] ミス時、[Matari] マターリ時、[Shakin] シャキン時、[FS] Fast/Slow発生時`,
 
@@ -4907,6 +4924,7 @@ const g_lang_msgObj = {
         shuffleGroup: `Mirror/X-Mirror/Turning/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
         stepRtnGroup: `矢印などノーツの種類、回転に関するパターンを切り替えます。\nあらかじめ設定されている場合のみ変更可能です。`,
         kcReset: `対応するキーの割り当てを元に戻します。`,
+        kcPreview: `キーボードレイアウトのプレビューを表示/非表示します。`,
 
         pickArrow: `色番号ごとの矢印色（枠、塗りつぶし）、通常時のフリーズアロー色（枠、帯）を\nカラーピッカーから選んで変更できます。`,
         pickColorR: `設定する矢印色の種類を切り替えます。`,
@@ -4986,7 +5004,8 @@ const g_lang_msgObj = {
         effect: `Applies effects to the arrows and freeze arrows.\n[Dizzy/Spin] Arrows rotate.\n[Wave/Storm] Swing from left to right.\n[Blinking] Arrows blink.\n[Squids] Arrows stretch and shrink.`,
         camoufrage: `The appearance of the steps changes randomly with the same placement.`,
         camoufrageType: `[FrzArrow] Initially hides freeze-arrow bars and displays only the arrow portion (bars reappear on hit/failure)`,
-        swapping: `This setting allows you to swap the positions of the step zones.\n[Mirror] Swaps the positions of step zones within each shuffle group. \n[X-Mirror] Swaps only the central portion of step zones within each shuffle group.\n[Mirror+] Flips the position of all step zones, regardless of shuffle groups. `,
+        swapping: `This setting allows you to swap the positions of the step zones.\n[InnerSwap] Swaps only the inner portion of step zones within each shuffle group.\n[OuterSwap] Swaps the outer portion (inverse of InnerSwap) within each shuffle group.\n` +
+            `[Mirror] Swaps the positions of step zones within each shuffle group. \n[Mirror+] Flips the position of all step zones, regardless of shuffle groups. `,
         judgRange: `Set the allowable range of judgment.\n[Normal] Normal judgment, [Narrow/Hard] Hard judgment, [ExHard] Very hard judgment`,
         autoRetry: `Set the conditions for automatic retry.\n[Miss] When missed, [Matari] When good, [Shakin] When great, [FS] When Fast/Slow occurs`,
 
@@ -5009,6 +5028,7 @@ const g_lang_msgObj = {
         shuffleGroup: `Change the shuffle group when Mirror, X-Mirror, Turning, Random or S-Random are selected.\nShuffle with the same numbers listed above.`,
         stepRtnGroup: `Switches the type of notes, such as arrows, and the pattern regarding rotation.\nThis can only be changed if it has been set in advance.`,
         kcReset: `Restores the corresponding key assignments.`,
+        kcPreview: `Show/hide the preview of the keyboard layout.`,
 
         pickArrow: `Change the frame or fill of arrow color and the frame or bar of normal freeze-arrow color\nfor each color number from the color picker.`,
         pickColorR: `Switches the arrow color type to be set.`,
