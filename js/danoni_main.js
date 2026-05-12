@@ -10760,7 +10760,7 @@ const keyconfigKeyboardPreview = (() => {
 
 			rowDef.keys.forEach(keyDef => {
 				const keyW = kw(keyDef.w);
-				const keyH = kh(typeof keyDef.h === C_TYP_FUNCTION ? keyDef.h() : keyDef.h || 1);
+				const keyH = kh(keyDef.h || 1);
 
 				if (keyDef.kc >= 0) {
 					_state.keyRects.push({
