@@ -2294,6 +2294,7 @@ for (let j = 0; j < 260; j++) {
 // キーボード配列の言語設定
 const g_lang_kCd = {
     Ja: {
+        13: `Enter`,
         48: `0`,
         49: `1`,
         50: `2`,
@@ -2319,6 +2320,7 @@ const g_lang_kCd = {
         229: `IME`,
     },
     En: {
+        13: `Return`,
         48: `0 )`,
         49: `1 !`,
         50: `2 @`,
@@ -2435,6 +2437,7 @@ g_kCd[134] = `FN`;
 g_kCd[144] = `NumLk`;
 g_kCd[145] = `SL`;
 g_kCd[240] = `CapsLk`;
+g_kCd[242] = `Kana`;
 g_kCd[256] = `R)Shift`;
 g_kCd[257] = `R)Ctrl`;
 g_kCd[258] = `R)Alt`;
@@ -2554,6 +2557,7 @@ g_kCdN[222] = `Equal`;
 g_kCdN[226] = `IntlRo`;
 g_kCdN[229] = `Backquote`;
 g_kCdN[240] = `CapsLock`;
+g_kCdN[242] = `KanaMode`;
 g_kCdN[256] = `ShiftRight`;
 g_kCdN[257] = `ControlRight`;
 g_kCdN[258] = `AltRight`;
@@ -4736,6 +4740,10 @@ const g_lang_lblNameObj = {
         'u_±120deg': `±120°`,
         'u_±360deg': `±360°`,
 
+        unallocated: `未割当`,
+        allocated: `割当済`,
+        altAllocated: `代替キー`,
+
         j_ii: "(・∀・)ｲｲ!!",
         j_shakin: "(`・ω・)ｼｬｷﾝ",
         j_matari: "( ´∀`)ﾏﾀｰﾘ",
@@ -4786,6 +4794,10 @@ const g_lang_lblNameObj = {
         'u_Pendulum': `Pendulum`,
         'u_±120deg': `±120deg`,
         'u_±360deg': `±360deg`,
+
+        unallocated: `Unallocated`,
+        allocated: `Allocated`,
+        altAllocated: `Alternate Keys`,
 
         j_ii: ":D Perfect!!",
         j_shakin: ":) Great!",
@@ -4912,6 +4924,7 @@ const g_lang_msgObj = {
         shuffleGroup: `Mirror/X-Mirror/Turning/Random/S-Random選択時、シャッフルするグループを変更します。\n矢印の上にある同じ数字同士でシャッフルします。`,
         stepRtnGroup: `矢印などノーツの種類、回転に関するパターンを切り替えます。\nあらかじめ設定されている場合のみ変更可能です。`,
         kcReset: `対応するキーの割り当てを元に戻します。`,
+        kcPreview: `キーボードレイアウトのプレビューを表示/非表示します。`,
 
         pickArrow: `色番号ごとの矢印色（枠、塗りつぶし）、通常時のフリーズアロー色（枠、帯）を\nカラーピッカーから選んで変更できます。`,
         pickColorR: `設定する矢印色の種類を切り替えます。`,
@@ -5015,6 +5028,7 @@ const g_lang_msgObj = {
         shuffleGroup: `Change the shuffle group when Mirror, X-Mirror, Turning, Random or S-Random are selected.\nShuffle with the same numbers listed above.`,
         stepRtnGroup: `Switches the type of notes, such as arrows, and the pattern regarding rotation.\nThis can only be changed if it has been set in advance.`,
         kcReset: `Restores the corresponding key assignments.`,
+        kcPreview: `Show/hide the preview of the keyboard layout.`,
 
         pickArrow: `Change the frame or fill of arrow color and the frame or bar of normal freeze-arrow color\nfor each color number from the color picker.`,
         pickColorR: `Switches the arrow color type to be set.`,
