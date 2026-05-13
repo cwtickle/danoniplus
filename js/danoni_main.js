@@ -10421,7 +10421,7 @@ const keyconfigKeyboardPreview = (() => {
 	//   offsetX : 行左端の水平オフセット（単位: BASE_KEY_W）。正の値 = 右にずらす。
 	//   keys    : キー定義の配列
 	//
-	// 各キー: { kc, w, h?, label? }
+	// 各キー: { kc, w?, h?, label? }
 	//   kc    : keyCode（数値）。-1 はスペーサー（描画・キャッシュなし）。
 	//   w     : 幅倍率（BASE_KEY_W 基準。省略時 1）
 	//   h     : 高さ倍率（省略時 1）
@@ -10430,23 +10430,6 @@ const keyconfigKeyboardPreview = (() => {
 	//
 	// 右Shift/Ctrl/Alt は danoniplus 独自コード 256〜258 を使用。
 	// -------------------------------------------------------------------------
-
-	// メインキーボード部（Fn行 + 数字行 + QWERTY + ASDF + ZXCV + スペース行）
-	//
-	// 各行の offsetX 設計（1u = BASE_KEY_W）:
-	//   Fn行    0u  Esc が左端
-	//   数字行  0u  229(IME/`) が左端
-	//   QWERTY  0u  Tab(1.5u) が左端、左端位置は数字行と揃う
-	//   ASDF    0u  CapsLk を 2.25u にして L)Shift 左端と揃える
-	//   ZXCV    0.25u  標準キーボードの行オフセットを offsetX + L)Shift 拡大で再現
-	//   スペース行 0u
-	//
-	// JIS と US の主な違い:
-	//   数字行: JIS は intlYen(220) あり、US はなし（BackSpace が広い）
-	//   QWERTY: JIS は [ の右にスペーサー、US はなし（Enter が横長）
-	//   ASDF  : JIS は ¥(221) あり、US はなし（Enter が横長）
-	//   ZXCV  : JIS は intlRo(226) あり、US はなし（R)Shift が広い）
-	//   Enter : JIS は縦長(h=2)、US は横長(h=1, w=2.25)
 	/**
 	 * g_localeObj.val に応じた MAIN_ROWS を生成して返す。
 	 * drawBase / calcScale の都度呼び出し、locale 変化を反映する。
@@ -10470,8 +10453,8 @@ const keyconfigKeyboardPreview = (() => {
 				],
 			},
 			// Row1: 数字行
-			// JIS: ..., 222, 220(intlYen, 0.75u), BS(1.5u)
-			// US : ..., 222,                      BS(2.25u)
+			// JIS: ..., 222, 220(intlYen), BS
+			// US : ..., 222,               BS
 			{
 				offsetX: 0,
 				keys: [
@@ -10481,13 +10464,13 @@ const keyconfigKeyboardPreview = (() => {
 					{ kc: 55 }, { kc: 56 }, { kc: 57 },
 					{ kc: 48 }, { kc: 189 }, { kc: 222 },
 					...(isJa
-						? [{ kc: 220, w: 0.75 }, { kc: 8, w: 1.5 }]  // JIS: intlYen + BS
-						: [{ kc: 8, w: 2.25 }]   // US : BS のみ（広い）
+						? [{ kc: 220, w: 0.75 }, { kc: 8 }]  // JIS: intlYen + BS
+						: [{ kc: 8, w: 1.7 }]   // US : BS のみ（広い）
 					),
 				],
 			},
 			// Row2: QWERTY
-			// JIS: ..., [, スペーサー(0.5u), Enter(縦長 h=2, w=1.25)
+			// JIS: ..., [, Enter
 			// US : ..., [, ]
 			{
 				offsetX: 0,
@@ -10498,46 +10481,48 @@ const keyconfigKeyboardPreview = (() => {
 					{ kc: 85 }, { kc: 73 }, { kc: 79 },
 					{ kc: 80 }, { kc: 192 },
 					...(isJa
-						? [{ kc: 219 }, { kc: -1, w: 0.5 }, { kc: 13, w: 1.25, h: 2 }]  // JIS: [, スペーサー, Enter縦長
-						: [{ kc: 219 }, { kc: 221 }]  // US : [, ]
+						? [{ kc: 219 }, { kc: 13, w: 1.25, h: 2 }]  // JIS: [, Enter縦長
+						: [{ kc: 219 }, { kc: 221, w: 1.2 }]  // US : [, ]
 					),
 				],
 			},
 			// Row3: ASDF
 			// JIS: ..., L, ;, ', ¥(221)
-			// US : ..., L, ;, '      ← ¥なし（Enter が下まで伸びる縦長分を吸収）
+			// US : ..., L, ;, ', Enter(13)
 			{
 				offsetX: 0,
 				keys: [
-					{ kc: 20, w: 2.25, label: `CapsLk` },
+					{ kc: 20, w: 1.75, label: `CapsLk` },
 					{ kc: 65 }, { kc: 83 }, { kc: 68 },
 					{ kc: 70 }, { kc: 71 }, { kc: 72 },
 					{ kc: 74 }, { kc: 75 }, { kc: 76 },
 					{ kc: 187 }, { kc: 186 },
 					...(isJa
 						? [{ kc: 221 }]  // JIS: ¥
-						: [{ kc: 13, w: 2.25 }] // US : Enter横長
+						: [{ kc: 13, w: 1.9 }] // US : Enter横長
 					),
 				],
 			},
-			// Row4: ZXCV（標準配列は ASDF より約 0.25u 右にオフセット）
-			// JIS: ..., /, intlRo(226), R)Shift(1.25u)
-			// US : ..., /,              R)Shift(2.5u)
+			// Row4: ZXCV
+			// JIS: ..., /, intlRo(226), R)Shift
+			// US : ..., /,              R)Shift
 			{
-				offsetX: 0.25,
+				offsetX: 0,
 				keys: [
-					{ kc: 16, w: 2.5 },
+					{ kc: 16, w: 2.25 },
 					{ kc: 90 }, { kc: 88 }, { kc: 67 },
 					{ kc: 86 }, { kc: 66 }, { kc: 78 },
 					{ kc: 77 }, { kc: 188 }, { kc: 190 },
 					{ kc: 191 },
 					...(isJa
-						? [{ kc: 226 }, { kc: 256, w: 1.25 }]  // JIS: intlRo + R)Shift
-						: [{ kc: 256, w: 2.5 }]   // US : R)Shift のみ（広い）
+						? [{ kc: 226 }, { kc: 256, w: 1.5 }]  // JIS: intlRo + R)Shift
+						: [{ kc: 256, w: 2.4 }]   // US : R)Shift のみ（広い）
 					),
 				],
 			},
-			// Row5: スペースバー行（JIS/US 共通）
+			// Row5: スペースバー行
+			// JIS: ..., NoConv(29), Space(32), Conv(28), ...
+			// US:  ..., Space(32), ...
 			{
 				offsetX: 0,
 				keys: [
@@ -10557,12 +10542,19 @@ const keyconfigKeyboardPreview = (() => {
 					),
 					{ kc: 258 },
 					{ kc: 91 },
-					{ kc: 257, w: 1.25 },
+					...(isJa
+						? [
+							{ kc: 257, w: 1.2 },
+						]
+						: [
+							{ kc: 257, w: 1.05 },
+						]
+					),
 				],
 			},
 		];
 	};
-	// 編集キークラスター（Insert/Delete/Home/End/PgUp/PgDn + 矢印キー）
+	// 編集キークラスター（PrintSc/ScrollLk/Pause/Insert/Delete/Home/End/PgUp/PgDn + 矢印キー）
 	// MAIN_ROWS と行インデックスを揃えて配置する。空行はスキップされる。
 	const NAV_ROWS = [
 		{ offsetX: 0, keys: [{ kc: 44, label: `PrintSc` }, { kc: 145, label: `ScrollLk` }, { kc: 19 }] },  // PrintSc ScrollLk Pause
@@ -10583,11 +10575,11 @@ const keyconfigKeyboardPreview = (() => {
 	//   [  T0  ][T_] [TEnter]  ← T0 は横2u、TEnter は縦2u
 	const NUM_ROWS = [
 		{ offsetX: 0, keys: [] },
-		{ offsetX: 0, keys: [{ kc: 144 }, { kc: 111 }, { kc: 106 }, { kc: 109 }] },  // NumLk T/ T* T-
+		{ offsetX: 0, keys: [{ kc: 144 }, { kc: 111 }, { kc: 106 }, { kc: 109 }] },        // NumLk T/ T* T-
 		{ offsetX: 0, keys: [{ kc: 103 }, { kc: 104 }, { kc: 105 }, { kc: 107, h: 2 }] },  // T7 T8 T9 T+(縦2u)
-		{ offsetX: 0, keys: [{ kc: 100 }, { kc: 101 }, { kc: 102 }] },                           // T4 T5 T6
-		{ offsetX: 0, keys: [{ kc: 97 }, { kc: 98 }, { kc: 99 }, { kc: 108, h: 2 }] }, // T1 T2 T3 TEnter(縦2u)
-		{ offsetX: 0, keys: [{ kc: 96, w: 2 }, { kc: 110 }] },                           // T0(横2u) T.
+		{ offsetX: 0, keys: [{ kc: 100 }, { kc: 101 }, { kc: 102 }] },                     // T4 T5 T6
+		{ offsetX: 0, keys: [{ kc: 97 }, { kc: 98 }, { kc: 99 }, { kc: 108, h: 2 }] },     // T1 T2 T3 TEnter(縦2u)
+		{ offsetX: 0, keys: [{ kc: 96, w: 2 }, { kc: 110 }] },                             // T0(横2u) T.
 	];
 
 	// -------------------------------------------------------------------------
@@ -10833,11 +10825,11 @@ const keyconfigKeyboardPreview = (() => {
 		ctx.textBaseline = `middle`;
 
 		const drawLegend = (x, fill, stroke, label) => {
-			roundRect(ctx, x, ly, 10, 10, 2);
+			roundRect(ctx, x, ly - 5, 10, 10, 2);
 			ctx.fillStyle = fill; ctx.fill();
 			ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke();
 			ctx.fillStyle = C_COLOR.legendText;
-			ctx.fillText(label, x + 14, ly + 5);
+			ctx.fillText(label, x + 14, ly);
 		};
 
 		drawLegend(8, C_COLOR.keyFill, C_COLOR.keyStroke, g_lblNameObj.unallocated);
