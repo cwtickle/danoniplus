@@ -10540,8 +10540,8 @@ const keyconfigKeyboardPreview = (() => {
 							{ kc: 32, w: 8.25 },
 						]
 					),
-					{ kc: 93 },
 					{ kc: 258 },
+					{ kc: 93 },
 					...(isJa
 						? [
 							{ kc: 257, w: 1.2 },
