@@ -10396,6 +10396,9 @@ const keyconfigKeyboardPreview = (() => {
 		altFill: `#3e3e1a`,   // 代替キー背景
 		altStroke: `#777755`,   // 代替キー枠
 		altText: `#eeeecc`,   // 代替キー文字
+		shortcutFill: `#330011`,   // ショートカットキー背景
+		shortcutStroke: `#ff4466`,   // ショートカットキー枠
+		shortcutText: `#ffaacc`,   // ショートカットキー文字
 		bgFill: `#0d0d1a`,   // Canvas 背景
 		legendText: `#888899`,   // 凡例テキスト
 	};
@@ -10418,17 +10421,19 @@ const keyconfigKeyboardPreview = (() => {
 	// キーレイアウト定義
 	//
 	// 各行: { offsetX, keys }
-	//   offsetX : 行左端の水平オフセット（単位: BASE_KEY_W）。正の値 = 右にずらす。
+	//   offsetX : 行左端の水平オフセット（単位: BASE_KEY_W）。全行 0 で統一し、
+	//             L)Shift の幅で行頭位置を調整する。
 	//   keys    : キー定義の配列
 	//
 	// 各キー: { kc, w?, h?, label? }
 	//   kc    : keyCode（数値）。-1 はスペーサー（描画・キャッシュなし）。
 	//   w     : 幅倍率（BASE_KEY_W 基準。省略時 1）
-	//   h     : 高さ倍率（省略時 1）
+	//   h     : 高さ倍率（BASE_KEY_H 基準。省略時 1）
 	//   label : 省略時は g_kCd[kc] を参照。g_kCd が空文字のキーや
 	//           左右を区別したいキーに指定する。
 	//
 	// 右Shift/Ctrl/Alt は danoniplus 独自コード 256〜258 を使用。
+	// Appli キーは 93 を使用（g_kCd[93] = `Appli`）。
 	// -------------------------------------------------------------------------
 	/**
 	 * g_localeObj.val に応じた MAIN_ROWS を生成して返す。
@@ -10443,18 +10448,18 @@ const keyconfigKeyboardPreview = (() => {
 			{
 				offsetX: 0,
 				keys: [
-					{ kc: 27 },                   // Esc
-					{ kc: -1, w: 0.5 },                   // スペーサー
+					{ kc: 27 },                    // Esc
+					{ kc: -1, w: 0.5 },            // スペーサー
 					{ kc: 112 }, { kc: 113 }, { kc: 114 }, { kc: 115 },
-					{ kc: -1, w: 0.25 },                   // スペーサー
+					{ kc: -1, w: 0.25 },           // スペーサー
 					{ kc: 116 }, { kc: 117 }, { kc: 118 }, { kc: 119 },
-					{ kc: -1, w: 0.25 },                   // スペーサー
+					{ kc: -1, w: 0.25 },           // スペーサー
 					{ kc: 120 }, { kc: 121 }, { kc: 122 }, { kc: 123 },
 				],
 			},
 			// Row1: 数字行
-			// JIS: ..., 222, 220(intlYen), BS
-			// US : ..., 222,               BS
+			// JIS: ..., 220(intlYen), BS
+			// US : ...,               BS
 			{
 				offsetX: 0,
 				keys: [
@@ -10465,12 +10470,12 @@ const keyconfigKeyboardPreview = (() => {
 					{ kc: 48 }, { kc: 189 }, { kc: 222 },
 					...(isJa
 						? [{ kc: 220, w: 0.75 }, { kc: 8 }]  // JIS: intlYen + BS
-						: [{ kc: 8, w: 1.7 }]   // US : BS のみ（広い）
+						: [{ kc: 8, w: 1.7 }]                 // US : BS のみ（広い）
 					),
 				],
 			},
 			// Row2: QWERTY
-			// JIS: ..., [, Enter
+			// JIS: ..., [, Enter(13)
 			// US : ..., [, ]
 			{
 				offsetX: 0,
@@ -10482,7 +10487,7 @@ const keyconfigKeyboardPreview = (() => {
 					{ kc: 80 }, { kc: 192 },
 					...(isJa
 						? [{ kc: 219 }, { kc: 13, w: 1.25, h: 2 }]  // JIS: [, Enter縦長
-						: [{ kc: 219 }, { kc: 221, w: 1.2 }]  // US : [, ]
+						: [{ kc: 219 }, { kc: 221, w: 1.2 }]        // US : [, ]
 					),
 				],
 			},
@@ -10498,14 +10503,15 @@ const keyconfigKeyboardPreview = (() => {
 					{ kc: 74 }, { kc: 75 }, { kc: 76 },
 					{ kc: 187 }, { kc: 186 },
 					...(isJa
-						? [{ kc: 221 }]  // JIS: ¥
-						: [{ kc: 13, w: 1.9 }] // US : Enter横長
+						? [{ kc: 221 }]           // JIS: ¥
+						: [{ kc: 13, w: 1.9 }]    // US : Enter横長
 					),
 				],
 			},
 			// Row4: ZXCV
-			// JIS: ..., /, intlRo(226), R)Shift
-			// US : ..., /,              R)Shift
+			// L)Shift の幅で行頭位置を揃える
+			// JIS: L)Shift, ..., intlRo(226), R)Shift
+			// US : L)Shift, ...,              R)Shift
 			{
 				offsetX: 0,
 				keys: [
@@ -10516,13 +10522,13 @@ const keyconfigKeyboardPreview = (() => {
 					{ kc: 191 },
 					...(isJa
 						? [{ kc: 226 }, { kc: 256, w: 1.5 }]  // JIS: intlRo + R)Shift
-						: [{ kc: 256, w: 2.4 }]   // US : R)Shift のみ（広い）
+						: [{ kc: 256, w: 2.4 }]                // US : R)Shift のみ（広い）
 					),
 				],
 			},
 			// Row5: スペースバー行
-			// JIS: ..., NoConv(29), Space(32), Conv(28), ...
-			// US:  ..., Space(32), ...
+			// JIS: ..., NoConv(29), Space, Conv(28), カタカナひらがな(242), ...
+			// US : ..., Space, ...
 			{
 				offsetX: 0,
 				keys: [
@@ -10543,12 +10549,8 @@ const keyconfigKeyboardPreview = (() => {
 					{ kc: 258 },
 					{ kc: 93 },
 					...(isJa
-						? [
-							{ kc: 257, w: 1.2 },
-						]
-						: [
-							{ kc: 257, w: 1.05 },
-						]
+						? [{ kc: 257, w: 1.2 }]
+						: [{ kc: 257, w: 1.05 }]
 					),
 				],
 			},
@@ -10560,19 +10562,19 @@ const keyconfigKeyboardPreview = (() => {
 		{ offsetX: 0, keys: [{ kc: 44, label: `PrintSc` }, { kc: 145, label: `ScrollLk` }, { kc: 19 }] },  // PrintSc ScrollLk Pause
 		{ offsetX: 0, keys: [{ kc: 45 }, { kc: 36 }, { kc: 33 }] },  // Insert Home PgUp
 		{ offsetX: 0, keys: [{ kc: 46 }, { kc: 35 }, { kc: 34 }] },  // Delete End  PgDn
-		{ offsetX: 0, keys: [] },                                                          // ASDF行：空
+		{ offsetX: 0, keys: [] },                                    // ASDF行：空
 		{ offsetX: 0, keys: [{ kc: -1 }, { kc: 38 }, { kc: -1 }] },  // ↑
 		{ offsetX: 0, keys: [{ kc: 37 }, { kc: 40 }, { kc: 39 }] },  // ← ↓ →
 	];
 
-	// テンキー（Space行の下に余白を空けて横に羅列）
+	// テンキー（MAIN_ROWS と行インデックスを揃えて配置。1行目は空行で Fn行に揃える）
 	// kc は g_kCd 定義に従う: 96〜111=テンキー各種, 144=NumLk
-	// 標準テンキーレイアウト:
+	// 標準テンキーレイアウト（2行目から）:
 	//   [NumLk] [T/] [T*] [T-]
 	//   [T7][T8][T9] [T+]
 	//   [T4][T5][T6] [T+]  ← T+ は縦2u
 	//   [T1][T2][T3] [TEnter]
-	//   [  T0  ][T_] [TEnter]  ← T0 は横2u、TEnter は縦2u
+	//   [  T0  ][T.] [TEnter]  ← T0 は横2u、TEnter は縦2u
 	const NUM_ROWS = [
 		{ offsetX: 0, keys: [] },
 		{ offsetX: 0, keys: [{ kc: 144 }, { kc: 111 }, { kc: 106 }, { kc: 109 }] },        // NumLk T/ T* T-
@@ -10587,14 +10589,15 @@ const keyconfigKeyboardPreview = (() => {
 	// -------------------------------------------------------------------------
 	const _state = {
 		visible: false,
-		mappedSet: new Set(),   // メインキー（各矢印の index 0）
-		altSet: new Set(),   // 代替キー（各矢印の index 1 以降）
+		mappedSet: new Set(),     // メインキー（各矢印の index 0）
+		altSet: new Set(),        // 代替キー（各矢印の index 1 以降）
+		shortcutSet: new Set(),   // プレイ中ショートカット（keyRetry / keyTitleBack / PgDn / PgUp）
 		canvasBase: null,
 		canvasMap: null,
-		keyRects: [],          // { kc, x, y, w, h, label } — drawMap で照合するキャッシュ
-		scale: 1,           // BASE_KEY_W/H に掛けるスケール係数
-		cvsW: 500,         // 実際の Canvas 幅（スケール計算後）
-		cvsH: 240,         // 実際の Canvas 高さ（スケール計算後）
+		keyRects: [],             // { kc, x, y, w, h, label } — drawMap で照合するキャッシュ
+		scale: 1,                 // BASE_KEY_W/H に掛けるスケール係数
+		cvsW: 500,                // 実際の Canvas 幅（スケール計算後）
+		cvsH: 240,                // 実際の Canvas 高さ（スケール計算後）
 	};
 
 	// -------------------------------------------------------------------------
@@ -10621,7 +10624,7 @@ const keyconfigKeyboardPreview = (() => {
 
 	const BASE_NAV_W = 3 * BASE_KEY_W + 2 * BASE_KEY_GAP;  // NAV は 3列固定
 	const BASE_ROW_H = MAIN_ROWS_LEN * (BASE_KEY_H + BASE_KEY_GAP) - BASE_KEY_GAP;  // MAIN+NAV 分の高さ
-	const NUM_ROWS_LEN = 6;  // テンキーの行数
+	const NUM_ROWS_LEN = 6;  // テンキーの行数（1行目は空行、2行目からテンキー配置）
 	const NUM_GAP_H = BASE_KEY_H * 0.4;  // テンキー上部の余白（基準キー高の40%）
 	const BASE_NUM_ROW_H = NUM_ROWS_LEN * (BASE_KEY_H + BASE_KEY_GAP) - BASE_KEY_GAP;  // テンキー部の高さ
 	const BASE_NUM_W = 4 * BASE_KEY_W + 3 * BASE_KEY_GAP;  // テンキー横幅（4列固定）
@@ -10835,6 +10838,7 @@ const keyconfigKeyboardPreview = (() => {
 		drawLegend(8, C_COLOR.keyFill, C_COLOR.keyStroke, g_lblNameObj.unallocated);
 		drawLegend(95, C_COLOR.mappedFill, C_COLOR.mappedStroke, g_lblNameObj.allocated);
 		drawLegend(182, C_COLOR.altFill, C_COLOR.altStroke, g_lblNameObj.altAllocated);
+		drawLegend(269, C_COLOR.shortcutFill, C_COLOR.shortcutStroke, g_lblNameObj.shortcutKey);
 	};
 
 	/**
@@ -10857,7 +10861,7 @@ const keyconfigKeyboardPreview = (() => {
 		ctx.scale(dpr, dpr);
 		ctx.clearRect(0, 0, _state.cvsW, _state.cvsH);
 
-		// 代替キーを先に描画し、メインキーで上書きすることで優先度を表現
+		// 優先度: ショートカット > メイン > 代替（後から描くほど優先）
 		const drawKey = (fill, stroke, text) => rect => {
 			const [primary, sub] = getKeyLabels(rect.kc, rect.label);
 			roundRect(ctx, rect.x + 0.5, rect.y + 0.5, rect.w - 1, rect.h - 1, kr());
@@ -10869,13 +10873,22 @@ const keyconfigKeyboardPreview = (() => {
 			drawKeyLabel(ctx, rect.x, rect.y, rect.w, rect.h, primary, sub, text, text);
 		};
 
+		// 1. 代替キー（メイン・ショートカットと重複しない場合のみ）
 		_state.keyRects
-			.filter(rect => _state.altSet.has(rect.kc) && !_state.mappedSet.has(rect.kc))
+			.filter(rect => _state.altSet.has(rect.kc)
+				&& !_state.mappedSet.has(rect.kc)
+				&& !_state.shortcutSet.has(rect.kc))
 			.forEach(drawKey(C_COLOR.altFill, C_COLOR.altStroke, C_COLOR.altText));
 
+		// 2. メインキー（ショートカットと重複しない場合のみ）
 		_state.keyRects
-			.filter(rect => _state.mappedSet.has(rect.kc))
+			.filter(rect => _state.mappedSet.has(rect.kc) && !_state.shortcutSet.has(rect.kc))
 			.forEach(drawKey(C_COLOR.mappedFill, C_COLOR.mappedStroke, C_COLOR.mappedText));
+
+		// 3. ショートカット（常に最前面）
+		_state.keyRects
+			.filter(rect => _state.shortcutSet.has(rect.kc))
+			.forEach(drawKey(C_COLOR.shortcutFill, C_COLOR.shortcutStroke, C_COLOR.shortcutText));
 	};
 
 	// -------------------------------------------------------------------------
@@ -10963,6 +10976,10 @@ const keyconfigKeyboardPreview = (() => {
 
 		_state.mappedSet = new Set(ctrl.map(arr => arr[0]).filter(v => v > 0));
 		_state.altSet = new Set(ctrl.flatMap(arr => arr.slice(1)).filter(v => v > 0));
+		// プレイ中ショートカット: keyRetry / keyTitleBack は g_headerObj から取得、PgDn(34) / PgUp(33) は固定
+		_state.shortcutSet = new Set(
+			[g_headerObj.keyRetry, g_headerObj.keyTitleBack, 34, 33].filter(v => v > 0)
+		);
 		if (_state.visible) drawMap();
 	};
 
@@ -10974,6 +10991,7 @@ const keyconfigKeyboardPreview = (() => {
 		_state.visible = false;
 		_state.mappedSet = new Set();
 		_state.altSet = new Set();
+		_state.shortcutSet = new Set();
 		_state.keyRects = [];
 		_state.canvasBase = null;
 		_state.canvasMap = null;
