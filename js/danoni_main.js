@@ -10833,12 +10833,14 @@ const keyconfigKeyboardPreview = (() => {
 			ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke();
 			ctx.fillStyle = C_COLOR.legendText;
 			ctx.fillText(label, x + 14, ly);
-		};
 
-		drawLegend(8, C_COLOR.keyFill, C_COLOR.keyStroke, g_lblNameObj.unallocated);
-		drawLegend(95, C_COLOR.mappedFill, C_COLOR.mappedStroke, g_lblNameObj.allocated);
-		drawLegend(182, C_COLOR.altFill, C_COLOR.altStroke, g_lblNameObj.altAllocated);
-		drawLegend(269, C_COLOR.shortcutFill, C_COLOR.shortcutStroke, g_lblNameObj.shortcutKey);
+			return 14 + ctx.measureText(label).width + 14;
+		};
+		let lx = 8;
+		lx += drawLegend(lx, C_COLOR.keyFill, C_COLOR.keyStroke, g_lblNameObj.unallocated);
+		lx += drawLegend(lx, C_COLOR.mappedFill, C_COLOR.mappedStroke, g_lblNameObj.allocated);
+		lx += drawLegend(lx, C_COLOR.altFill, C_COLOR.altStroke, g_lblNameObj.altAllocated);
+		lx += drawLegend(lx, C_COLOR.shortcutFill, C_COLOR.shortcutStroke, g_lblNameObj.shortcutKey);
 	};
 
 	/**
