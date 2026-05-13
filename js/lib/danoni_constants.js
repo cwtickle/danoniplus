@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/05/12 (v47.6.0)
+ * Revised : 2026/05/13 (v47.6.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -4743,6 +4743,7 @@ const g_lang_lblNameObj = {
         unallocated: `未割当`,
         allocated: `割当済`,
         altAllocated: `代替キー`,
+        shortcutKey: `ショートカットキー`,
 
         j_ii: "(・∀・)ｲｲ!!",
         j_shakin: "(`・ω・)ｼｬｷﾝ",
@@ -4798,6 +4799,7 @@ const g_lang_lblNameObj = {
         unallocated: `Unallocated`,
         allocated: `Allocated`,
         altAllocated: `Alternate Keys`,
+        shortcutKey: `Shortcut Keys`,
 
         j_ii: ":D Perfect!!",
         j_shakin: ":) Great!",
