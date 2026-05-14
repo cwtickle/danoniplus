@@ -10417,8 +10417,7 @@ const keyconfigKeyboardPreview = (() => {
 	// キーレイアウト定義
 	//
 	// 各行: { offsetX, keys }
-	//   offsetX : 行左端の水平オフセット（単位: BASE_KEY_W）。全行 0 で統一し、
-	//             L)Shift の幅で行頭位置を調整する。
+	//   offsetX : 行左端の水平オフセット（単位: BASE_KEY_W）。未指定時は0
 	//   keys    : キー定義の配列
 	//
 	// 各キー: { kc, w?, h?, label? }
@@ -10442,7 +10441,6 @@ const keyconfigKeyboardPreview = (() => {
 		return [
 			// Row0: Fn キー行（JIS/US 共通）
 			{
-				offsetX: 0,
 				keys: [
 					{ kc: 27 },                    // Esc
 					{ kc: -1, w: 0.5 },            // スペーサー
@@ -10457,7 +10455,6 @@ const keyconfigKeyboardPreview = (() => {
 			// JIS: ..., 220(intlYen), BS
 			// US : ...,               BS
 			{
-				offsetX: 0,
 				keys: [
 					{ kc: 229 },
 					{ kc: 49 }, { kc: 50 }, { kc: 51 },
@@ -10474,7 +10471,6 @@ const keyconfigKeyboardPreview = (() => {
 			// JIS: ..., [, Enter(13)
 			// US : ..., [, ]
 			{
-				offsetX: 0,
 				keys: [
 					{ kc: 9, w: 1.5 },
 					{ kc: 81 }, { kc: 87 }, { kc: 69 },
@@ -10491,7 +10487,6 @@ const keyconfigKeyboardPreview = (() => {
 			// JIS: ..., L, ;, ', ¥(221)
 			// US : ..., L, ;, ', Enter(13)
 			{
-				offsetX: 0,
 				keys: [
 					{ kc: 20, w: 1.75, label: `CapsLk` },
 					{ kc: 65 }, { kc: 83 }, { kc: 68 },
@@ -10509,7 +10504,6 @@ const keyconfigKeyboardPreview = (() => {
 			// JIS: L)Shift, ..., intlRo(226), R)Shift
 			// US : L)Shift, ...,              R)Shift
 			{
-				offsetX: 0,
 				keys: [
 					{ kc: 16, w: 2.25 },
 					{ kc: 90 }, { kc: 88 }, { kc: 67 },
@@ -10526,7 +10520,6 @@ const keyconfigKeyboardPreview = (() => {
 			// JIS: ..., NoConv(29), Space, Conv(28), カタカナひらがな(242), ...
 			// US : ..., Space, ...
 			{
-				offsetX: 0,
 				keys: [
 					{ kc: 17, w: 1.25 },
 					{ kc: 91 },
@@ -10555,12 +10548,12 @@ const keyconfigKeyboardPreview = (() => {
 	// 編集キークラスター（PrintSc/ScrollLk/Pause/Insert/Delete/Home/End/PgUp/PgDn + 矢印キー）
 	// MAIN_ROWS と行インデックスを揃えて配置する。空行はスキップされる。
 	const NAV_ROWS = [
-		{ offsetX: 0, keys: [{ kc: 44, label: `PrintSc` }, { kc: 145, label: `ScrollLk` }, { kc: 19 }] },  // PrintSc ScrollLk Pause
-		{ offsetX: 0, keys: [{ kc: 45 }, { kc: 36 }, { kc: 33 }] },  // Insert Home PgUp
-		{ offsetX: 0, keys: [{ kc: 46 }, { kc: 35 }, { kc: 34 }] },  // Delete End  PgDn
-		{ offsetX: 0, keys: [] },                                    // ASDF行：空
-		{ offsetX: 0, keys: [{ kc: -1 }, { kc: 38 }, { kc: -1 }] },  // ↑
-		{ offsetX: 0, keys: [{ kc: 37 }, { kc: 40 }, { kc: 39 }] },  // ← ↓ →
+		{ keys: [{ kc: 44, label: `PrintSc` }, { kc: 145, label: `ScrollLk` }, { kc: 19 }] },  // PrintSc ScrollLk Pause
+		{ keys: [{ kc: 45 }, { kc: 36 }, { kc: 33 }] },  // Insert Home PgUp
+		{ keys: [{ kc: 46 }, { kc: 35 }, { kc: 34 }] },  // Delete End  PgDn
+		{ keys: [] },                                    // ASDF行：空
+		{ keys: [{ kc: -1 }, { kc: 38 }, { kc: -1 }] },  // ↑
+		{ keys: [{ kc: 37 }, { kc: 40 }, { kc: 39 }] },  // ← ↓ →
 	];
 
 	// テンキー（MAIN_ROWS と行インデックスを揃えて配置。1行目は空行で Fn行に揃える）
@@ -10572,12 +10565,12 @@ const keyconfigKeyboardPreview = (() => {
 	//   [T1][T2][T3] [TEnter]
 	//   [  T0  ][T.] [TEnter]  ← T0 は横2u、TEnter は縦2u
 	const NUM_ROWS = [
-		{ offsetX: 0, keys: [] },
-		{ offsetX: 0, keys: [{ kc: 144 }, { kc: 111 }, { kc: 106 }, { kc: 109 }] },        // NumLk T/ T* T-
-		{ offsetX: 0, keys: [{ kc: 103 }, { kc: 104 }, { kc: 105 }, { kc: 107, h: 2 }] },  // T7 T8 T9 T+(縦2u)
-		{ offsetX: 0, keys: [{ kc: 100 }, { kc: 101 }, { kc: 102 }] },                     // T4 T5 T6
-		{ offsetX: 0, keys: [{ kc: 97 }, { kc: 98 }, { kc: 99 }, { kc: 108, h: 2 }] },     // T1 T2 T3 TEnter(縦2u)
-		{ offsetX: 0, keys: [{ kc: 96, w: 2 }, { kc: 110 }] },                             // T0(横2u) T.
+		{ keys: [] },
+		{ keys: [{ kc: 144 }, { kc: 111 }, { kc: 106 }, { kc: 109 }] },        // NumLk T/ T* T-
+		{ keys: [{ kc: 103 }, { kc: 104 }, { kc: 105 }, { kc: 107, h: 2 }] },  // T7 T8 T9 T+(縦2u)
+		{ keys: [{ kc: 100 }, { kc: 101 }, { kc: 102 }] },                     // T4 T5 T6
+		{ keys: [{ kc: 97 }, { kc: 98 }, { kc: 99 }, { kc: 108, h: 2 }] },     // T1 T2 T3 TEnter(縦2u)
+		{ keys: [{ kc: 96, w: 2 }, { kc: 110 }] },                             // T0(横2u) T.
 	];
 
 	// -------------------------------------------------------------------------
@@ -10755,7 +10748,7 @@ const keyconfigKeyboardPreview = (() => {
 			if (rowDef.keys.length === 0) return;
 
 			const rowY = originY + rowIdx * (baseKeyH + gap);
-			const startX = originX + Math.floor(rowDef.offsetX * BASE_KEY_W * _state.scale);
+			const startX = originX + Math.floor((rowDef.offsetX || 0) * BASE_KEY_W * _state.scale);
 			let curX = startX;
 
 			rowDef.keys.forEach(keyDef => {
