@@ -10400,7 +10400,7 @@ const keyconfigKeyboardPreview = (() => {
 		shortcutStroke: `#ff4466`,   // ショートカットキー枠
 		shortcutText: `#ffaacc`,   // ショートカットキー文字
 		bgFill: `#0d0d1a`,   // Canvas 背景
-		legendText: `#888899`,   // 凡例テキスト
+		legendText: `#cccccc`,   // 凡例テキスト
 	};
 
 	// ボタン配置
@@ -10822,7 +10822,7 @@ const keyconfigKeyboardPreview = (() => {
 
 		// 凡例
 		const ly = _state.cvsH - 10;
-		const fnt = `${Math.max(9, Math.floor(10 * _state.scale))}px ${getBasicFont()}`;
+		const fnt = `${Math.max(9, Math.floor(12 * _state.scale))}px ${getBasicFont()}`;
 		ctx.font = fnt;
 		ctx.textAlign = `left`;
 		ctx.textBaseline = `middle`;
