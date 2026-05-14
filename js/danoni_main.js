@@ -10665,7 +10665,7 @@ const keyconfigKeyboardPreview = (() => {
 		if (forcedLabel !== undefined) return [forcedLabel, ``];
 
 		const raw = g_kCd[kc];
-		if (raw && raw !== `- - -` && raw !== `Unknown`) {
+		if (raw && raw !== g_kCd[0] && raw !== g_kCd[1]) {
 			const parts = raw.split(` `);
 			return [parts[0] || ``, parts[1] || ``];
 		}
@@ -10697,7 +10697,7 @@ const keyconfigKeyboardPreview = (() => {
 	};
 
 	const drawKeyLabel = (ctx, x, y, keyW, keyH, primary, sub, textColor, subColor) => {
-		const fs = primary.length >= 5
+		const fs = primary.length >= 5 * keyW / BASE_KEY_W
 			? Math.max(6, Math.floor(8 * _state.scale))
 			: Math.max(7, Math.floor(11 * _state.scale));
 
