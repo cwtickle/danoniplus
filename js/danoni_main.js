@@ -10465,7 +10465,7 @@ const keyconfigKeyboardPreview = (() => {
 					{ kc: 55 }, { kc: 56 }, { kc: 57 },
 					{ kc: 48 }, { kc: 189 }, { kc: 222 },
 					...(isJa
-						? [{ kc: 220, w: 0.75 }, { kc: 8 }]  // JIS: intlYen + BS
+						? [{ kc: 220, w: 0.75 }, { kc: 8, label: `Back\nSpace` }]  // JIS: intlYen + BS
 						: [{ kc: 8, w: 1.7 }]                 // US : BS のみ（広い）
 					),
 				],
@@ -10697,22 +10697,31 @@ const keyconfigKeyboardPreview = (() => {
 	};
 
 	const drawKeyLabel = (ctx, x, y, keyW, keyH, primary, sub, textColor, subColor) => {
-		const fs = primary.length >= 5 * keyW / BASE_KEY_W
-			? Math.max(6, Math.floor(8 * _state.scale))
+		const fs = (_textLen) => _textLen >= 5 * keyW / BASE_KEY_W
+			? Math.max(6, Math.floor(9 * _state.scale))
 			: Math.max(7, Math.floor(11 * _state.scale));
 
 		if (sub) {
 			ctx.fillStyle = subColor;
-			ctx.font = `bold ${Math.max(6, Math.floor(8 * _state.scale))}px monospace`;
+			ctx.font = `bold ${Math.max(6, Math.floor(9 * _state.scale))}px monospace`;
 			ctx.textAlign = `right`;
 			ctx.textBaseline = `top`;
 			ctx.fillText(sub, x + keyW - 2, y + 2);
 		}
+		const [primary1, primary2] = primary.split(`\n`);
 		ctx.fillStyle = textColor;
-		ctx.font = `bold ${fs}px monospace`;
 		ctx.textAlign = `center`;
 		ctx.textBaseline = `middle`;
-		ctx.fillText(primary, x + keyW / 2, y + keyH / 2 + (sub ? 2 : 0));
+		const subDiff = sub ? 2 : 0;
+		if (primary2) {
+			const siz = fs(Math.max(primary1.length, primary2.length));
+			ctx.font = `bold ${siz}px monospace`;
+			ctx.fillText(primary1, x + keyW / 2, y + keyH / 2 - siz / 2 + subDiff);
+			ctx.fillText(primary2, x + keyW / 2, y + keyH / 2 + siz / 2 + subDiff);
+		} else {
+			ctx.font = `bold ${fs(primary.length)}px monospace`;
+			ctx.fillText(primary, x + keyW / 2, y + keyH / 2 + subDiff);
+		}
 	};
 
 	const drawOneKey = (ctx, x, y, keyW, keyH, fill, stroke, lw, primary, sub, textColor, subColor) => {
