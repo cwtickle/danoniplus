@@ -10536,8 +10536,8 @@ const keyconfigKeyboardPreview = (() => {
 	// MAIN_ROWS と行インデックスを揃えて配置する。空行はスキップされる。
 	const NAV_ROWS = [
 		{ keys: [{ kc: 44, label: `Print\nScreen` }, { kc: 145, label: `Scroll\nLock` }, { kc: 19 }] },  // PrintSc ScrollLk Pause
-		{ keys: [{ kc: 45 }, { kc: 36 }, { kc: 33 }] },  // Insert Home PgUp
-		{ keys: [{ kc: 46 }, { kc: 35 }, { kc: 34 }] },  // Delete End  PgDn
+		{ keys: [{ kc: 45 }, { kc: 36 }, { kc: 33, label: `Page\nUp` }] },    // Insert Home PgUp
+		{ keys: [{ kc: 46 }, { kc: 35 }, { kc: 34, label: `Page\nDown` }] },  // Delete End  PgDn
 		{ keys: [] },                                    // ASDF行：空
 		{ keys: [{ kc: -1 }, { kc: 38 }, { kc: -1 }] },  // ↑
 		{ keys: [{ kc: 37 }, { kc: 40 }, { kc: 39 }] },  // ← ↓ →
