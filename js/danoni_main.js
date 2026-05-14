@@ -10910,7 +10910,7 @@ const keyconfigKeyboardPreview = (() => {
 
 		// ボタン: キャンバス横幅中央に配置、小さいサイズ
 		const btnW = 80;
-		const btnX = Math.floor((g_btnWidth() - btnW) / 2);
+		const btnX = g_btnX() + Math.floor((g_btnWidth() - btnW) / 2);
 
 		// "↓ Preview" → 展開、"↑ Preview" → 閉じる のトグルボタン
 		const btn = createCss2Button(C_BTN_ID, `↓ Preview`, () => {
@@ -10924,7 +10924,7 @@ const keyconfigKeyboardPreview = (() => {
 		divRoot.appendChild(btn);
 
 		// プレビューエリア: 水平・垂直センタリング
-		const areaX = Math.floor((g_btnWidth() - _state.cvsW) / 2);
+		const areaX = g_btnX() + Math.floor((g_btnWidth() - _state.cvsW) / 2);
 		const areaY = 130;
 
 		const areaDiv = createEmptySprite(divRoot, C_PREVIEW_ID, {
