@@ -88,6 +88,7 @@ const g_remoteDomain = detectDomain(g_rootPath);
 
 const g_randTime = Date.now();
 const g_versionForUrl = g_version.slice(4);    // URL用に先頭の"Ver "を削除
+const g_dpr = window.devicePixelRatio || 1;
 
 const g_isFile = location.href.match(/^file/);
 const g_isLocal = location.href.match(/^file/) || location.href.indexOf(`localhost`) !== -1;
@@ -3380,7 +3381,6 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 		_keyCtrlPtn,
 		config: {
 			scale: 1.5,
-			dpr: window.devicePixelRatio || 1,
 			timeMargin: 35,
 			mmWidthBase: (g_sWidth - 500) / 2 + 290,
 			mmMarginY: 2,
@@ -3389,7 +3389,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 			},
 			get logicalWidth() {
 				const logicalWidth = this.timeMargin + (this.laneWidth * keyNum);
-				return Math.ceil(logicalWidth * this.dpr) / this.dpr;
+				return Math.ceil(logicalWidth * g_dpr) / g_dpr;
 			}
 		},
 	};
@@ -3403,16 +3403,15 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
  * 指定された高さに基づいて分割されたCanvasリストを生成する
  * @param {number} _width
  * @param {number} _totalHeight
- * @param {number} _dpr
  * @return {object[]} 分割されたCanvasとそのコンテキスト、オフセット情報を含むリスト
  */
-const createSplitCanvases = (_width, _totalHeight, _dpr) => {
+const createSplitCanvases = (_width, _totalHeight) => {
 	// バックバッファ（実際のピクセル数）の最大値を 8000 に設定（iOS Safari 8192px 対策）
 	const BACKING_STORE_LIMIT = 8000;
 
 	// 論理上の最大高さ（CSSピクセル）を計算
-	// dpr=2なら4000px、dpr=3なら2666px が1枚の限界になる
-	const maxLogicalHeight = Math.max(1, Math.floor(BACKING_STORE_LIMIT / _dpr));
+	// g_dpr=2なら4000px、g_dpr=3なら2666px が1枚の限界になる
+	const maxLogicalHeight = Math.max(1, Math.floor(BACKING_STORE_LIMIT / g_dpr));
 	if (_totalHeight <= 0) return [];
 
 	const count = Math.ceil(_totalHeight / maxLogicalHeight);
@@ -3426,8 +3425,8 @@ const createSplitCanvases = (_width, _totalHeight, _dpr) => {
 			: maxLogicalHeight;
 
 		// 実際の描画解像度をセット
-		cvs.width = _width * _dpr;
-		cvs.height = logicalH * _dpr;
+		cvs.width = _width * g_dpr;
+		cvs.height = logicalH * g_dpr;
 
 		// ブラウザ上の表示サイズをセット
 		cvs.style.width = `${_width}px`;
@@ -3435,7 +3434,7 @@ const createSplitCanvases = (_width, _totalHeight, _dpr) => {
 		cvs.style.display = 'block';
 
 		const ctx = cvs.getContext('2d');
-		ctx.scale(_dpr, _dpr);
+		ctx.scale(g_dpr, g_dpr);
 
 		list.push({
 			canvas: cvs,
@@ -3474,7 +3473,6 @@ const distributeDrawing = (_canvases, _y, _h, _dpr, _drawFunc) => {
 /**
  * 譜面ミニマップ：キー名を表示するヘッダーキャンバスを作成する
  * @param {object} _config ミニマップの基本設定
- * @param {number} _config.dpr デバイスピクセル比
  * @param {number} _config.timeMargin 時間軸のマージン
  * @param {number} _config.laneWidth レーンの幅
  * @param {number} _config.logicalWidth キャンバスの論理幅
@@ -3483,20 +3481,20 @@ const distributeDrawing = (_canvases, _y, _h, _dpr, _drawFunc) => {
  * @return {HTMLCanvasElement} ヘッダー用のキャンバス要素
  */
 const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
-	const { dpr, timeMargin, laneWidth, logicalWidth } = _config;
+	const { timeMargin, laneWidth, logicalWidth } = _config;
 	const headerHeight = 15; // ヘッダーの固定高
 
 	const canvas = document.createElement('canvas');
 	const ctx = canvas.getContext('2d');
 
 	// 解像度と表示サイズの設定
-	canvas.width = logicalWidth * dpr;
-	canvas.height = headerHeight * dpr;
+	canvas.width = logicalWidth * g_dpr;
+	canvas.height = headerHeight * g_dpr;
 	canvas.style.width = `${logicalWidth}px`;
 	canvas.style.height = `${headerHeight}px`;
 	canvas.style.display = 'block';
 
-	ctx.scale(dpr, dpr);
+	ctx.scale(g_dpr, g_dpr);
 
 	// テキストのスタイル設定
 	ctx.fillStyle = '#999';
@@ -3526,7 +3524,6 @@ const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
  * @param {string} _params._keyCtrlPtn キーコントロールパターン
  * @param {object} _params.config ミニマップの基本設定
  * @param {number} _params.config.scale ミニマップの時間軸のスケール
- * @param {number} _params.config.dpr デバイスピクセル比
  * @param {number} _params.config.timeMargin 時間軸のマージン
  * @param {number} _params.config.laneWidth レーンの幅
  * @param {number} _params.config.logicalWidth キャンバスの論理幅
@@ -3536,10 +3533,10 @@ const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
  */
 const generateMinimapData = (_params, _isReverse) => {
 	const { _scoreObj, _keyNum, _playingFrame, _firstArrowFrame, _keyCtrlPtn, config } = _params;
-	const { scale, dpr, timeMargin, laneWidth, logicalWidth, mmMarginY } = config;
+	const { scale, timeMargin, laneWidth, logicalWidth, mmMarginY } = config;
 
 	const mmHeightTotal = _playingFrame * scale + mmMarginY * 2;
-	const canvases = createSplitCanvases(logicalWidth, mmHeightTotal, dpr);
+	const canvases = createSplitCanvases(logicalWidth, mmHeightTotal);
 
 	const getY = (frame) => {
 		const relativeFrame = frame - _firstArrowFrame;
@@ -3554,7 +3551,7 @@ const generateMinimapData = (_params, _isReverse) => {
 	const interval = g_fps;
 	for (let f = Math.ceil(_firstArrowFrame / interval) * interval; f <= _firstArrowFrame + _playingFrame; f += interval) {
 		const y = getY(f);
-		distributeDrawing(canvases, y - 5, 10, dpr, (ctx) => {
+		distributeDrawing(canvases, y - 5, 10, g_dpr, (ctx) => {
 			ctx.strokeStyle = '#444';
 			ctx.fillStyle = '#999';
 			ctx.font = `10px ${getBasicFont()}`;
@@ -3583,7 +3580,7 @@ const generateMinimapData = (_params, _isReverse) => {
 			const top = Math.min(y1, y2);
 			const h = Math.abs(y2 - y1);
 			const x = timeMargin + j * laneWidth;
-			distributeDrawing(canvases, top, h, dpr, (ctx) => {
+			distributeDrawing(canvases, top, h, g_dpr, (ctx) => {
 				ctx.fillStyle = 'rgba(0, 200, 255, 0.4)';
 				ctx.fillRect(x + 2, top, laneWidth - 3, h);
 				ctx.strokeStyle = 'rgba(0, 200, 255, 0.8)';
@@ -3597,7 +3594,7 @@ const generateMinimapData = (_params, _isReverse) => {
 		const color = g_dfColorObj.setColorType2[g_keyObj[`color${_keyCtrlPtn}_0`][j]] || '#ffffff';
 		_scoreObj.arrowData[j].forEach(note => {
 			const y = getY(parseFloat(note));
-			distributeDrawing(canvases, y - 1.5, 3, dpr, (ctx) => {
+			distributeDrawing(canvases, y - 1.5, 3, g_dpr, (ctx) => {
 				ctx.fillStyle = color;
 				ctx.fillRect(timeMargin + j * laneWidth + 1, y - 1.5, laneWidth - 1, 3);
 			});
@@ -8239,9 +8236,8 @@ const createOptionWindow = _sprite => {
 				const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
 
 				graphObj.id = `graph${_name}${j > 0 ? j + 1 : ``}`;
-				const dpr = window.devicePixelRatio || 1;
-				graphObj.width = g_limitObj.graphWidth * dpr;
-				graphObj.height = g_limitObj.graphHeight * dpr;
+				graphObj.width = g_limitObj.graphWidth * g_dpr;
+				graphObj.height = g_limitObj.graphHeight * g_dpr;
 				graphObj.style.width = wUnit(g_limitObj.graphWidth);
 				graphObj.style.height = wUnit(g_limitObj.graphHeight);
 				graphObj.style.left = wUnit(125);
@@ -8249,7 +8245,7 @@ const createOptionWindow = _sprite => {
 				graphObj.style.position = `absolute`;
 				graphObj.style.background = j === 0 ? bkColor : `#ffffff00`;
 				const ctx = graphObj.getContext(`2d`);
-				ctx.scale(dpr, dpr);
+				ctx.scale(g_dpr, g_dpr);
 
 				detailObj.appendChild(graphObj);
 			}
@@ -10400,7 +10396,7 @@ const keyconfigKeyboardPreview = (() => {
 		shortcutStroke: `#ff4466`,   // ショートカットキー枠
 		shortcutText: `#ffaacc`,   // ショートカットキー文字
 		bgFill: `#0d0d1a`,   // Canvas 背景
-		legendText: `#888899`,   // 凡例テキスト
+		legendText: `#cccccc`,   // 凡例テキスト
 	};
 
 	// ボタン配置
@@ -10469,7 +10465,7 @@ const keyconfigKeyboardPreview = (() => {
 					{ kc: 55 }, { kc: 56 }, { kc: 57 },
 					{ kc: 48 }, { kc: 189 }, { kc: 222 },
 					...(isJa
-						? [{ kc: 220, w: 0.75 }, { kc: 8 }]  // JIS: intlYen + BS
+						? [{ kc: 220, w: 0.75 }, { kc: 8, label: `Back\nSpace` }]  // JIS: intlYen + BS
 						: [{ kc: 8, w: 1.7 }]                 // US : BS のみ（広い）
 					),
 				],
@@ -10669,7 +10665,7 @@ const keyconfigKeyboardPreview = (() => {
 		if (forcedLabel !== undefined) return [forcedLabel, ``];
 
 		const raw = g_kCd[kc];
-		if (raw && raw !== `- - -` && raw !== `Unknown`) {
+		if (raw && raw !== g_kCd[0] && raw !== g_kCd[1]) {
 			const parts = raw.split(` `);
 			return [parts[0] || ``, parts[1] || ``];
 		}
@@ -10701,22 +10697,31 @@ const keyconfigKeyboardPreview = (() => {
 	};
 
 	const drawKeyLabel = (ctx, x, y, keyW, keyH, primary, sub, textColor, subColor) => {
-		const fs = primary.length >= 5
-			? Math.max(6, Math.floor(8 * _state.scale))
+		const fs = (_textLen) => _textLen >= 5 * keyW / BASE_KEY_W
+			? Math.max(6, Math.floor(9 * _state.scale))
 			: Math.max(7, Math.floor(11 * _state.scale));
 
 		if (sub) {
 			ctx.fillStyle = subColor;
-			ctx.font = `bold ${Math.max(6, Math.floor(8 * _state.scale))}px monospace`;
+			ctx.font = `bold ${Math.max(6, Math.floor(9 * _state.scale))}px monospace`;
 			ctx.textAlign = `right`;
 			ctx.textBaseline = `top`;
 			ctx.fillText(sub, x + keyW - 2, y + 2);
 		}
+		const [primary1, primary2] = primary.split(`\n`);
 		ctx.fillStyle = textColor;
-		ctx.font = `bold ${fs}px monospace`;
 		ctx.textAlign = `center`;
 		ctx.textBaseline = `middle`;
-		ctx.fillText(primary, x + keyW / 2, y + keyH / 2 + (sub ? 2 : 0));
+		const subDiff = sub ? 2 : 0;
+		if (primary2) {
+			const siz = fs(Math.max(primary1.length, primary2.length));
+			ctx.font = `bold ${siz}px monospace`;
+			ctx.fillText(primary1, x + keyW / 2, y + keyH / 2 - siz / 2 + subDiff);
+			ctx.fillText(primary2, x + keyW / 2, y + keyH / 2 + siz / 2 + subDiff);
+		} else {
+			ctx.font = `bold ${fs(primary.length)}px monospace`;
+			ctx.fillText(primary, x + keyW / 2, y + keyH / 2 + subDiff);
+		}
 	};
 
 	const drawOneKey = (ctx, x, y, keyW, keyH, fill, stroke, lw, primary, sub, textColor, subColor) => {
@@ -10787,15 +10792,14 @@ const keyconfigKeyboardPreview = (() => {
 		const canvas = _state.canvasBase;
 		if (!canvas) return;
 
-		const dpr = window.devicePixelRatio || 1;
 		canvas.style.top = wUnit(40);
-		canvas.width = _state.cvsW * dpr;
-		canvas.height = _state.cvsH * dpr;
+		canvas.width = _state.cvsW * g_dpr;
+		canvas.height = _state.cvsH * g_dpr;
 		canvas.style.width = wUnit(_state.cvsW);
 		canvas.style.height = wUnit(_state.cvsH);
 
 		const ctx = canvas.getContext(`2d`);
-		ctx.scale(dpr, dpr);
+		ctx.scale(g_dpr, g_dpr);
 		ctx.clearRect(0, 0, _state.cvsW, _state.cvsH);
 		ctx.fillStyle = C_COLOR.bgFill;
 		ctx.fillRect(0, 0, _state.cvsW, _state.cvsH);
@@ -10822,7 +10826,7 @@ const keyconfigKeyboardPreview = (() => {
 
 		// 凡例
 		const ly = _state.cvsH - 10;
-		const fnt = `${Math.max(9, Math.floor(10 * _state.scale))}px ${getBasicFont()}`;
+		const fnt = `${Math.max(9, Math.floor(12 * _state.scale))}px ${getBasicFont()}`;
 		ctx.font = fnt;
 		ctx.textAlign = `left`;
 		ctx.textBaseline = `middle`;
@@ -10852,15 +10856,14 @@ const keyconfigKeyboardPreview = (() => {
 		const canvas = _state.canvasMap;
 		if (!canvas) return;
 
-		const dpr = window.devicePixelRatio || 1;
 		canvas.style.top = wUnit(40);
-		canvas.width = _state.cvsW * dpr;
-		canvas.height = _state.cvsH * dpr;
+		canvas.width = _state.cvsW * g_dpr;
+		canvas.height = _state.cvsH * g_dpr;
 		canvas.style.width = wUnit(_state.cvsW);
 		canvas.style.height = wUnit(_state.cvsH);
 
 		const ctx = canvas.getContext(`2d`);
-		ctx.scale(dpr, dpr);
+		ctx.scale(g_dpr, g_dpr);
 		ctx.clearRect(0, 0, _state.cvsW, _state.cvsH);
 
 		// 優先度: ショートカット > メイン > 代替（後から描くほど優先）
@@ -16147,12 +16150,11 @@ const resultInit = () => {
 	for (let j = 0; j < 2; j++) {
 		const canvas = document.createElement(`canvas`);
 		canvas.id = `graphGaugeTransition${j > 0 ? j + 1 : ``}`;
-		const dpr = window.devicePixelRatio || 1;
-		canvas.width = g_limitObj.gaugeTransitionWidth * dpr;
-		canvas.height = g_limitObj.gaugeTransitionHeight * dpr;
+		canvas.width = g_limitObj.gaugeTransitionWidth * g_dpr;
+		canvas.height = g_limitObj.gaugeTransitionHeight * g_dpr;
 		canvas.style.width = wUnit(g_limitObj.gaugeTransitionWidth);
 		canvas.style.height = wUnit(g_limitObj.gaugeTransitionHeight);
-		canvas.getContext(`2d`).scale(dpr, dpr);
+		canvas.getContext(`2d`).scale(g_dpr, g_dpr);
 		canvas.style.left = wUnit(0);
 		canvas.style.top = wUnit(0);
 		canvas.style.position = `absolute`;
@@ -16463,13 +16465,12 @@ const resultInit = () => {
 		tmpDiv.style.background = `#000000cc`;
 		const canvas = document.createElement(`canvas`);
 		const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
-		const dpr = window.devicePixelRatio || 1;
 		const logicalWidth = 400;
 		const logicalHeight = g_sHeight - 90;
 
 		canvas.id = `resultImage`;
-		canvas.width = logicalWidth * dpr;
-		canvas.height = logicalHeight * dpr;
+		canvas.width = logicalWidth * g_dpr;
+		canvas.height = logicalHeight * g_dpr;
 		canvas.style.width = wUnit(logicalWidth);
 		canvas.style.height = wUnit(logicalHeight);
 		canvas.style.left = wUnit((g_sWidth - parseFloat(canvas.style.width)) / 2);
@@ -16477,7 +16478,7 @@ const resultInit = () => {
 		canvas.style.position = `absolute`;
 
 		const context = canvas.getContext(`2d`);
-		context.scale(dpr, dpr);
+		context.scale(g_dpr, g_dpr);
 		const drawText = (_text, { x = 30, dy = 0, hy, siz = 15, color = `#cccccc`, align = C_ALIGN_LEFT, font } = {}) => {
 			context.font = `${wUnit(siz)} ${getBasicFont(font)}`;
 			context.fillStyle = color;
