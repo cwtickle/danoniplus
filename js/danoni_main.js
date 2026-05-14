@@ -10917,10 +10917,9 @@ const keyconfigKeyboardPreview = (() => {
 			togglePreview();
 			btn.textContent = _state.visible ? `↑ Preview` : `↓ Preview`;
 		}, {
-			x: btnX, y: BTN_Y, w: btnW, h: BTN_H,
+			x: btnX, y: BTN_Y, w: btnW, h: BTN_H, siz: BTN_FS,
 			title: g_msgObj.kcPreview,
 		}, g_cssObj.button_Setting);
-		btn.style.fontSize = `${BTN_FS}px`;
 		divRoot.appendChild(btn);
 
 		// プレビューエリア: 水平・垂直センタリング
@@ -10929,21 +10928,16 @@ const keyconfigKeyboardPreview = (() => {
 
 		const areaDiv = createEmptySprite(divRoot, C_PREVIEW_ID, {
 			x: areaX, y: areaY - 60, w: _state.cvsW, h: _state.cvsH + 80,
-			pointerEvents: C_DIS_AUTO, background: `#00000080`,
+			pointerEvents: C_DIS_AUTO, background: `#00000080`, display: C_DIS_NONE, overflow: `hidden`,
 		});
-		areaDiv.style.display = `none`;
-		areaDiv.style.position = `absolute`;
-		areaDiv.style.overflow = `hidden`;
 
 		const canvasBase = document.createElement(`canvas`);
 		canvasBase.id = C_CANVAS_BASE_ID;
-		canvasBase.style.cssText = `position:absolute;left:0;top:0;`;
 		areaDiv.appendChild(canvasBase);
 		_state.canvasBase = canvasBase;
 
 		const canvasMap = document.createElement(`canvas`);
 		canvasMap.id = C_CANVAS_MAP_ID;
-		canvasMap.style.cssText = `position:absolute;left:0;top:0;`;
 		areaDiv.appendChild(canvasMap);
 		_state.canvasMap = canvasMap;
 
