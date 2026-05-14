@@ -10457,13 +10457,11 @@ const keyconfigKeyboardPreview = (() => {
 			{
 				keys: [
 					{ kc: 229 },
-					{ kc: 49 }, { kc: 50 }, { kc: 51 },
-					{ kc: 52 }, { kc: 53 }, { kc: 54 },
-					{ kc: 55 }, { kc: 56 }, { kc: 57 },
-					{ kc: 48 }, { kc: 189 }, { kc: 222 },
+					{ kc: 49 }, { kc: 50 }, { kc: 51 }, { kc: 52 }, { kc: 53 }, { kc: 54 },
+					{ kc: 55 }, { kc: 56 }, { kc: 57 }, { kc: 48 }, { kc: 189 }, { kc: 222 },
 					...(isJa
 						? [{ kc: 220, w: 0.75 }, { kc: 8, label: `Back\nSpace` }]  // JIS: intlYen + BS
-						: [{ kc: 8, w: 1.7 }]                 // US : BS のみ（広い）
+						: [{ kc: 8, w: 1.7 }]                                      // US : BS のみ（広い）
 					),
 				],
 			},
@@ -10473,10 +10471,8 @@ const keyconfigKeyboardPreview = (() => {
 			{
 				keys: [
 					{ kc: 9, w: 1.5 },
-					{ kc: 81 }, { kc: 87 }, { kc: 69 },
-					{ kc: 82 }, { kc: 84 }, { kc: 89 },
-					{ kc: 85 }, { kc: 73 }, { kc: 79 },
-					{ kc: 80 }, { kc: 192 },
+					{ kc: 81 }, { kc: 87 }, { kc: 69 }, { kc: 82 }, { kc: 84 }, { kc: 89 },
+					{ kc: 85 }, { kc: 73 }, { kc: 79 }, { kc: 80 }, { kc: 192 },
 					...(isJa
 						? [{ kc: 219 }, { kc: 13, w: 1.25, h: 2 }]  // JIS: [, Enter縦長
 						: [{ kc: 219 }, { kc: 221, w: 1.2 }]        // US : [, ]
@@ -10488,7 +10484,7 @@ const keyconfigKeyboardPreview = (() => {
 			// US : ..., L, ;, ', Enter(13)
 			{
 				keys: [
-					{ kc: 20, w: 1.75, label: `CapsLk` },
+					{ kc: 20, w: 1.75, label: `Caps\nLock` },
 					{ kc: 65 }, { kc: 83 }, { kc: 68 },
 					{ kc: 70 }, { kc: 71 }, { kc: 72 },
 					{ kc: 74 }, { kc: 75 }, { kc: 76 },
@@ -10522,21 +10518,12 @@ const keyconfigKeyboardPreview = (() => {
 			{
 				keys: [
 					{ kc: 17, w: 1.25 },
-					{ kc: 91 },
-					{ kc: 18 },
+					{ kc: 91 }, { kc: 18 },
 					...(isJa
-						? [
-							{ kc: 29 },
-							{ kc: 32, w: 5.25 },
-							{ kc: 28 },
-							{ kc: 242 },
-						]
-						: [
-							{ kc: 32, w: 8.25 },
-						]
+						? [{ kc: 29 }, { kc: 32, w: 5.25 }, { kc: 28 }, { kc: 242 }] // JIS: NoConv + Space + Conv + カタカナひらがな
+						: [{ kc: 32, w: 8.25 }]										 // US : Space のみ（広い）
 					),
-					{ kc: 258 },
-					{ kc: 93 },
+					{ kc: 258 }, { kc: 93 },
 					...(isJa
 						? [{ kc: 257, w: 1.2 }]
 						: [{ kc: 257, w: 1.05 }]
@@ -10548,7 +10535,7 @@ const keyconfigKeyboardPreview = (() => {
 	// 編集キークラスター（PrintSc/ScrollLk/Pause/Insert/Delete/Home/End/PgUp/PgDn + 矢印キー）
 	// MAIN_ROWS と行インデックスを揃えて配置する。空行はスキップされる。
 	const NAV_ROWS = [
-		{ keys: [{ kc: 44, label: `PrintSc` }, { kc: 145, label: `ScrollLk` }, { kc: 19 }] },  // PrintSc ScrollLk Pause
+		{ keys: [{ kc: 44, label: `Print\nScreen` }, { kc: 145, label: `Scroll\nLock` }, { kc: 19 }] },  // PrintSc ScrollLk Pause
 		{ keys: [{ kc: 45 }, { kc: 36 }, { kc: 33 }] },  // Insert Home PgUp
 		{ keys: [{ kc: 46 }, { kc: 35 }, { kc: 34 }] },  // Delete End  PgDn
 		{ keys: [] },                                    // ASDF行：空
@@ -10566,7 +10553,7 @@ const keyconfigKeyboardPreview = (() => {
 	//   [  T0  ][T.] [TEnter]  ← T0 は横2u、TEnter は縦2u
 	const NUM_ROWS = [
 		{ keys: [] },
-		{ keys: [{ kc: 144 }, { kc: 111 }, { kc: 106 }, { kc: 109 }] },        // NumLk T/ T* T-
+		{ keys: [{ kc: 144, label: `Num\nLock` }, { kc: 111 }, { kc: 106 }, { kc: 109 }] },        // NumLk T/ T* T-
 		{ keys: [{ kc: 103 }, { kc: 104 }, { kc: 105 }, { kc: 107, h: 2 }] },  // T7 T8 T9 T+(縦2u)
 		{ keys: [{ kc: 100 }, { kc: 101 }, { kc: 102 }] },                     // T4 T5 T6
 		{ keys: [{ kc: 97 }, { kc: 98 }, { kc: 99 }, { kc: 108, h: 2 }] },     // T1 T2 T3 TEnter(縦2u)
