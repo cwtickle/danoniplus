@@ -9735,7 +9735,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 * @returns {HTMLDivElement}
 	 */
 	const makeKCButton = (_id, _text, _func, { x = g_btnX(5 / 6) - 20, y = 15, w = g_btnWidth(1 / 6), h = 18,
-		siz = g_limitObj.jdgCntsSiz, borderStyle = `solid`, cxtFunc, ...rest } = {}, _mainClass = g_cssObj.button_RevOFF, ..._classes) =>
+		siz = g_limitObj.jdgCntsSiz, borderStyle = C_DIS_NONE, cxtFunc, ...rest } = {}, _mainClass = g_cssObj.button_RevOFF, ..._classes) =>
 		makeSettingLblCssButton(_id, getStgDetailName(_text), 0, _func, { x, y, w, h, siz, cxtFunc, borderStyle, ...rest }, _mainClass, ..._classes);
 
 	/**
