@@ -14176,7 +14176,7 @@ const mainInit = () => {
 		// 矢印(枠外判定、AutoPlay: OFF)
 		arrowOFF: (_j, _arrowName, _cnt) => {
 			if (_cnt < (-1) * g_judgObj.arrowJ[g_judgPosObj.shobon]) {
-				judgeUwan(_cnt);
+				judgeUwan(_cnt, _j);
 				judgeObjDelete.arrow(_j, _arrowName);
 			}
 		},
@@ -14198,7 +14198,7 @@ const mainInit = () => {
 			if (_cnt === 0) {
 				const stepDivHit = document.getElementById(`stepHit${_j}`);
 
-				safeExecuteCustomHooks(`g_customJsObj.dummyArrow`, g_customJsObj.dummyArrow);
+				safeExecuteCustomHooks(`g_customJsObj.dummyArrow`, g_customJsObj.dummyArrow, _j);
 				stepDivHit.style.top = wUnit(-15);
 				stepDivHit.style.opacity = 1;
 				stepDivHit.classList.value = ``;
@@ -14222,7 +14222,7 @@ const mainInit = () => {
 
 		// ダミーフリーズアロー(成功時)
 		dummyFrzOK: (_j, _k, _frzName, _cnt) => {
-			safeExecuteCustomHooks(`g_customJsObj.dummyFrz`, g_customJsObj.dummyFrz);
+			safeExecuteCustomHooks(`g_customJsObj.dummyFrz`, g_customJsObj.dummyFrz, _j);
 			$id(`frzHit${_j}`).opacity = 0;
 			g_attrObj[_frzName].judgEndFlg = true;
 			judgeObjDelete.dummyFrz(_j, _frzName);
@@ -15470,7 +15470,7 @@ const changeHitFrz = (_j, _k, _name, _difFrame = 0) => {
 	if (g_stateObj.frzReturn !== C_FLG_OFF) {
 		startFrzReturn();
 	}
-	safeExecuteCustomHooks(`g_customJsObj.judg_${_name}Hit`, g_customJsObj[`judg_${_name}Hit`], _difFrame);
+	safeExecuteCustomHooks(`g_customJsObj.judg_${_name}Hit`, g_customJsObj[`judg_${_name}Hit`], _difFrame, _j);
 };
 
 /**
@@ -15561,7 +15561,7 @@ const judgeArrow = _j => {
 
 			if (g_headerObj.frzStartjdgUse) {
 				const [resultFunc] = checkJudgment(_difCnt);
-				resultFunc(_difFrame);
+				resultFunc(_difFrame, _j);
 				displayDiff(_difFrame);
 			} else {
 				displayDiff(_difFrame, `F`);
