@@ -14186,7 +14186,7 @@ const mainInit = () => {
 			if (_cnt === 0) {
 				const stepDivHit = document.getElementById(`stepHit${_j}`);
 
-				judgeIi(_cnt);
+				judgeIi(_cnt, _j);
 				stepDivHit.style.opacity = 1;
 				stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 				judgeObjDelete.arrow(_j, _arrowName);
@@ -14214,7 +14214,7 @@ const mainInit = () => {
 
 		// フリーズアロー(成功時)
 		frzOK: (_j, _k, _frzName, _cnt) => {
-			judgeKita(_cnt);
+			judgeKita(_cnt, _j);
 			$id(`frzHit${_j}`).opacity = 0;
 			g_attrObj[_frzName].judgEndFlg = true;
 			judgeObjDelete.frz(_j, _frzName);
@@ -14231,12 +14231,12 @@ const mainInit = () => {
 		// フリーズアロー(枠外判定)
 		frzNG: (_j, _k, _frzName, _cnt) => {
 			if (_cnt < (-1) * g_judgObj.frzJ[g_judgPosObj.iknai]) {
-				judgeIknai(_cnt);
+				judgeIknai(_cnt, _j);
 				g_attrObj[_frzName].judgEndFlg = true;
 
 				changeFailedFrz(_j, _k);
 				if (g_headerObj.frzStartjdgUse) {
-					judgeUwan(_cnt);
+					judgeUwan(_cnt, _j);
 				}
 			}
 		},
@@ -14247,7 +14247,7 @@ const mainInit = () => {
 		// フリーズアロー(キーを離したときの処理)
 		frzKeyUp: (_j, _k, _frzName, _cnt) => {
 			if (g_attrObj[_frzName].keyUpFrame > g_headerObj.frzAttempt) {
-				judgeIknai(_cnt);
+				judgeIknai(_cnt, _j);
 				g_attrObj[_frzName].judgEndFlg = true;
 				changeFailedFrz(_j, _k);
 			}
@@ -14289,7 +14289,7 @@ const mainInit = () => {
 
 					// 自身より前の矢印が未判定の場合、強制的に枠外判定を行い矢印を削除
 					if (prevArrow.cnt >= (-1) * g_judgObj.arrowJ[g_judgPosObj.uwan]) {
-						judgeUwan(prevArrow.cnt);
+						judgeUwan(prevArrow.cnt, _j);
 						judgeObjDelete.arrow(_j, prevArrowName);
 					}
 				}
@@ -14316,9 +14316,9 @@ const mainInit = () => {
 
 					// 自身より前のフリーズアローが未判定の場合、強制的に枠外判定を行う
 					if (prevFrz.cnt >= (-1) * g_judgObj.frzJ[g_judgPosObj.iknai] && !prevFrz.judgEndFlg) {
-						judgeIknai(prevFrz.cnt);
+						judgeIknai(prevFrz.cnt, _j);
 						if (g_headerObj.frzStartjdgUse) {
-							judgeUwan(prevFrz.cnt);
+							judgeUwan(prevFrz.cnt, _j);
 						}
 					}
 					// 自身より前のフリーズアローを削除して判定対象を自身に変更 (g_workObj.judgFrzCnt[_j]をカウントアップ)
@@ -14332,7 +14332,7 @@ const mainInit = () => {
 			if (_cnt === 0) {
 				changeHitFrz(_j, _k, `frz`);
 				if (g_headerObj.frzStartjdgUse) {
-					judgeIi(_cnt);
+					judgeIi(_cnt, _j);
 				}
 			}
 		},
@@ -15544,7 +15544,7 @@ const judgeArrow = _j => {
 		} else if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.shobon]) {
 			// 通常判定
 			const [resultFunc, resultJdg] = checkJudgment(_difCnt);
-			resultFunc(_difFrame);
+			resultFunc(_difFrame, _j);
 			displayDiff(_difFrame);
 			stepHitTargetArrow(resultJdg);
 			document.getElementById(arrowName).remove();
@@ -15572,7 +15572,7 @@ const judgeArrow = _j => {
 			} else {
 				changeFailedFrz(_j, fcurrentNo);
 				if (g_headerObj.frzStartjdgUse) {
-					judgeIknai(_difFrame);
+					judgeIknai(_difFrame, _j);
 					currentFrz.judgEndFlg = true;
 				}
 			}
@@ -15708,8 +15708,9 @@ const updateCombo = () => {
  * 回復判定の共通処理
  * @param {string} _name 
  * @param {number} _difFrame 
+ * @param {number} _j
  */
-const judgeRecovery = (_name, _difFrame) => {
+const judgeRecovery = (_name, _difFrame, _j) => {
 	changeJudgeCharacter(_name, g_lblNameObj[`j_${_name}`]);
 	updateCombo();
 	lifeRecovery();
@@ -15727,65 +15728,72 @@ const judgeRecovery = (_name, _difFrame) => {
 	if (_name === `shakin`) {
 		quickRetry(`Shakin(Great)`);
 	}
-	safeExecuteCustomHooks(`g_customJsObj.judg_${_name}`, g_customJsObj[`judg_${_name}`], _difFrame);
+	safeExecuteCustomHooks(`g_customJsObj.judg_${_name}`, g_customJsObj[`judg_${_name}`], _difFrame, _j);
 };
 
 /**
  * ダメージ系共通処理
  * @param {string} _name 
  * @param {number} _difFrame 
+ * @param {number} _j
  */
-const judgeDamage = (_name, _difFrame) => {
+const judgeDamage = (_name, _difFrame, _j) => {
 	changeJudgeCharacter(_name, g_lblNameObj[`j_${_name}`]);
 	g_resultObj.combo = 0;
 	comboJ.textContent = ``;
 	diffJ.textContent = ``;
 	lifeDamage();
-	safeExecuteCustomHooks(`g_customJsObj.judg_${_name}`, g_customJsObj[`judg_${_name}`], _difFrame);
+	safeExecuteCustomHooks(`g_customJsObj.judg_${_name}`, g_customJsObj[`judg_${_name}`], _difFrame, _j);
 };
 
 /**
  * 判定処理：イイ
  * @param {number} _difFrame 
+ * @param {number} _j
  */
-const judgeIi = _difFrame => judgeRecovery(`ii`, _difFrame);
+const judgeIi = (_difFrame, _j) => judgeRecovery(`ii`, _difFrame, _j);
 
 /**
  * 判定処理：シャキン
  * @param {number} _difFrame 
+ * @param {number} _j
  */
-const judgeShakin = _difFrame => judgeRecovery(`shakin`, _difFrame);
+const judgeShakin = (_difFrame, _j) => judgeRecovery(`shakin`, _difFrame, _j);
 
 /**
  * 判定処理：マターリ
  * @param {number} _difFrame 
+ * @param {number} _j
  */
-const judgeMatari = _difFrame => {
+const judgeMatari = (_difFrame, _j) => {
 	changeJudgeCharacter(`matari`, g_lblNameObj.j_matari);
 	comboJ.textContent = ``;
 	finishViewing();
 	quickRetry(`Matari(Good)`);
 
-	safeExecuteCustomHooks(`g_customJsObj.judg_matari`, g_customJsObj.judg_matari, _difFrame);
+	safeExecuteCustomHooks(`g_customJsObj.judg_matari`, g_customJsObj.judg_matari, _difFrame, _j);
 };
 
 /**
  * 判定処理：ショボーン
  * @param {number} _difFrame 
+ * @param {number} _j
  */
-const judgeShobon = _difFrame => judgeDamage(`shobon`, _difFrame);
+const judgeShobon = (_difFrame, _j) => judgeDamage(`shobon`, _difFrame, _j);
 
 /**
  * 判定処理：ウワァン
  * @param {number} _difFrame 
+ * @param {number} _j
  */
-const judgeUwan = _difFrame => judgeDamage(`uwan`, _difFrame);
+const judgeUwan = (_difFrame, _j) => judgeDamage(`uwan`, _difFrame, _j);
 
 /**
  * 判定処理：キター
  * @param {number} _difFrame 
+ * @param {number} _j
  */
-const judgeKita = _difFrame => {
+const judgeKita = (_difFrame, _j) => {
 	changeJudgeCharacter(`kita`, g_lblNameObj.j_kita, `F`);
 
 	if (++g_resultObj.fCombo > g_resultObj.fmaxCombo) {
@@ -15797,21 +15805,22 @@ const judgeKita = _difFrame => {
 	lifeRecovery();
 	finishViewing();
 
-	safeExecuteCustomHooks(`g_customJsObj.judg_kita`, g_customJsObj.judg_kita, _difFrame);
+	safeExecuteCustomHooks(`g_customJsObj.judg_kita`, g_customJsObj.judg_kita, _difFrame, _j);
 };
 
 /**
  * 判定処理：イクナイ
  * @param {number} _difFrame 
+ * @param {number} _j
  */
-const judgeIknai = _difFrame => {
+const judgeIknai = (_difFrame, _j) => {
 	changeJudgeCharacter(`iknai`, g_lblNameObj.j_iknai, `F`);
 	comboFJ.textContent = ``;
 	g_resultObj.fCombo = 0;
 
 	lifeDamage();
 
-	safeExecuteCustomHooks(`g_customJsObj.judg_iknai`, g_customJsObj.judg_iknai, _difFrame);
+	safeExecuteCustomHooks(`g_customJsObj.judg_iknai`, g_customJsObj.judg_iknai, _difFrame, _j);
 };
 
 const jdgList = [`ii`, `shakin`, `matari`, `shobon`].map(jdg => toCapitalize(jdg));
