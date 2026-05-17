@@ -9499,16 +9499,21 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	).filter(val => val[0] === 0);
 	const initColors = [];
 	arrowColors.forEach(val => {
-		if (val[1].startsWith('g')) {
+		const laneToken = val[1];
+		const laneStr = String(laneToken ?? ``);
+		if (laneStr.startsWith('g')) {
 			// g付きの場合は矢印グループから対象の矢印番号を検索
-			const groupVal = setIntVal(val[1].slice(1));
+			const groupVal = setIntVal(laneStr.slice(1));
 			for (let j = 0; j < tkObj.keyNum; j++) {
 				if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === groupVal) {
 					initColors[j] = makeColorGradation(val[2]);
 				}
 			}
 		} else {
-			initColors[val[1]] = makeColorGradation(val[2]);
+			const laneIdx = setIntVal(laneToken, -1);
+			if (laneIdx >= 0 && laneIdx < tkObj.keyNum) {
+				initColors[laneIdx] = makeColorGradation(val[2]);
+			}
 		}
 	});
 	if (_initFlg) {
@@ -9535,11 +9540,19 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	 */
 	const getKeyConfigColor = (_j, _colorPos) => {
 		let arrowColor = g_headerObj.setColor[_colorPos];
-		const baseGroupNum = g_keycons.colorGroupNum === -1 ? g_localKeyStorage.keyCtrlPtn : g_keycons.colorGroupNum;
+
+		// 色変化データの利用条件設定（Default/Type0限定）
+		const baseGroupNum = g_keycons.colorGroupNum === -1
+			? (g_localKeyStorage?.keyCtrlPtn ?? 0)
+			: g_keycons.colorGroupNum;
+		const currentColorGr = g_keyObj[`color${keyCtrlPtn}_${g_keycons.colorGroupNum}`];
+		const baseColorGr = g_baseColorGrs?.[`color${keyCtrlPtn}_${baseGroupNum}`];
 		if (hasVal(initColors[_j]) && g_keycons.colorDefTypes.includes(g_colorType)
-			&& g_keyObj[`color${keyCtrlPtn}_${g_keycons.colorGroupNum}`][_j] === g_baseColorGrs[`color${keyCtrlPtn}_${baseGroupNum}`][_j]) {
+			&& currentColorGr?.[_j] === baseColorGr?.[_j]) {
 			arrowColor = initColors[_j];
 		}
+
+		// アシスト設定時はアシストの色を優先して適用
 		if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
 			g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay] !== undefined &&
 			!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
