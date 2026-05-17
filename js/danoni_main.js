@@ -7006,7 +7006,7 @@ const updateSettingSummary = () => {
 	const estimatedHighscoreCondition = g_stateObj.dataSaveFlg && (g_stateObj.autoPlay !== C_FLG_ALL && g_headerObj.playbackRate === 1 && g_stateObj.fadein < 10 &&
 		(g_stateObj.shuffle === C_FLG_OFF || (g_stateObj.shuffle.endsWith(`Mirror`) && orgShuffleFlg)));
 
-	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData + `${estimatedHighscoreCondition ? '' : ` | <span class="common_kita common_bold">No Records</span>`}`;
+	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData + `${estimatedHighscoreCondition ? '' : ` | <span class="common_auto common_bold">No Records</span>`}`;
 	document.getElementById(`lblSummaryPlaystyleInfo`).textContent = settingData.playStyleData + `${g_stateObj.excessive === C_FLG_ON ? ' | Excessive' : ''}`;
 	document.getElementById(`lblSummaryDisplayInfo`).textContent = settingData.displayData;
 	document.getElementById(`lblSummaryDisplay2Info`).textContent = settingData.display2Data;
@@ -7784,9 +7784,9 @@ const makeHighScore = _scoreId => {
 			`${g_localStorage.highscores?.[scoreName]?.allPerfect ?? '' ? '<span class="result_AllPerfect">◆</span>' : ''}`, { xPos: 1, dx: 20, yPos: 12, w: 100, align: C_ALIGN_CENTER }),
 		createScoreLabel(`lblHClearLamps`, `Cleared: ` + (g_localStorage.highscores?.[scoreName]?.clearLamps?.join(', ') ?? C_FLG_HYPHEN), { yPos: 13, overflow: C_DIS_AUTO, w: g_sWidth / 2 + 40, h: 37 }),
 
-		createScoreLabel(`lblHShuffle`, g_stateObj.shuffle.indexOf(`Mirror`) < 0 ? `` : `Shuffle: <span class="common_iknai">${g_stateObj.shuffle}</span>`, { yPos: 11.5, dx: -130 }),
-		createScoreLabel(`lblHAssist`, g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `Assist: <span class="common_kita">${g_stateObj.autoPlay}</span>`, { yPos: 12.5, dx: -130 }),
-		createScoreLabel(`lblHAnother`, !hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `` : `A.Keymode: <span class="common_ii">${g_keyObj[`transKey${keyCtrlPtn}`]}</span>`, { yPos: 13.5, dx: -130 }),
+		createScoreLabel(`lblHShuffle`, g_stateObj.shuffle.indexOf(`Mirror`) < 0 ? `` : `Shuffle: <span class="common_shuffle">${g_stateObj.shuffle}</span>`, { yPos: 11.5, dx: -130 }),
+		createScoreLabel(`lblHAssist`, g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `Assist: <span class="common_assist">${g_stateObj.autoPlay}</span>`, { yPos: 12.5, dx: -130 }),
+		createScoreLabel(`lblHAnother`, !hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `` : `A.Keymode: <span class="common_another">${g_keyObj[`transKey${keyCtrlPtn}`]}</span>`, { yPos: 13.5, dx: -130 }),
 	);
 
 	// 結果をクリップボードへコピー (ハイスコア保存分)
@@ -13874,7 +13874,7 @@ const mainInit = () => {
 		multiAppend(infoSprite,
 			// FrzReturnゲージ
 			createColorObject2(`lifeBackFrzObj`, { ...g_lblPosObj.lifeBackFrzObj, display: g_workObj.scoreDisp }, g_cssObj.life_Background),
-			createColorObject2(`lifeBarFrz`, { ...g_lblPosObj.lifeBarFrz, display: g_workObj.scoreDisp }, g_cssObj.main_stepShobon),
+			createColorObject2(`lifeBarFrz`, { ...g_lblPosObj.lifeBarFrz, display: g_workObj.scoreDisp }, g_cssObj.life_frzNormal),
 		)
 	}
 
@@ -15259,8 +15259,8 @@ const startFrzReturn = () => {
 			clearTimeout(g_workObj.frzReturnTimerId);
 			g_workObj.frzReturnTimerId = null;
 		}
-		lifeBarFrz.classList.remove(g_cssObj.main_stepShobon, g_cssObj.main_stepMatari);
-		lifeBarFrz.classList.add(g_cssObj.main_stepMatari);
+		lifeBarFrz.classList.remove(g_cssObj.life_frzNormal, g_cssObj.life_frzActive);
+		lifeBarFrz.classList.add(g_cssObj.life_frzActive);
 		const seqLen = g_workObj.frzReturnSeq.length;
 		executeFrzReturn(
 			g_workObj.frzReturnSeq[seqLen > 1 ? Math.floor(Math.random() * seqLen) : 0], 0,
@@ -15291,8 +15291,8 @@ const executeFrzReturn = (_seq, _idx, _axis) => {
 		g_workObj.frzReturnFlg = false;
 		g_workObj.frzReturnTimerId = null;
 		const frzReturnGauge = document.getElementById(`lifeBarFrz`);
-		frzReturnGauge.classList.remove(g_cssObj.main_stepShobon, g_cssObj.main_stepMatari);
-		frzReturnGauge.classList.add(g_cssObj.main_stepShobon);
+		frzReturnGauge.classList.remove(g_cssObj.life_frzNormal, g_cssObj.life_frzActive);
+		frzReturnGauge.classList.add(g_cssObj.life_frzNormal);
 		return;
 	}
 
