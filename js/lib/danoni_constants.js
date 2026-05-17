@@ -3838,6 +3838,8 @@ Object.keys(g_keyObj)
     .filter(key => key.startsWith(g_keyObj.defaultProp) && key.endsWith(`_0`))
     .forEach(key => g_keyObj.defaultKeyList.push(key.split(`_`)[0].slice(g_keyObj.defaultProp.length)));
 
+let g_baseColorGrs = {};
+
 // キーパターンのコピーリスト
 // ・コピー先：コピー元の順に指定する
 // ・上から順に処理する

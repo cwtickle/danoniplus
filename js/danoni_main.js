@@ -6924,7 +6924,7 @@ const commonSettingBtn = _labelName => {
 		// キーコンフィグ画面へ移動
 		createCss2Button(`btnKeyConfig`, g_lblNameObj.b_keyConfig, () => true, {
 			...g_lblPosObj.btnKeyConfig,
-			animationName: (g_initialFlg ? `` : `smallToNormalY`), resetFunc: () => keyConfigInit(`Main`),
+			animationName: (g_initialFlg ? `` : `smallToNormalY`), resetFunc: () => keyConfigInit(`Main`, true),
 		}, g_cssObj.button_Setting),
 
 		// プレイ開始
@@ -9444,8 +9444,9 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 /**
  * キーコンフィグ画面初期化
  * @param {string} _kcType
+ * @param {boolean} _initFlg 初期表示フラグ
  */
-const keyConfigInit = (_kcType = g_kcType) => {
+const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 
 	clearWindow(true);
 	const divRoot = document.getElementById(`divRoot`);
@@ -9491,6 +9492,36 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		g_keyObj[`keyGroupOrder${keyCtrlPtn}`] ?? tkObj.keyGroupList;
 	g_keycons.colorCursorNum = 0;
 
+	// 色変化中の初期色を取得（矢印枠のみ）
+	const arrowColorTmp = g_detailObj.miniMapParams[g_stateObj.scoreId]._scoreObj.ncolorData.Arrow;
+	const arrowColors = Array.from({ length: Math.ceil(arrowColorTmp.length / 5) }, (_, i) =>
+		arrowColorTmp.slice(i * 5, i * 5 + 5)
+	).filter(val => val[0] === 0);
+	const initColors = [];
+	arrowColors.forEach(val => {
+		const laneToken = val[1];
+		const laneStr = String(laneToken ?? ``);
+		if (laneStr.startsWith('g')) {
+			// g付きの場合は矢印グループから対象の矢印番号を検索
+			const groupVal = setIntVal(laneStr.slice(1));
+			for (let j = 0; j < tkObj.keyNum; j++) {
+				if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === groupVal) {
+					initColors[j] = makeColorGradation(val[2]);
+				}
+			}
+		} else {
+			const laneIdx = setIntVal(laneToken, -1);
+			if (laneIdx >= 0 && laneIdx < tkObj.keyNum) {
+				initColors[laneIdx] = makeColorGradation(val[2]);
+			}
+		}
+	});
+	if (_initFlg) {
+		g_baseColorGrs = {};
+		const colorKey = Object.keys(g_keyObj).filter(val => val.startsWith(`color${g_keyObj.currentKey}`));
+		colorKey.forEach(val => g_baseColorGrs[val] = g_keyObj[val]);
+	}
+
 	/**
 	 * keyconSpriteのスクロール位置調整
 	 * @param {number} _targetX 
@@ -9509,6 +9540,19 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	 */
 	const getKeyConfigColor = (_j, _colorPos) => {
 		let arrowColor = g_headerObj.setColor[_colorPos];
+
+		// 色変化データの利用条件設定（Default/Type0限定）
+		const baseGroupNum = g_keycons.colorGroupNum === -1
+			? (g_localKeyStorage?.keyCtrlPtn ?? 0)
+			: g_keycons.colorGroupNum;
+		const currentColorGr = g_keyObj[`color${keyCtrlPtn}_${g_keycons.colorGroupNum}`];
+		const baseColorGr = g_baseColorGrs?.[`color${keyCtrlPtn}_${baseGroupNum}`];
+		if (hasVal(initColors[_j]) && g_keycons.colorDefTypes.includes(g_colorType)
+			&& currentColorGr?.[_j] === baseColorGr?.[_j]) {
+			arrowColor = initColors[_j];
+		}
+
+		// アシスト設定時はアシストの色を優先して適用
 		if (typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT &&
 			g_keyObj[`assistPos${keyCtrlPtn}`][g_stateObj.autoPlay] !== undefined &&
 			!g_autoPlaysBase.includes(g_stateObj.autoPlay)) {
