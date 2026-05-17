@@ -71,8 +71,8 @@
 	--settings-border-gaugeTable-x: 1px;
 
 	/* 譜面明細子画面: ハイスコア表示 */
-	/*--settings-assist-x: var(--common-kita); */
-	/*--settings-another-x: var(--common-ii); */
+	/* --settings-assist-x: var(--common-kita); */
+	/* --settings-another-x: var(--common-ii); */
 
 	/* キーコンフィグ関連 */
 	--keyconfig-warning-x: #999900;
@@ -121,8 +121,8 @@
 	--life-failed: #999999;
 
 	/* ライフゲージ: FrzReturn用 */
-	/*--life-frz-normal: var(--main-stepShobon); */
-	/*--life-frz-active: var(--main-stepMatari); */
+	/* --life-frz-normal: var(--main-stepShobon); */
+	/* --life-frz-active: var(--main-stepMatari); */
 
 	/* ライフゲージ本体 */
 	--life-background: #cccccc;
