@@ -4,7 +4,7 @@
   本体cssファイル
 
   Created : 2018/10/08
-  Revised : 2025/02/01 (v39.0.0)
+  Revised : 2026/05/17 (v48.0.0)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -839,6 +839,14 @@ input[type="color"] {
 	color: var(--life-color-border-x, #cccccc);
 }
 
+.life_frzNormal {
+	background: var(--life-frz-normal, var(--main-stepShobon, #ccccff));
+}
+
+.life_frzActive {
+	background: var(--life-frz-active, var(--main-stepMatari, #ff9966));
+}
+
 /* 結果画面：項目、設定値 */
 .result_lbl {
 	color: var(--result-lbl-x, #999999);
@@ -907,6 +915,22 @@ input[type="color"] {
 
 .common_excessive {
 	color: var(--common-excessive, var(--common-kita));
+}
+
+.common_auto {
+	color: var(--common-auto, var(--common-kita, #ffff99));
+}
+
+.common_shuffle {
+	color: var(--settings-shuffle-x, var(--common-iknai, #99ff66));
+}
+
+.common_assist {
+	color: var(--settings-assist-x, var(--common-kita, #ffff99));
+}
+
+.common_another {
+	color: var(--settings-another-x, var(--common-ii, #66ffff));
 }
 
 /* 結果画面：枠 */

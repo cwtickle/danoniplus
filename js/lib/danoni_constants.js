@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/05/13 (v47.6.1)
+ * Revised : 2026/05/17 (v48.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -542,7 +542,10 @@ const updateWindowSiz = () => {
             x: g_btnX(), y: g_sHeight - 50, w: g_btnWidth(1 / 4), h: 20,
         },
         kcMsg: {
-            x: g_btnX(), y: g_sHeight - 33, w: g_btnWidth(), h: 20, siz: g_limitObj.mainSiz,
+            x: g_btnX(), y: g_sHeight - 35, w: g_btnWidth(), h: 20, siz: g_limitObj.mainSiz,
+        },
+        kcMsg2: {
+            x: g_btnX(), y: g_sHeight - 20, w: g_btnWidth(), h: 20, siz: g_limitObj.mainSiz,
         },
         kcDesc: {
             x: g_btnX() + 50, y: 68, w: g_btnWidth() - 100, h: 20,
@@ -3097,6 +3100,8 @@ const g_cssObj = {
     life_Background: `life_Background`,
     life_Border: `life_Border`,
     life_BorderColor: `life_BorderColor`,
+    life_frzNormal: `life_frzNormal`,
+    life_frzActive: `life_frzActive`,
 
     result_lbl: `result_lbl`,
     result_style: `result_style`,
@@ -3117,6 +3122,11 @@ const g_cssObj = {
     common_diffFast: `common_diffFast`,
     common_excessive: `common_excessive`,
     common_estAdj: `common_estAdj`,
+
+    common_auto: `common_auto`,
+    common_shuffle: `common_shuffle`,
+    common_assist: `common_assist`,
+    common_another: `common_another`,
 
     result_score: `result_score`,
     result_scoreHiBlanket: `result_scoreHiBlanket`,
@@ -3834,6 +3844,8 @@ Object.defineProperty(g_keyObj, `defaultProp`, { writable: false });
 Object.keys(g_keyObj)
     .filter(key => key.startsWith(g_keyObj.defaultProp) && key.endsWith(`_0`))
     .forEach(key => g_keyObj.defaultKeyList.push(key.split(`_`)[0].slice(g_keyObj.defaultProp.length)));
+
+let g_baseColorGrs = {};
 
 // キーパターンのコピーリスト
 // ・コピー先：コピー元の順に指定する
@@ -4719,6 +4731,7 @@ const g_lang_lblNameObj = {
         kcShortcutDesc1: `タイトルバック: {0}`,
         kcShortcutDesc2: `リトライ: {1}`,
         transKeyDesc: `別キーモードではキーコンフィグ、ColorType等は保存されません`,
+        colorTypeDesc: `現在のColorTypeの設定では、色変化(Display:Color)は自動的にOFFになります`,
         sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
         resultImageDesc: `画像を右クリックしてコピーできます`,
 
@@ -4775,6 +4788,7 @@ const g_lang_lblNameObj = {
         kcShortcutDesc1: `Return to title: {0}`,
         kcShortcutDesc2: `Retry the game: {1}`,
         transKeyDesc: `Key config, Color type, etc. are not saved in another key mode`,
+        colorTypeDesc: `With the current ColorType setting, color change (Display:Color) will be automatically turned OFF.`,
         sdShortcutDesc: `When "Hidden+" or "Sudden+" select, "pageUp" cover up / "pageDown" cover down`,
         resultImageDesc: `You can copy the image by right-clicking on it.`,
 

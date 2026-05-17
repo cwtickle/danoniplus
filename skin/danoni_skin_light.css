@@ -5,7 +5,7 @@
   スキンcssファイル (light)
 
   Created : 2019/11/04
-  Revised : 2025/02/01 (v39.0.0)
+  Revised : 2026/05/17 (v48.0.0)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -70,6 +70,10 @@
 	--settings-slice-gaugeTable-x: 1;
 	--settings-border-gaugeTable-x: 1px;
 
+	/* 譜面明細子画面: ハイスコア表示 */
+	/* --settings-assist-x: var(--common-kita); */
+	/* --settings-another-x: var(--common-ii); */
+
 	/* キーコンフィグ関連 */
 	--keyconfig-warning-x: #999900;
 	--keyconfig-imgType-x: #003377;
@@ -96,6 +100,7 @@
 	/* --common-diffSlow: var(--common-shobon); */
 	/* --common-estAdj: var(--common-shakin); */
 	/* --common-excessive: var(--common-kita); */
+	/* --common-auto: var(--common-kita); */
 
 	/* ステップゾーン */
 	--main-stepKeyDown: #009999;
@@ -114,6 +119,10 @@
 	--life-max: #cccc66;
 	--life-cleared: #66cccc;
 	--life-failed: #999999;
+
+	/* ライフゲージ: FrzReturn用 */
+	/* --life-frz-normal: var(--main-stepShobon); */
+	/* --life-frz-active: var(--main-stepMatari); */
 
 	/* ライフゲージ本体 */
 	--life-background: #cccccc;
