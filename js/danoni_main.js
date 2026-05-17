@@ -9809,6 +9809,12 @@ const keyConfigInit = (_kcType = g_kcType) => {
 			hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? g_lblNameObj.transKeyDesc : ``,
 			g_lblPosObj.kcMsg, g_cssObj.keyconfig_warning
 		),
+		// ColorType警告メッセージ
+		createDivCss2Label(
+			`kcMsg2`,
+			g_keycons.colorDefTypes.includes(g_colorType) ? `` : g_lblNameObj.colorTypeDesc,
+			g_lblPosObj.kcMsg2, g_cssObj.keyconfig_Defaultkey
+		),
 
 		// キーカラータイプ切替ボタン
 		makeKCButtonHeader(`lblcolorType`, `ColorType`, { x: 10 + g_btnX() }, g_cssObj.keyconfig_ColorType),
@@ -9988,14 +9994,18 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const setColorType = (_scrollNum = 1, _reloadFlg = true) => {
 		const nextNum = getNextNum(_scrollNum, `colorTypes`, g_colorType);
 		g_colorType = g_keycons.colorTypes[nextNum];
+		const isDefault = g_keycons.colorDefTypes.includes(g_colorType);
 		if (g_headerObj.colorUse) {
 			g_stateObj.d_color = boolToSwitch(g_keycons.colorDefTypes.findIndex(val => val === g_colorType) !== -1);
 		}
 		changeSetColor();
 		viewGroupObj.color(`_${g_keycons.colorGroupNum}`);
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
+		kcMsg2.textContent = isDefault ? `` : g_lblNameObj.colorTypeDesc;
+		kcMsg2.style.top = wUnit(hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? g_lblPosObj.kcMsg2.y : g_lblPosObj.kcMsg.y);
+		kcMsg2.style.fontSize = wUnit(getFontSize2(kcMsg2.textContent, g_btnWidth()));
 		if (_reloadFlg) {
-			colorPickSprite.style.display = ([`Default`, `Type0`].includes(g_colorType) ? C_DIS_NONE : C_DIS_INHERIT);
+			colorPickSprite.style.display = isDefault ? C_DIS_NONE : C_DIS_INHERIT;
 			g_keycons.colorCursorNum = g_keycons.colorCursorNum % Math.ceil(g_headerObj.setColor.length / g_limitObj.kcColorPickerNum);
 			changeColorPickers();
 		}
@@ -10017,7 +10027,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	};
 
 	const colorPickSprite = createEmptySprite(divRoot, `colorPickSprite`, { ...g_windowObj.colorPickSprite, title: g_msgObj.pickArrow });
-	if ([`Default`, `Type0`].includes(g_colorType)) {
+	if (g_keycons.colorDefTypes.includes(g_colorType)) {
 		colorPickSprite.style.display = C_DIS_NONE;
 	}
 	multiAppend(colorPickSprite,
@@ -11052,7 +11062,7 @@ const updateKeyInfo = (_header, _keyCtrlPtn) => {
  * - ここでのID管理は1譜面目も区別して設定する (setScoreIdHeaderの第三引数を使用)
  */
 const changeSetColor = () => {
-	const isDefault = [`Default`, `Type0`].includes(g_colorType);
+	const isDefault = g_keycons.colorDefTypes.includes(g_colorType);
 	const idHeader = setScoreIdHeader(g_stateObj.scoreId, false, true);
 	const defaultType = idHeader + g_colorType;
 	const currentTypes = {
