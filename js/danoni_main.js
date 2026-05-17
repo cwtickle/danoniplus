@@ -10001,7 +10001,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		changeSetColor();
 		viewGroupObj.color(`_${g_keycons.colorGroupNum}`);
 		lnkColorType.textContent = `${getStgDetailName(g_colorType)}${g_localStorage.colorType === g_colorType ? ' *' : ''}`;
-		kcMsg2.textContent = isDefault ? `` : g_lblNameObj.colorTypeDesc;
+		kcMsg2.textContent = (isDefault || !g_headerObj.colorUse) ? `` : g_lblNameObj.colorTypeDesc;
 		kcMsg2.style.top = wUnit(hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? g_lblPosObj.kcMsg2.y : g_lblPosObj.kcMsg.y);
 		kcMsg2.style.fontSize = wUnit(getFontSize2(kcMsg2.textContent, g_btnWidth()));
 		if (_reloadFlg) {
