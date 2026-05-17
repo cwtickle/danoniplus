@@ -9544,7 +9544,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		// 色変化データの利用条件設定（Default/Type0限定）
 		const storageObj = g_stateObj.extraKeyFlg ? g_localStorage : g_localKeyStorage;
 		const baseGroupNum = g_keycons.colorGroupNum === -1
-			? (storageObj?.[`keyCtrlPtn${g_keyObj.currentKey}`] || storageObj?.keyCtrlPtn || 0)
+			? (storageObj?.[`keyCtrlPtn${g_keyObj.currentKey}`] ?? storageObj?.keyCtrlPtn ?? 0)
 			: g_keycons.colorGroupNum;
 		const currentColorGr = g_keyObj[`color${keyCtrlPtn}_${g_keycons.colorGroupNum}`];
 		const baseColorGr = g_baseColorGrs?.[`color${keyCtrlPtn}_${baseGroupNum}`];
