@@ -70,6 +70,10 @@
 	--settings-slice-gaugeTable-x: 1;
 	--settings-border-gaugeTable-x: 1px;
 
+	/* 譜面明細子画面: ハイスコア表示 */
+	/*--settings-assist-x: var(--common-kita); */
+	/*--settings-another-x: var(--common-ii); */
+
 	/* キーコンフィグ関連 */
 	--keyconfig-warning-x: #ffff99;
 	--keyconfig-imgType-x: #99ddff;
@@ -96,6 +100,7 @@
 	/* --common-diffSlow: var(--common-shobon); */
 	/* --common-estAdj: var(--common-shakin); */
 	/* --common-excessive: var(--common-kita); */
+	/* --common-auto: var(--common-kita); */
 
 	/* ステップゾーン */
 	--main-stepKeyDown: #66ffff;
@@ -114,6 +119,10 @@
 	--life-max: #444400;
 	--life-cleared: #004444;
 	--life-failed: #444444;
+
+	/* ライフゲージ: FrzReturn用 */
+	/*--life-frz-normal: var(--main-stepShobon); */
+	/*--life-frz-active: var(--main-stepMatari); */
 
 	/* ライフゲージ本体 */
 	--life-background: #222222;

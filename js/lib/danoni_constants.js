@@ -3100,6 +3100,8 @@ const g_cssObj = {
     life_Background: `life_Background`,
     life_Border: `life_Border`,
     life_BorderColor: `life_BorderColor`,
+    life_frzNormal: `life_frzNormal`,
+    life_frzActive: `life_frzActive`,
 
     result_lbl: `result_lbl`,
     result_style: `result_style`,
@@ -3120,6 +3122,11 @@ const g_cssObj = {
     common_diffFast: `common_diffFast`,
     common_excessive: `common_excessive`,
     common_estAdj: `common_estAdj`,
+
+    common_auto: `common_auto`,
+    common_shuffle: `common_shuffle`,
+    common_assist: `common_assist`,
+    common_another: `common_another`,
 
     result_score: `result_score`,
     result_scoreHiBlanket: `result_scoreHiBlanket`,
