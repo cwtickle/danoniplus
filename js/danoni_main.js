@@ -9812,7 +9812,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 		// ColorType警告メッセージ
 		createDivCss2Label(
 			`kcMsg2`,
-			[`Default`, `Type0`].includes(g_colorType) ? `` : g_lblNameObj.colorTypeDesc,
+			g_keycons.colorDefTypes.includes(g_colorType) ? `` : g_lblNameObj.colorTypeDesc,
 			g_lblPosObj.kcMsg2, g_cssObj.keyconfig_Defaultkey
 		),
 
@@ -9994,7 +9994,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	const setColorType = (_scrollNum = 1, _reloadFlg = true) => {
 		const nextNum = getNextNum(_scrollNum, `colorTypes`, g_colorType);
 		g_colorType = g_keycons.colorTypes[nextNum];
-		const isDefault = [`Default`, `Type0`].includes(g_colorType);
+		const isDefault = g_keycons.colorDefTypes.includes(g_colorType);
 		if (g_headerObj.colorUse) {
 			g_stateObj.d_color = boolToSwitch(g_keycons.colorDefTypes.findIndex(val => val === g_colorType) !== -1);
 		}
@@ -10027,7 +10027,7 @@ const keyConfigInit = (_kcType = g_kcType) => {
 	};
 
 	const colorPickSprite = createEmptySprite(divRoot, `colorPickSprite`, { ...g_windowObj.colorPickSprite, title: g_msgObj.pickArrow });
-	if ([`Default`, `Type0`].includes(g_colorType)) {
+	if (g_keycons.colorDefTypes.includes(g_colorType)) {
 		colorPickSprite.style.display = C_DIS_NONE;
 	}
 	multiAppend(colorPickSprite,
@@ -11062,7 +11062,7 @@ const updateKeyInfo = (_header, _keyCtrlPtn) => {
  * - ここでのID管理は1譜面目も区別して設定する (setScoreIdHeaderの第三引数を使用)
  */
 const changeSetColor = () => {
-	const isDefault = [`Default`, `Type0`].includes(g_colorType);
+	const isDefault = g_keycons.colorDefTypes.includes(g_colorType);
 	const idHeader = setScoreIdHeader(g_stateObj.scoreId, false, true);
 	const defaultType = idHeader + g_colorType;
 	const currentTypes = {
