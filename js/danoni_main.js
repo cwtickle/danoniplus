@@ -9148,7 +9148,7 @@ const createSettingsDisplayWindow = _sprite => {
 			g_settings.displayNum[_name] = list.findIndex(flg => flg === g_stateObj[`d_${_name.toLowerCase()}`]);
 			displaySprite.appendChild(
 				makeSettingLblCssButton(linkId, dispView(), _heightPos, () => switchDisplay(), {
-					x: 30 + 180 * _widthPos, w: 170,
+					x: 30 + 180 * _widthPos, y: 20 * _heightPos, w: 170, h: 18,
 					title: g_msgObj[`d_${_name.toLowerCase()}`], borderStyle: `solid`,
 					cxtFunc: () => switchDisplay(-1),
 				}, `button_${cssBgList[g_settings.displayNum[_name]]}`, `button_${cssBarList[g_settings.displayNum[_name]]}`)
@@ -9159,14 +9159,14 @@ const createSettingsDisplayWindow = _sprite => {
 			if (g_settings[`d_${_name}s`] !== undefined) {
 				displaySprite.appendChild(
 					makeSettingLblCssButton(`${linkId}R`, `>`, _heightPos, () => switchDisplay(1, false), {
-						x: 175 + 180 * _widthPos, w: 25, cxtFunc: () => switchDisplay(-1, false),
+						x: 175 + 180 * _widthPos, w: 25, y: 2 + 20 * _heightPos, h: 18, cxtFunc: () => switchDisplay(-1, false),
 					}, g_cssObj.button_Mini)
 				);
 			}
 		} else {
 			displaySprite.appendChild(
 				createDivCss2Label(linkId, g_lblNameObj[`d_${toCapitalize(_name)}`] + `:${g_headerObj[`${_name}Set`]}`, {
-					x: 30 + 180 * _widthPos, y: 3 + g_limitObj.setLblHeight * _heightPos,
+					x: 30 + 180 * _widthPos, y: 3 + 20 * _heightPos,
 					w: 170, siz: g_limitObj.difSelectorSiz,
 				}, g_cssObj[`button_Disabled${flg}`])
 			);
@@ -9181,7 +9181,7 @@ const createSettingsDisplayWindow = _sprite => {
 	const spriteList = setSpriteList(g_settingPos.settingsDisplay);
 
 	_sprite.appendChild(createDivCss2Label(`sdDesc`, g_lblNameObj.sdDesc, g_lblPosObj.sdDesc));
-	g_displays.forEach((name, j) => makeDisplayButton(name, j % 7, Math.floor(j / 7)));
+	g_displays.forEach((name, j) => makeDisplayButton(name, j % 6, Math.floor(j / 6)));
 
 	// ---------------------------------------------------
 	// 矢印の見え方 (Appearance)
@@ -9226,9 +9226,7 @@ const createSettingsDisplayWindow = _sprite => {
 	// ---------------------------------------------------
 	// 判定表示系の不透明度 (Opacity)
 	// 縦位置: 9
-	g_headerObj.opacityUse = false;
-	[`judgment`, `fastSlow`, `filterLine`].forEach(display =>
-		g_headerObj.opacityUse ||= g_headerObj[`${display}Use`] || g_headerObj[`${display}Set`] === C_FLG_ON);
+	g_headerObj.opacityUse = g_headerObj.judgmentUse || g_headerObj.judgmentSet === C_FLG_ON;
 
 	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent });
 
@@ -12199,7 +12197,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
 	obj.wordData = [];
 	obj.wordMaxDepth = -1;
-	if (g_stateObj.d_lyrics === C_FLG_OFF) {
+	if (g_stateObj.d_background === C_FLG_OFF) {
 	} else {
 		[obj.wordData, obj.wordMaxDepth] = makeWordData(scoreIdHeader);
 	}
@@ -13399,6 +13397,8 @@ const getArrowSettings = () => {
 		const lowerDisp = _disp.toLowerCase();
 		g_workObj[`${lowerDisp}Disp`] = (g_stateObj[`d_${lowerDisp}`] === C_FLG_OFF ? C_DIS_NONE : C_DIS_INHERIT);
 	});
+	g_workObj.judgmentDisp = g_stateObj.d_judgment !== C_FLG_ON ? C_DIS_NONE : C_DIS_INHERIT;
+	g_workObj.fastslowDisp = g_stateObj.d_judgment === C_FLG_OFF ? C_DIS_NONE : C_DIS_INHERIT;
 
 	g_workObj.lifeVal = Math.floor(g_workObj.lifeInit * 100) / 100;
 	g_workObj.arrowReturnVal = 0;
@@ -13696,11 +13696,11 @@ const mainInit = () => {
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		mainSprite.appendChild(createDivCss2Label(`filterView`, ``, g_lblPosObj.filterView));
 		if (g_stateObj.d_filterline === C_FLG_ON) {
-			$id(`filterView`).opacity = objOpacity;
+			$id(`filterView`).opacity = 1;
 			for (let j = 0; j < g_stateObj.layerNum; j++) {
-				$id(`filterBar${j}`).opacity = objOpacity;
+				$id(`filterBar${j}`).opacity = 1;
 				if (doubleFilterFlg) {
-					$id(`filterBar${j}_HS`).opacity = objOpacity;
+					$id(`filterBar${j}_HS`).opacity = 1;
 				}
 			}
 		}
@@ -16792,7 +16792,6 @@ const getSelectedSettingList = (_orgShuffleFlg) => {
 	let displayData = [
 		withDisplays(g_stateObj.d_stepzone, C_FLG_ON, g_lblNameObj.rd_StepZone),
 		withDisplays(g_stateObj.d_judgment, C_FLG_ON, g_lblNameObj.rd_Judgment),
-		withDisplays(g_stateObj.d_fastslow, C_FLG_ON, g_lblNameObj.rd_FastSlow),
 		withDisplays(g_stateObj.d_lifegauge, C_FLG_ON, g_lblNameObj.rd_LifeGauge),
 		withDisplays(g_stateObj.d_score, C_FLG_ON, g_lblNameObj.rd_Score),
 		withDisplays(g_stateObj.d_musicinfo, C_FLG_ON, g_lblNameObj.rd_MusicInfo),
@@ -16812,7 +16811,6 @@ const getSelectedSettingList = (_orgShuffleFlg) => {
 	let display2Data = [
 		withDisplays(g_stateObj.d_velocity, C_FLG_ON, g_lblNameObj.rd_Velocity),
 		withDisplays(g_stateObj.d_color, C_FLG_ON, g_lblNameObj.rd_Color),
-		withDisplays(g_stateObj.d_lyrics, C_FLG_ON, g_lblNameObj.rd_Lyrics),
 		withDisplays(g_stateObj.d_background, C_FLG_ON, g_lblNameObj.rd_Background),
 		withDisplays(g_stateObj.d_arroweffect, C_FLG_ON, g_lblNameObj.rd_ArrowEffect),
 		withDisplays(g_stateObj.d_special, C_FLG_ON, g_lblNameObj.rd_Special),
