@@ -9211,7 +9211,7 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	if (d.stepzone === C_FLG_OFF) {
 		multiAppend(_frame,
 			disableBox(`StepZone`, { x: Math.round(_playW / 2 - 200), y: stepY, w: 400, h: 50 }),
-			disableBox(`StepZone_Rev`, { x: Math.round(_playW / 2 - 200), y: stepY + revStepY, w: 400, h: 50 }),
+			disableBox(`StepZone_Rev`, { x: Math.round(_playW / 2 - 200), y: C_STEP_Y + revStepY, w: 400, h: 50 }),
 		);
 	} else {
 		// 簡易ステップゾーン（7レーン分）
@@ -9227,7 +9227,7 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 				border: `1px solid rgba(150,150,255,0.5)`,
 			});
 			createEmptySprite(_frame, `previewStepR${j}`, {
-				x: startX + j * laneW + 2, y: stepY + revStepY + 2, w: laneW - 4, h: laneW - 4,
+				x: startX + j * laneW + 2, y: C_STEP_Y + revStepY + 2, w: laneW - 4, h: laneW - 4,
 				background: `rgba(200,100,100,0.20)`,
 				border: `1px solid rgba(255,150,150,0.4)`,
 			});
@@ -9459,13 +9459,13 @@ const applyJudgPositionToGame = (_groupId, _x, _y) => {
 		const stdY = Math.round((playH + stepYR) / 2 - 60);
 		g_diffObj.arrowJdgX = _x - stdX;
 		g_diffObj.arrowJdgY = _y - stdY;
-		showToast(`jdgJ 座標を更新: dX=${g_diffObj.arrowJdgX}, dY=${g_diffObj.arrowJdgY}`);
+		showToast(`${g_lblNameObj.arrowJdgUpdate}: dX=${g_diffObj.arrowJdgX}, dY=${g_diffObj.arrowJdgY}`);
 	} else if (_groupId === `jdgFJ`) {
 		const stdX = g_headerObj.playingWidth / 2 - 120;
 		const stdY = Math.round((playH + stepYR) / 2 + 10);
 		g_diffObj.frzJdgX = _x - stdX;
 		g_diffObj.frzJdgY = _y - stdY;
-		showToast(`jdgFJ 座標を更新: dX=${g_diffObj.frzJdgX}, dY=${g_diffObj.frzJdgY}`);
+		showToast(`${g_lblNameObj.frzJdgUpdate}: dX=${g_diffObj.frzJdgX}, dY=${g_diffObj.frzJdgY}`);
 	}
 }
 
