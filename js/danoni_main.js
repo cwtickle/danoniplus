@@ -7086,8 +7086,8 @@ const setSpriteList = _settingList => {
 	const spriteList = [];
 	Object.keys(_settingList).forEach(setting =>
 		spriteList[setting] = createEmptySprite(optionsprite, `${setting}Sprite`, {
-			x: 25, y: _settingList[setting].heightPos * g_limitObj.setLblHeight + _settingList[setting].y + 20,
-			w: optionWidth + _settingList[setting].dw, h: g_limitObj.setLblHeight + _settingList[setting].dh,
+			x: 25, y: _settingList[setting].heightPos * g_limitObj.setLblHeight + (_settingList[setting].y || 0) + 20,
+			w: optionWidth + (_settingList[setting].dw || 0), h: g_limitObj.setLblHeight + (_settingList[setting].dh || 0),
 		}));
 	return spriteList;
 };
@@ -9075,7 +9075,13 @@ const settingsDisplayInit = () => {
 	createSettingsDisplayWindow(divRoot);
 
 	// ショートカットキーメッセージ
-	divRoot.appendChild(createDescDiv(`scMsg`, g_lblNameObj.sdShortcutDesc));
+	multiAppend(divRoot,
+		createDescDiv(`scMsg`, g_lblNameObj.sdShortcutDesc),
+		createCss2Button(`btnDisplayPreview`, `↓ Preview`, _evt => {
+			toggleDisplayPreview();
+		}, g_lblPosObj.btnDisplayPreview, g_cssObj.button_Setting),
+	);
+	createScText(btnDisplayPreview, `DisplayPreview`, { displayName: `settingsDisplay`, targetLabel: `btnDisplayPreview`, x: -25 });
 
 	// ユーザカスタムイベント(初期)
 	safeExecuteCustomHooks(`g_customJsObj.settingsDisplay`, g_customJsObj.settingsDisplay);
@@ -9089,6 +9095,407 @@ const settingsDisplayInit = () => {
 
 	safeExecuteCustomHooks(`g_skinJsObj.settingsDisplay`, g_skinJsObj.settingsDisplay);
 };
+
+/** プレビューウィンドウのルートdiv */
+let g_previewRoot = null;
+
+/** プレビュー内の各UIオブジェクトの現在座標 */
+const g_previewPos = {
+	jdgJ: { x: null, y: null },   // 通常判定キャラクタ・コンボ
+	jdgFJ: { x: null, y: null },   // フリーズ判定キャラクタ・コンボ
+};
+
+/**
+ * プレビューのトグル（表示 / 非表示）
+ */
+const toggleDisplayPreview = () => {
+	if (g_previewRoot && document.getElementById(`displayPreviewOverlay`)) {
+		closeDisplayPreview();
+	} else {
+		openDisplayPreview();
+	}
+};
+
+/**
+ * プレビューオーバーレイを開く
+ */
+const openDisplayPreview = () => {
+	const divRoot = document.getElementById(`divRoot`);
+	if (!divRoot) return;
+
+	// 既存があれば削除
+	closeDisplayPreview();
+
+	// ============================================================
+	// オーバーレイ本体
+	// ============================================================
+	const overlay = createEmptySprite(divRoot, `displayPreviewOverlay`, {
+		w: g_sWidth, h: g_sHeight, background: `rgba(0,0,0,0.82)`, pointerEvents: C_DIS_AUTO,
+	});
+	g_previewRoot = overlay;
+	multiAppend(overlay,
+		createDivCss2Label(`lblDisplayPreview`, `Display Preview`,
+			g_lblPosObj.lblDisplayPreview, g_cssObj.settings_Display),
+		createDescDiv(`lblDisplayPreviewMsg`, g_lblNameObj.displayPreviewDesc),
+	);
+
+	// ============================================================
+	// プレイ画面フレーム（白枠）
+	// ============================================================
+	const rate = 0.8;
+	const playW = g_headerObj.playingWidth || g_sWidth;
+	const playH = g_headerObj.playingHeight || g_sHeight;
+	const frameX = Math.round((g_sWidth - playW) / 2);
+	const frameY = Math.round((g_sHeight - playH) / 2);
+
+	const frame = createEmptySprite(overlay, `previewFrame`, {
+		x: frameX, y: frameY, w: playW, h: playH,
+		background: `#111111`,
+		border: `1px solid #444444`,
+		overflow: `hidden`,
+		boxSizing: `border-box`,
+		transform: `scale(${rate})`,
+	});
+
+	// ============================================================
+	// Display設定に応じたUIを描画
+	// ============================================================
+	buildPreviewUI(frame, playW, playH);
+
+	// 閉じるボタン
+	overlay.appendChild(createCss2Button(`btnDispClose`, `✕`, () => closeDisplayPreview(), {
+		x: g_btnX() + g_btnWidth() - 50, y: 0, w: 50, h: 50, siz: 16,
+	}, g_cssObj.button_Back));
+};
+
+/**
+ * プレビューオーバーレイを閉じる
+ */
+const closeDisplayPreview = () => {
+	const overlay = document.getElementById(`displayPreviewOverlay`);
+	if (overlay && overlay.parentNode) {
+		overlay.parentNode.removeChild(overlay);
+	}
+	g_previewRoot = null;
+};
+
+/**
+ * プレビュー内のUI要素を構築する
+ * @param {HTMLElement} _frame     プレイ画面フレーム要素
+ * @param {number}      _playW     プレイ幅(px)
+ * @param {number}      _playH     プレイ高さ(px)
+ */
+const buildPreviewUI = (_frame, _playW, _playH) => {
+
+	// --- Display設定の現在値を取得 ---
+	const d = {
+		stepzone: g_stateObj.d_stepzone,
+		judgment: g_stateObj.d_judgment,
+		lifegauge: g_stateObj.d_lifegauge,
+		score: g_stateObj.d_score,
+		musicinfo: g_stateObj.d_musicinfo,
+	};
+
+	const disableBox = (_name, { x, y, w, h } = {}) =>
+		createDivCss2Label(`previewDisableBox_${_name}`, `${g_emojiObj.crossMark} ${_name}`, {
+			x, y, w, h, background: `rgba(0,0,0,0.5)`, border: `1px dashed #555555`,
+			size: 32, color: `#cccccc`, align: C_ALIGN_LEFT,
+		});
+
+	// ============================================================
+	// ステップゾーン（中央横帯）
+	// ============================================================
+	const stepY = g_posObj.stepY ?? C_STEP_Y;
+	const revStepY = g_posObj.reverseStepY;
+
+	if (d.stepzone === C_FLG_OFF) {
+		multiAppend(_frame,
+			disableBox(`StepZone`, { x: Math.round(_playW / 2 - 200), y: stepY, w: 400, h: 50 }),
+			disableBox(`StepZone_Rev`, { x: Math.round(_playW / 2 - 200), y: stepY + revStepY, w: 400, h: 50 }),
+		);
+	} else {
+		// 簡易ステップゾーン（7レーン分）
+		const laneCount = 7;
+		const laneW = 50;
+		const totalW = laneCount * laneW;
+		const startX = Math.round((_playW - totalW) / 2);
+
+		for (let j = 0; j < laneCount; j++) {
+			createEmptySprite(_frame, `previewStep${j}`, {
+				x: startX + j * laneW + 2, y: stepY + 2, w: laneW - 4, h: laneW - 4,
+				background: `rgba(100,100,200,0.25)`,
+				border: `1px solid rgba(150,150,255,0.5)`,
+			});
+			createEmptySprite(_frame, `previewStepR${j}`, {
+				x: startX + j * laneW + 2, y: stepY + revStepY + 2, w: laneW - 4, h: laneW - 4,
+				background: `rgba(200,100,100,0.20)`,
+				border: `1px solid rgba(255,150,150,0.4)`,
+			});
+		}
+	}
+
+	// ============================================================
+	// 判定エリア（ドラッグ可能）
+	// ============================================================
+	if (d.judgment === C_FLG_OFF) {
+		_frame.appendChild(disableBox(`Judgment`, {
+			x: Math.round(_playW / 2 - 220), y: Math.round((_playH + (g_posObj?.stepYR ?? 0)) / 2 - 60), w: 440, h: 120,
+		}));
+	} else {
+		const jX0 = g_lblPosObj?.jdgJ?.x ?? Math.round(_playW / 2 - 220);
+		const jY0 = g_lblPosObj?.jdgJ?.y ?? Math.round((_playH + (g_posObj?.stepYR ?? 0)) / 2 - 60);
+		const fX0 = g_lblPosObj?.jdgFJ?.x ?? Math.round(_playW / 2 - 120);
+		const fY0 = g_lblPosObj?.jdgFJ?.y ?? Math.round((_playH + (g_posObj?.stepYR ?? 0)) / 2 + 10);
+
+		const jdgInitX = g_previewPos.jdgJ.x ?? jX0;
+		const jdgInitY = g_previewPos.jdgJ.y ?? jY0;
+		const jdgFInitX = g_previewPos.jdgFJ.x ?? fX0;
+		const jdgFInitY = g_previewPos.jdgFJ.y ?? fY0;
+
+		// 通常判定グループ
+		buildDraggableJudgGroup(_frame, `jdgJ`, jdgInitX, jdgInitY, _playW, _playH, {
+			charaText: d.judgment === C_FLG_ON ? g_lblNameObj.j_ii : ``,
+			comboText: d.judgment === C_FLG_ON ? `5 Combo!!` : ``,
+			diffText: `Fast 3 Frames`,
+			charaColor: `#66ffff`,
+		});
+
+		// フリーズ判定グループ
+		buildDraggableJudgGroup(_frame, `jdgFJ`, jdgFInitX, jdgFInitY, _playW, _playH, {
+			charaText: d.judgment === C_FLG_ON ? g_lblNameObj.j_kita : ``,
+			comboText: d.judgment === C_FLG_ON ? `5 Combo!!` : ``,
+			diffText: `Fast 2 Frames`,
+			charaColor: `#ffff99`,
+		});
+	}
+
+	// ============================================================
+	// ライフゲージ（左縦帯）
+	// ============================================================
+	if (d.lifegauge === C_FLG_OFF) {
+		_frame.appendChild(disableBox(`LifeGauge`, { x: 5, y: 50, w: 15, h: _playH - 100 }));
+	} else {
+		multiAppend(_frame,
+			createDivCss2Label(`previewLifeBack`, ``, {
+				x: 5, y: 50, w: 15, h: _playH - 100,
+				background: `#333333`, border: `1px solid #555555`,
+			}),
+			createDivCss2Label(`previewLifeBar`, ``, {
+				x: 5, y: 50 + (_playH - 100) * 0.3,
+				w: 15, h: (_playH - 100) * 0.7, background: `#006666`,
+			}),
+			createDivCss2Label(`previewLifeNum`, `700`, {
+				x: 0, y: 30, w: 70, h: 20,
+				size: 14, color: `#ffffff`, background: `#006666`, align: `center`,
+			}),
+		);
+	}
+
+	// ============================================================
+	// スコア・判定カウンタ（右端縦列）
+	// ============================================================
+	if (d.score === C_FLG_OFF) {
+		_frame.appendChild(disableBox(`Score`, { x: _playW - 80, y: 20, w: 70, h: 200 }));
+	} else {
+		const scoreItems = [
+			{ color: `#66ffff`, cnt: `5` },
+			{ color: `#99ff99`, cnt: `0` },
+			{ color: `#ffcc66`, cnt: `0` },
+			{ color: `#cc99ff`, cnt: `0` },
+			{ color: `#ff9999`, cnt: `0` },
+			{ color: `#ffffff`, cnt: `5` },
+			{},
+			{ color: `#ffff99`, cnt: `5` },
+			{ color: `#99ff66`, cnt: `0` },
+			{ color: `#ffffff`, cnt: `5` },
+		];
+		const sx = _playW - 110;
+		scoreItems.forEach((item, i) => {
+			_frame.appendChild(
+				createDivCss2Label(`previewScore${i}`, item.cnt || ``, {
+					x: sx + 50, y: 20 * (i + 1), w: 50, h: 20,
+					siz: 16, color: item.color, align: `right`,
+				}),
+			);
+		});
+	}
+
+	// ============================================================
+	// 曲名・制作者（左下）
+	// ============================================================
+	if (d.musicinfo === C_FLG_OFF) {
+		_frame.appendChild(disableBox(`MusicInfo`, { x: 5, y: _playH - 50, w: _playW - 125, h: 40 }));
+	} else {
+		multiAppend(
+			_frame,
+			createDivCss2Label(`previewCredit`, `Sample Music / Artist Name`, {
+				...g_lblPosObj.previewCredit, x: 100, y: _playH - 30, w: _playW - 125, h: 20,
+			}),
+			createDivCss2Label(`previewDifName`, `[7key / Normal]`, {
+				...g_lblPosObj.previewCredit, x: 100, y: _playH - 16, w: _playW - 125, h: 16, siz: 12,
+			}),
+			createDivCss2Label(`previewTime1`, `0:04 /`, {
+				...g_lblPosObj.previewCredit, x: 18, y: _playH - 30, w: 40, h: 20, align: C_ALIGN_RIGHT,
+			}),
+			createDivCss2Label(`previewTime2`, `2:54`, {
+				...g_lblPosObj.previewCredit, x: 60, y: _playH - 30, w: 60, h: 20,
+			}),
+		)
+	}
+};
+
+/**
+ * ドラッグ可能な判定グループを生成する
+ * @param {HTMLElement} _parent    親要素
+ * @param {string}      _groupId   `jdgJ` または `jdgFJ`
+ * @param {number}      _initX     初期X座標（frame相対）
+ * @param {number}      _initY     初期Y座標（frame相対）
+ * @param {number}      _playW     プレイ幅
+ * @param {number}      _playH     プレイ高さ
+ * @param {object}      _opts      表示テキスト・色オプション
+ */
+const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _playH, _opts) => {
+
+	const group = createEmptySprite(_parent, `previewGrp_${_groupId}`, {
+		x: _initX, y: _initY, w: 370, h: 51, cursor: `grab`, pointerEvents: C_DIS_AUTO,
+	});
+
+	multiAppend(
+		group,
+		// キャラクタ
+		createDivCss2Label(`previewChara_${_groupId}`, _opts.charaText, {
+			x: 0, y: 0, w: 200, h: 22,
+			siz: 18, color: _opts.charaColor, align: C_ALIGN_LEFT,
+		}),
+		// コンボ
+		createDivCss2Label(`previewCombo_${_groupId}`, _opts.comboText, {
+			x: 170, y: 0, w: 200, h: 22,
+			siz: 18, color: `#ffffff`, align: C_ALIGN_LEFT,
+		}),
+		// Fast/Slow
+		createDivCss2Label(`previewDiff_${_groupId}`, _opts.diffText, {
+			x: 170, y: 25, w: 200, h: 20,
+			siz: 13, color: `#ff9966`, align: C_ALIGN_LEFT,
+		}),
+	);
+
+	// ドラッグハンドル（薄い枠）
+	const handle = createEmptySprite(group, `lblHandle_${_groupId}`, {
+		x: 0, y: 0, w: 370, h: 51, border: `1px dashed rgba(255,255,255,0.3)`,
+		boxSizing: `border-box`, borderRadius: `2px`,
+		background: `rgba(255,255,255,0.04)`,
+	});
+
+	// ラベル（左上）
+	handle.appendChild(
+		createDivCss2Label(`lblHandleSub_${_groupId}`, _groupId, {
+			x: 4, y: 2, siz: 9, color: `rgba(255,255,255,0.5)`,
+			fontFamily: getBasicFont(), pointerEvents: C_DIS_NONE,
+		})
+	);
+
+	// ---- ドラッグ処理 ----
+	let dragging = false;
+	let dragStartX = 0, dragStartY = 0;
+	let elemStartX = 0, elemStartY = 0;
+
+	g_handler.addListener(group, `pointerdown`, (e) => {
+		dragging = true;
+		dragStartX = e.clientX;
+		dragStartY = e.clientY;
+		elemStartX = parseInt(group.style.left, 10);
+		elemStartY = parseInt(group.style.top, 10);
+		group.style.cursor = `grabbing`;
+		group.setPointerCapture(e.pointerId);
+		e.stopPropagation();
+	});
+	g_handler.addListener(group, `pointermove`, (e) => {
+		if (!dragging) return;
+		const dx = e.clientX - dragStartX;
+		const dy = e.clientY - dragStartY;
+		const newX = Math.max(0, Math.min(_playW - 370, elemStartX + dx));
+		const newY = Math.max(0, Math.min(_playH - 50, elemStartY + dy));
+		group.style.left = `${newX}px`;
+		group.style.top = `${newY}px`;
+		e.stopPropagation();
+	});
+	g_handler.addListener(group, `pointerup`, (e) => {
+		if (!dragging) return;
+		dragging = false;
+		group.style.cursor = `grab`;
+
+		const finalX = parseInt(group.style.left, 10);
+		const finalY = parseInt(group.style.top, 10);
+
+		// ---- 座標をグローバル状態とゲーム本体に反映 ----
+		g_previewPos[_groupId].x = finalX;
+		g_previewPos[_groupId].y = finalY;
+		applyJudgPositionToGame(_groupId, finalX, finalY);
+
+		e.stopPropagation();
+	});
+}
+
+/**
+ * ドラッグ結果の座標をゲーム本体の判定位置設定に反映する
+ * @param {string} _groupId  `jdgJ` または `jdgFJ`
+ * @param {number} _x        frame相対X
+ * @param {number} _y        frame相対Y
+ */
+const applyJudgPositionToGame = (_groupId, _x, _y) => {
+	const playH = g_headerObj.playingHeight || g_sHeight;
+	const stepYR = g_posObj?.stepYR ?? 0;
+
+	// mainInit内のjdgX[0/1], jdgY[0/1]はローカル変数なため、
+	// g_diffObj経由でオフセットとして保持し、次回プレイ開始時に反映する。
+	// ここでは g_diffObj.arrowJdgY / frzJdgY をオフセット格納先として利用する。
+	//
+	// 「標準Y」= (playH + stepYR) / 2 - 60  (jdgJ の場合)
+	//           = (playH + stepYR) / 2 + 10  (jdgFJ の場合)
+	// オフセット = 実際のY - 標準Y
+
+	if (_groupId === `jdgJ`) {
+		const stdX = g_headerObj.playingWidth / 2 - 220;
+		const stdY = Math.round((playH + stepYR) / 2 - 60);
+		g_diffObj.arrowJdgX = _x - stdX;
+		g_diffObj.arrowJdgY = _y - stdY;
+		showToast(`jdgJ 座標を更新: dX=${g_diffObj.arrowJdgX}, dY=${g_diffObj.arrowJdgY}`);
+	} else if (_groupId === `jdgFJ`) {
+		const stdX = g_headerObj.playingWidth / 2 - 120;
+		const stdY = Math.round((playH + stepYR) / 2 + 10);
+		g_diffObj.frzJdgX = _x - stdX;
+		g_diffObj.frzJdgY = _y - stdY;
+		showToast(`jdgFJ 座標を更新: dX=${g_diffObj.frzJdgX}, dY=${g_diffObj.frzJdgY}`);
+	}
+}
+
+/**
+ * 画面上部に一時的なトーストメッセージを表示する
+ * @param {string} _msg
+ */
+function showToast(_msg) {
+	const existing = document.getElementById(`previewToast`);
+	if (existing) existing.remove();
+
+	const toast = createDivCss2Label(`previewToast`, _msg, {
+		x: g_btnX() + g_btnWidth() / 2, y: 50, w: g_btnWidth() / 2, h: 10,
+		transform: `translateX(-50%)`,
+		background: `rgba(0,40,80,0.92)`,
+		color: `#aaddff`,
+		border: `1px solid #3366aa`,
+		borderRadius: `6px`,
+		padding: `6px 16px`,
+		fontSize: `12px`,
+		fontFamily: `monospace`,
+		whiteSpace: `nowrap`,
+		pointerEvents: `none`,
+		transition: `opacity 0.4s`,
+		opacity: `1`,
+	});
+	divRoot.appendChild(toast);
+	setTimeout(() => { toast.style.opacity = `0`; }, 2200);
+	setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2700);
+}
 
 /**
  * 設定・オプション画面のラベル・ボタン処理の描画
@@ -10429,7 +10836,6 @@ const keyconfigKeyboardPreview = (() => {
 	// 定数
 	// -------------------------------------------------------------------------
 	const C_PREVIEW_ID = `kbPreviewArea`;
-	const C_BTN_ID = `btnKbPreview`;
 	const C_CANVAS_BASE_ID = `kbCanvasBase`;
 	const C_CANVAS_MAP_ID = `kbCanvasMap`;
 
@@ -10938,18 +11344,11 @@ const keyconfigKeyboardPreview = (() => {
 	const init = divRoot => {
 		calcScale();
 
-		// ボタン: キャンバス横幅中央に配置、小さいサイズ
-		const btnW = 80;
-		const btnX = g_btnX() + Math.floor((g_btnWidth() - btnW) / 2);
-
 		// "↓ Preview" → 展開、"↑ Preview" → 閉じる のトグルボタン
-		const btn = createCss2Button(C_BTN_ID, `↓ Preview`, () => {
+		const btn = createCss2Button(`btnKbPreview`, `↓ Preview`, () => {
 			togglePreview();
 			btn.textContent = _state.visible ? `↑ Preview` : `↓ Preview`;
-		}, {
-			x: btnX, y: BTN_Y, w: btnW, h: BTN_H, siz: BTN_FS,
-			title: g_msgObj.kcPreview,
-		}, g_cssObj.button_Setting);
+		}, g_lblPosObj.btnKbPreview, g_cssObj.button_Setting);
 		divRoot.appendChild(btn);
 
 		// プレビューエリア: 水平・垂直センタリング
@@ -13905,8 +14304,12 @@ const mainInit = () => {
 	const jdgGroups = [`J`, `FJ`];
 	const jdgX = [g_headerObj.playingWidth / 2 - 220, g_headerObj.playingWidth / 2 - 120];
 	const jdgY = [(g_headerObj.playingHeight + g_posObj.stepYR) / 2 - 60, (g_headerObj.playingHeight + g_posObj.stepYR) / 2 + 10];
-	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.jdgPosReset) {
+	if (g_stateObj.d_background === C_FLG_OFF && g_headerObj.jdgPosReset && g_diffObj.arrowJdgX === 0) {
+		// jdgPosResetオプションにより判定位置変更が阻害されることを防ぐため、
+		// X座標が変わった場合は判定位置変更が行われたと判断
 	} else {
+		jdgX[0] += g_diffObj.arrowJdgX;
+		jdgX[1] += g_diffObj.frzJdgX;
 		jdgY[0] += g_diffObj.arrowJdgY;
 		jdgY[1] += g_diffObj.frzJdgY;
 	}

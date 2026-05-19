@@ -102,34 +102,33 @@ const g_limitObj = {
 const g_settingPos = {
     dataMgt: {},
     option: {
-        difficulty: { heightPos: 0, y: -5, dw: 0, dh: 10 },
-        speed: { heightPos: 2, y: 0, dw: 0, dh: 0 },
-        motion: { heightPos: 3, y: 0, dw: 0, dh: 0 },
-        reverse: { heightPos: 4, y: 0, dw: 0, dh: 0 },
-        scroll: { heightPos: 4, y: 0, dw: 0, dh: 0 },
-        shuffle: { heightPos: 5.5, y: 0, dw: 0, dh: 0 },
-        autoPlay: { heightPos: 6.5, y: 0, dw: 0, dh: 0 },
-        gauge: { heightPos: 7.5, y: 0, dw: 0, dh: 0 },
-        adjustment: { heightPos: 10.5, y: 0, dw: 0, dh: 0 },
-        fadein: { heightPos: 11.5, y: 0, dw: 0, dh: 0 },
-        volume: { heightPos: 12.5, y: 0, dw: 0, dh: 0 },
+        difficulty: { heightPos: 0, y: -5, dh: 10 },
+        speed: { heightPos: 2 },
+        motion: { heightPos: 3 },
+        reverse: { heightPos: 4 },
+        scroll: { heightPos: 4 },
+        shuffle: { heightPos: 5.5 },
+        autoPlay: { heightPos: 6.5 },
+        gauge: { heightPos: 7.5 },
+        adjustment: { heightPos: 10.5 },
+        fadein: { heightPos: 11.5 },
+        volume: { heightPos: 12.5 },
     },
     settingsDisplay: {
-        appearance: { heightPos: 5.6, y: 10, dw: 0, dh: 0 },
-        opacity: { heightPos: 7.2, y: 10, dw: 0, dh: 0 },
-        hitPosition: { heightPos: 8.2, y: 10, dw: 0, dh: 0 },
-        judgPosition: { heightPos: 9.2, y: 10, dw: 0, dh: 0 },
+        appearance: { heightPos: 5.8, y: 10 },
+        opacity: { heightPos: 7.4, y: 10 },
+        hitPosition: { heightPos: 8.4, y: 10 },
     },
     exSetting: {
-        playWindow: { heightPos: 0, y: 0, dw: 0, dh: 0 },
-        stepArea: { heightPos: 1, y: 0, dw: 0, dh: 0 },
-        frzReturn: { heightPos: 2.5, y: 0, dw: 0, dh: 0 },
-        shaking: { heightPos: 3.5, y: 0, dw: 0, dh: 0 },
-        effect: { heightPos: 5, y: 0, dw: 0, dh: 0 },
-        camoufrage: { heightPos: 6, y: 0, dw: 0, dh: 0 },
-        swapping: { heightPos: 7, y: 0, dw: 0, dh: 0 },
-        judgRange: { heightPos: 8.5, y: 0, dw: 0, dh: 0 },
-        autoRetry: { heightPos: 12.5, y: 0, dw: 0, dh: 0 },
+        playWindow: { heightPos: 0 },
+        stepArea: { heightPos: 1 },
+        frzReturn: { heightPos: 2.5 },
+        shaking: { heightPos: 3.5 },
+        effect: { heightPos: 5 },
+        camoufrage: { heightPos: 6 },
+        swapping: { heightPos: 7 },
+        judgRange: { heightPos: 8.5 },
+        autoRetry: { heightPos: 12.5 },
     },
 };
 
@@ -537,6 +536,19 @@ const updateWindowSiz = () => {
             x: g_limitObj.setLblLeft + g_limitObj.setLblWidth - 40, y: 0, w: 40, h: g_limitObj.setLblHeight, siz: 12,
             borderStyle: `solid`,
         },
+        lblDisplayPreview: {
+            x: g_sWidth / 2 - 100, y: 0, w: 200, h: 20, siz: 24,
+        },
+        btnDisplayPreview: {
+            x: g_btnX() + Math.floor((g_btnWidth() - 80) / 2), y: 3, w: 80, h: 18, siz: 11,
+            title: g_msgObj.displayPreview,
+        },
+        lblDisplayPreviewMsg: {
+            x: g_btnX(), y: g_sHeight - 40, w: g_btnWidth(), h: 20, siz: 14,
+        },
+        previewCredit: {
+            siz: 13, color: `#cccccc`, align: C_ALIGN_LEFT,
+        },
 
         /** キーコンフィグ画面 */
         scKcMsg: {
@@ -571,6 +583,10 @@ const updateWindowSiz = () => {
         },
         lnkKeySwitch: {
             x: g_sWidth - 60, w: 50, h: 20, siz: 14,
+        },
+        btnKbPreview: {
+            x: g_btnX() + Math.floor((g_btnWidth() - 80) / 2), y: 3, w: 80, h: 18, siz: 11,
+            title: g_msgObj.displayPreview,
         },
 
         btnKcBack: {
@@ -1196,8 +1212,6 @@ const g_stateObj = {
     appearance: `Visible`,
     filterLock: C_FLG_OFF,
     opacity: 100,
-    judgPosX: 0,
-    judgPosY: 0,
 
     playWindow: `Default`,
     playWindowType: C_FLG_HYPHEN,
@@ -2278,6 +2292,8 @@ const g_posObj = {
 };
 
 const g_diffObj = {
+    arrowJdgX: 0,
+    frzJdgX: 0,
     arrowJdgY: 0,
     frzJdgY: 0,
 };
@@ -2833,6 +2849,7 @@ const g_shortcutObj = {
         KeyU: { id: `btnSettingSummary` },
     },
     settingsDisplay: {
+        KeyP: { id: `btnDisplayPreview` },
         ShiftLeft_KeyA: { id: `lnkAppearanceL` },
         ShiftRight_KeyA: { id: `lnkAppearanceL` },
         KeyA: { id: `lnkAppearanceR` },
@@ -3054,6 +3071,7 @@ const g_mainRepeatObj = {
 // CSS名称
 const g_cssObj = {
     title_base: `title_base`,
+    settings_Display: `settings_Display`,
 
     settings_DifSelector: `settings_DifSelector`,
     settings_Disabled: `settings_Disabled`,
@@ -4722,6 +4740,7 @@ const g_lang_lblNameObj = {
         transKeyDesc: `別キーモードではキーコンフィグ、ColorType等は保存されません`,
         colorTypeDesc: `現在のColorTypeの設定では、色変化(Display:Color)は自動的にOFFになります`,
         sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
+        displayPreviewDesc: `判定キャラクタ部分をドラッグで移動するとその位置に補正されます`,
         resultImageDesc: `画像を右クリックしてコピーできます`,
 
         s_level: `Level`,
@@ -4779,6 +4798,7 @@ const g_lang_lblNameObj = {
         transKeyDesc: `Key config, Color type, etc. are not saved in another key mode`,
         colorTypeDesc: `With the current ColorType setting, color change (Display:Color) will be automatically turned OFF.`,
         sdShortcutDesc: `When "Hidden+" or "Sudden+" select, "pageUp" cover up / "pageDown" cover down`,
+        displayPreviewDesc: `If you drag the judgment character section, it will be adjusted to that position.`,
         resultImageDesc: `You can copy the image by right-clicking on it.`,
 
         s_level: `Level`,
@@ -4922,6 +4942,7 @@ const g_lang_msgObj = {
         appearance: `流れる矢印の見え方を制御します。`,
         opacity: `判定キャラクタ、コンボ数、Fast/Slow、Hidden+/Sudden+の\n境界線表示の透明度を設定します。`,
         hitPosition: `判定位置にズレを感じる場合、\n数値を変えることで判定の中央位置を1px単位(プラス:手前, マイナス:奥側)で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
+        displayPreview: `プレイ画面上のオブジェクトの表示状態をプレビューします。\n判定キャラクタ部分をドラッグで移動するとその位置に補正されます。`,
 
         colorType: `矢印・フリーズアローの配色セットをあらかじめ定義されたリストから選択できます。\nType1～4選択時は色変化が自動でOFFになり、カラーピッカーから好きな色に変更できます。\n[Type0] グラデーション切替, [Type1～4] デフォルトパターン`,
         imgType: `矢印・フリーズアローなどのオブジェクトの見た目を変更します。`,
@@ -5026,6 +5047,7 @@ const g_lang_msgObj = {
         appearance: `Controls how the flowing sequences look.`,
         opacity: `Set the transparency of some objects such as judgment, combo counts, fast and slow`,
         hitPosition: `If you feel a discrepancy in the judgment position, \nyou can adjust the center position of the judgment in 1px increments \n (plus: in front, minus: at the back) by changing the numerical value. \nUse this function when there is a tendency to push too fast or too slow.`,
+        displayPreview: `Preview the display status of objects on the play screen.\nDragging the judgment character section will adjust it to that position.`,
 
         colorType: `Change the color scheme set for arrows and freeze-arrows from the predefined set.\nWhen Type1 to 4 is selected, color change is automatically turned off and can be changed to any color from the color picker.\n[Type0] Switch the sequences color gradations, [Type1～4] default color scheme`,
         imgType: `Change the appearance of sequences.`,
