@@ -4801,8 +4801,8 @@ const g_lang_lblNameObj = {
         colorTypeDesc: `With the current ColorType setting, color change (Display:Color) will be automatically turned OFF.`,
         sdShortcutDesc: `When "Hidden+" or "Sudden+" select, "pageUp" cover up / "pageDown" cover down`,
         displayPreviewDesc: `If you drag the judgment character section, it will be adjusted to that position.`,
-        arrowJdgUpdate: `Update the coordinates of the arrow judgment`,
-        frzJdgUpdate: `Update the coordinates of the freeze arrow judgment`,
+        arrowJdgUpdate: `Update the coordinates (arrow)`,
+        frzJdgUpdate: `Update the coordinates (freeze)`,
         resultImageDesc: `You can copy the image by right-clicking on it.`,
 
         s_level: `Level`,

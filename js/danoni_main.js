@@ -9099,10 +9099,22 @@ const settingsDisplayInit = () => {
 /** プレビューウィンドウのルートdiv */
 let g_previewRoot = null;
 
+/** プレビューで登録した一時リスナー群 */
+let g_previewLsnrKeys = new Set();
+
 /** プレビュー内の各UIオブジェクトの現在座標 */
 const g_previewPos = {
 	jdgJ: { x: null, y: null },   // 通常判定キャラクタ・コンボ
 	jdgFJ: { x: null, y: null },   // フリーズ判定キャラクタ・コンボ
+};
+
+/**
+ * プレビュー用リスナー登録（キーをレジストリへ格納）
+ */
+const addPreviewListener = (target, type, listener, capture = false) => {
+	const key = g_handler.addListener(target, type, listener, capture);
+	g_previewLsnrKeys.add(key);
+	return key;
 };
 
 /**
@@ -9173,9 +9185,14 @@ const openDisplayPreview = () => {
  */
 const closeDisplayPreview = () => {
 	const overlay = document.getElementById(`displayPreviewOverlay`);
-	if (overlay && overlay.parentNode) {
-		overlay.parentNode.removeChild(overlay);
+	if (!overlay) return;
+	deleteChildspriteAll(`displayPreviewOverlay`);
+	// プレビュー専用に登録した残りのハンドラを明示解除
+	if (g_previewLsnrKeys?.size) {
+		g_previewLsnrKeys.forEach(k => g_handler.removeListener(k));
+		g_previewLsnrKeys.clear();
 	}
+	overlay.remove();
 	g_previewRoot = null;
 };
 
@@ -9364,18 +9381,18 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 		group,
 		// キャラクタ
 		createDivCss2Label(`previewChara_${_groupId}`, _opts.charaText, {
-			x: 0, y: 0, w: 200, h: 22,
-			siz: 18, color: _opts.charaColor, align: C_ALIGN_LEFT,
+			x: 0, y: 0, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
+			siz: g_limitObj.jdgCharaSiz, color: _opts.charaColor,
 		}),
 		// コンボ
 		createDivCss2Label(`previewCombo_${_groupId}`, _opts.comboText, {
-			x: 170, y: 0, w: 200, h: 22,
-			siz: 18, color: `#ffffff`, align: C_ALIGN_LEFT,
+			x: 170, y: 0, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
+			siz: g_limitObj.jdgCharaSiz, color: `#ffffff`,
 		}),
 		// Fast/Slow
 		createDivCss2Label(`previewDiff_${_groupId}`, _opts.diffText, {
-			x: 170, y: 25, w: 200, h: 20,
-			siz: 13, color: `#ff9966`, align: C_ALIGN_LEFT,
+			x: 170, y: 25, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
+			siz: g_limitObj.mainSiz, color: `#ff9966`,
 		}),
 	);
 
@@ -9399,7 +9416,7 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 	let dragStartX = 0, dragStartY = 0;
 	let elemStartX = 0, elemStartY = 0;
 
-	g_handler.addListener(group, `pointerdown`, (e) => {
+	const keyDown = addPreviewListener(group, `pointerdown`, (e) => {
 		dragging = true;
 		dragStartX = e.clientX;
 		dragStartY = e.clientY;
@@ -9409,7 +9426,7 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 		group.setPointerCapture(e.pointerId);
 		e.stopPropagation();
 	});
-	g_handler.addListener(group, `pointermove`, (e) => {
+	const keyMove = addPreviewListener(group, `pointermove`, (e) => {
 		if (!dragging) return;
 		const dx = e.clientX - dragStartX;
 		const dy = e.clientY - dragStartY;
@@ -9419,7 +9436,7 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 		group.style.top = `${newY}px`;
 		e.stopPropagation();
 	});
-	g_handler.addListener(group, `pointerup`, (e) => {
+	const keyUp = addPreviewListener(group, `pointerup`, (e) => {
 		if (!dragging) return;
 		dragging = false;
 		group.style.cursor = `grab`;
@@ -9434,6 +9451,14 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 
 		e.stopPropagation();
 	});
+	// pointerup が届かないケースを拾う
+	const keyCancel = addPreviewListener(group, `pointercancel`, () => {
+		dragging = false;
+		group.style.cursor = `grab`;
+	});
+	group.setAttribute(`lsnrkey`, keyMove);
+	group.setAttribute(`lsnrkeyTS`, keyDown);
+	group.setAttribute(`lsnrkeyTE`, keyUp);
 }
 
 /**
