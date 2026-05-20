@@ -2008,6 +2008,7 @@ const makeBgCanvas = (_ctx, { w = g_sWidth, h = g_sHeight } = {}) => {
  * @param {string} [_customDisplayName=''] 画面名(メイン画面: 'Main', それ以外: 空)
  */
 const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
+	closeDisplayPreview();
 	resetKeyControl();
 	resetTransform();
 	resetXY();
@@ -9183,14 +9184,15 @@ const openDisplayPreview = () => {
  */
 const closeDisplayPreview = () => {
 	const overlay = document.getElementById(`displayPreviewOverlay`);
-	if (!overlay) return;
-	deleteChildspriteAll(`displayPreviewOverlay`);
+	if (overlay) {
+		deleteChildspriteAll(`displayPreviewOverlay`);
+		overlay.remove();
+	}
 	// プレビュー専用に登録した残りのハンドラを明示解除
 	if (g_previewLsnrKeys?.size) {
 		g_previewLsnrKeys.forEach(k => g_handler.removeListener(k));
 		g_previewLsnrKeys.clear();
 	}
-	overlay.remove();
 	g_previewRoot = null;
 };
 
