@@ -9494,7 +9494,7 @@ const applyJudgPositionToGame = (_groupId, _x, _y) => {
  * 画面上部に一時的なトーストメッセージを表示する
  * @param {string} _msg
  */
-function showToast(_msg) {
+const showToast = _msg => {
 	const existing = document.getElementById(`previewToast`);
 	if (existing) existing.remove();
 
