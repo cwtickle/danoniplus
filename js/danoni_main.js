@@ -9124,9 +9124,12 @@ const addPreviewListener = (target, type, listener, capture = false) => {
 const toggleDisplayPreview = () => {
 	if (g_previewRoot && document.getElementById(`displayPreviewOverlay`)) {
 		closeDisplayPreview();
+		g_currentPage = `settingsDisplay`;
 	} else {
 		openDisplayPreview();
+		g_currentPage = `displayPreview`;
 	}
+	setShortcutEvent(g_currentPage, () => true, { displayFlg: false });
 };
 
 /**
@@ -9143,7 +9146,7 @@ const openDisplayPreview = () => {
 	// オーバーレイ本体
 	// ============================================================
 	const overlay = createEmptySprite(divRoot, `displayPreviewOverlay`, {
-		w: g_sWidth, h: g_sHeight, background: `rgba(0,0,0,0.82)`, pointerEvents: C_DIS_AUTO,
+		w: g_sWidth, h: g_sHeight, background: g_headerObj.baseBrightFlg ? `#eeeeeedd` : `#111111dd`, pointerEvents: C_DIS_AUTO,
 	});
 	g_previewRoot = overlay;
 	multiAppend(overlay,

@@ -2945,6 +2945,16 @@ const g_shortcutObj = {
         Tab: { id: `btnSettings` },
         KeyU: { id: `btnSettingSummary` },
     },
+    displayPreview: {
+        KeyP: { id: `btnDisplayPreview2` },
+        Escape: { id: `btnBack` },
+        Space: { id: `btnKeyConfig` },
+        Enter: { id: `btnPlay` },
+        NumpadEnter: { id: `btnPlay` },
+        ShiftLeft_Tab: { id: `btnBack` },
+        ShiftRight_Tab: { id: `btnBack` },
+        Tab: { id: `btnSettings` },
+    },
     exSetting: {
         ShiftLeft_KeyP: { id: `lnkPlayWindowL` },
         ShiftRight_KeyP: { id: `lnkPlayWindowL` },
