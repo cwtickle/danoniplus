@@ -21,6 +21,7 @@
 |Tarwil||[@Tarwil1503](https://x.com/Tarwil1503)|コーディング、機能提案|
 |zaql0|||不具合報告|
 |蒼宮野あいすかぁびぃ４号||[@icekirby4](https://x.com/icekirby4)|機能提案|
+|イトトン|[@ittn-exe](https://github.com/ittn-exe)|[@ittn-exe](https://x.com/ittn_exe)|機能提案|
 |さつき|[@satsukizzz](https://github.com/satsukizzz)|[@satsukizzz](https://x.com/satsukizzz)|機能提案、不具合報告|
 |ショウタ||[@sssyouta](https://x.com/sssyouta)|機能提案、不具合報告|
 |しょーでん||[@ricetask68934](https://x.com/ricetask68934)|機能提案|
