@@ -1809,6 +1809,7 @@ const g_handler = (() => {
 			if (key in events) {
 				const e = events[key];
 				e.target.removeEventListener(e.type, e.listener, e.capture);
+				delete events[key];
 			}
 		}
 	};
