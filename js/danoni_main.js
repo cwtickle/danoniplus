@@ -9263,10 +9263,10 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 			x: Math.round(_playW / 2 - 220), y: Math.round((_playH + (g_posObj?.stepYR ?? 0)) / 2 - 60), w: 440, h: 120,
 		}));
 	} else {
-		const jX0 = g_lblPosObj?.jdgJ?.x ?? Math.round(_playW / 2 - 220);
-		const jY0 = g_lblPosObj?.jdgJ?.y ?? Math.round((_playH + (g_posObj?.stepYR ?? 0)) / 2 - 60);
-		const fX0 = g_lblPosObj?.jdgFJ?.x ?? Math.round(_playW / 2 - 120);
-		const fY0 = g_lblPosObj?.jdgFJ?.y ?? Math.round((_playH + (g_posObj?.stepYR ?? 0)) / 2 + 10);
+		const jX0 = Math.round(_playW / 2 - 220) + (g_diffObj.arrowJdgX ?? 0);
+		const jY0 = Math.round((_playH + (g_posObj?.stepYR ?? 0)) / 2 - 60) + (g_diffObj.arrowJdgY ?? 0);
+		const fX0 = Math.round(_playW / 2 - 120) + (g_diffObj.frzJdgX ?? 0);
+		const fY0 = Math.round((_playH + (g_posObj?.stepYR ?? 0)) / 2 + 10) + (g_diffObj.frzJdgY ?? 0);
 
 		const jdgInitX = g_previewPos.jdgJ.x ?? jX0;
 		const jdgInitY = g_previewPos.jdgJ.y ?? jY0;
