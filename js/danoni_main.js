@@ -9148,6 +9148,9 @@ const openDisplayPreview = () => {
 	multiAppend(overlay,
 		createDivCss2Label(`lblDisplayPreview`, `Display Preview`,
 			g_lblPosObj.lblDisplayPreview, g_cssObj.settings_Display),
+		createCss2Button(`btnDisplayPreview2`, `↑ Preview`, _evt => {
+			toggleDisplayPreview();
+		}, g_lblPosObj.btnDisplayPreview, g_cssObj.button_Setting),
 		createDescDiv(`lblDisplayPreviewMsg`, g_lblNameObj.displayPreviewDesc),
 	);
 
@@ -9173,11 +9176,6 @@ const openDisplayPreview = () => {
 	// Display設定に応じたUIを描画
 	// ============================================================
 	buildPreviewUI(frame, playW, playH);
-
-	// 閉じるボタン
-	overlay.appendChild(createCss2Button(`btnDispClose`, `✕`, () => closeDisplayPreview(), {
-		x: g_btnX() + g_btnWidth() - 50, y: 0, w: 50, h: 50, siz: 16,
-	}, g_cssObj.button_Back));
 };
 
 /**
@@ -9397,46 +9395,38 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 	);
 
 	// ドラッグハンドル（薄い枠）
-	const handle = createEmptySprite(group, `lblHandle_${_groupId}`, {
+	createEmptySprite(group, `lblHandle_${_groupId}`, {
 		x: 0, y: 0, w: 370, h: 51, border: `1px dashed rgba(255,255,255,0.3)`,
 		boxSizing: `border-box`, borderRadius: `2px`,
 		background: `rgba(255,255,255,0.04)`,
 	});
-
-	// ラベル（左上）
-	handle.appendChild(
-		createDivCss2Label(`lblHandleSub_${_groupId}`, _groupId, {
-			x: 4, y: 2, siz: 9, color: `rgba(255,255,255,0.5)`,
-			fontFamily: getBasicFont(), pointerEvents: C_DIS_NONE,
-		})
-	);
 
 	// ---- ドラッグ処理 ----
 	let dragging = false;
 	let dragStartX = 0, dragStartY = 0;
 	let elemStartX = 0, elemStartY = 0;
 
-	const keyDown = addPreviewListener(group, `pointerdown`, (e) => {
+	const keyDown = addPreviewListener(group, `pointerdown`, _evt => {
 		dragging = true;
-		dragStartX = e.clientX;
-		dragStartY = e.clientY;
+		dragStartX = _evt.clientX;
+		dragStartY = _evt.clientY;
 		elemStartX = parseInt(group.style.left, 10);
 		elemStartY = parseInt(group.style.top, 10);
 		group.style.cursor = `grabbing`;
-		group.setPointerCapture(e.pointerId);
-		e.stopPropagation();
+		group.setPointerCapture(_evt.pointerId);
+		_evt.stopPropagation();
 	});
-	const keyMove = addPreviewListener(group, `pointermove`, (e) => {
+	const keyMove = addPreviewListener(group, `pointermove`, _evt => {
 		if (!dragging) return;
-		const dx = e.clientX - dragStartX;
-		const dy = e.clientY - dragStartY;
+		const dx = _evt.clientX - dragStartX;
+		const dy = _evt.clientY - dragStartY;
 		const newX = Math.max(0, Math.min(_playW - 370, elemStartX + dx));
 		const newY = Math.max(0, Math.min(_playH - 50, elemStartY + dy));
-		group.style.left = `${newX}px`;
-		group.style.top = `${newY}px`;
-		e.stopPropagation();
+		group.style.left = wUnit(newX);
+		group.style.top = wUnit(newY);
+		_evt.stopPropagation();
 	});
-	const keyUp = addPreviewListener(group, `pointerup`, (e) => {
+	const keyUp = addPreviewListener(group, `pointerup`, _evt => {
 		if (!dragging) return;
 		dragging = false;
 		group.style.cursor = `grab`;
@@ -9449,17 +9439,17 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 		g_previewPos[_groupId].y = finalY;
 		applyJudgPositionToGame(_groupId, finalX, finalY);
 
-		e.stopPropagation();
+		_evt.stopPropagation();
 	});
 	// pointerup が届かないケースを拾う
-	const keyCancel = addPreviewListener(group, `pointercancel`, () => {
+	addPreviewListener(group, `pointercancel`, _evt => {
 		dragging = false;
 		group.style.cursor = `grab`;
 	});
 	group.setAttribute(`lsnrkey`, keyMove);
 	group.setAttribute(`lsnrkeyTS`, keyDown);
 	group.setAttribute(`lsnrkeyTE`, keyUp);
-}
+};
 
 /**
  * ドラッグ結果の座標をゲーム本体の判定位置設定に反映する
@@ -9492,7 +9482,7 @@ const applyJudgPositionToGame = (_groupId, _x, _y) => {
 		g_diffObj.frzJdgY = _y - stdY;
 		showToast(`${g_lblNameObj.frzJdgUpdate}: dX=${g_diffObj.frzJdgX}, dY=${g_diffObj.frzJdgY}`);
 	}
-}
+};
 
 /**
  * 画面上部に一時的なトーストメッセージを表示する
@@ -9520,7 +9510,7 @@ function showToast(_msg) {
 	divRoot.appendChild(toast);
 	setTimeout(() => { toast.style.opacity = `0`; }, 2200);
 	setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2700);
-}
+};
 
 /**
  * 設定・オプション画面のラベル・ボタン処理の描画
