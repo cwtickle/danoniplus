@@ -4383,6 +4383,7 @@ const g_lang_msgInfoObj = {
         I_0005: `正規のミラー譜面で無いため、ハイスコアは保存されません`,
         I_0006: `ローカルストレージ情報をクリップボードにコピーしました！`,
         I_0007: `オブジェクト情報をクリップボードにコピーしました！`,
+        I_0011: `指定した部分キーが未定義のため、画面表示できません。設定を見直してください。`,
     },
     En: {
         W_0001: `Your browser is not guaranteed to work.<br>
@@ -4432,6 +4433,7 @@ const g_lang_msgInfoObj = {
         I_0005: `Highscore is not saved because not a regular mirrored chart.`,
         I_0006: `Local storage information copied to clipboard!`,
         I_0007: `Object information copied to clipboard!`,
+        I_0011: `The specified partial key is undefined and cannot be displayed on the screen. Please review your settings.`,
     },
 };
 
