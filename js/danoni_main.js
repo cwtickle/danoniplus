@@ -10408,7 +10408,6 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 			}
 		}
 		if (g_keycons.cursorNumList.length === 0) {
-			appearConfigSteps(0);
 		} else {
 			changeConfigCursor(0);
 
