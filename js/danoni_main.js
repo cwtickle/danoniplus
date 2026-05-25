@@ -10408,7 +10408,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 			}
 		}
 		if (g_keycons.cursorNumList.length === 0) {
-			appearConfigSteps(0);
+			makeInfoWindow(g_msgInfoObj.I_0011, ``);
 		} else {
 			changeConfigCursor(0);
 
