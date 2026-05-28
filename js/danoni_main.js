@@ -6734,6 +6734,11 @@ const dataMgtInit = () => {
 				.filter(key => key.startsWith('dm_') && g_stateObj[key] === C_FLG_ON)
 				.map(key => key.slice(`dm_`.length));
 
+			if (selectedData.length === 0) {
+				window.alert(g_msgObj.noDataSelected);
+				return;
+			}
+
 			if (window.confirm(g_msgObj.dataResetConfirm +
 				`\n\n${selectedData.map(val => `- ${g_msgObj[val] || g_msgObj.keyTypes.split('{0}').join(val)}`).join(`\n`)}`)) {
 				selectedData.forEach(key => {
