@@ -4883,6 +4883,7 @@ const g_lang_msgObj = {
         keyTypes: `Key: {0} の保存データ（個別の色設定を除く）を消去します。`,
 
         dataResetConfirm: `選択したローカル設定をクリアします。よろしいですか？`,
+        noDataSelected: `消去するデータが選択されていません。`,
         dataRestoreConfirm: `ローカル設定を前回の状態に戻します（１回限り）。よろしいですか？\n消去した設定によっては今の設定が上書きされることがあります。`,
         safeModeONConfirm: `セーフモードを解除して、ローカルストレージ情報を利用します。\nよろしいですか？`,
         safeModeOFFConfirm: `セーフモードを設定して、ローカルストレージを使わずにリロードします。\nよろしいですか？`,
@@ -4987,6 +4988,7 @@ const g_lang_msgObj = {
         keyTypes: `Deletes the stored data (except color settings) for Key: {0}.`,
 
         dataResetConfirm: `Delete the selected local settings. Is it OK?`,
+        noDataSelected: `No data selected to delete.`,
         dataRestoreConfirm: `Restore local settings to previous state (one time only). Is it OK?\nSome deleted settings may overwrite the current settings.`,
         safeModeONConfirm: `Exit safe mode and use local storage information. Is it OK?`,
         safeModeOFFConfirm: `Set safe mode and reload without local storage. Is it OK?`,
