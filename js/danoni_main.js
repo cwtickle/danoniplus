@@ -9366,18 +9366,22 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	if (d.musicinfo === C_FLG_OFF) {
 		_frame.appendChild(disableBox(`MusicInfo`, { x: 5, y: _playH - 50, w: _playW - 125, h: 40 }));
 	} else {
+		const creditName = `Sample Music / Artist Name`;
+		const difName = `[7key / Normal]`;
+		const checkMusicSiz = (_text, _siz) => getFontSize2(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, { maxSiz: _siz });
+
 		multiAppend(_frame,
-			createDivCss2Label(`previewCredit`, `Sample Music / Artist Name`, {
-				...g_lblPosObj.previewCredit, x: 100, y: _playH - 30, w: _playW - 125, h: 20,
+			createDivCss2Label(`previewCredit`, creditName, {
+				...g_lblPosObj.lblCredit, siz: checkMusicSiz(creditName, g_limitObj.musicTitleSiz)
 			}),
-			createDivCss2Label(`previewDifName`, `[7key / Normal]`, {
-				...g_lblPosObj.previewCredit, x: 100, y: _playH - 16, w: _playW - 125, h: 16, siz: 12,
+			createDivCss2Label(`previewDifName`, difName, {
+				...g_lblPosObj.lblDifName, siz: checkMusicSiz(difName, 12)
 			}),
 			createDivCss2Label(`previewTime1`, `0:04 /`, {
-				...g_lblPosObj.previewCredit, x: 18, y: _playH - 30, w: 40, h: 20, align: C_ALIGN_RIGHT,
+				...g_lblPosObj.lblTime1,
 			}),
 			createDivCss2Label(`previewTime2`, `2:54`, {
-				...g_lblPosObj.previewCredit, x: 60, y: _playH - 30, w: 60, h: 20,
+				...g_lblPosObj.lblTime2,
 			}),
 
 			// ゲージ設定名

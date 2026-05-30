@@ -546,9 +546,6 @@ const updateWindowSiz = () => {
         lblDisplayPreviewMsg: {
             x: g_btnX(), y: g_sHeight - 40, w: g_btnWidth(), h: 20, siz: 14,
         },
-        previewCredit: {
-            siz: 13, color: `#cccccc`, align: C_ALIGN_LEFT,
-        },
 
         /** キーコンフィグ画面 */
         scKcMsg: {
