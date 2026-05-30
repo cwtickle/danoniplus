@@ -9344,6 +9344,20 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 				}),
 			);
 		});
+
+		// FrzReturn用ゲージ
+		if (g_stateObj.frzReturn !== C_FLG_OFF) {
+			multiAppend(_frame,
+				createDivCss2Label(`previewFrzLifeBack`, ``, {
+					x: 0, y: 50, w: 5, h: _playH - 100,
+					background: `#333333`, border: `1px solid #555555`,
+				}),
+				createDivCss2Label(`previewFrzLifeBar`, ``, {
+					x: 0, y: 50 + (_playH - 100) * 0.7,
+					w: 5, h: (_playH - 100) * 0.3,
+				}, g_cssObj.life_frzNormal),
+			);
+		}
 	}
 
 	// ============================================================
@@ -9352,8 +9366,7 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	if (d.musicinfo === C_FLG_OFF) {
 		_frame.appendChild(disableBox(`MusicInfo`, { x: 5, y: _playH - 50, w: _playW - 125, h: 40 }));
 	} else {
-		multiAppend(
-			_frame,
+		multiAppend(_frame,
 			createDivCss2Label(`previewCredit`, `Sample Music / Artist Name`, {
 				...g_lblPosObj.previewCredit, x: 100, y: _playH - 30, w: _playW - 125, h: 20,
 			}),
@@ -9366,8 +9379,16 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 			createDivCss2Label(`previewTime2`, `2:54`, {
 				...g_lblPosObj.previewCredit, x: 60, y: _playH - 30, w: 60, h: 20,
 			}),
+
+			// ゲージ設定名
+			createDivCss2Label(`previewGauge`, `Original`, {
+				...g_lblPosObj.lblGaugeMode,
+			}),
 		)
 	}
+
+	// ユーザカスタムイベント(プレビュー表示用)
+	safeExecuteCustomHooks(`g_customJsObj.displayPreview`, g_customJsObj.displayPreview, _frame, _playW, _playH);
 };
 
 /**
