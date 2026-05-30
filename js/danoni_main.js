@@ -9299,21 +9299,12 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	// ライフゲージ（左縦帯）
 	// ============================================================
 	if (d.lifegauge === C_FLG_OFF) {
-		_frame.appendChild(disableBox(`LifeGauge`, { x: 5, y: 50, w: 15, h: _playH - 100 }));
+		_frame.appendChild(disableBox(`LifeGauge`, g_lblPosObj.previewLifeDisabled));
 	} else {
 		multiAppend(_frame,
-			createDivCss2Label(`previewLifeBack`, ``, {
-				x: 5, y: 50, w: 15, h: _playH - 100,
-				background: `#333333`, border: `1px solid #555555`,
-			}),
-			createDivCss2Label(`previewLifeBar`, ``, {
-				x: 5, y: 50 + (_playH - 100) * 0.3,
-				w: 15, h: (_playH - 100) * 0.7, background: `#006666`,
-			}),
-			createDivCss2Label(`previewLifeNum`, `700`, {
-				x: 0, y: 30, w: 70, h: 20,
-				size: 14, color: `#ffffff`, background: `#006666`, align: `center`,
-			}),
+			createDivCss2Label(`previewLifeBack`, ``, g_lblPosObj.previewLifeBack),
+			createDivCss2Label(`previewLifeBar`, ``, g_lblPosObj.previewLifeBar),
+			createDivCss2Label(`previewLifeNum`, `700`, g_lblPosObj.previewLifeNum),
 		);
 	}
 
@@ -9324,7 +9315,7 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		_frame.appendChild(disableBox(`Score`, g_lblPosObj.previewScoreDisabled));
 
 		if (g_stateObj.frzReturn !== C_FLG_OFF) {
-			_frame.appendChild(disableBox(`FrzReturn`, g_lblPosObj.previewLifeFrzDisabled));
+			_frame.appendChild(disableBox(`FrzReturnBar`, g_lblPosObj.previewLifeFrzDisabled));
 		}
 	} else {
 		const scoreItems = [
@@ -9352,14 +9343,8 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		// FrzReturn用ゲージ
 		if (g_stateObj.frzReturn !== C_FLG_OFF) {
 			multiAppend(_frame,
-				createDivCss2Label(`previewFrzLifeBack`, ``, {
-					x: 0, y: 50, w: 5, h: _playH - 100,
-					background: `#333333`, border: `1px solid #555555`,
-				}),
-				createDivCss2Label(`previewFrzLifeBar`, ``, {
-					x: 0, y: 50 + (_playH - 100) * 0.7,
-					w: 5, h: (_playH - 100) * 0.3,
-				}, g_cssObj.life_frzNormal),
+				createDivCss2Label(`previewFrzLifeBack`, ``, g_lblPosObj.previewFrzLifeBack),
+				createDivCss2Label(`previewFrzLifeBar`, ``, g_lblPosObj.previewFrzLifeBar, g_cssObj.life_frzNormal),
 			);
 		}
 	}
@@ -9368,8 +9353,8 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	// 曲名・制作者（左下）
 	// ============================================================
 	if (d.musicinfo === C_FLG_OFF) {
-		_frame.appendChild(disableBox(`MusicInfo`, { x: 5, y: _playH - 50, w: _playW - 125, h: 40 }));
-		_frame.appendChild(disableBox(`GaugeName`, { x: 0, y: 10, w: 110, h: 18 }));
+		_frame.appendChild(disableBox(`MusicInfo`, g_lblPosObj.previewMusicInfoDisabled));
+		_frame.appendChild(disableBox(`GaugeName`, g_lblPosObj.previewGaugeNameDisabled));
 	} else {
 		const creditName = `Sample Music / Artist Name`;
 		const difName = `[7key / Normal]`;

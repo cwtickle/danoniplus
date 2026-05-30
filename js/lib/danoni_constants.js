@@ -549,8 +549,37 @@ const updateWindowSiz = () => {
         previewScoreDisabled: {
             x: g_headerObj.playingWidth - 80, y: 20, w: 70, h: 200,
         },
+        previewLifeDisabled: {
+            x: 5, y: 50, w: 15, h: g_headerObj.playingHeight - 100,
+        },
         previewLifeFrzDisabled: {
+            x: 0, y: 70, w: 5, h: g_headerObj.playingHeight - 120,
+        },
+        previewMusicInfoDisabled: {
+            x: 5, y: g_headerObj.playingHeight - 50, w: g_headerObj.playingWidth - 125, h: 40,
+        },
+        previewGaugeNameDisabled: {
+            x: 0, y: 10, w: 110, h: 18,
+        },
+        previewLifeBack: {
+            x: 5, y: 50, w: 15, h: g_headerObj.playingHeight - 100,
+            background: `#333333`, border: `1px solid #555555`,
+        },
+        previewLifeBar: {
+            x: 5, y: 50 + (g_headerObj.playingHeight - 100) * 0.3,
+            w: 15, h: (g_headerObj.playingHeight - 100) * 0.7, background: `#006666`,
+        },
+        previewLifeNum: {
+            x: 0, y: 30, w: 70, h: 20,
+            size: 14, color: `#ffffff`, background: `#006666`, align: C_ALIGN_CENTER,
+        },
+        previewFrzLifeBack: {
             x: 0, y: 50, w: 5, h: g_headerObj.playingHeight - 100,
+            background: `#333333`, border: `1px solid #555555`,
+        },
+        previewFrzLifeBar: {
+            x: 0, y: 50 + (g_headerObj.playingHeight - 100) * 0.7,
+            w: 5, h: (g_headerObj.playingHeight - 100) * 0.3,
         },
 
         /** キーコンフィグ画面 */
