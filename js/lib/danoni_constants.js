@@ -546,6 +546,12 @@ const updateWindowSiz = () => {
         lblDisplayPreviewMsg: {
             x: g_btnX(), y: g_sHeight - 40, w: g_btnWidth(), h: 20, siz: 14,
         },
+        previewScoreDisabled: {
+            x: g_headerObj.playingWidth - 80, y: 20, w: 70, h: 200,
+        },
+        previewLifeFrzDisabled: {
+            x: 0, y: 50, w: 5, h: g_headerObj.playingHeight - 100,
+        },
 
         /** キーコンフィグ画面 */
         scKcMsg: {

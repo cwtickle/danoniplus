@@ -9321,7 +9321,11 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	// スコア・判定カウンタ（右端縦列）
 	// ============================================================
 	if (d.score === C_FLG_OFF) {
-		_frame.appendChild(disableBox(`Score`, { x: _playW - 80, y: 20, w: 70, h: 200 }));
+		_frame.appendChild(disableBox(`Score`, g_lblPosObj.previewScoreDisabled));
+
+		if (g_stateObj.frzReturn !== C_FLG_OFF) {
+			_frame.appendChild(disableBox(`FrzReturn`, g_lblPosObj.previewLifeFrzDisabled));
+		}
 	} else {
 		const scoreItems = [
 			{ color: `#66ffff`, cnt: `5` },
@@ -9365,6 +9369,7 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	// ============================================================
 	if (d.musicinfo === C_FLG_OFF) {
 		_frame.appendChild(disableBox(`MusicInfo`, { x: 5, y: _playH - 50, w: _playW - 125, h: 40 }));
+		_frame.appendChild(disableBox(`GaugeName`, { x: 0, y: 10, w: 110, h: 18 }));
 	} else {
 		const creditName = `Sample Music / Artist Name`;
 		const difName = `[7key / Normal]`;
@@ -9380,14 +9385,10 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 			createDivCss2Label(`previewTime1`, `0:04 /`, {
 				...g_lblPosObj.lblTime1,
 			}),
-			createDivCss2Label(`previewTime2`, `2:54`, {
-				...g_lblPosObj.lblTime2,
-			}),
+			createDivCss2Label(`previewTime2`, `2:54`, g_lblPosObj.lblTime2),
 
 			// ゲージ設定名
-			createDivCss2Label(`previewGauge`, `Original`, {
-				...g_lblPosObj.lblGaugeMode,
-			}),
+			createDivCss2Label(`previewGauge`, `Original`, g_lblPosObj.lblGaugeMode),
 		)
 	}
 
