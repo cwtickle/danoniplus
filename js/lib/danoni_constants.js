@@ -640,7 +640,7 @@ const updateWindowSiz = () => {
             x: -8, y: -8, w: C_ARW_WIDTH + 16, h: C_ARW_WIDTH + 16,
         },
         lblframe: {
-            x: 0, y: 0, w: 100, h: 30, siz: 20,
+            x: 0, y: 0, w: 100, h: 30, siz: 18,
         },
         lblCredit: {
             x: 125, y: g_headerObj.playingHeight - 30, w: g_headerObj.playingWidth - 125, h: 20, align: C_ALIGN_LEFT,
@@ -653,6 +653,9 @@ const updateWindowSiz = () => {
         },
         lblTime2: {
             x: 60, y: g_headerObj.playingHeight - 30, w: 60, h: 20, siz: g_limitObj.mainSiz,
+        },
+        lblGaugeMode: {
+            x: 5, y: 18, w: 100, h: 20, siz: 11, align: C_ALIGN_LEFT,
         },
         lifeBackObj: {
             x: 5, y: 50, w: 15, h: g_headerObj.playingHeight - 100, styleName: `lifeBar`,

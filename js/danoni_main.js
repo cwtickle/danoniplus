@@ -14264,6 +14264,9 @@ const mainInit = () => {
 			x: 0, y: 30, w: 70, h: 20, siz: g_limitObj.jdgCntsSiz, display: g_workObj.lifegaugeDisp,
 		}, lblInitColor),
 
+		// ゲージ種類
+		createDivCss2Label(`lblGaugeMode`, g_stateObj.gauge, { ...g_lblPosObj.lblGaugeMode, display: g_workObj.musicinfoDisp }),
+
 		// ライフ背景
 		createColorObject2(`lifeBackObj`, { ...g_lblPosObj.lifeBackObj, display: g_workObj.lifegaugeDisp }, g_cssObj.life_Background),
 
