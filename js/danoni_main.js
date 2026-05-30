@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/05/26
+ * Revised : 2026/05/30
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 48.1.2`;
-const g_revisedDate = `2026/05/26`;
+const g_version = `Ver 48.2.0`;
+const g_revisedDate = `2026/05/30`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -6734,6 +6734,11 @@ const dataMgtInit = () => {
 				.filter(key => key.startsWith('dm_') && g_stateObj[key] === C_FLG_ON)
 				.map(key => key.slice(`dm_`.length));
 
+			if (selectedData.length === 0) {
+				window.alert(g_msgObj.noDataSelected);
+				return;
+			}
+
 			if (window.confirm(g_msgObj.dataResetConfirm +
 				`\n\n${selectedData.map(val => `- ${g_msgObj[val] || g_msgObj.keyTypes.split('{0}').join(val)}`).join(`\n`)}`)) {
 				selectedData.forEach(key => {
@@ -9294,21 +9299,12 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	// ライフゲージ（左縦帯）
 	// ============================================================
 	if (d.lifegauge === C_FLG_OFF) {
-		_frame.appendChild(disableBox(`LifeGauge`, { x: 5, y: 50, w: 15, h: _playH - 100 }));
+		_frame.appendChild(disableBox(`LifeGauge`, g_lblPosObj.previewLifeDisabled));
 	} else {
 		multiAppend(_frame,
-			createDivCss2Label(`previewLifeBack`, ``, {
-				x: 5, y: 50, w: 15, h: _playH - 100,
-				background: `#333333`, border: `1px solid #555555`,
-			}),
-			createDivCss2Label(`previewLifeBar`, ``, {
-				x: 5, y: 50 + (_playH - 100) * 0.3,
-				w: 15, h: (_playH - 100) * 0.7, background: `#006666`,
-			}),
-			createDivCss2Label(`previewLifeNum`, `700`, {
-				x: 0, y: 30, w: 70, h: 20,
-				size: 14, color: `#ffffff`, background: `#006666`, align: `center`,
-			}),
+			createDivCss2Label(`previewLifeBack`, ``, g_lblPosObj.previewLifeBack),
+			createDivCss2Label(`previewLifeBar`, ``, g_lblPosObj.previewLifeBar),
+			createDivCss2Label(`previewLifeNum`, `700`, g_lblPosObj.previewLifeNum),
 		);
 	}
 
@@ -9316,7 +9312,11 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	// スコア・判定カウンタ（右端縦列）
 	// ============================================================
 	if (d.score === C_FLG_OFF) {
-		_frame.appendChild(disableBox(`Score`, { x: _playW - 80, y: 20, w: 70, h: 200 }));
+		_frame.appendChild(disableBox(`Score`, g_lblPosObj.previewScoreDisabled));
+
+		if (g_stateObj.frzReturn !== C_FLG_OFF) {
+			_frame.appendChild(disableBox(`FrzReturnBar`, g_lblPosObj.previewLifeFrzDisabled));
+		}
 	} else {
 		const scoreItems = [
 			{ color: `#66ffff`, cnt: `5` },
@@ -9339,30 +9339,114 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 				}),
 			);
 		});
+
+		// FrzReturn用ゲージ
+		if (g_stateObj.frzReturn !== C_FLG_OFF) {
+			multiAppend(_frame,
+				createDivCss2Label(`previewFrzLifeBack`, ``, g_lblPosObj.previewFrzLifeBack),
+				createDivCss2Label(`previewFrzLifeBar`, ``, g_lblPosObj.previewFrzLifeBar, g_cssObj.life_frzNormal),
+			);
+		}
 	}
 
 	// ============================================================
 	// 曲名・制作者（左下）
 	// ============================================================
 	if (d.musicinfo === C_FLG_OFF) {
-		_frame.appendChild(disableBox(`MusicInfo`, { x: 5, y: _playH - 50, w: _playW - 125, h: 40 }));
+		_frame.appendChild(disableBox(`MusicInfo`, g_lblPosObj.previewMusicInfoDisabled));
+		_frame.appendChild(disableBox(`GaugeName`, g_lblPosObj.previewGaugeNameDisabled));
 	} else {
-		multiAppend(
-			_frame,
-			createDivCss2Label(`previewCredit`, `Sample Music / Artist Name`, {
-				...g_lblPosObj.previewCredit, x: 100, y: _playH - 30, w: _playW - 125, h: 20,
+		const creditName = `Sample Music / Artist Name`;
+		const difName = `[7key / Normal]`;
+		const checkMusicSiz = (_text, _siz) => getFontSize2(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, { maxSiz: _siz });
+
+		multiAppend(_frame,
+			createDivCss2Label(`previewCredit`, creditName, {
+				...g_lblPosObj.lblCredit, siz: checkMusicSiz(creditName, g_limitObj.musicTitleSiz)
 			}),
-			createDivCss2Label(`previewDifName`, `[7key / Normal]`, {
-				...g_lblPosObj.previewCredit, x: 100, y: _playH - 16, w: _playW - 125, h: 16, siz: 12,
+			createDivCss2Label(`previewDifName`, difName, {
+				...g_lblPosObj.lblDifName, siz: checkMusicSiz(difName, 12)
 			}),
 			createDivCss2Label(`previewTime1`, `0:04 /`, {
-				...g_lblPosObj.previewCredit, x: 18, y: _playH - 30, w: 40, h: 20, align: C_ALIGN_RIGHT,
+				...g_lblPosObj.lblTime1,
 			}),
-			createDivCss2Label(`previewTime2`, `2:54`, {
-				...g_lblPosObj.previewCredit, x: 60, y: _playH - 30, w: 60, h: 20,
-			}),
+			createDivCss2Label(`previewTime2`, `2:54`, g_lblPosObj.lblTime2),
+
+			// ゲージ設定名
+			createDivCss2Label(`previewGauge`, `Original`, g_lblPosObj.lblGaugeMode),
 		)
 	}
+
+	// ユーザカスタムイベント(プレビュー表示用)
+	safeExecuteCustomHooks(`g_customJsObj.displayPreview`, g_customJsObj.displayPreview, _frame, _playW, _playH);
+};
+
+/**
+ * 要素をドラッグ可能にする（汎用ユーティリティ）
+ * @param {HTMLElement} _target ドラッグ対象の要素
+ * @param {number} _playW 制限範囲の幅
+ * @param {number} _playH 制限範囲の高さ
+ * @param {object} _bounds 要素自体のサイズ { w, h } (はみ出し防止用)
+ * @param {function} _onDragEnd 位置確定時に呼ばれるコールバック (_finalX, _finalY) => void
+ */
+const makeElementDraggable = (_target, _playW, _playH, _bounds, _onDragEnd) => {
+	let dragging = false;
+	let dragStartX = 0, dragStartY = 0;
+	let elemStartX = 0, elemStartY = 0;
+
+	const boundsW = _bounds?.w ?? _target.offsetWidth ?? 0;
+	const boundsH = _bounds?.h ?? _target.offsetHeight ?? 0;
+
+	const keyDown = addPreviewListener(_target, `pointerdown`, _evt => {
+		dragging = true;
+		dragStartX = _evt.clientX;
+		dragStartY = _evt.clientY;
+		elemStartX = parseInt(_target.style.left, 10) || 0;
+		elemStartY = parseInt(_target.style.top, 10) || 0;
+		_target.style.cursor = `grabbing`;
+		_target.setPointerCapture(_evt.pointerId);
+		_evt.stopPropagation();
+	});
+
+	const keyMove = addPreviewListener(_target, `pointermove`, _evt => {
+		if (!dragging) return;
+		const dx = _evt.clientX - dragStartX;
+		const dy = _evt.clientY - dragStartY;
+
+		// 境界値制限
+		const newX = Math.max(0, Math.min(_playW - boundsW, elemStartX + dx));
+		const newY = Math.max(0, Math.min(_playH - boundsH, elemStartY + dy));
+
+		_target.style.left = wUnit(newX);
+		_target.style.top = wUnit(newY);
+		_evt.stopPropagation();
+	});
+
+	const keyUp = addPreviewListener(_target, `pointerup`, _evt => {
+		if (!dragging) return;
+		dragging = false;
+		_target.style.cursor = `grab`;
+
+		const finalX = parseInt(_target.style.left, 10) || 0;
+		const finalY = parseInt(_target.style.top, 10) || 0;
+
+		// 外部の保存処理などを実行
+		if (typeof _onDragEnd === `function`) {
+			_onDragEnd(finalX, finalY);
+		}
+
+		_evt.stopPropagation();
+	});
+
+	addPreviewListener(_target, `pointercancel`, _evt => {
+		dragging = false;
+		_target.style.cursor = `grab`;
+	});
+
+	// 既存の管理用属性（必要に応じて）
+	_target.setAttribute(`lsnrkey`, keyMove);
+	_target.setAttribute(`lsnrkeyTS`, keyDown);
+	_target.setAttribute(`lsnrkeyTE`, keyUp);
 };
 
 /**
@@ -9376,11 +9460,14 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
  * @param {object}      _opts      表示テキスト・色オプション
  */
 const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _playH, _opts) => {
+	const groupW = 370;
+	const groupH = 51;
 
 	const group = createEmptySprite(_parent, `previewGrp_${_groupId}`, {
-		x: _initX, y: _initY, w: 370, h: 51, cursor: `grab`, pointerEvents: C_DIS_AUTO,
+		x: _initX, y: _initY, w: groupW, h: groupH, cursor: `grab`, pointerEvents: C_DIS_AUTO,
 	});
 
+	// 内包要素の生成 (省略：元のコードの multiAppend 部分と同一)
 	multiAppend(
 		group,
 		// キャラクタ
@@ -9402,91 +9489,73 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 
 	// ドラッグハンドル（薄い枠）
 	createEmptySprite(group, `lblHandle_${_groupId}`, {
-		x: 0, y: 0, w: 370, h: 51, border: `1px dashed rgba(255,255,255,0.3)`,
-		boxSizing: `border-box`, borderRadius: `2px`,
-		background: `rgba(255,255,255,0.04)`,
+		x: 0, y: 0, w: groupW, h: groupH, border: `1px dashed rgba(255,255,255,0.3)`,
+		boxSizing: `border-box`, borderRadius: `2px`, background: `rgba(255,255,255,0.04)`,
 	});
 
-	// ---- ドラッグ処理 ----
-	let dragging = false;
-	let dragStartX = 0, dragStartY = 0;
-	let elemStartX = 0, elemStartY = 0;
+	// ============================================================
+	// 判定グループ固有の「座標反映ルール」を定義
+	// ============================================================
+	const configMap = {
+		jdgJ: {
+			toastTitle: g_lblNameObj.arrowJdgUpdate,
+			getStdX: (pw) => Math.round(pw / 2 - 220),
+			getStdY: (ph, syr) => Math.round((ph + syr) / 2 - 60),
+			saveCallback: (dx, dy) => {
+				g_diffObj.arrowJdgX = dx;
+				g_diffObj.arrowJdgY = dy;
+			}
+		},
+		jdgFJ: {
+			toastTitle: g_lblNameObj.frzJdgUpdate,
+			getStdX: (pw) => Math.round(pw / 2 - 120),
+			getStdY: (ph, syr) => Math.round((ph + syr) / 2 + 10),
+			saveCallback: (dx, dy) => {
+				g_diffObj.frzJdgX = dx;
+				g_diffObj.frzJdgY = dy;
+			}
+		}
+	};
 
-	const keyDown = addPreviewListener(group, `pointerdown`, _evt => {
-		dragging = true;
-		dragStartX = _evt.clientX;
-		dragStartY = _evt.clientY;
-		elemStartX = parseInt(group.style.left, 10);
-		elemStartY = parseInt(group.style.top, 10);
-		group.style.cursor = `grabbing`;
-		group.setPointerCapture(_evt.pointerId);
-		_evt.stopPropagation();
-	});
-	const keyMove = addPreviewListener(group, `pointermove`, _evt => {
-		if (!dragging) return;
-		const dx = _evt.clientX - dragStartX;
-		const dy = _evt.clientY - dragStartY;
-		const newX = Math.max(0, Math.min(_playW - 370, elemStartX + dx));
-		const newY = Math.max(0, Math.min(_playH - 50, elemStartY + dy));
-		group.style.left = wUnit(newX);
-		group.style.top = wUnit(newY);
-		_evt.stopPropagation();
-	});
-	const keyUp = addPreviewListener(group, `pointerup`, _evt => {
-		if (!dragging) return;
-		dragging = false;
-		group.style.cursor = `grab`;
-
-		const finalX = parseInt(group.style.left, 10);
-		const finalY = parseInt(group.style.top, 10);
-
-		// ---- 座標をグローバル状態とゲーム本体に反映 ----
+	// 汎用関数を呼び出し、判定位置特有の処理をコールバックとして渡す
+	makeElementDraggable(group, _playW, _playH, { w: groupW, h: groupH }, (finalX, finalY) => {
+		// グローバルなプレビュー座標を更新
 		g_previewPos[_groupId].x = finalX;
 		g_previewPos[_groupId].y = finalY;
-		applyJudgPositionToGame(_groupId, finalX, finalY);
 
-		_evt.stopPropagation();
+		// 設定マップから該当するルールを適用して保存
+		const currentConfig = configMap[_groupId];
+		if (currentConfig) {
+			applyElementPositionToGame(finalX, finalY, currentConfig);
+		}
 	});
-	// pointerup が届かないケースを拾う
-	addPreviewListener(group, `pointercancel`, _evt => {
-		dragging = false;
-		group.style.cursor = `grab`;
-	});
-	group.setAttribute(`lsnrkey`, keyMove);
-	group.setAttribute(`lsnrkeyTS`, keyDown);
-	group.setAttribute(`lsnrkeyTE`, keyUp);
 };
 
 /**
- * ドラッグ結果の座標をゲーム本体の判定位置設定に反映する
- * @param {string} _groupId  `jdgJ` または `jdgFJ`
- * @param {number} _x        frame相対X
- * @param {number} _y        frame相対Y
+ * ドラッグ結果の座標をゲーム本体の設定に汎用的に反映する
+ * @param {number} _x 確定したframe相対X
+ * @param {number} _y 確定したframe相対Y
+ * @param {object} _config 反映用の設定オブジェクト
  */
-const applyJudgPositionToGame = (_groupId, _x, _y) => {
+const applyElementPositionToGame = (_x, _y, _config) => {
+	const playW = g_headerObj.playingWidth || g_sWidth;
 	const playH = g_headerObj.playingHeight || g_sHeight;
 	const stepYR = g_posObj?.stepYR ?? 0;
 
-	// mainInit内のjdgX[0/1], jdgY[0/1]はローカル変数なため、
-	// g_diffObj経由でオフセットとして保持し、次回プレイ開始時に反映する。
-	// ここでは g_diffObj.arrowJdgY / frzJdgY をオフセット格納先として利用する。
-	//
-	// 「標準Y」= (playH + stepYR) / 2 - 60  (jdgJ の場合)
-	//           = (playH + stepYR) / 2 + 10  (jdgFJ の場合)
-	// オフセット = 実際のY - 標準Y
+	// 1. 各要素固有の「標準座標（基準点）」を計算
+	const stdX = _config.getStdX(playW);
+	const stdY = _config.getStdY(playH, stepYR);
 
-	if (_groupId === `jdgJ`) {
-		const stdX = g_headerObj.playingWidth / 2 - 220;
-		const stdY = Math.round((playH + stepYR) / 2 - 60);
-		g_diffObj.arrowJdgX = _x - stdX;
-		g_diffObj.arrowJdgY = _y - stdY;
-		showToast(`${g_lblNameObj.arrowJdgUpdate}: dX=${g_diffObj.arrowJdgX}, dY=${g_diffObj.arrowJdgY}`);
-	} else if (_groupId === `jdgFJ`) {
-		const stdX = g_headerObj.playingWidth / 2 - 120;
-		const stdY = Math.round((playH + stepYR) / 2 + 10);
-		g_diffObj.frzJdgX = _x - stdX;
-		g_diffObj.frzJdgY = _y - stdY;
-		showToast(`${g_lblNameObj.frzJdgUpdate}: dX=${g_diffObj.frzJdgX}, dY=${g_diffObj.frzJdgY}`);
+	// 2. オフセット（差分）を計算
+	const diffX = _x - stdX;
+	const diffY = _y - stdY;
+
+	// 3. 指定された保存先にオフセットを格納
+	_config.saveCallback(diffX, diffY);
+
+	// 4. トースト表示 (通知が不要な要素なら省略可能にする)
+	if (_config.toastTitle) {
+		showToast(`${_config.toastTitle}: dX=${diffX}, dY=${diffY}`);
 	}
 };
 
@@ -14258,6 +14327,9 @@ const mainInit = () => {
 		createDivCss2Label(`lblLife`, intLifeVal, {
 			x: 0, y: 30, w: 70, h: 20, siz: g_limitObj.jdgCntsSiz, display: g_workObj.lifegaugeDisp,
 		}, lblInitColor),
+
+		// ゲージ種類
+		createDivCss2Label(`lblGaugeMode`, g_stateObj.gauge, { ...g_lblPosObj.lblGaugeMode, display: g_workObj.musicinfoDisp }),
 
 		// ライフ背景
 		createColorObject2(`lifeBackObj`, { ...g_lblPosObj.lifeBackObj, display: g_workObj.lifegaugeDisp }, g_cssObj.life_Background),

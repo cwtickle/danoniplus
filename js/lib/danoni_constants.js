@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/05/26 (v48.1.2)
+ * Revised : 2026/05/30 (v48.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -546,8 +546,40 @@ const updateWindowSiz = () => {
         lblDisplayPreviewMsg: {
             x: g_btnX(), y: g_sHeight - 40, w: g_btnWidth(), h: 20, siz: 14,
         },
-        previewCredit: {
-            siz: 13, color: `#cccccc`, align: C_ALIGN_LEFT,
+        previewScoreDisabled: {
+            x: g_headerObj.playingWidth - 80, y: 20, w: 70, h: 200,
+        },
+        previewLifeDisabled: {
+            x: 5, y: 50, w: 15, h: g_headerObj.playingHeight - 100,
+        },
+        previewLifeFrzDisabled: {
+            x: 0, y: 70, w: 5, h: g_headerObj.playingHeight - 120,
+        },
+        previewMusicInfoDisabled: {
+            x: 5, y: g_headerObj.playingHeight - 50, w: g_headerObj.playingWidth - 125, h: 40,
+        },
+        previewGaugeNameDisabled: {
+            x: 0, y: 10, w: 110, h: 18,
+        },
+        previewLifeBack: {
+            x: 5, y: 50, w: 15, h: g_headerObj.playingHeight - 100,
+            background: `#333333`, border: `1px solid #555555`,
+        },
+        previewLifeBar: {
+            x: 5, y: 50 + (g_headerObj.playingHeight - 100) * 0.3,
+            w: 15, h: (g_headerObj.playingHeight - 100) * 0.7, background: `#006666`,
+        },
+        previewLifeNum: {
+            x: 0, y: 30, w: 70, h: 20,
+            siz: g_limitObj.jdgCntsSiz, color: `#ffffff`, background: `#006666`, align: C_ALIGN_CENTER,
+        },
+        previewFrzLifeBack: {
+            x: 0, y: 50, w: 5, h: g_headerObj.playingHeight - 100,
+            background: `#333333`, border: `1px solid #555555`,
+        },
+        previewFrzLifeBar: {
+            x: 0, y: 50 + (g_headerObj.playingHeight - 100) * 0.7,
+            w: 5, h: (g_headerObj.playingHeight - 100) * 0.3,
         },
 
         /** キーコンフィグ画面 */
@@ -640,7 +672,7 @@ const updateWindowSiz = () => {
             x: -8, y: -8, w: C_ARW_WIDTH + 16, h: C_ARW_WIDTH + 16,
         },
         lblframe: {
-            x: 0, y: 0, w: 100, h: 30, siz: 20,
+            x: 0, y: 0, w: 100, h: 30, siz: 18,
         },
         lblCredit: {
             x: 125, y: g_headerObj.playingHeight - 30, w: g_headerObj.playingWidth - 125, h: 20, align: C_ALIGN_LEFT,
@@ -653,6 +685,9 @@ const updateWindowSiz = () => {
         },
         lblTime2: {
             x: 60, y: g_headerObj.playingHeight - 30, w: 60, h: 20, siz: g_limitObj.mainSiz,
+        },
+        lblGaugeMode: {
+            x: 5, y: 18, w: 100, h: 20, siz: 11, align: C_ALIGN_LEFT,
         },
         lifeBackObj: {
             x: 5, y: 50, w: 15, h: g_headerObj.playingHeight - 100, styleName: `lifeBar`,
@@ -4883,6 +4918,7 @@ const g_lang_msgObj = {
         keyTypes: `Key: {0} の保存データ（個別の色設定を除く）を消去します。`,
 
         dataResetConfirm: `選択したローカル設定をクリアします。よろしいですか？`,
+        noDataSelected: `消去するデータが選択されていません。`,
         dataRestoreConfirm: `ローカル設定を前回の状態に戻します（１回限り）。よろしいですか？\n消去した設定によっては今の設定が上書きされることがあります。`,
         safeModeONConfirm: `セーフモードを解除して、ローカルストレージ情報を利用します。\nよろしいですか？`,
         safeModeOFFConfirm: `セーフモードを設定して、ローカルストレージを使わずにリロードします。\nよろしいですか？`,
@@ -4987,6 +5023,7 @@ const g_lang_msgObj = {
         keyTypes: `Deletes the stored data (except color settings) for Key: {0}.`,
 
         dataResetConfirm: `Delete the selected local settings. Is it OK?`,
+        noDataSelected: `No data selected to delete.`,
         dataRestoreConfirm: `Restore local settings to previous state (one time only). Is it OK?\nSome deleted settings may overwrite the current settings.`,
         safeModeONConfirm: `Exit safe mode and use local storage information. Is it OK?`,
         safeModeOFFConfirm: `Set safe mode and reload without local storage. Is it OK?`,
@@ -5107,6 +5144,7 @@ const g_customJsObj = {
     option: [],
     difficulty: [],
     settingsDisplay: [],
+    displayPreview: [],
     exSetting: [],
     settingSummary: [],
     keyconfig: [],
