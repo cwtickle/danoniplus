@@ -571,7 +571,7 @@ const updateWindowSiz = () => {
         },
         previewLifeNum: {
             x: 0, y: 30, w: 70, h: 20,
-            size: 14, color: `#ffffff`, background: `#006666`, align: C_ALIGN_CENTER,
+            siz: g_limitObj.jdgCntsSiz, color: `#ffffff`, background: `#006666`, align: C_ALIGN_CENTER,
         },
         previewFrzLifeBack: {
             x: 0, y: 50, w: 5, h: g_headerObj.playingHeight - 100,
