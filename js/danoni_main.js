@@ -14265,7 +14265,7 @@ const mainInit = () => {
 		}, lblInitColor),
 
 		// ゲージ種類
-		createDivCss2Label(`lblGaugeMode`, g_stateObj.gauge, { ...g_lblPosObj.lblGaugeMode }),
+		createDivCss2Label(`lblGaugeMode`, g_stateObj.gauge, { ...g_lblPosObj.lblGaugeMode, display: g_workObj.musicinfoDisp }),
 
 		// ライフ背景
 		createColorObject2(`lifeBackObj`, { ...g_lblPosObj.lifeBackObj, display: g_workObj.lifegaugeDisp }, g_cssObj.life_Background),
