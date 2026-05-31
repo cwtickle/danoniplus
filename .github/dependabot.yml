@@ -1,0 +1,14 @@
+version: 2
+updates:
+  # GitHub Actions のアップデートを自動化する設定
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly" # チェックする頻度（daily, weekly, monthly から選択）
+    open-pull-requests-limit: 5 # 同時に開くPRの最大数
+
+  # (参考) もし JavaScript/Node.js のライブラリも自動化したい場合
+  # - package-ecosystem: "npm"
+  #   directory: "/"
+  #   schedule:
+  #     interval: "weekly"

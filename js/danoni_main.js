@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/05/30
+ * Revised : 2026/05/31
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 48.2.0`;
-const g_revisedDate = `2026/05/30`;
+const g_version = `Ver 48.3.0`;
+const g_revisedDate = `2026/05/31`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -4359,8 +4359,26 @@ const headerConvert = _dosObj => {
 	obj.baseSpeed = 1 + ((g_posObj.distY - (g_posObj.stepY - C_STEP_Y) * 2) / (500 - C_STEP_Y) - 1) * 0.85;
 
 	// 矢印・フリーズアロー判定位置補正
+	g_diffObj.arrowJdgX = (isNaN(parseFloat(_dosObj.arrowJdgX)) ? 0 : parseFloat(_dosObj.arrowJdgX));
 	g_diffObj.arrowJdgY = (isNaN(parseFloat(_dosObj.arrowJdgY)) ? 0 : parseFloat(_dosObj.arrowJdgY));
+	g_diffObj.frzJdgX = (isNaN(parseFloat(_dosObj.frzJdgX)) ? 0 : parseFloat(_dosObj.frzJdgX));
 	g_diffObj.frzJdgY = (isNaN(parseFloat(_dosObj.frzJdgY)) ? 0 : parseFloat(_dosObj.frzJdgY));
+	g_diffInitObj.arrowJdgX = g_diffObj.arrowJdgX;
+	g_diffInitObj.arrowJdgY = g_diffObj.arrowJdgY;
+	g_diffInitObj.frzJdgX = g_diffObj.frzJdgX;
+	g_diffInitObj.frzJdgY = g_diffObj.frzJdgY;
+
+	// ショートカット表示位置補正
+	g_diffObj.shortcutX = (isNaN(parseFloat(_dosObj.shortcutX)) ? 0 : parseFloat(_dosObj.shortcutX));
+	g_diffObj.shortcutY = (isNaN(parseFloat(_dosObj.shortcutY)) ? 0 : parseFloat(_dosObj.shortcutY));
+	g_diffInitObj.shortcutX = g_diffObj.shortcutX;
+	g_diffInitObj.shortcutY = g_diffObj.shortcutY;
+
+	if (Object.keys(g_diffObj).some(key => g_localStorage[key] !== undefined)) {
+		Object.keys(g_diffObj).forEach(key =>
+			g_diffObj[key] = setIntVal(g_localStorage[key], g_diffObj[key])
+		);
+	}
 
 	// musicフォルダ設定
 	obj.musicFolder = _dosObj.musicFolder ?? (g_remoteFlg ? `${C_MRK_CURRENT_DIRECTORY}../music` : `music`);
@@ -9111,8 +9129,9 @@ let g_previewLsnrKeys = new Set();
 
 /** プレビュー内の各UIオブジェクトの現在座標 */
 const g_previewPos = {
-	jdgJ: { x: null, y: null },   // 通常判定キャラクタ・コンボ
-	jdgFJ: { x: null, y: null },   // フリーズ判定キャラクタ・コンボ
+	arrowJdg: { x: null, y: null },   // 通常判定キャラクタ・コンボ
+	frzJdg: { x: null, y: null },     // フリーズ判定キャラクタ・コンボ
+	shortcut: { x: null, y: null },
 };
 
 /**
@@ -9161,8 +9180,23 @@ const openDisplayPreview = () => {
 		createCss2Button(`btnDisplayPreview2`, `↑ Preview`, _evt => {
 			toggleDisplayPreview();
 		}, g_lblPosObj.btnDisplayPreview, g_cssObj.button_Setting),
+		createCss2Button(`btnDisplayReset`, `Reset`, _evt => {
+			if (window.confirm(g_msgObj.displayPreviewResetConfirm)) {
+				Object.assign(g_diffObj, g_diffInitObj);
+				Object.keys(g_diffInitObj).forEach(key => {
+					g_localStorage[key] = g_diffInitObj[key];
+				});
+				Object.keys(g_previewPos).forEach(key => g_previewPos[key] = { x: null, y: null });
+				closeDisplayPreview();
+				openDisplayPreview();
+			}
+		}, g_lblPosObj.btnDisplayReset, g_cssObj.button_Reset),
 		createDescDiv(`lblDisplayPreviewMsg`, g_lblNameObj.displayPreviewDesc),
 	);
+	if (g_headerObj.scAreaWidth > 0) {
+		overlay.appendChild(createDescDiv(`lblDisplayPreviewMsg2`, g_lblNameObj.displayPreviewDesc2));
+	}
+	createScText(btnDisplayReset, `DisplayPreviewReset`, { displayName: `displayPreview`, targetLabel: `btnDisplayReset`, x: -15 });
 
 	// ============================================================
 	// プレイ画面フレーム（白枠）
@@ -9177,7 +9211,6 @@ const openDisplayPreview = () => {
 		x: frameX, y: frameY, w: playW, h: playH,
 		background: `#111111`,
 		border: `1px solid #444444`,
-		overflow: `hidden`,
 		boxSizing: `border-box`,
 		transform: `scale(${rate})`,
 	});
@@ -9273,13 +9306,13 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		const fX0 = Math.round(_playW / 2 - 120) + (g_diffObj.frzJdgX ?? 0);
 		const fY0 = Math.round((_playH + (g_posObj?.stepYR ?? 0)) / 2 + 10) + (g_diffObj.frzJdgY ?? 0);
 
-		const jdgInitX = g_previewPos.jdgJ.x ?? jX0;
-		const jdgInitY = g_previewPos.jdgJ.y ?? jY0;
-		const jdgFInitX = g_previewPos.jdgFJ.x ?? fX0;
-		const jdgFInitY = g_previewPos.jdgFJ.y ?? fY0;
+		const jdgInitX = g_previewPos.arrowJdg.x ?? jX0;
+		const jdgInitY = g_previewPos.arrowJdg.y ?? jY0;
+		const jdgFInitX = g_previewPos.frzJdg.x ?? fX0;
+		const jdgFInitY = g_previewPos.frzJdg.y ?? fY0;
 
 		// 通常判定グループ
-		buildDraggableJudgGroup(_frame, `jdgJ`, jdgInitX, jdgInitY, _playW, _playH, {
+		buildDraggableJudgGroup(_frame, `arrowJdg`, jdgInitX, jdgInitY, _playW, _playH, {
 			charaText: d.judgment === C_FLG_ON ? g_lblNameObj.j_ii : ``,
 			comboText: d.judgment === C_FLG_ON ? `5 Combo!!` : ``,
 			diffText: `Fast 3 Frames`,
@@ -9287,7 +9320,7 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		});
 
 		// フリーズ判定グループ
-		buildDraggableJudgGroup(_frame, `jdgFJ`, jdgFInitX, jdgFInitY, _playW, _playH, {
+		buildDraggableJudgGroup(_frame, `frzJdg`, jdgFInitX, jdgFInitY, _playW, _playH, {
 			charaText: d.judgment === C_FLG_ON ? g_lblNameObj.j_kita : ``,
 			comboText: d.judgment === C_FLG_ON ? `5 Combo!!` : ``,
 			diffText: `Fast 2 Frames`,
@@ -9330,7 +9363,7 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 			{ color: `#99ff66`, cnt: `0` },
 			{ color: `#ffffff`, cnt: `5` },
 		];
-		const sx = _playW - 110;
+		const sx = _playW - 110 + g_headerObj.scAreaWidth;
 		scoreItems.forEach((item, i) => {
 			_frame.appendChild(
 				createDivCss2Label(`previewScore${i}`, item.cnt || ``, {
@@ -9377,6 +9410,28 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		)
 	}
 
+	// ============================================================
+	// ショートカット表示
+	// ============================================================
+	const scGroup = createEmptySprite(_frame, `previewScGroup`, {
+		x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
+		y: _playH - 65 + g_diffObj.shortcutY, w: 80, h: 65, pointerEvents: C_DIS_AUTO,
+	});
+	multiAppend(scGroup,
+		createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, { ...g_lblPosObj.lblMainScHeader, x: 0, y: 0 }),
+		createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry],
+			{ ...g_lblPosObj.lblMainScKey, x: 0, y: 15, fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold` }),
+		createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, { ...g_lblPosObj.lblMainScHeader, x: 0, y: 35 }),
+		createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack],
+			{ ...g_lblPosObj.lblMainScKey, x: 0, y: 50, fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold` }),
+	);
+	const scConfig = {
+		toastTitle: g_lblNameObj.shortcutUpdate,
+		getStdX: (pw) => g_sWidth + g_headerObj.scAreaWidth - 85,
+		getStdY: (ph, syr) => _playH - 65,
+	};
+	makeElementDraggable(scGroup, `shortcut`, _playW, _playH, { w: 80, h: 65 }, scConfig);
+
 	// ユーザカスタムイベント(プレビュー表示用)
 	safeExecuteCustomHooks(`g_customJsObj.displayPreview`, g_customJsObj.displayPreview, _frame, _playW, _playH);
 };
@@ -9384,18 +9439,31 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 /**
  * 要素をドラッグ可能にする（汎用ユーティリティ）
  * @param {HTMLElement} _target ドラッグ対象の要素
+ * @param {string} _key 座標保存用のキー（g_previewPosオブジェクトのプロパティ名）
  * @param {number} _playW 制限範囲の幅
  * @param {number} _playH 制限範囲の高さ
- * @param {object} _bounds 要素自体のサイズ { w, h } (はみ出し防止用)
- * @param {function} _onDragEnd 位置確定時に呼ばれるコールバック (_finalX, _finalY) => void
+ * @param {object} _bounds 要素自体のサイズ { w, h, scale } (はみ出し防止用)
+ * @param {object} _config 座標反映ルールオブジェクト
  */
-const makeElementDraggable = (_target, _playW, _playH, _bounds, _onDragEnd) => {
+const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) => {
 	let dragging = false;
 	let dragStartX = 0, dragStartY = 0;
 	let elemStartX = 0, elemStartY = 0;
 
 	const boundsW = _bounds?.w ?? _target.offsetWidth ?? 0;
 	const boundsH = _bounds?.h ?? _target.offsetHeight ?? 0;
+	const scale = _bounds?.scale ?? 0.8;
+
+	// ドラッグハンドル（薄い枠）を作成
+	const handleId = _target.id ? `handle_${_target.id}` : `dragHandle_${Math.random().toString(36).slice(2, 9)}`;
+	_target.style.cursor = `grab`;
+
+	createEmptySprite(_target, handleId, {
+		x: 0, y: 0, w: boundsW, h: boundsH,
+		border: `1px dashed rgba(255,255,255,0.3)`,
+		boxSizing: `border-box`, borderRadius: `2px`,
+		background: `rgba(255,255,255,0.04)`,
+	});
 
 	const keyDown = addPreviewListener(_target, `pointerdown`, _evt => {
 		dragging = true;
@@ -9410,11 +9478,18 @@ const makeElementDraggable = (_target, _playW, _playH, _bounds, _onDragEnd) => {
 
 	const keyMove = addPreviewListener(_target, `pointermove`, _evt => {
 		if (!dragging) return;
-		const dx = _evt.clientX - dragStartX;
-		const dy = _evt.clientY - dragStartY;
 
-		// 境界値制限
-		const newX = Math.max(0, Math.min(_playW - boundsW, elemStartX + dx));
+		// 1. マウスの実際の移動量を計算
+		const mouseDx = _evt.clientX - dragStartX;
+		const mouseDy = _evt.clientY - dragStartY;
+
+		// 2. 【最重要】スケール逆算して、縮小空間内の移動量に変換
+		const dx = mouseDx / scale;
+		const dy = mouseDy / scale;
+
+		// 3. 境界値制限
+		const minX = g_headerObj.playingLayout ? -g_headerObj.scAreaWidth : 0;
+		const newX = Math.max(minX, Math.min(_playW + g_headerObj.scAreaWidth - boundsW, elemStartX + dx));
 		const newY = Math.max(0, Math.min(_playH - boundsH, elemStartY + dy));
 
 		_target.style.left = wUnit(newX);
@@ -9430,11 +9505,13 @@ const makeElementDraggable = (_target, _playW, _playH, _bounds, _onDragEnd) => {
 		const finalX = parseInt(_target.style.left, 10) || 0;
 		const finalY = parseInt(_target.style.top, 10) || 0;
 
-		// 外部の保存処理などを実行
-		if (typeof _onDragEnd === `function`) {
-			_onDragEnd(finalX, finalY);
+		if (g_previewPos[_key]) {
+			g_previewPos[_key].x = finalX;
+			g_previewPos[_key].y = finalY;
 		}
-
+		if (_config) {
+			applyElementPositionToGame(finalX, finalY, _config, _key);
+		}
 		_evt.stopPropagation();
 	});
 
@@ -9452,7 +9529,7 @@ const makeElementDraggable = (_target, _playW, _playH, _bounds, _onDragEnd) => {
 /**
  * ドラッグ可能な判定グループを生成する
  * @param {HTMLElement} _parent    親要素
- * @param {string}      _groupId   `jdgJ` または `jdgFJ`
+ * @param {string}      _groupId   `arrowJdg` または `frzJdg`
  * @param {number}      _initX     初期X座標（frame相対）
  * @param {number}      _initY     初期Y座標（frame相対）
  * @param {number}      _playW     プレイ幅
@@ -9464,7 +9541,7 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 	const groupH = 51;
 
 	const group = createEmptySprite(_parent, `previewGrp_${_groupId}`, {
-		x: _initX, y: _initY, w: groupW, h: groupH, cursor: `grab`, pointerEvents: C_DIS_AUTO,
+		x: _initX, y: _initY, w: groupW, h: groupH, pointerEvents: C_DIS_AUTO,
 	});
 
 	// 内包要素の生成 (省略：元のコードの multiAppend 部分と同一)
@@ -9487,48 +9564,24 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 		}),
 	);
 
-	// ドラッグハンドル（薄い枠）
-	createEmptySprite(group, `lblHandle_${_groupId}`, {
-		x: 0, y: 0, w: groupW, h: groupH, border: `1px dashed rgba(255,255,255,0.3)`,
-		boxSizing: `border-box`, borderRadius: `2px`, background: `rgba(255,255,255,0.04)`,
-	});
-
 	// ============================================================
 	// 判定グループ固有の「座標反映ルール」を定義
 	// ============================================================
 	const configMap = {
-		jdgJ: {
+		arrowJdg: {
 			toastTitle: g_lblNameObj.arrowJdgUpdate,
 			getStdX: (pw) => Math.round(pw / 2 - 220),
 			getStdY: (ph, syr) => Math.round((ph + syr) / 2 - 60),
-			saveCallback: (dx, dy) => {
-				g_diffObj.arrowJdgX = dx;
-				g_diffObj.arrowJdgY = dy;
-			}
 		},
-		jdgFJ: {
+		frzJdg: {
 			toastTitle: g_lblNameObj.frzJdgUpdate,
 			getStdX: (pw) => Math.round(pw / 2 - 120),
 			getStdY: (ph, syr) => Math.round((ph + syr) / 2 + 10),
-			saveCallback: (dx, dy) => {
-				g_diffObj.frzJdgX = dx;
-				g_diffObj.frzJdgY = dy;
-			}
 		}
 	};
 
-	// 汎用関数を呼び出し、判定位置特有の処理をコールバックとして渡す
-	makeElementDraggable(group, _playW, _playH, { w: groupW, h: groupH }, (finalX, finalY) => {
-		// グローバルなプレビュー座標を更新
-		g_previewPos[_groupId].x = finalX;
-		g_previewPos[_groupId].y = finalY;
-
-		// 設定マップから該当するルールを適用して保存
-		const currentConfig = configMap[_groupId];
-		if (currentConfig) {
-			applyElementPositionToGame(finalX, finalY, currentConfig);
-		}
-	});
+	// 汎用ドラッグ及びドラッグ枠作成、差分適用処理
+	makeElementDraggable(group, _groupId, _playW, _playH, { w: groupW, h: groupH }, configMap[_groupId]);
 };
 
 /**
@@ -9536,8 +9589,9 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
  * @param {number} _x 確定したframe相対X
  * @param {number} _y 確定したframe相対Y
  * @param {object} _config 反映用の設定オブジェクト
+ * @param {string} _key 保存用キー(g_diffObjのプロパティ名の接頭辞)
  */
-const applyElementPositionToGame = (_x, _y, _config) => {
+const applyElementPositionToGame = (_x, _y, _config, _key) => {
 	const playW = g_headerObj.playingWidth || g_sWidth;
 	const playH = g_headerObj.playingHeight || g_sHeight;
 	const stepYR = g_posObj?.stepYR ?? 0;
@@ -9551,7 +9605,10 @@ const applyElementPositionToGame = (_x, _y, _config) => {
 	const diffY = _y - stdY;
 
 	// 3. 指定された保存先にオフセットを格納
-	_config.saveCallback(diffX, diffY);
+	g_diffObj[`${_key}X`] = diffX;
+	g_diffObj[`${_key}Y`] = diffY;
+	g_localStorage[`${_key}X`] = diffX;
+	g_localStorage[`${_key}Y`] = diffY;
 
 	// 4. トースト表示 (通知が不要な要素なら省略可能にする)
 	if (_config.toastTitle) {
@@ -13897,6 +13954,9 @@ const getArrowSettings = () => {
 	if (g_headerObj.scAreaWidth === 0 && (g_headerObj.keyRetry !== g_headerObj.keyRetryDef2 || g_headerObj.keyTitleBack !== g_headerObj.keyTitleBackDef2)) {
 		g_workObj.nonDefaultSc = false;
 	}
+	if (g_diffObj.shortcutX !== 0 || g_diffObj.shortcutY !== 0) {
+		g_workObj.nonDefaultSc = true;
+	}
 
 	g_workObj.backX = (g_workObj.nonDefaultSc && g_headerObj.playingLayout ? g_headerObj.scAreaWidth : 0);
 	g_workObj.playingX = g_headerObj.playingX + g_workObj.backX;
@@ -14372,12 +14432,28 @@ const mainInit = () => {
 
 	if (g_workObj.nonDefaultSc) {
 		multiAppend(infoSprite,
-			createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, { ...g_lblPosObj.lblMainScHeader, y: g_headerObj.playingHeight - 65 }),
-			createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry],
-				{ ...g_lblPosObj.lblMainScKey, y: g_headerObj.playingHeight - 50, fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold` }),
-			createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, { ...g_lblPosObj.lblMainScHeader, y: g_headerObj.playingHeight - 35 }),
-			createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack],
-				{ ...g_lblPosObj.lblMainScKey, y: g_headerObj.playingHeight - 20, fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold` }),
+			createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, {
+				...g_lblPosObj.lblMainScHeader,
+				x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
+				y: g_headerObj.playingHeight - 65 + g_diffObj.shortcutY,
+			}),
+			createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry], {
+				...g_lblPosObj.lblMainScKey,
+				x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
+				y: g_headerObj.playingHeight - 50 + g_diffObj.shortcutY,
+				fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold`,
+			}),
+			createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, {
+				...g_lblPosObj.lblMainScHeader,
+				x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
+				y: g_headerObj.playingHeight - 35 + g_diffObj.shortcutY,
+			}),
+			createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack], {
+				...g_lblPosObj.lblMainScKey,
+				x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
+				y: g_headerObj.playingHeight - 20 + g_diffObj.shortcutY,
+				fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold`,
+			}),
 		);
 	}
 
