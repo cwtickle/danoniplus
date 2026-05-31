@@ -9442,7 +9442,7 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
  * @param {string} _key 座標保存用のキー（g_previewPosオブジェクトのプロパティ名）
  * @param {number} _playW 制限範囲の幅
  * @param {number} _playH 制限範囲の高さ
- * @param {object} _bounds 要素自体のサイズ { w, h } (はみ出し防止用)
+ * @param {object} _bounds 要素自体のサイズ { w, h, scale } (はみ出し防止用)
  * @param {object} _config 座標反映ルールオブジェクト
  */
 const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) => {
@@ -9452,6 +9452,7 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 
 	const boundsW = _bounds?.w ?? _target.offsetWidth ?? 0;
 	const boundsH = _bounds?.h ?? _target.offsetHeight ?? 0;
+	const scale = _bounds?.scale ?? 0.8;
 
 	// ドラッグハンドル（薄い枠）を作成
 	const handleId = _target.id ? `handle_${_target.id}` : `dragHandle_${Math.random().toString(36).slice(2, 9)}`;
@@ -9477,10 +9478,16 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 
 	const keyMove = addPreviewListener(_target, `pointermove`, _evt => {
 		if (!dragging) return;
-		const dx = _evt.clientX - dragStartX;
-		const dy = _evt.clientY - dragStartY;
 
-		// 境界値制限
+		// 1. マウスの実際の移動量を計算
+		const mouseDx = _evt.clientX - dragStartX;
+		const mouseDy = _evt.clientY - dragStartY;
+
+		// 2. 【最重要】スケール逆算して、縮小空間内の移動量に変換
+		const dx = mouseDx / scale;
+		const dy = mouseDy / scale;
+
+		// 3. 境界値制限
 		const minX = g_headerObj.playingLayout ? -g_headerObj.scAreaWidth : 0;
 		const newX = Math.max(minX, Math.min(_playW + g_headerObj.scAreaWidth - boundsW, elemStartX + dx));
 		const newY = Math.max(0, Math.min(_playH - boundsH, elemStartY + dy));

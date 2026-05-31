@@ -4934,7 +4934,7 @@ const g_lang_msgObj = {
         github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
         security: `Dancing☆Onigiri (CW Edition)のサポート情報ページへ移動します。`,
 
-        environment: `${g_settings.environments.join(`, `)}の設定を初期化します。`,
+        environment: `以下の設定を初期化します。\n  - Adjustment, Volume, ColorType, Appearance, Opacity, HitPosition, 判定キャラクタ位置, ショートカット表示位置`,
         highscores: `全譜面のハイスコアを初期化します。\n個別に初期化したい場合はSettings画面より行ってください。`,
         customKey: `カスタムキーに関する全ての保存データを消去します。\n下記のKeyDataから個別に消去可能できないときに使用してください。`,
         others: `標準以外に関する保存データを消去します。`,
@@ -5040,7 +5040,7 @@ const g_lang_msgObj = {
         github: `Go to the GitHub page of Dancing Onigiri "CW Edition".`,
         security: `Go to the support information page for Dancing Onigiri "CW Edition".`,
 
-        environment: `Initialize ${g_settings.environments.join(`, `)} settings.`,
+        environment: `Initialize settings below:\n  - Adjustment, Volume, ColorType, Appearance, Opacity, HitPosition, judgment character positions and shortcut display position.`,
         highscores: `Initializes the high score of all charts. \nIf you want to initialize each chart individually, \nplease do so from the Highscore view in the Settings screen.`,
         customKey: `Delete stored data related to all custom keymodes. \nUse this option when you cannot delete individual KeyData from the following KeyData.`,
         others: `Delete non-standard stored data.`,
