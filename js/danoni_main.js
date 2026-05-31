@@ -9397,6 +9397,17 @@ const makeElementDraggable = (_target, _playW, _playH, _bounds, _onDragEnd) => {
 	const boundsW = _bounds?.w ?? _target.offsetWidth ?? 0;
 	const boundsH = _bounds?.h ?? _target.offsetHeight ?? 0;
 
+	// ドラッグハンドル（薄い枠）を作成
+	const handleId = _target.id ? `handle_${_target.id}` : `dragHandle_${Math.random().toString(36).slice(2, 9)}`;
+	_target.style.cursor = `grab`;
+
+	createEmptySprite(_target, handleId, {
+		x: 0, y: 0, w: boundsW, h: boundsH,
+		border: `1px dashed rgba(255,255,255,0.3)`,
+		boxSizing: `border-box`, borderRadius: `2px`,
+		background: `rgba(255,255,255,0.04)`,
+	});
+
 	const keyDown = addPreviewListener(_target, `pointerdown`, _evt => {
 		dragging = true;
 		dragStartX = _evt.clientX;
@@ -9464,7 +9475,7 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 	const groupH = 51;
 
 	const group = createEmptySprite(_parent, `previewGrp_${_groupId}`, {
-		x: _initX, y: _initY, w: groupW, h: groupH, cursor: `grab`, pointerEvents: C_DIS_AUTO,
+		x: _initX, y: _initY, w: groupW, h: groupH, pointerEvents: C_DIS_AUTO,
 	});
 
 	// 内包要素の生成 (省略：元のコードの multiAppend 部分と同一)
@@ -9486,12 +9497,6 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 			siz: g_limitObj.mainSiz, color: `#ff9966`,
 		}),
 	);
-
-	// ドラッグハンドル（薄い枠）
-	createEmptySprite(group, `lblHandle_${_groupId}`, {
-		x: 0, y: 0, w: groupW, h: groupH, border: `1px dashed rgba(255,255,255,0.3)`,
-		boxSizing: `border-box`, borderRadius: `2px`, background: `rgba(255,255,255,0.04)`,
-	});
 
 	// ============================================================
 	// 判定グループ固有の「座標反映ルール」を定義
