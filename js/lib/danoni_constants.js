@@ -1334,7 +1334,8 @@ const g_settings = {
         customKey: 0,
         others: 0,
     },
-    environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`],
+    environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`,
+        `arrowJdgX`, `arrowJdgY`, `frzJdgX`, `frzJdgY`, `shortcutX`, `shortcutY`],
     keyStorages: [`reverse`, `keyCtrl`, `keyCtrlPtn`, `shuffle`, `color`, `stepRtn`],
     colorStorages: [`setColor`, `setShadowColor`, `frzColor`, `frzShadowColor`],
 
@@ -4933,7 +4934,7 @@ const g_lang_msgObj = {
         github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
         security: `Dancing☆Onigiri (CW Edition)のサポート情報ページへ移動します。`,
 
-        environment: `${g_settings.environments.map(v => toCapitalize(v)).join(`, `)}の設定を初期化します。`,
+        environment: `${g_settings.environments.join(`, `)}の設定を初期化します。`,
         highscores: `全譜面のハイスコアを初期化します。\n個別に初期化したい場合はSettings画面より行ってください。`,
         customKey: `カスタムキーに関する全ての保存データを消去します。\n下記のKeyDataから個別に消去可能できないときに使用してください。`,
         others: `標準以外に関する保存データを消去します。`,
