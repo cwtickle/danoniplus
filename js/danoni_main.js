@@ -4370,6 +4370,12 @@ const headerConvert = _dosObj => {
 	g_diffInitObj.shortcutX = g_diffObj.shortcutX;
 	g_diffInitObj.shortcutY = g_diffObj.shortcutY;
 
+	if (Object.keys(g_diffObj).some(key => g_localStorage[key] !== undefined)) {
+		Object.keys(g_diffObj).forEach(key =>
+			g_diffObj[key] = setIntVal(g_localStorage[key], g_diffObj[key])
+		);
+	}
+
 	// musicフォルダ設定
 	obj.musicFolder = _dosObj.musicFolder ?? (g_remoteFlg ? `${C_MRK_CURRENT_DIRECTORY}../music` : `music`);
 
@@ -9587,6 +9593,8 @@ const applyElementPositionToGame = (_x, _y, _config, _key) => {
 	// 3. 指定された保存先にオフセットを格納
 	g_diffObj[`${_key}X`] = diffX;
 	g_diffObj[`${_key}Y`] = diffY;
+	g_localStorage[`${_key}X`] = diffX;
+	g_localStorage[`${_key}Y`] = diffY;
 
 	// 4. トースト表示 (通知が不要な要素なら省略可能にする)
 	if (_config.toastTitle) {
