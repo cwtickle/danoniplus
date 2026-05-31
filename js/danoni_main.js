@@ -9363,7 +9363,7 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 			{ color: `#99ff66`, cnt: `0` },
 			{ color: `#ffffff`, cnt: `5` },
 		];
-		const sx = _playW - 110;
+		const sx = _playW - 110 + g_headerObj.scAreaWidth;
 		scoreItems.forEach((item, i) => {
 			_frame.appendChild(
 				createDivCss2Label(`previewScore${i}`, item.cnt || ``, {
