@@ -9111,8 +9111,8 @@ let g_previewLsnrKeys = new Set();
 
 /** プレビュー内の各UIオブジェクトの現在座標 */
 const g_previewPos = {
-	jdgJ: { x: null, y: null },   // 通常判定キャラクタ・コンボ
-	jdgFJ: { x: null, y: null },   // フリーズ判定キャラクタ・コンボ
+	arrowJdg: { x: null, y: null },   // 通常判定キャラクタ・コンボ
+	frzJdg: { x: null, y: null },   // フリーズ判定キャラクタ・コンボ
 };
 
 /**
@@ -9273,13 +9273,13 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		const fX0 = Math.round(_playW / 2 - 120) + (g_diffObj.frzJdgX ?? 0);
 		const fY0 = Math.round((_playH + (g_posObj?.stepYR ?? 0)) / 2 + 10) + (g_diffObj.frzJdgY ?? 0);
 
-		const jdgInitX = g_previewPos.jdgJ.x ?? jX0;
-		const jdgInitY = g_previewPos.jdgJ.y ?? jY0;
-		const jdgFInitX = g_previewPos.jdgFJ.x ?? fX0;
-		const jdgFInitY = g_previewPos.jdgFJ.y ?? fY0;
+		const jdgInitX = g_previewPos.arrowJdg.x ?? jX0;
+		const jdgInitY = g_previewPos.arrowJdg.y ?? jY0;
+		const jdgFInitX = g_previewPos.frzJdg.x ?? fX0;
+		const jdgFInitY = g_previewPos.frzJdg.y ?? fY0;
 
 		// 通常判定グループ
-		buildDraggableJudgGroup(_frame, `jdgJ`, jdgInitX, jdgInitY, _playW, _playH, {
+		buildDraggableJudgGroup(_frame, `arrowJdg`, jdgInitX, jdgInitY, _playW, _playH, {
 			charaText: d.judgment === C_FLG_ON ? g_lblNameObj.j_ii : ``,
 			comboText: d.judgment === C_FLG_ON ? `5 Combo!!` : ``,
 			diffText: `Fast 3 Frames`,
@@ -9287,7 +9287,7 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		});
 
 		// フリーズ判定グループ
-		buildDraggableJudgGroup(_frame, `jdgFJ`, jdgFInitX, jdgFInitY, _playW, _playH, {
+		buildDraggableJudgGroup(_frame, `frzJdg`, jdgFInitX, jdgFInitY, _playW, _playH, {
 			charaText: d.judgment === C_FLG_ON ? g_lblNameObj.j_kita : ``,
 			comboText: d.judgment === C_FLG_ON ? `5 Combo!!` : ``,
 			diffText: `Fast 2 Frames`,
@@ -9384,12 +9384,13 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 /**
  * 要素をドラッグ可能にする（汎用ユーティリティ）
  * @param {HTMLElement} _target ドラッグ対象の要素
+ * @param {string} _key 座標保存用のキー（g_previewPosオブジェクトのプロパティ名）
  * @param {number} _playW 制限範囲の幅
  * @param {number} _playH 制限範囲の高さ
  * @param {object} _bounds 要素自体のサイズ { w, h } (はみ出し防止用)
- * @param {function} _onDragEnd 位置確定時に呼ばれるコールバック (_finalX, _finalY) => void
+ * @param {object} _config 座標反映ルールオブジェクト
  */
-const makeElementDraggable = (_target, _playW, _playH, _bounds, _onDragEnd) => {
+const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) => {
 	let dragging = false;
 	let dragStartX = 0, dragStartY = 0;
 	let elemStartX = 0, elemStartY = 0;
@@ -9441,11 +9442,13 @@ const makeElementDraggable = (_target, _playW, _playH, _bounds, _onDragEnd) => {
 		const finalX = parseInt(_target.style.left, 10) || 0;
 		const finalY = parseInt(_target.style.top, 10) || 0;
 
-		// 外部の保存処理などを実行
-		if (typeof _onDragEnd === `function`) {
-			_onDragEnd(finalX, finalY);
+		if (g_previewPos[_key]) {
+			g_previewPos[_key].x = finalX;
+			g_previewPos[_key].y = finalY;
 		}
-
+		if (_config) {
+			applyElementPositionToGame(finalX, finalY, _config, _key);
+		}
 		_evt.stopPropagation();
 	});
 
@@ -9463,7 +9466,7 @@ const makeElementDraggable = (_target, _playW, _playH, _bounds, _onDragEnd) => {
 /**
  * ドラッグ可能な判定グループを生成する
  * @param {HTMLElement} _parent    親要素
- * @param {string}      _groupId   `jdgJ` または `jdgFJ`
+ * @param {string}      _groupId   `arrowJdg` または `frzJdg`
  * @param {number}      _initX     初期X座標（frame相対）
  * @param {number}      _initY     初期Y座標（frame相対）
  * @param {number}      _playW     プレイ幅
@@ -9502,38 +9505,22 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 	// 判定グループ固有の「座標反映ルール」を定義
 	// ============================================================
 	const configMap = {
-		jdgJ: {
+		arrowJdg: {
 			toastTitle: g_lblNameObj.arrowJdgUpdate,
 			getStdX: (pw) => Math.round(pw / 2 - 220),
 			getStdY: (ph, syr) => Math.round((ph + syr) / 2 - 60),
-			saveCallback: (dx, dy) => {
-				g_diffObj.arrowJdgX = dx;
-				g_diffObj.arrowJdgY = dy;
-			}
+			targetKeys: { x: `arrowJdgX`, y: `arrowJdgY` },
 		},
-		jdgFJ: {
+		frzJdg: {
 			toastTitle: g_lblNameObj.frzJdgUpdate,
 			getStdX: (pw) => Math.round(pw / 2 - 120),
 			getStdY: (ph, syr) => Math.round((ph + syr) / 2 + 10),
-			saveCallback: (dx, dy) => {
-				g_diffObj.frzJdgX = dx;
-				g_diffObj.frzJdgY = dy;
-			}
+			targetKeys: { x: `frzJdgX`, y: `frzJdgY` },
 		}
 	};
 
-	// 汎用関数を呼び出し、判定位置特有の処理をコールバックとして渡す
-	makeElementDraggable(group, _playW, _playH, { w: groupW, h: groupH }, (finalX, finalY) => {
-		// グローバルなプレビュー座標を更新
-		g_previewPos[_groupId].x = finalX;
-		g_previewPos[_groupId].y = finalY;
-
-		// 設定マップから該当するルールを適用して保存
-		const currentConfig = configMap[_groupId];
-		if (currentConfig) {
-			applyElementPositionToGame(finalX, finalY, currentConfig);
-		}
-	});
+	// 汎用ドラッグ及びドラッグ枠作成、差分適用処理
+	makeElementDraggable(group, _groupId, _playW, _playH, { w: groupW, h: groupH }, configMap[_groupId]);
 };
 
 /**
@@ -9541,8 +9528,9 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
  * @param {number} _x 確定したframe相対X
  * @param {number} _y 確定したframe相対Y
  * @param {object} _config 反映用の設定オブジェクト
+ * @param {string} _key 保存用キー(g_diffObjのプロパティ名の接頭辞)
  */
-const applyElementPositionToGame = (_x, _y, _config) => {
+const applyElementPositionToGame = (_x, _y, _config, _key) => {
 	const playW = g_headerObj.playingWidth || g_sWidth;
 	const playH = g_headerObj.playingHeight || g_sHeight;
 	const stepYR = g_posObj?.stepYR ?? 0;
@@ -9556,7 +9544,8 @@ const applyElementPositionToGame = (_x, _y, _config) => {
 	const diffY = _y - stdY;
 
 	// 3. 指定された保存先にオフセットを格納
-	_config.saveCallback(diffX, diffY);
+	g_diffObj[`${_key}X`] = diffX;
+	g_diffObj[`${_key}Y`] = diffY;
 
 	// 4. トースト表示 (通知が不要な要素なら省略可能にする)
 	if (_config.toastTitle) {
