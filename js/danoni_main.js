@@ -4359,9 +4359,13 @@ const headerConvert = _dosObj => {
 	obj.baseSpeed = 1 + ((g_posObj.distY - (g_posObj.stepY - C_STEP_Y) * 2) / (500 - C_STEP_Y) - 1) * 0.85;
 
 	// 矢印・フリーズアロー判定位置補正
+	g_diffObj.arrowJdgX = (isNaN(parseFloat(_dosObj.arrowJdgX)) ? 0 : parseFloat(_dosObj.arrowJdgX));
 	g_diffObj.arrowJdgY = (isNaN(parseFloat(_dosObj.arrowJdgY)) ? 0 : parseFloat(_dosObj.arrowJdgY));
+	g_diffObj.frzJdgX = (isNaN(parseFloat(_dosObj.frzJdgX)) ? 0 : parseFloat(_dosObj.frzJdgX));
 	g_diffObj.frzJdgY = (isNaN(parseFloat(_dosObj.frzJdgY)) ? 0 : parseFloat(_dosObj.frzJdgY));
+	g_diffInitObj.arrowJdgX = g_diffObj.arrowJdgX;
 	g_diffInitObj.arrowJdgY = g_diffObj.arrowJdgY;
+	g_diffInitObj.frzJdgX = g_diffObj.frzJdgX;
 	g_diffInitObj.frzJdgY = g_diffObj.frzJdgY;
 
 	// ショートカット表示位置補正
@@ -9179,6 +9183,9 @@ const openDisplayPreview = () => {
 		createCss2Button(`btnDisplayReset`, `Reset`, _evt => {
 			if (window.confirm(g_msgObj.displayPreviewResetConfirm)) {
 				Object.assign(g_diffObj, g_diffInitObj);
+				Object.keys(g_diffInitObj).forEach(key => {
+					g_localStorage[key] = g_diffInitObj[key];
+				});
 				Object.keys(g_previewPos).forEach(key => g_previewPos[key] = { x: null, y: null });
 				closeDisplayPreview();
 				openDisplayPreview();
