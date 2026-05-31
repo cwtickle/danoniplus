@@ -543,8 +543,14 @@ const updateWindowSiz = () => {
             x: g_btnX() + Math.floor((g_btnWidth() - 80) / 2), y: 3, w: 80, h: 18, siz: 11,
             title: g_msgObj.displayPreview,
         },
+        btnDisplayReset: {
+            x: g_btnX() + g_btnWidth() - 80, y: 3, w: 80, h: 18, siz: 11,
+        },
         lblDisplayPreviewMsg: {
             x: g_btnX(), y: g_sHeight - 40, w: g_btnWidth(), h: 20, siz: 14,
+        },
+        lblDisplayPreviewMsg2: {
+            x: g_btnX(), y: g_sHeight - 25, w: g_btnWidth(), h: 20, siz: 14,
         },
         previewScoreDisabled: {
             x: g_headerObj.playingWidth - 80, y: 20, w: 70, h: 200,
@@ -2331,6 +2337,17 @@ const g_diffObj = {
     frzJdgX: 0,
     arrowJdgY: 0,
     frzJdgY: 0,
+    shortcutX: 0,
+    shortcutY: 0,
+};
+
+const g_diffInitObj = {
+    arrowJdgX: 0,
+    frzJdgX: 0,
+    arrowJdgY: 0,
+    frzJdgY: 0,
+    shortcutX: 0,
+    shortcutY: 0,
 };
 
 // キーコンフィグカーソル
@@ -2982,6 +2999,7 @@ const g_shortcutObj = {
     },
     displayPreview: {
         KeyP: { id: `btnDisplayPreview2` },
+        KeyR: { id: `btnDisplayReset` },
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `btnPlay` },
@@ -4785,9 +4803,11 @@ const g_lang_lblNameObj = {
         transKeyDesc: `別キーモードではキーコンフィグ、ColorType等は保存されません`,
         colorTypeDesc: `現在のColorTypeの設定では、色変化(Display:Color)は自動的にOFFになります`,
         sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
-        displayPreviewDesc: `判定キャラクタ部分をドラッグで移動するとその位置に補正されます`,
+        displayPreviewDesc: `判定キャラクタ部分、ショートカット表示はドラッグで移動するとその位置に補正されます`,
+        displayPreviewDesc2: `枠外への移動はショートカットがデフォルトと異なるか、位置が通常と異なる場合のみ有効です`,
         arrowJdgUpdate: `矢印判定の座標を更新`,
         frzJdgUpdate: `フリーズアロー判定の座標を更新`,
+        shortcutUpdate: `ショートカット表示の座標を更新`,
         resultImageDesc: `画像を右クリックしてコピーできます`,
 
         s_level: `Level`,
@@ -4845,9 +4865,11 @@ const g_lang_lblNameObj = {
         transKeyDesc: `Key config, Color type, etc. are not saved in another key mode`,
         colorTypeDesc: `With the current ColorType setting, color change (Display:Color) will be automatically turned OFF.`,
         sdShortcutDesc: `When "Hidden+" or "Sudden+" select, "pageUp" cover up / "pageDown" cover down`,
-        displayPreviewDesc: `If you drag the judgment character section, it will be adjusted to that position.`,
+        displayPreviewDesc: `If you drag the judgment character section or shortcut display, it will be adjusted to that position.`,
+        displayPreviewDesc2: `Moving outside the frame is only effective when the shortcut display position differs from the default.`,
         arrowJdgUpdate: `Update the coordinates (arrow)`,
         frzJdgUpdate: `Update the coordinates (freeze)`,
+        shortcutUpdate: `Update the coordinates (shortcut)`,
         resultImageDesc: `You can copy the image by right-clicking on it.`,
 
         s_level: `Level`,
@@ -4993,6 +5015,7 @@ const g_lang_msgObj = {
         opacity: `判定キャラクタ、コンボ数、Fast/Slowの透明度を設定します。`,
         hitPosition: `判定位置にズレを感じる場合、\n数値を変えることで判定の中央位置を1px単位(プラス:手前, マイナス:奥側)で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
         displayPreview: `プレイ画面上のオブジェクトの表示状態をプレビューします。\n判定キャラクタ部分をドラッグで移動するとその位置に補正されます。`,
+        displayPreviewResetConfirm: `プレイ画面上のオブジェクトの位置を初期状態に戻します。よろしいですか？`,
 
         colorType: `矢印・フリーズアローの配色セットをあらかじめ定義されたリストから選択できます。\nType1～4選択時は色変化が自動でOFFになり、カラーピッカーから好きな色に変更できます。\n[Type0] グラデーション切替, [Type1～4] デフォルトパターン`,
         imgType: `矢印・フリーズアローなどのオブジェクトの見た目を変更します。`,
@@ -5097,6 +5120,7 @@ const g_lang_msgObj = {
         opacity: `Set the transparency of some objects such as judgment, combo counts, fast and slow`,
         hitPosition: `If you feel a discrepancy in the judgment position, \nyou can adjust the center position of the judgment in 1px increments \n (plus: in front, minus: at the back) by changing the numerical value. \nUse this function when there is a tendency to push too fast or too slow.`,
         displayPreview: `Preview the display status of objects on the play screen.\nDragging the judgment character section will adjust it to that position.`,
+        displayPreviewResetConfirm: `Reset the position of objects on the play screen to the initial state. Is it OK?`,
 
         colorType: `Change the color scheme set for arrows and freeze-arrows from the predefined set.\nWhen Type1 to 4 is selected, color change is automatically turned off and can be changed to any color from the color picker.\n[Type0] Switch the sequences color gradations, [Type1～4] default color scheme`,
         imgType: `Change the appearance of sequences.`,

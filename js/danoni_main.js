@@ -4361,6 +4361,14 @@ const headerConvert = _dosObj => {
 	// 矢印・フリーズアロー判定位置補正
 	g_diffObj.arrowJdgY = (isNaN(parseFloat(_dosObj.arrowJdgY)) ? 0 : parseFloat(_dosObj.arrowJdgY));
 	g_diffObj.frzJdgY = (isNaN(parseFloat(_dosObj.frzJdgY)) ? 0 : parseFloat(_dosObj.frzJdgY));
+	g_diffInitObj.arrowJdgY = g_diffObj.arrowJdgY;
+	g_diffInitObj.frzJdgY = g_diffObj.frzJdgY;
+
+	// ショートカット表示位置補正
+	g_diffObj.shortcutX = (isNaN(parseFloat(_dosObj.shortcutX)) ? 0 : parseFloat(_dosObj.shortcutX));
+	g_diffObj.shortcutY = (isNaN(parseFloat(_dosObj.shortcutY)) ? 0 : parseFloat(_dosObj.shortcutY));
+	g_diffInitObj.shortcutX = g_diffObj.shortcutX;
+	g_diffInitObj.shortcutY = g_diffObj.shortcutY;
 
 	// musicフォルダ設定
 	obj.musicFolder = _dosObj.musicFolder ?? (g_remoteFlg ? `${C_MRK_CURRENT_DIRECTORY}../music` : `music`);
@@ -9112,7 +9120,8 @@ let g_previewLsnrKeys = new Set();
 /** プレビュー内の各UIオブジェクトの現在座標 */
 const g_previewPos = {
 	arrowJdg: { x: null, y: null },   // 通常判定キャラクタ・コンボ
-	frzJdg: { x: null, y: null },   // フリーズ判定キャラクタ・コンボ
+	frzJdg: { x: null, y: null },     // フリーズ判定キャラクタ・コンボ
+	shortcut: { x: null, y: null },
 };
 
 /**
@@ -9161,8 +9170,20 @@ const openDisplayPreview = () => {
 		createCss2Button(`btnDisplayPreview2`, `↑ Preview`, _evt => {
 			toggleDisplayPreview();
 		}, g_lblPosObj.btnDisplayPreview, g_cssObj.button_Setting),
+		createCss2Button(`btnDisplayReset`, `Reset`, _evt => {
+			if (window.confirm(g_msgObj.displayPreviewResetConfirm)) {
+				Object.assign(g_diffObj, g_diffInitObj);
+				Object.keys(g_previewPos).forEach(key => g_previewPos[key] = { x: null, y: null });
+				closeDisplayPreview();
+				openDisplayPreview();
+			}
+		}, g_lblPosObj.btnDisplayReset, g_cssObj.button_Reset),
 		createDescDiv(`lblDisplayPreviewMsg`, g_lblNameObj.displayPreviewDesc),
 	);
+	if (g_headerObj.scAreaWidth > 0) {
+		overlay.appendChild(createDescDiv(`lblDisplayPreviewMsg2`, g_lblNameObj.displayPreviewDesc2));
+	}
+	createScText(btnDisplayReset, `DisplayPreviewReset`, { displayName: `displayPreview`, targetLabel: `btnDisplayReset`, x: -15 });
 
 	// ============================================================
 	// プレイ画面フレーム（白枠）
@@ -9177,7 +9198,6 @@ const openDisplayPreview = () => {
 		x: frameX, y: frameY, w: playW, h: playH,
 		background: `#111111`,
 		border: `1px solid #444444`,
-		overflow: `hidden`,
 		boxSizing: `border-box`,
 		transform: `scale(${rate})`,
 	});
@@ -9377,6 +9397,28 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		)
 	}
 
+	// ============================================================
+	// ショートカット表示
+	// ============================================================
+	const scGroup = createEmptySprite(_frame, `previewScGroup`, {
+		x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
+		y: _playH - 65 + g_diffObj.shortcutY, w: 80, h: 65, pointerEvents: C_DIS_AUTO,
+	});
+	multiAppend(scGroup,
+		createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, { ...g_lblPosObj.lblMainScHeader, x: 0, y: 0 }),
+		createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry],
+			{ ...g_lblPosObj.lblMainScKey, x: 0, y: 15, fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold` }),
+		createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, { ...g_lblPosObj.lblMainScHeader, x: 0, y: 35 }),
+		createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack],
+			{ ...g_lblPosObj.lblMainScKey, x: 0, y: 50, fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold` }),
+	);
+	const scConfig = {
+		toastTitle: g_lblNameObj.shortcutUpdate,
+		getStdX: (pw) => g_sWidth + g_headerObj.scAreaWidth - 85,
+		getStdY: (ph, syr) => _playH - 65,
+	};
+	makeElementDraggable(scGroup, `shortcut`, _playW, _playH, { w: 80, h: 65 }, scConfig);
+
 	// ユーザカスタムイベント(プレビュー表示用)
 	safeExecuteCustomHooks(`g_customJsObj.displayPreview`, g_customJsObj.displayPreview, _frame, _playW, _playH);
 };
@@ -9426,7 +9468,8 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 		const dy = _evt.clientY - dragStartY;
 
 		// 境界値制限
-		const newX = Math.max(0, Math.min(_playW - boundsW, elemStartX + dx));
+		const minX = g_headerObj.playingLayout ? -g_headerObj.scAreaWidth : 0;
+		const newX = Math.max(minX, Math.min(_playW + g_headerObj.scAreaWidth - boundsW, elemStartX + dx));
 		const newY = Math.max(0, Math.min(_playH - boundsH, elemStartY + dy));
 
 		_target.style.left = wUnit(newX);
@@ -9509,13 +9552,11 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 			toastTitle: g_lblNameObj.arrowJdgUpdate,
 			getStdX: (pw) => Math.round(pw / 2 - 220),
 			getStdY: (ph, syr) => Math.round((ph + syr) / 2 - 60),
-			targetKeys: { x: `arrowJdgX`, y: `arrowJdgY` },
 		},
 		frzJdg: {
 			toastTitle: g_lblNameObj.frzJdgUpdate,
 			getStdX: (pw) => Math.round(pw / 2 - 120),
 			getStdY: (ph, syr) => Math.round((ph + syr) / 2 + 10),
-			targetKeys: { x: `frzJdgX`, y: `frzJdgY` },
 		}
 	};
 
@@ -13891,6 +13932,9 @@ const getArrowSettings = () => {
 	if (g_headerObj.scAreaWidth === 0 && (g_headerObj.keyRetry !== g_headerObj.keyRetryDef2 || g_headerObj.keyTitleBack !== g_headerObj.keyTitleBackDef2)) {
 		g_workObj.nonDefaultSc = false;
 	}
+	if (g_diffObj.shortcutX !== 0 || g_diffObj.shortcutY !== 0) {
+		g_workObj.nonDefaultSc = true;
+	}
 
 	g_workObj.backX = (g_workObj.nonDefaultSc && g_headerObj.playingLayout ? g_headerObj.scAreaWidth : 0);
 	g_workObj.playingX = g_headerObj.playingX + g_workObj.backX;
@@ -14366,12 +14410,28 @@ const mainInit = () => {
 
 	if (g_workObj.nonDefaultSc) {
 		multiAppend(infoSprite,
-			createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, { ...g_lblPosObj.lblMainScHeader, y: g_headerObj.playingHeight - 65 }),
-			createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry],
-				{ ...g_lblPosObj.lblMainScKey, y: g_headerObj.playingHeight - 50, fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold` }),
-			createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, { ...g_lblPosObj.lblMainScHeader, y: g_headerObj.playingHeight - 35 }),
-			createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack],
-				{ ...g_lblPosObj.lblMainScKey, y: g_headerObj.playingHeight - 20, fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold` }),
+			createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, {
+				...g_lblPosObj.lblMainScHeader,
+				x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
+				y: g_headerObj.playingHeight - 65 + g_diffObj.shortcutY,
+			}),
+			createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry], {
+				...g_lblPosObj.lblMainScKey,
+				x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
+				y: g_headerObj.playingHeight - 50 + g_diffObj.shortcutY,
+				fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold`,
+			}),
+			createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, {
+				...g_lblPosObj.lblMainScHeader,
+				x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
+				y: g_headerObj.playingHeight - 35 + g_diffObj.shortcutY,
+			}),
+			createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack], {
+				...g_lblPosObj.lblMainScKey,
+				x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
+				y: g_headerObj.playingHeight - 20 + g_diffObj.shortcutY,
+				fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold`,
+			}),
 		);
 	}
 
