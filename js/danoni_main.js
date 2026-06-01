@@ -9295,7 +9295,7 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	}
 
 	// ============================================================
-	// hitPositon を視覚化する判定基準ライン
+	// HitPosition を視覚化する判定基準ライン
 	// ============================================================
 	// 通常譜面用の判定ライン（赤または目立つ色で、レーン幅全体をカバー）
 	// 上から下に流れる場合、hitPosがプラスなら「ステップゾーンより下」にラインが来る
@@ -9615,6 +9615,7 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 	const group = createEmptySprite(_parent, `previewGrp_${_groupId}`, {
 		x: _initX, y: _initY, w: groupW, h: groupH, pointerEvents: C_DIS_AUTO,
 	});
+	const opacity = g_stateObj.opacity / 100;
 
 	// 内包要素の生成 (省略：元のコードの multiAppend 部分と同一)
 	multiAppend(
@@ -9622,17 +9623,17 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 		// キャラクタ
 		createDivCss2Label(`previewChara_${_groupId}`, _opts.charaText, {
 			x: 0, y: 0, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
-			siz: g_limitObj.jdgCharaSiz, color: _opts.charaColor,
+			siz: g_limitObj.jdgCharaSiz, color: _opts.charaColor, opacity,
 		}),
 		// コンボ
 		createDivCss2Label(`previewCombo_${_groupId}`, _opts.comboText, {
 			x: 170, y: 0, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
-			siz: g_limitObj.jdgCharaSiz, color: `#ffffff`,
+			siz: g_limitObj.jdgCharaSiz, color: `#ffffff`, opacity,
 		}),
 		// Fast/Slow
 		createDivCss2Label(`previewDiff_${_groupId}`, _opts.diffText, {
 			x: 170, y: 25, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
-			siz: g_limitObj.mainSiz, color: `#ff9966`,
+			siz: g_limitObj.mainSiz, color: `#ff9966`, opacity,
 		}),
 	);
 
