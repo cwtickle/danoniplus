@@ -586,7 +586,7 @@ const updateWindowSiz = () => {
             w: 4, h: (g_headerObj.playingHeight - 100) * 0.3,
         },
         previewHitPosText: {
-            w: 100, h: 16, siz: 14, color: `#33aaff`,
+            w: 60, h: 16, siz: 14, color: `#33aaff`,
             fontFamily: `monospace`, fontWeight: `bold`,
         },
 

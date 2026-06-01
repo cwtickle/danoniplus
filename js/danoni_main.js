@@ -9312,10 +9312,10 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	multiAppend(
 		lineNormal,
 		createDivCss2Label(`previewHitPosTitle`, `Hit`, {
-			...g_lblPosObj.previewHitPosText, x: -100, y: -14, align: C_ALIGN_RIGHT,
+			...g_lblPosObj.previewHitPosText, x: -60, y: -14, align: C_ALIGN_RIGHT,
 		}),
 		createDivCss2Label(`previewHitPosTitle2`, `Position`, {
-			...g_lblPosObj.previewHitPosText, x: -100, y: -2, align: C_ALIGN_RIGHT,
+			...g_lblPosObj.previewHitPosText, x: -60, y: -2, align: C_ALIGN_RIGHT,
 		}),
 		createDivCss2Label(`previewHitPosText`, `${hitPos > 0 ? '+' : ''}${hitPos}px↑↓`, {
 			...g_lblPosObj.previewHitPosText, x: totalW + 5, y: -8, align: C_ALIGN_LEFT,
