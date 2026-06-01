@@ -9311,11 +9311,14 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	// 青いラインの右端（totalW から10pxほど外側）に数値を表示
 	multiAppend(
 		lineNormal,
-		createDivCss2Label(`previewHitPosTitle`, g_lblNameObj.HitPosition, {
-			...g_lblPosObj.previewHitPosText, x: -105, align: C_ALIGN_RIGHT,
+		createDivCss2Label(`previewHitPosTitle`, `Hit`, {
+			...g_lblPosObj.previewHitPosText, x: -100, y: -14, align: C_ALIGN_RIGHT,
+		}),
+		createDivCss2Label(`previewHitPosTitle2`, `Position`, {
+			...g_lblPosObj.previewHitPosText, x: -100, y: -2, align: C_ALIGN_RIGHT,
 		}),
 		createDivCss2Label(`previewHitPosText`, `${hitPos > 0 ? '+' : ''}${hitPos}px↑↓`, {
-			...g_lblPosObj.previewHitPosText, x: totalW + 10, align: C_ALIGN_LEFT,
+			...g_lblPosObj.previewHitPosText, x: totalW + 5, y: -8, align: C_ALIGN_LEFT,
 		}),
 	);
 
