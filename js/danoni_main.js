@@ -9171,7 +9171,7 @@ const openDisplayPreview = () => {
 	// オーバーレイ本体
 	// ============================================================
 	const overlay = createEmptySprite(divRoot, `displayPreviewOverlay`, {
-		w: g_sWidth, h: g_sHeight, background: g_headerObj.baseBrightFlg ? `#eeeeeedd` : `#111111dd`, pointerEvents: C_DIS_AUTO,
+		w: g_sWidth, h: g_sHeight, background: g_headerObj.baseBrightFlg ? `#eeeeeeee` : `#111111dd`, pointerEvents: C_DIS_AUTO,
 	});
 	g_previewRoot = overlay;
 	multiAppend(overlay,
@@ -9209,7 +9209,7 @@ const openDisplayPreview = () => {
 
 	const frame = createEmptySprite(overlay, `previewFrame`, {
 		x: frameX, y: frameY, w: playW, h: playH,
-		background: g_headerObj.baseBrightFlg ? `#eeeeeedd` : `#111111`,
+		background: g_headerObj.baseBrightFlg ? `#eeeeee` : `#111111`,
 		border: `1px solid #444444`,
 		boxSizing: `border-box`,
 		transform: `scale(${rate})`,
