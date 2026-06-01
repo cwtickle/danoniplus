@@ -9171,7 +9171,7 @@ const openDisplayPreview = () => {
 	// オーバーレイ本体
 	// ============================================================
 	const overlay = createEmptySprite(divRoot, `displayPreviewOverlay`, {
-		w: g_sWidth, h: g_sHeight, background: g_headerObj.baseBrightFlg ? `#eeeeeedd` : `#111111dd`, pointerEvents: C_DIS_AUTO,
+		w: g_sWidth, h: g_sHeight, background: g_headerObj.baseBrightFlg ? `#eeeeeeee` : `#111111dd`, pointerEvents: C_DIS_AUTO,
 	});
 	g_previewRoot = overlay;
 	multiAppend(overlay,
