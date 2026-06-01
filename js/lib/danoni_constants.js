@@ -569,23 +569,21 @@ const updateWindowSiz = () => {
         },
         previewLifeBack: {
             x: 5, y: 50, w: 15, h: g_headerObj.playingHeight - 100,
-            background: `#333333`, border: `1px solid #555555`,
         },
         previewLifeBar: {
             x: 5, y: 50 + (g_headerObj.playingHeight - 100) * 0.3,
-            w: 15, h: (g_headerObj.playingHeight - 100) * 0.7, background: `#006666`,
+            w: 15, h: (g_headerObj.playingHeight - 100) * 0.7,
         },
         previewLifeNum: {
             x: 0, y: 30, w: 70, h: 20,
-            siz: g_limitObj.jdgCntsSiz, color: `#ffffff`, background: `#006666`, align: C_ALIGN_CENTER,
+            siz: g_limitObj.jdgCntsSiz, align: C_ALIGN_CENTER,
         },
         previewFrzLifeBack: {
-            x: 0, y: 50, w: 5, h: g_headerObj.playingHeight - 100,
-            background: `#333333`, border: `1px solid #555555`,
+            x: 0, y: 50, w: 4, h: g_headerObj.playingHeight - 100,
         },
         previewFrzLifeBar: {
             x: 0, y: 50 + (g_headerObj.playingHeight - 100) * 0.7,
-            w: 5, h: (g_headerObj.playingHeight - 100) * 0.3,
+            w: 4, h: (g_headerObj.playingHeight - 100) * 0.3,
         },
         previewHitPosText: {
             y: -8, w: 100, h: 16, siz: 14, color: `#33aaff`,

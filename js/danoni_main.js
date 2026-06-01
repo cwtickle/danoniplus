@@ -9209,7 +9209,7 @@ const openDisplayPreview = () => {
 
 	const frame = createEmptySprite(overlay, `previewFrame`, {
 		x: frameX, y: frameY, w: playW, h: playH,
-		background: `#111111`,
+		background: g_headerObj.baseBrightFlg ? `#eeeeeedd` : `#111111`,
 		border: `1px solid #444444`,
 		boxSizing: `border-box`,
 		transform: `scale(${rate})`,
@@ -9372,9 +9372,9 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		_frame.appendChild(disableBox(`LifeGauge`, g_lblPosObj.previewLifeDisabled));
 	} else {
 		multiAppend(_frame,
-			createDivCss2Label(`previewLifeBack`, ``, g_lblPosObj.previewLifeBack),
-			createDivCss2Label(`previewLifeBar`, ``, g_lblPosObj.previewLifeBar),
-			createDivCss2Label(`previewLifeNum`, `700`, g_lblPosObj.previewLifeNum),
+			createDivCss2Label(`previewLifeBack`, ``, g_lblPosObj.previewLifeBack, g_cssObj.life_Background),
+			createDivCss2Label(`previewLifeBar`, ``, g_lblPosObj.previewLifeBar, g_cssObj.life_Cleared),
+			createDivCss2Label(`previewLifeNum`, `700`, g_lblPosObj.previewLifeNum, g_cssObj.life_Cleared),
 		);
 	}
 
@@ -9389,31 +9389,31 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		}
 	} else {
 		const scoreItems = [
-			{ color: `#66ffff`, cnt: `5` },
-			{ color: `#99ff99`, cnt: `0` },
-			{ color: `#ffcc66`, cnt: `0` },
-			{ color: `#cc99ff`, cnt: `0` },
-			{ color: `#ff9999`, cnt: `0` },
-			{ color: `#ffffff`, cnt: `5` },
+			{ name: `ii`, cnt: `5` },
+			{ name: `shakin`, cnt: `0` },
+			{ name: `matari`, cnt: `0` },
+			{ name: `shobon`, cnt: `0` },
+			{ name: `uwan`, cnt: `0` },
+			{ name: `combo`, cnt: `5` },
 			{},
-			{ color: `#ffff99`, cnt: `5` },
-			{ color: `#99ff66`, cnt: `0` },
-			{ color: `#ffffff`, cnt: `5` },
+			{ name: `kita`, cnt: `5` },
+			{ name: `iknai`, cnt: `0` },
+			{ name: `combo`, cnt: `5` },
 		];
 		const sx = _playW - 110 + g_headerObj.scAreaWidth;
 		scoreItems.forEach((item, i) => {
 			_frame.appendChild(
 				createDivCss2Label(`previewScore${i}`, item.cnt || ``, {
 					x: sx + 50, y: 20 * (i + 1), w: 50, h: 20,
-					siz: 16, color: item.color, align: `right`,
-				}),
+					siz: 16, align: `right`,
+				}, g_cssObj[`common_${item.name}`]),
 			);
 		});
 
 		// FrzReturn用ゲージ
 		if (g_stateObj.frzReturn !== C_FLG_OFF) {
 			multiAppend(_frame,
-				createDivCss2Label(`previewFrzLifeBack`, ``, g_lblPosObj.previewFrzLifeBack),
+				createDivCss2Label(`previewFrzLifeBack`, ``, g_lblPosObj.previewFrzLifeBack, g_cssObj.life_Background),
 				createDivCss2Label(`previewFrzLifeBar`, ``, g_lblPosObj.previewFrzLifeBar, g_cssObj.life_frzNormal),
 			);
 		}
@@ -9530,11 +9530,12 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 	const handleId = _target.id ? `handle_${_target.id}` : `dragHandle_${Math.random().toString(36).slice(2, 9)}`;
 	_target.style.cursor = `grab`;
 
+	const bgColor = g_headerObj.baseBrightFlg ? `0,0,0` : `255,255,255`;
 	createEmptySprite(_target, handleId, {
 		x: 0, y: 0, w: boundsW, h: boundsH,
-		border: `1px dashed rgba(255,255,255,0.3)`,
+		border: `1px dashed rgba(${bgColor},0.3)`,
 		boxSizing: `border-box`, borderRadius: `2px`,
-		background: `rgba(255,255,255,0.04)`,
+		background: `rgba(${bgColor},0.04)`,
 	});
 
 	const keyDown = addPreviewListener(_target, `pointerdown`, _evt => {
@@ -9623,18 +9624,18 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 		// キャラクタ
 		createDivCss2Label(`previewChara_${_groupId}`, _opts.charaText, {
 			x: 0, y: 0, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
-			siz: g_limitObj.jdgCharaSiz, color: _opts.charaColor, opacity,
-		}),
+			siz: g_limitObj.jdgCharaSiz, opacity,
+		}, _groupId === `arrowJdg` ? g_cssObj.common_ii : g_cssObj.common_kita),
 		// コンボ
 		createDivCss2Label(`previewCombo_${_groupId}`, _opts.comboText, {
 			x: 170, y: 0, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
-			siz: g_limitObj.jdgCharaSiz, color: `#ffffff`, opacity,
-		}),
+			siz: g_limitObj.jdgCharaSiz, opacity,
+		}, _groupId === `arrowJdg` ? g_cssObj.common_kita : g_cssObj.common_ii),
 		// Fast/Slow
 		createDivCss2Label(`previewDiff_${_groupId}`, _opts.diffText, {
 			x: 170, y: 25, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
 			siz: g_limitObj.mainSiz, color: `#ff9966`, opacity,
-		}),
+		}, g_cssObj.common_fast),
 	);
 
 	// ============================================================
