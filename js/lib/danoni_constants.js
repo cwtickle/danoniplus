@@ -587,6 +587,10 @@ const updateWindowSiz = () => {
             x: 0, y: 50 + (g_headerObj.playingHeight - 100) * 0.7,
             w: 5, h: (g_headerObj.playingHeight - 100) * 0.3,
         },
+        previewHitPosText: {
+            y: -8, w: 100, h: 16, siz: 14, color: `#33aaff`,
+            fontFamily: `monospace`, fontWeight: `bold`,
+        },
 
         /** キーコンフィグ画面 */
         scKcMsg: {
@@ -3001,6 +3005,13 @@ const g_shortcutObj = {
     displayPreview: {
         KeyP: { id: `btnDisplayPreview2` },
         KeyR: { id: `btnDisplayReset` },
+        ShiftLeft_ArrowDown: { id: `lnkHitPositionR` },
+        ShiftRight_ArrowDown: { id: `lnkHitPositionR` },
+        ArrowDown: { id: `lnkHitPositionRR` },
+        ShiftLeft_ArrowUp: { id: `lnkHitPositionL` },
+        ShiftRight_ArrowUp: { id: `lnkHitPositionL` },
+        ArrowUp: { id: `lnkHitPositionLL` },
+
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `btnPlay` },
