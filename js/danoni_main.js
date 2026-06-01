@@ -9209,7 +9209,7 @@ const openDisplayPreview = () => {
 
 	const frame = createEmptySprite(overlay, `previewFrame`, {
 		x: frameX, y: frameY, w: playW, h: playH,
-		background: g_headerObj.baseBrightFlg ? `#eeeeeedd` : `#111111`,
+		background: g_headerObj.baseBrightFlg ? `#eeeeee` : `#111111`,
 		border: `1px solid #444444`,
 		boxSizing: `border-box`,
 		transform: `scale(${rate})`,
