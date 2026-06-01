@@ -9266,6 +9266,13 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	// ============================================================
 	const stepY = g_posObj.stepY ?? C_STEP_Y;
 	const revStepY = g_posObj.reverseStepY;
+	const hitPos = g_stateObj.hitPosition ?? 0;
+
+	// 簡易ステップゾーン（7レーン分）
+	const laneCount = 7;
+	const laneW = 50;
+	const totalW = laneCount * laneW;
+	const startX = Math.round((_playW - totalW) / 2);
 
 	if (d.stepzone === C_FLG_OFF) {
 		multiAppend(_frame,
@@ -9273,12 +9280,6 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 			disableBox(`StepZone_Rev`, { x: Math.round(_playW / 2 - 200), y: C_STEP_Y + revStepY, w: 400, h: 50 }),
 		);
 	} else {
-		// 簡易ステップゾーン（7レーン分）
-		const laneCount = 7;
-		const laneW = 50;
-		const totalW = laneCount * laneW;
-		const startX = Math.round((_playW - totalW) / 2);
-
 		for (let j = 0; j < laneCount; j++) {
 			createEmptySprite(_frame, `previewStep${j}`, {
 				x: startX + j * laneW + 2, y: stepY + 2, w: laneW - 4, h: laneW - 4,
@@ -9292,6 +9293,42 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 			});
 		}
 	}
+
+	// ============================================================
+	// hitPositon を視覚化する判定基準ライン
+	// ============================================================
+	// 通常譜面用の判定ライン（赤または目立つ色で、レーン幅全体をカバー）
+	// 上から下に流れる場合、hitPosがプラスなら「ステップゾーンより下」にラインが来る
+	const lineNormal = createEmptySprite(_frame, `previewHitPosLine`, {
+		x: startX,
+		y: stepY + Math.round(laneW / 2) + hitPos, // ステップゾーンの中心 + hitPos 
+		w: totalW,
+		h: 2, // 2pxの横線
+		background: `#33aaff`,
+		boxShadow: `0 0 4px #33aaff`, // ネオンっぽく光らせて目立たせる
+	});
+
+	// 青いラインの右端（totalW から10pxほど外側）に数値を表示
+	multiAppend(
+		lineNormal,
+		createDivCss2Label(`previewHitPosTitle`, g_lblNameObj.HitPosition, {
+			...g_lblPosObj.previewHitPosText, x: -105, align: C_ALIGN_RIGHT,
+		}),
+		createDivCss2Label(`previewHitPosText`, `${hitPos > 0 ? '+' : ''}${hitPos}px↑↓`, {
+			...g_lblPosObj.previewHitPosText, x: totalW + 10, align: C_ALIGN_LEFT,
+		}),
+	);
+
+	// リバース譜面用の判定ライン
+	// 下から上に流れる場合、hitPosがプラスなら「ステップゾーンより上（座標としてはマイナス）」に来る
+	createEmptySprite(_frame, `previewHitPosLineRev`, {
+		x: startX,
+		y: (C_STEP_Y + revStepY) + Math.round(laneW / 2) - hitPos, // ステップゾーンの中心 - hitPos
+		w: totalW,
+		h: 2,
+		background: `#ffaa00`,
+		boxShadow: `0 0 4px #ffaa00`,
+	});
 
 	// ============================================================
 	// 判定エリア（ドラッグ可能）
@@ -9434,6 +9471,41 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 
 	// ユーザカスタムイベント(プレビュー表示用)
 	safeExecuteCustomHooks(`g_customJsObj.displayPreview`, g_customJsObj.displayPreview, _frame, _playW, _playH);
+};
+
+/**
+ * プレビューが表示されたまま、HitPositionのラインだけを動かす
+ * @param {number} _newHitPos 新しい g_stateObj.hitPosition の値
+ */
+const updatePreviewHitPositionLine = (_newHitPos) => {
+
+	// 表示用の文字列を作成（例: "+15px", "-8px", "0px"）
+	const sign = _newHitPos > 0 ? `+` : ``;
+	const textValue = `${sign}${_newHitPos}px↑↓`;
+
+	// 1. 各種基準座標を再取得（buildPreviewUI 内の計算ロジックと同期）
+	const stepY = g_posObj.stepY ?? C_STEP_Y;
+	const revStepY = g_posObj.reverseStepY;
+	const laneW = 50;
+
+	// 2. DOM要素を直接取得
+	const lineNormal = document.getElementById(`previewHitPosLine`);
+	const lineReverse = document.getElementById(`previewHitPosLineRev`);
+	const textNormal = document.getElementById(`previewHitPosText`);
+
+	// 3. プレビューが表示されている場合のみ、style.top を直接書き換える
+	if (lineNormal) {
+		const newY = stepY + Math.round(laneW / 2) + _newHitPos;
+		lineNormal.style.top = wUnit(newY);
+	}
+	if (textNormal) {
+		textNormal.textContent = textValue;
+	}
+
+	if (lineReverse) {
+		const newY = (C_STEP_Y + revStepY) + Math.round(laneW / 2) - _newHitPos;
+		lineReverse.style.top = wUnit(newY);
+	}
 };
 
 /**
@@ -9790,6 +9862,7 @@ const createSettingsDisplayWindow = _sprite => {
 	createGeneralSetting(spriteList.hitPosition, `hitPosition`, {
 		skipTerms: g_settings.hitPositionTerms, scLabel: g_lblNameObj.sc_hitPosition, roundNum: 5,
 		unitName: g_lblNameObj.pixel,
+		addRFunc: () => updatePreviewHitPositionLine(g_stateObj.hitPosition),
 	});
 };
 
