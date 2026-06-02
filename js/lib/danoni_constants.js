@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/05/31 (v48.3.0)
+ * Revised : 2026/06/02 (v48.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -569,23 +569,25 @@ const updateWindowSiz = () => {
         },
         previewLifeBack: {
             x: 5, y: 50, w: 15, h: g_headerObj.playingHeight - 100,
-            background: `#333333`, border: `1px solid #555555`,
         },
         previewLifeBar: {
             x: 5, y: 50 + (g_headerObj.playingHeight - 100) * 0.3,
-            w: 15, h: (g_headerObj.playingHeight - 100) * 0.7, background: `#006666`,
+            w: 15, h: (g_headerObj.playingHeight - 100) * 0.7,
         },
         previewLifeNum: {
             x: 0, y: 30, w: 70, h: 20,
-            siz: g_limitObj.jdgCntsSiz, color: `#ffffff`, background: `#006666`, align: C_ALIGN_CENTER,
+            siz: g_limitObj.jdgCntsSiz, align: C_ALIGN_CENTER,
         },
         previewFrzLifeBack: {
-            x: 0, y: 50, w: 5, h: g_headerObj.playingHeight - 100,
-            background: `#333333`, border: `1px solid #555555`,
+            x: 0, y: 50, w: 4, h: g_headerObj.playingHeight - 100,
         },
         previewFrzLifeBar: {
             x: 0, y: 50 + (g_headerObj.playingHeight - 100) * 0.7,
-            w: 5, h: (g_headerObj.playingHeight - 100) * 0.3,
+            w: 4, h: (g_headerObj.playingHeight - 100) * 0.3,
+        },
+        previewHitPosText: {
+            w: 60, h: 16, siz: 14, color: `#33aaff`,
+            fontFamily: `monospace`, fontWeight: `bold`,
         },
 
         /** キーコンフィグ画面 */
@@ -3001,6 +3003,13 @@ const g_shortcutObj = {
     displayPreview: {
         KeyP: { id: `btnDisplayPreview2` },
         KeyR: { id: `btnDisplayReset` },
+        ShiftLeft_ArrowDown: { id: `lnkHitPositionR` },
+        ShiftRight_ArrowDown: { id: `lnkHitPositionR` },
+        ArrowDown: { id: `lnkHitPositionRR` },
+        ShiftLeft_ArrowUp: { id: `lnkHitPositionL` },
+        ShiftRight_ArrowUp: { id: `lnkHitPositionL` },
+        ArrowUp: { id: `lnkHitPositionLL` },
+
         Escape: { id: `btnBack` },
         Space: { id: `btnKeyConfig` },
         Enter: { id: `btnPlay` },

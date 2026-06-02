@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/05/31
+ * Revised : 2026/06/02
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 48.3.0`;
-const g_revisedDate = `2026/05/31`;
+const g_version = `Ver 48.4.0`;
+const g_revisedDate = `2026/06/02`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -9171,7 +9171,7 @@ const openDisplayPreview = () => {
 	// オーバーレイ本体
 	// ============================================================
 	const overlay = createEmptySprite(divRoot, `displayPreviewOverlay`, {
-		w: g_sWidth, h: g_sHeight, background: g_headerObj.baseBrightFlg ? `#eeeeeedd` : `#111111dd`, pointerEvents: C_DIS_AUTO,
+		w: g_sWidth, h: g_sHeight, background: g_headerObj.baseBrightFlg ? `#eeeeeeee` : `#111111dd`, pointerEvents: C_DIS_AUTO,
 	});
 	g_previewRoot = overlay;
 	multiAppend(overlay,
@@ -9209,7 +9209,7 @@ const openDisplayPreview = () => {
 
 	const frame = createEmptySprite(overlay, `previewFrame`, {
 		x: frameX, y: frameY, w: playW, h: playH,
-		background: `#111111`,
+		background: g_headerObj.baseBrightFlg ? `#eeeeee` : `#111111`,
 		border: `1px solid #444444`,
 		boxSizing: `border-box`,
 		transform: `scale(${rate})`,
@@ -9266,6 +9266,13 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	// ============================================================
 	const stepY = g_posObj.stepY ?? C_STEP_Y;
 	const revStepY = g_posObj.reverseStepY;
+	const hitPos = g_stateObj.hitPosition ?? 0;
+
+	// 簡易ステップゾーン（7レーン分）
+	const laneCount = 7;
+	const laneW = 50;
+	const totalW = laneCount * laneW;
+	const startX = Math.round((_playW - totalW) / 2);
 
 	if (d.stepzone === C_FLG_OFF) {
 		multiAppend(_frame,
@@ -9273,12 +9280,6 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 			disableBox(`StepZone_Rev`, { x: Math.round(_playW / 2 - 200), y: C_STEP_Y + revStepY, w: 400, h: 50 }),
 		);
 	} else {
-		// 簡易ステップゾーン（7レーン分）
-		const laneCount = 7;
-		const laneW = 50;
-		const totalW = laneCount * laneW;
-		const startX = Math.round((_playW - totalW) / 2);
-
 		for (let j = 0; j < laneCount; j++) {
 			createEmptySprite(_frame, `previewStep${j}`, {
 				x: startX + j * laneW + 2, y: stepY + 2, w: laneW - 4, h: laneW - 4,
@@ -9292,6 +9293,45 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 			});
 		}
 	}
+
+	// ============================================================
+	// HitPosition を視覚化する判定基準ライン
+	// ============================================================
+	// 通常譜面用の判定ライン（赤または目立つ色で、レーン幅全体をカバー）
+	// 上から下に流れる場合、hitPosがプラスなら「ステップゾーンより下」にラインが来る
+	const lineNormal = createEmptySprite(_frame, `previewHitPosLine`, {
+		x: startX,
+		y: stepY + Math.round(laneW / 2) + hitPos, // ステップゾーンの中心 + hitPos 
+		w: totalW,
+		h: 2, // 2pxの横線
+		background: `#33aaff`,
+		boxShadow: `0 0 4px #33aaff`, // ネオンっぽく光らせて目立たせる
+	});
+
+	// 青いラインの右端（totalW から10pxほど外側）に数値を表示
+	multiAppend(
+		lineNormal,
+		createDivCss2Label(`previewHitPosTitle`, `Hit`, {
+			...g_lblPosObj.previewHitPosText, x: -60, y: -14, align: C_ALIGN_RIGHT,
+		}),
+		createDivCss2Label(`previewHitPosTitle2`, `Position`, {
+			...g_lblPosObj.previewHitPosText, x: -60, y: -2, align: C_ALIGN_RIGHT,
+		}),
+		createDivCss2Label(`previewHitPosText`, `${hitPos > 0 ? '+' : ''}${hitPos}px↑↓`, {
+			...g_lblPosObj.previewHitPosText, x: totalW + 5, y: -8, align: C_ALIGN_LEFT,
+		}),
+	);
+
+	// リバース譜面用の判定ライン
+	// 下から上に流れる場合、hitPosがプラスなら「ステップゾーンより上（座標としてはマイナス）」に来る
+	createEmptySprite(_frame, `previewHitPosLineRev`, {
+		x: startX,
+		y: (C_STEP_Y + revStepY) + Math.round(laneW / 2) - hitPos, // ステップゾーンの中心 - hitPos
+		w: totalW,
+		h: 2,
+		background: `#ffaa00`,
+		boxShadow: `0 0 4px #ffaa00`,
+	});
 
 	// ============================================================
 	// 判定エリア（ドラッグ可能）
@@ -9335,9 +9375,9 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		_frame.appendChild(disableBox(`LifeGauge`, g_lblPosObj.previewLifeDisabled));
 	} else {
 		multiAppend(_frame,
-			createDivCss2Label(`previewLifeBack`, ``, g_lblPosObj.previewLifeBack),
-			createDivCss2Label(`previewLifeBar`, ``, g_lblPosObj.previewLifeBar),
-			createDivCss2Label(`previewLifeNum`, `700`, g_lblPosObj.previewLifeNum),
+			createDivCss2Label(`previewLifeBack`, ``, g_lblPosObj.previewLifeBack, g_cssObj.life_Background),
+			createDivCss2Label(`previewLifeBar`, ``, g_lblPosObj.previewLifeBar, g_cssObj.life_Cleared),
+			createDivCss2Label(`previewLifeNum`, `700`, g_lblPosObj.previewLifeNum, g_cssObj.life_Cleared),
 		);
 	}
 
@@ -9352,31 +9392,31 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		}
 	} else {
 		const scoreItems = [
-			{ color: `#66ffff`, cnt: `5` },
-			{ color: `#99ff99`, cnt: `0` },
-			{ color: `#ffcc66`, cnt: `0` },
-			{ color: `#cc99ff`, cnt: `0` },
-			{ color: `#ff9999`, cnt: `0` },
-			{ color: `#ffffff`, cnt: `5` },
+			{ name: `ii`, cnt: `5` },
+			{ name: `shakin`, cnt: `0` },
+			{ name: `matari`, cnt: `0` },
+			{ name: `shobon`, cnt: `0` },
+			{ name: `uwan`, cnt: `0` },
+			{ name: `combo`, cnt: `5` },
 			{},
-			{ color: `#ffff99`, cnt: `5` },
-			{ color: `#99ff66`, cnt: `0` },
-			{ color: `#ffffff`, cnt: `5` },
+			{ name: `kita`, cnt: `5` },
+			{ name: `iknai`, cnt: `0` },
+			{ name: `combo`, cnt: `5` },
 		];
 		const sx = _playW - 110 + g_headerObj.scAreaWidth;
 		scoreItems.forEach((item, i) => {
 			_frame.appendChild(
 				createDivCss2Label(`previewScore${i}`, item.cnt || ``, {
 					x: sx + 50, y: 20 * (i + 1), w: 50, h: 20,
-					siz: 16, color: item.color, align: `right`,
-				}),
+					siz: 16, align: `right`,
+				}, g_cssObj[`common_${item.name}`]),
 			);
 		});
 
 		// FrzReturn用ゲージ
 		if (g_stateObj.frzReturn !== C_FLG_OFF) {
 			multiAppend(_frame,
-				createDivCss2Label(`previewFrzLifeBack`, ``, g_lblPosObj.previewFrzLifeBack),
+				createDivCss2Label(`previewFrzLifeBack`, ``, g_lblPosObj.previewFrzLifeBack, g_cssObj.life_Background),
 				createDivCss2Label(`previewFrzLifeBar`, ``, g_lblPosObj.previewFrzLifeBar, g_cssObj.life_frzNormal),
 			);
 		}
@@ -9437,6 +9477,41 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 };
 
 /**
+ * プレビューが表示されたまま、HitPositionのラインだけを動かす
+ * @param {number} _newHitPos 新しい g_stateObj.hitPosition の値
+ */
+const updatePreviewHitPositionLine = (_newHitPos) => {
+
+	// 表示用の文字列を作成（例: "+15px", "-8px", "0px"）
+	const sign = _newHitPos > 0 ? `+` : ``;
+	const textValue = `${sign}${_newHitPos}px↑↓`;
+
+	// 1. 各種基準座標を再取得（buildPreviewUI 内の計算ロジックと同期）
+	const stepY = g_posObj.stepY ?? C_STEP_Y;
+	const revStepY = g_posObj.reverseStepY;
+	const laneW = 50;
+
+	// 2. DOM要素を直接取得
+	const lineNormal = document.getElementById(`previewHitPosLine`);
+	const lineReverse = document.getElementById(`previewHitPosLineRev`);
+	const textNormal = document.getElementById(`previewHitPosText`);
+
+	// 3. プレビューが表示されている場合のみ、style.top を直接書き換える
+	if (lineNormal) {
+		const newY = stepY + Math.round(laneW / 2) + _newHitPos;
+		lineNormal.style.top = wUnit(newY);
+	}
+	if (textNormal) {
+		textNormal.textContent = textValue;
+	}
+
+	if (lineReverse) {
+		const newY = (C_STEP_Y + revStepY) + Math.round(laneW / 2) - _newHitPos;
+		lineReverse.style.top = wUnit(newY);
+	}
+};
+
+/**
  * 要素をドラッグ可能にする（汎用ユーティリティ）
  * @param {HTMLElement} _target ドラッグ対象の要素
  * @param {string} _key 座標保存用のキー（g_previewPosオブジェクトのプロパティ名）
@@ -9458,11 +9533,12 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 	const handleId = _target.id ? `handle_${_target.id}` : `dragHandle_${Math.random().toString(36).slice(2, 9)}`;
 	_target.style.cursor = `grab`;
 
+	const bgColor = g_headerObj.baseBrightFlg ? `0,0,0` : `255,255,255`;
 	createEmptySprite(_target, handleId, {
 		x: 0, y: 0, w: boundsW, h: boundsH,
-		border: `1px dashed rgba(255,255,255,0.3)`,
+		border: `1px dashed rgba(${bgColor},0.3)`,
 		boxSizing: `border-box`, borderRadius: `2px`,
-		background: `rgba(255,255,255,0.04)`,
+		background: `rgba(${bgColor},0.04)`,
 	});
 
 	const keyDown = addPreviewListener(_target, `pointerdown`, _evt => {
@@ -9543,6 +9619,7 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 	const group = createEmptySprite(_parent, `previewGrp_${_groupId}`, {
 		x: _initX, y: _initY, w: groupW, h: groupH, pointerEvents: C_DIS_AUTO,
 	});
+	const opacity = g_stateObj.opacity / 100;
 
 	// 内包要素の生成 (省略：元のコードの multiAppend 部分と同一)
 	multiAppend(
@@ -9550,18 +9627,18 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
 		// キャラクタ
 		createDivCss2Label(`previewChara_${_groupId}`, _opts.charaText, {
 			x: 0, y: 0, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
-			siz: g_limitObj.jdgCharaSiz, color: _opts.charaColor,
-		}),
+			siz: g_limitObj.jdgCharaSiz, opacity,
+		}, _groupId === `arrowJdg` ? g_cssObj.common_ii : g_cssObj.common_kita),
 		// コンボ
 		createDivCss2Label(`previewCombo_${_groupId}`, _opts.comboText, {
 			x: 170, y: 0, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
-			siz: g_limitObj.jdgCharaSiz, color: `#ffffff`,
-		}),
+			siz: g_limitObj.jdgCharaSiz, opacity,
+		}, _groupId === `arrowJdg` ? g_cssObj.common_kita : g_cssObj.common_ii),
 		// Fast/Slow
 		createDivCss2Label(`previewDiff_${_groupId}`, _opts.diffText, {
 			x: 170, y: 25, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
-			siz: g_limitObj.mainSiz, color: `#ff9966`,
-		}),
+			siz: g_limitObj.mainSiz, color: `#ff9966`, opacity,
+		}, g_cssObj.common_fast),
 	);
 
 	// ============================================================
@@ -9790,6 +9867,7 @@ const createSettingsDisplayWindow = _sprite => {
 	createGeneralSetting(spriteList.hitPosition, `hitPosition`, {
 		skipTerms: g_settings.hitPositionTerms, scLabel: g_lblNameObj.sc_hitPosition, roundNum: 5,
 		unitName: g_lblNameObj.pixel,
+		addRFunc: () => updatePreviewHitPositionLine(g_stateObj.hitPosition),
 	});
 };
 
