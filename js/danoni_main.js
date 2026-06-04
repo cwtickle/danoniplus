@@ -9341,30 +9341,67 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 			x: Math.round(_playW / 2 - 220), y: Math.round((_playH + (g_posObj?.stepYR ?? 0)) / 2 - 60), w: 440, h: 120,
 		}));
 	} else {
-		const jX0 = Math.round(_playW / 2 - 220) + (g_diffObj.arrowJdgX ?? 0);
-		const jY0 = Math.round((_playH + (g_posObj?.stepYR ?? 0)) / 2 - 60) + (g_diffObj.arrowJdgY ?? 0);
-		const fX0 = Math.round(_playW / 2 - 120) + (g_diffObj.frzJdgX ?? 0);
-		const fY0 = Math.round((_playH + (g_posObj?.stepYR ?? 0)) / 2 + 10) + (g_diffObj.frzJdgY ?? 0);
+		const opacity = g_stateObj.opacity / 100;
+		const jdgCenterY = Math.round((_playH + (g_posObj?.stepYR ?? 0)) / 2);
+		const groupW = 370;
+		const groupH = 51;
 
-		const jdgInitX = g_previewPos.arrowJdg.x ?? jX0;
-		const jdgInitY = g_previewPos.arrowJdg.y ?? jY0;
-		const jdgFInitX = g_previewPos.frzJdg.x ?? fX0;
-		const jdgFInitY = g_previewPos.frzJdg.y ?? fY0;
+		const jdgSettings = [
+			{
+				key: `arrowJdg`,
+				stdYOffset: -60,
+				offsetX: g_diffObj.arrowJdgX ?? 0,
+				offsetY: g_diffObj.arrowJdgY ?? 0,
+				chara: d.judgment === C_FLG_ON ? g_lblNameObj.j_ii : ``,
+				css: [g_cssObj.common_ii, g_cssObj.common_kita], // [chara, combo]
+				toast: g_lblNameObj.arrowJdgUpdate,
+			},
+			{
+				key: `frzJdg`,
+				stdYOffset: 10,
+				offsetX: g_diffObj.frzJdgX ?? 0,
+				offsetY: g_diffObj.frzJdgY ?? 0,
+				chara: d.judgment === C_FLG_ON ? g_lblNameObj.j_kita : ``,
+				css: [g_cssObj.common_kita, g_cssObj.common_ii],
+				toast: g_lblNameObj.frzJdgUpdate,
+			}
+		];
 
-		// 通常判定グループ
-		buildDraggableJudgGroup(_frame, `arrowJdg`, jdgInitX, jdgInitY, _playW, _playH, {
-			charaText: d.judgment === C_FLG_ON ? g_lblNameObj.j_ii : ``,
-			comboText: d.judgment === C_FLG_ON ? `5 Combo!!` : ``,
-			diffText: `Fast 3 Frames`,
-			charaColor: `#66ffff`,
-		});
+		jdgSettings.forEach(item => {
 
-		// フリーズ判定グループ
-		buildDraggableJudgGroup(_frame, `frzJdg`, jdgFInitX, jdgFInitY, _playW, _playH, {
-			charaText: d.judgment === C_FLG_ON ? g_lblNameObj.j_kita : ``,
-			comboText: d.judgment === C_FLG_ON ? `5 Combo!!` : ``,
-			diffText: `Fast 2 Frames`,
-			charaColor: `#ffff99`,
+			const stdX = Math.round(_playW / 2 - (item.key === `arrowJdg` ? 220 : 120));
+			const initX = g_previewPos[item.key].x ?? (stdX + item.offsetX);
+			const initY = g_previewPos[item.key].y ?? (jdgCenterY + item.offsetY + item.stdYOffset);
+
+			// グループコンテナの生成
+			const group = createEmptySprite(_frame, `previewGrp_${item.key}`, {
+				x: initX, y: initY, w: groupW, h: groupH, pointerEvents: C_DIS_AUTO,
+			});
+
+			// ラベル類の配置
+			multiAppend(group,
+				createDivCss2Label(`previewChara_${item.key}`, item.chara, {
+					x: 0, y: 0, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
+					siz: g_limitObj.jdgCharaSiz, opacity,
+				}, item.css[0]),
+				createDivCss2Label(`previewCombo_${item.key}`, d.judgment === C_FLG_ON ? `5 Combo!!` : ``, {
+					x: 170, y: 0, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
+					siz: g_limitObj.jdgCharaSiz, opacity,
+				}, item.css[1]),
+				createDivCss2Label(`previewDiff_${item.key}`, `Fast 3 Frames`, {
+					x: 170, y: 25, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
+					siz: g_limitObj.mainSiz, color: `#ff9966`, opacity,
+				}, g_cssObj.common_fast),
+			);
+
+			// ドラッグ機能を付与
+			makeElementDraggable(group, item.key, _playW, _playH, { w: groupW, h: groupH }, {
+				toastTitle: item.toast,
+				getStdPos: () => ({
+					x: stdX,
+					y: Math.round(jdgCenterY + item.stdYOffset),
+				}),
+			});
 		});
 	}
 
@@ -9467,8 +9504,10 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	);
 	const scConfig = {
 		toastTitle: g_lblNameObj.shortcutUpdate,
-		getStdX: (pw) => g_sWidth + g_headerObj.scAreaWidth - 85,
-		getStdY: (ph, syr) => _playH - 65,
+		getStdPos: () => ({
+			x: g_sWidth + g_headerObj.scAreaWidth - 85,
+			y: _playH - 65
+		}),
 	};
 	makeElementDraggable(scGroup, `shortcut`, _playW, _playH, { w: 80, h: 65 }, scConfig);
 
@@ -9603,65 +9642,6 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 };
 
 /**
- * ドラッグ可能な判定グループを生成する
- * @param {HTMLElement} _parent    親要素
- * @param {string}      _groupId   `arrowJdg` または `frzJdg`
- * @param {number}      _initX     初期X座標（frame相対）
- * @param {number}      _initY     初期Y座標（frame相対）
- * @param {number}      _playW     プレイ幅
- * @param {number}      _playH     プレイ高さ
- * @param {object}      _opts      表示テキスト・色オプション
- */
-const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _playH, _opts) => {
-	const groupW = 370;
-	const groupH = 51;
-
-	const group = createEmptySprite(_parent, `previewGrp_${_groupId}`, {
-		x: _initX, y: _initY, w: groupW, h: groupH, pointerEvents: C_DIS_AUTO,
-	});
-	const opacity = g_stateObj.opacity / 100;
-
-	// 内包要素の生成 (省略：元のコードの multiAppend 部分と同一)
-	multiAppend(
-		group,
-		// キャラクタ
-		createDivCss2Label(`previewChara_${_groupId}`, _opts.charaText, {
-			x: 0, y: 0, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
-			siz: g_limitObj.jdgCharaSiz, opacity,
-		}, _groupId === `arrowJdg` ? g_cssObj.common_ii : g_cssObj.common_kita),
-		// コンボ
-		createDivCss2Label(`previewCombo_${_groupId}`, _opts.comboText, {
-			x: 170, y: 0, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
-			siz: g_limitObj.jdgCharaSiz, opacity,
-		}, _groupId === `arrowJdg` ? g_cssObj.common_kita : g_cssObj.common_ii),
-		// Fast/Slow
-		createDivCss2Label(`previewDiff_${_groupId}`, _opts.diffText, {
-			x: 170, y: 25, w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight,
-			siz: g_limitObj.mainSiz, color: `#ff9966`, opacity,
-		}, g_cssObj.common_fast),
-	);
-
-	// ============================================================
-	// 判定グループ固有の「座標反映ルール」を定義
-	// ============================================================
-	const configMap = {
-		arrowJdg: {
-			toastTitle: g_lblNameObj.arrowJdgUpdate,
-			getStdX: (pw) => Math.round(pw / 2 - 220),
-			getStdY: (ph, syr) => Math.round((ph + syr) / 2 - 60),
-		},
-		frzJdg: {
-			toastTitle: g_lblNameObj.frzJdgUpdate,
-			getStdX: (pw) => Math.round(pw / 2 - 120),
-			getStdY: (ph, syr) => Math.round((ph + syr) / 2 + 10),
-		}
-	};
-
-	// 汎用ドラッグ及びドラッグ枠作成、差分適用処理
-	makeElementDraggable(group, _groupId, _playW, _playH, { w: groupW, h: groupH }, configMap[_groupId]);
-};
-
-/**
  * ドラッグ結果の座標をゲーム本体の設定に汎用的に反映する
  * @param {number} _x 確定したframe相対X
  * @param {number} _y 確定したframe相対Y
@@ -9669,17 +9649,13 @@ const buildDraggableJudgGroup = (_parent, _groupId, _initX, _initY, _playW, _pla
  * @param {string} _key 保存用キー(g_diffObjのプロパティ名の接頭辞)
  */
 const applyElementPositionToGame = (_x, _y, _config, _key) => {
-	const playW = g_headerObj.playingWidth || g_sWidth;
-	const playH = g_headerObj.playingHeight || g_sHeight;
-	const stepYR = g_posObj?.stepYR ?? 0;
 
 	// 1. 各要素固有の「標準座標（基準点）」を計算
-	const stdX = _config.getStdX(playW);
-	const stdY = _config.getStdY(playH, stepYR);
+	const std = _config.getStdPos();
 
 	// 2. オフセット（差分）を計算
-	const diffX = _x - stdX;
-	const diffY = _y - stdY;
+	const diffX = _x - std.x;
+	const diffY = _y - std.y;
 
 	// 3. 指定された保存先にオフセットを格納
 	g_diffObj[`${_key}X`] = diffX;
@@ -9816,7 +9792,7 @@ const createSettingsDisplayWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// 矢印の見え方 (Appearance)
-	// 縦位置: 7.4
+	// 縦位置: 5.8
 	createGeneralSetting(spriteList.appearance, `appearance`, {
 		addRFunc: () => dispAppearanceSlider(),
 	});
@@ -9856,14 +9832,14 @@ const createSettingsDisplayWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// 判定表示系の不透明度 (Opacity)
-	// 縦位置: 9
+	// 縦位置: 7.4
 	g_headerObj.opacityUse = g_headerObj.judgmentUse || g_headerObj.judgmentSet === C_FLG_ON;
 
 	createGeneralSetting(spriteList.opacity, `opacity`, { unitName: g_lblNameObj.percent });
 
 	// ---------------------------------------------------
 	// タイミング調整 (HitPosition)
-	// 縦位置: 10
+	// 縦位置: 8.4
 	createGeneralSetting(spriteList.hitPosition, `hitPosition`, {
 		skipTerms: g_settings.hitPositionTerms, scLabel: g_lblNameObj.sc_hitPosition, roundNum: 5,
 		unitName: g_lblNameObj.pixel,
