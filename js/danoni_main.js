@@ -9351,7 +9351,7 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 				key: `arrowJdg`,
 				stdYOffset: -60,
 				offsetX: g_diffObj.arrowJdgX ?? 0,
-				offsetY: g_diffObj.arrowJdgY ?? 0, // 基準からのY差分
+				offsetY: g_diffObj.arrowJdgY ?? 0,
 				chara: d.judgment === C_FLG_ON ? g_lblNameObj.j_ii : ``,
 				css: [g_cssObj.common_ii, g_cssObj.common_kita], // [chara, combo]
 				toast: g_lblNameObj.arrowJdgUpdate,
@@ -9369,7 +9369,6 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 
 		jdgSettings.forEach(item => {
 
-			// 共通する複雑な座標計算は、ループ側で一括して行う
 			const stdX = Math.round(_playW / 2 - (item.key === `arrowJdg` ? 220 : 120));
 			const initX = g_previewPos[item.key].x ?? (stdX + item.offsetX);
 			const initY = g_previewPos[item.key].y ?? (jdgCenterY + item.offsetY + item.stdYOffset);
