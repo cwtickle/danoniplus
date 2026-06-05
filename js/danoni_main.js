@@ -11059,13 +11059,6 @@ const keyconfigKeyboardPreview = (() => {
 		legendText: `#cccccc`,   // 凡例テキスト
 	};
 
-	// ボタン配置
-	// X・W は init() 内で動的計算（g_btnWidth() 依存）
-	// Y: KeyConfig テキスト上の余白に収まるよう小さく設定
-	const BTN_H = 18;   // ボタン高さ
-	const BTN_Y = 3;    // divRoot 内 Y 座標
-	const BTN_FS = 11;   // ボタンのフォントサイズ(px)
-
 	// プレビューエリア
 	// X: canvas を divRoot 内で水平センタリング（init で動的計算）
 	// Y: g_sHeight に対して垂直センタリング（init で動的計算）
