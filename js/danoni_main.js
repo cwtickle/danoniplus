@@ -9070,14 +9070,15 @@ const resetGroupList = (_type, _keyCtrlPtn) => {
 	let k = 1;
 	g_keycons[`${_type}Groups`] = [0];
 
-	if (g_keyObj.currentPtn === -1) {
-		g_keycons[`${_type}Groups`] = addValtoArray(g_keycons[`${_type}Groups`], -1);
-	}
-	g_keycons[`${_type}GroupNum`] = Math.min(g_keyObj.currentPtn, 0);
 	while (g_keyObj[`${_type}${_keyCtrlPtn}_${k}`] !== undefined) {
 		g_keycons[`${_type}Groups`].push(k);
 		k++;
 	}
+	if (g_keyObj.currentPtn === -1
+		&& (_type !== `stepRtn` || (_type === `stepRtn` && g_keycons[`${_type}Groups`].length > 1))) {
+		g_keycons[`${_type}Groups`] = addValtoArray(g_keycons[`${_type}Groups`], -1);
+	}
+	g_keycons[`${_type}GroupNum`] = Math.min(g_keyObj.currentPtn, 0);
 };
 
 /*-----------------------------------------------------------*/
