@@ -11042,21 +11042,29 @@ const keyconfigKeyboardPreview = (() => {
 
 	// 色定義（既存ゲームの配色に合わせたダーク系）
 	const C_COLOR = {
-		keyFill: `#1a1a2e`,   // 通常キー背景
-		keyStroke: `#555577`,   // 通常キー枠
-		keyText: `#ccccdd`,   // 通常キー文字
-		keySubText: `#888899`,   // サブラベル（Shift面）
-		mappedFill: `#003366`,   // メインキー背景
-		mappedStroke: `#4488ff`,   // メインキー枠
-		mappedText: `#aaddff`,   // メインキー文字
-		altFill: `#3e3e1a`,   // 代替キー背景
-		altStroke: `#777755`,   // 代替キー枠
-		altText: `#eeeecc`,   // 代替キー文字
-		shortcutFill: `#330011`,   // ショートカットキー背景
-		shortcutStroke: `#ff4466`,   // ショートカットキー枠
-		shortcutText: `#ffaacc`,   // ショートカットキー文字
-		bgFill: `#0d0d1a`,   // Canvas 背景
-		legendText: `#cccccc`,   // 凡例テキスト
+		normal: {
+			fill: `#1a1a2e`,      // 通常キー背景
+			stroke: `#555577`,    // 通常キー枠
+			text: `#ccccdd`,      // 通常キー文字
+			subText: `#888899`,   // サブラベル（Shift面）
+		},
+		mapped: {
+			fill: `#003366`,      // メインキー背景
+			stroke: `#4488ff`,    // メインキー枠
+			text: `#aaddff`,      // メインキー文字
+		},
+		alt: {
+			fill: `#3e3e1a`,      // 代替キー背景
+			stroke: `#777755`,    // 代替キー枠
+			text: `#eeeecc`,      // 代替キー文字
+		},
+		shortcut: {
+			fill: `#330011`,      // ショートカットキー背景
+			stroke: `#ff4466`,    // ショートカットキー枠
+			text: `#ffaacc`,      // ショートカットキー文字
+		},
+		bgFill: `#0d0d1a`,        // Canvas 背景
+		legendText: `#cccccc`,    // 凡例テキスト
 	};
 
 	// プレビューエリア
@@ -11220,7 +11228,7 @@ const keyconfigKeyboardPreview = (() => {
 		shortcutSet: new Set(),   // プレイ中ショートカット（keyRetry / keyTitleBack / PgDn / PgUp）
 		canvasBase: null,
 		canvasMap: null,
-		keyRects: [],             // { kc, x, y, w, h, label } — drawMap で照合するキャッシュ
+		keyDataList: [],          // { kc, x, y, w, h, label } — drawMap で照合するキャッシュ
 		scale: 1,                 // BASE_KEY_W/H に掛けるスケール係数
 		cvsW: 500,                // 実際の Canvas 幅（スケール計算後）
 		cvsH: 240,                // 実際の Canvas 高さ（スケール計算後）
@@ -11312,6 +11320,22 @@ const keyconfigKeyboardPreview = (() => {
 	const kg = () => Math.max(1, Math.round(BASE_KEY_GAP * _state.scale));
 	const kr = () => Math.max(2, Math.round(4 * _state.scale));
 
+	/**
+	 * Canvasの共通初期化処理（サイズ設定、高解像度化、Context取得の冗長性を解消）
+	 */
+	const setupCanvasContext = (canvas) => {
+		if (!canvas) return null;
+		canvas.style.top = wUnit(40);
+		canvas.width = _state.cvsW * g_dpr;
+		canvas.height = _state.cvsH * g_dpr;
+		canvas.style.width = wUnit(_state.cvsW);
+		canvas.style.height = wUnit(_state.cvsH);
+
+		const ctx = canvas.getContext(`2d`);
+		ctx.scale(g_dpr, g_dpr);
+		return ctx;
+	};
+
 	const roundRect = (ctx, x, y, w, h, r) => {
 		ctx.beginPath();
 		ctx.moveTo(x + r, y);
@@ -11326,23 +11350,47 @@ const keyconfigKeyboardPreview = (() => {
 		ctx.closePath();
 	};
 
-	const drawKeyLabel = (ctx, x, y, keyW, keyH, primary, sub, textColor, subColor) => {
+	/**
+	 * 単一キーを描画する（枠の描画と内部テキストの書き込みを一括化）
+	 * @param {CanvasRenderingContext2D} ctx
+	 * @param {Object} keyData - 位置・サイズ・キーコードを含むキー情報
+	 * @param {Object} style   - fill, stroke, text 等の色セット
+	 * @param {number} lw      - 枠線の太さ(lineWidth)
+	 */
+	const drawOneKey = (ctx, { keyData, style, lw = 1 }) => {
+		const { x, y, w: keyW, h: keyH, kc, label } = keyData;
+
+		// 1. キーの枠線・背景を描画
+		roundRect(ctx, x + 0.5, y + 0.5, keyW - 1, keyH - 1, kr());
+		ctx.fillStyle = style.fill;
+		ctx.strokeStyle = style.stroke;
+		ctx.lineWidth = lw;
+		ctx.fill();
+		ctx.stroke();
+
+		// 2. キー内部のテキスト（メイン・サブ）を描画
+		const [primary, sub] = getKeyLabels(kc, label);
+
 		const fs = (_textLen) => _textLen >= 5 * keyW / BASE_KEY_W
 			? Math.max(6, Math.floor(9 * _state.scale))
 			: Math.max(7, Math.floor(11 * _state.scale));
 
+		// サブラベル（Shift面などの表記）がある場合
 		if (sub) {
-			ctx.fillStyle = subColor;
+			ctx.fillStyle = style.subText || style.text;
 			ctx.font = `bold ${Math.max(6, Math.floor(9 * _state.scale))}px monospace`;
 			ctx.textAlign = `right`;
 			ctx.textBaseline = `top`;
 			ctx.fillText(sub, x + keyW - 2, y + 2);
 		}
+
+		// メインラベルの描画（改行表記に対応）
 		const [primary1, primary2] = primary.split(`\n`);
-		ctx.fillStyle = textColor;
+		ctx.fillStyle = style.text;
 		ctx.textAlign = `center`;
 		ctx.textBaseline = `middle`;
 		const subDiff = sub ? 2 : 0;
+
 		if (primary2) {
 			const siz = fs(Math.max(primary1.length, primary2.length));
 			ctx.font = `bold ${siz}px monospace`;
@@ -11354,23 +11402,13 @@ const keyconfigKeyboardPreview = (() => {
 		}
 	};
 
-	const drawOneKey = (ctx, x, y, keyW, keyH, fill, stroke, lw, primary, sub, textColor, subColor) => {
-		roundRect(ctx, x + 0.5, y + 0.5, keyW - 1, keyH - 1, kr());
-		ctx.fillStyle = fill;
-		ctx.strokeStyle = stroke;
-		ctx.lineWidth = lw;
-		ctx.fill();
-		ctx.stroke();
-		drawKeyLabel(ctx, x, y, keyW, keyH, primary, sub, textColor, subColor);
-	};
-
 	// -------------------------------------------------------------------------
 	// レイアウト計算・描画
 	// -------------------------------------------------------------------------
 
 	/**
 	 * rows 配列から各キーの矩形座標を計算し、
-	 * canvas に描画しながら keyRects へキャッシュする。
+	 * canvas に描画しながら keyDataList へキャッシュする。
 	 *
 	 * @param {CanvasRenderingContext2D} ctx
 	 * @param {Array}  rows    - MAIN_ROWS または NAV_ROWS（{offsetX, keys} 形式）
@@ -11393,20 +11431,16 @@ const keyconfigKeyboardPreview = (() => {
 				const keyH = kh(keyDef.h || 1);
 
 				if (keyDef.kc >= 0) {
-					_state.keyRects.push({
+					const keyData = {
 						kc: keyDef.kc,
 						x: curX,
 						y: rowY,
 						w: keyW,
 						h: keyH,
 						label: keyDef.label,
-					});
-					const [primary, sub] = getKeyLabels(keyDef.kc, keyDef.label);
-					drawOneKey(
-						ctx, curX, rowY, keyW, keyH,
-						C_COLOR.keyFill, C_COLOR.keyStroke, 1,
-						primary, sub, C_COLOR.keyText, C_COLOR.keySubText
-					);
+					};
+					_state.keyDataList.push(keyData);
+					drawOneKey(ctx, { keyData, style: C_COLOR.normal, lw: 1 });
 				}
 
 				curX += keyW + gap;
@@ -11415,26 +11449,18 @@ const keyconfigKeyboardPreview = (() => {
 	};
 
 	/**
-	 * キーボード背景レイヤーを描画し keyRects をキャッシュする。
+	 * キーボード背景レイヤーを描画し keyDataList をキャッシュする。
 	 * init 時に呼ぶ。
 	 */
 	const drawBase = () => {
-		const canvas = _state.canvasBase;
-		if (!canvas) return;
+		const ctx = setupCanvasContext(_state.canvasBase);
+		if (!ctx) return;
 
-		canvas.style.top = wUnit(40);
-		canvas.width = _state.cvsW * g_dpr;
-		canvas.height = _state.cvsH * g_dpr;
-		canvas.style.width = wUnit(_state.cvsW);
-		canvas.style.height = wUnit(_state.cvsH);
-
-		const ctx = canvas.getContext(`2d`);
-		ctx.scale(g_dpr, g_dpr);
 		ctx.clearRect(0, 0, _state.cvsW, _state.cvsH);
 		ctx.fillStyle = C_COLOR.bgFill;
 		ctx.fillRect(0, 0, _state.cvsW, _state.cvsH);
 
-		_state.keyRects = [];
+		_state.keyDataList = [];
 
 		const mainRows = buildMainRows();
 		const gap = kg();
@@ -11461,20 +11487,24 @@ const keyconfigKeyboardPreview = (() => {
 		ctx.textAlign = `left`;
 		ctx.textBaseline = `middle`;
 
-		const drawLegend = (x, fill, stroke, label) => {
-			roundRect(ctx, x, ly - 5, 10, 10, 2);
-			ctx.fillStyle = fill; ctx.fill();
-			ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke();
-			ctx.fillStyle = C_COLOR.legendText;
-			ctx.fillText(label, x + 14, ly);
+		// 凡例定義データの配列化により、同一処理の繰り返しをループに統合
+		// 構造化した C_COLOR からオブジェクトをそのままセットするように変更
+		const legends = [
+			{ style: C_COLOR.normal, label: g_lblNameObj.unallocated },
+			{ style: C_COLOR.mapped, label: g_lblNameObj.allocated },
+			{ style: C_COLOR.alt, label: g_lblNameObj.altAllocated },
+			{ style: C_COLOR.shortcut, label: g_lblNameObj.shortcutKey }
+		];
 
-			return 14 + ctx.measureText(label).width + 14;
-		};
 		let lx = 8;
-		lx += drawLegend(lx, C_COLOR.keyFill, C_COLOR.keyStroke, g_lblNameObj.unallocated);
-		lx += drawLegend(lx, C_COLOR.mappedFill, C_COLOR.mappedStroke, g_lblNameObj.allocated);
-		lx += drawLegend(lx, C_COLOR.altFill, C_COLOR.altStroke, g_lblNameObj.altAllocated);
-		lx += drawLegend(lx, C_COLOR.shortcutFill, C_COLOR.shortcutStroke, g_lblNameObj.shortcutKey);
+		legends.forEach(item => {
+			roundRect(ctx, lx, ly - 5, 10, 10, 2);
+			ctx.fillStyle = item.style.fill; ctx.fill();
+			ctx.strokeStyle = item.style.stroke; ctx.lineWidth = 1; ctx.stroke();
+			ctx.fillStyle = C_COLOR.legendText;
+			ctx.fillText(item.label, lx + 14, ly);
+			lx += ctx.measureText(item.label).width + 28;
+		});
 	};
 
 	/**
@@ -11483,47 +11513,27 @@ const keyconfigKeyboardPreview = (() => {
 	 * 同一キーにメインと代替が重なる場合はメインを優先する。
 	 */
 	const drawMap = () => {
-		const canvas = _state.canvasMap;
-		if (!canvas) return;
+		const ctx = setupCanvasContext(_state.canvasMap);
+		if (!ctx) return;
 
-		canvas.style.top = wUnit(40);
-		canvas.width = _state.cvsW * g_dpr;
-		canvas.height = _state.cvsH * g_dpr;
-		canvas.style.width = wUnit(_state.cvsW);
-		canvas.style.height = wUnit(_state.cvsH);
-
-		const ctx = canvas.getContext(`2d`);
-		ctx.scale(g_dpr, g_dpr);
 		ctx.clearRect(0, 0, _state.cvsW, _state.cvsH);
 
-		// 優先度: ショートカット > メイン > 代替（後から描くほど優先）
-		const drawKey = (fill, stroke, text) => rect => {
-			const [primary, sub] = getKeyLabels(rect.kc, rect.label);
-			roundRect(ctx, rect.x + 0.5, rect.y + 0.5, rect.w - 1, rect.h - 1, kr());
-			ctx.fillStyle = fill;
-			ctx.strokeStyle = stroke;
-			ctx.lineWidth = 1.5;
-			ctx.fill();
-			ctx.stroke();
-			drawKeyLabel(ctx, rect.x, rect.y, rect.w, rect.h, primary, sub, text, text);
+		// キー状態に応じた色取得ロジック（優先度: ショートカット > メイン > 代替）
+		// 構造化した C_COLOR オブジェクトをそのまま返却するスッキリした形に改善
+		const getKeyStyle = (kc) => {
+			if (_state.shortcutSet.has(kc)) return C_COLOR.shortcut;
+			if (_state.mappedSet.has(kc)) return C_COLOR.mapped;
+			if (_state.altSet.has(kc)) return C_COLOR.alt;
+			return null;
 		};
 
-		// 1. 代替キー（メイン・ショートカットと重複しない場合のみ）
-		_state.keyRects
-			.filter(rect => _state.altSet.has(rect.kc)
-				&& !_state.mappedSet.has(rect.kc)
-				&& !_state.shortcutSet.has(rect.kc))
-			.forEach(drawKey(C_COLOR.altFill, C_COLOR.altStroke, C_COLOR.altText));
-
-		// 2. メインキー（ショートカットと重複しない場合のみ）
-		_state.keyRects
-			.filter(rect => _state.mappedSet.has(rect.kc) && !_state.shortcutSet.has(rect.kc))
-			.forEach(drawKey(C_COLOR.mappedFill, C_COLOR.mappedStroke, C_COLOR.mappedText));
-
-		// 3. ショートカット（常に最前面）
-		_state.keyRects
-			.filter(rect => _state.shortcutSet.has(rect.kc))
-			.forEach(drawKey(C_COLOR.shortcutFill, C_COLOR.shortcutStroke, C_COLOR.shortcutText));
+		// 配列のフィルタ・多重ループ連鎖を解消し、1回のループで優先度順に正しく描画
+		_state.keyDataList.forEach(keyData => {
+			const style = getKeyStyle(keyData.kc);
+			if (style) {
+				drawOneKey(ctx, { keyData, style, lw: 1.5 });
+			}
+		});
 	};
 
 	// -------------------------------------------------------------------------
@@ -11614,7 +11624,7 @@ const keyconfigKeyboardPreview = (() => {
 		_state.mappedSet = new Set();
 		_state.altSet = new Set();
 		_state.shortcutSet = new Set();
-		_state.keyRects = [];
+		_state.keyDataList = [];
 		_state.canvasBase = null;
 		_state.canvasMap = null;
 	};
