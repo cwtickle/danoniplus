@@ -11236,9 +11236,9 @@ const keyconfigKeyboardPreview = (() => {
 	 * _state に書き込む。init 時に呼ぶ。
 	 *
 	 * 基準サイズ（フルキーボード = メイン + ナビクラスター）:
-	 * 横: MAIN最大行幅 + ナビ幅(3キー) + 余白
-	 * 縦: 6行 × (BASE_KEY_H + BASE_KEY_GAP) - BASE_KEY_GAP
-	 * BASE_KEY_W = BASE_KEY_H = 28px、BASE_KEY_GAP = 3px を基準とする。
+	 *   横: MAIN最大行幅 + ナビ幅(3キー) + 余白
+	 *   縦: 6行 × (BASE_KEY_H + BASE_KEY_GAP) - BASE_KEY_GAP
+	 *   BASE_KEY_W = BASE_KEY_H = 28px、BASE_KEY_GAP = 3px を基準とする。
 	 */
 	const BASE_KEY_W = 28;
 	const BASE_KEY_H = 28;
@@ -11308,6 +11308,8 @@ const keyconfigKeyboardPreview = (() => {
 	// -------------------------------------------------------------------------
 	// Canvas ヘルパー
 	// -------------------------------------------------------------------------
+
+	// スケール済みの各寸法を返すヘルパー
 	const kw = w => Math.floor(w * BASE_KEY_W * _state.scale + (w - 1) * BASE_KEY_GAP * _state.scale);
 	const kh = h => Math.floor(h * BASE_KEY_H * _state.scale + (h - 1) * BASE_KEY_GAP * _state.scale);
 	const kg = () => Math.max(1, Math.round(BASE_KEY_GAP * _state.scale));
@@ -11584,8 +11586,8 @@ const keyconfigKeyboardPreview = (() => {
 	 * プレビューが表示中なら即時再描画する。
 	 *
 	 * g_keyObj[`keyCtrl${keyCtrlPtn}`] は二次元配列:
-	 * [ [矢印0のメインkeyCode, 代替keyCode, ...], [矢印1のメインkeyCode, ...], ... ]
-	 * 各サブ配列 of index 0 がメインキー、index 1 以降が代替キー。
+	 *   [ [矢印0のメインkeyCode, 代替keyCode, ...], [矢印1のメインkeyCode, ...], ... ]
+	 * 各サブ配列の index 0 がメインキー、index 1 以降が代替キー。
 	 */
 	const refresh = () => {
 		const tkObj = getKeyInfo();
