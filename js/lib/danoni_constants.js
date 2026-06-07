@@ -449,6 +449,14 @@ const updateWindowSiz = () => {
         lblFadeinBar: {
             x: g_limitObj.setLblLeft, y: 0, type: `range`,
         },
+        lnkAdjustment1: {
+            x: g_limitObj.setLblLeft, y: -3, w: g_limitObj.setLblWidth, h: g_limitObj.setLblHeight,
+            siz: g_limitObj.adjustmentViewSiz,
+        },
+        lnkAdjustment2: {
+            x: g_limitObj.setLblLeft, y: 10, w: g_limitObj.setLblWidth, h: g_limitObj.setLblHeight,
+            siz: g_limitObj.adjustmentViewOrgSiz,
+        },
 
         /** 設定: 譜面明細子画面 */
         lblTooldif: {

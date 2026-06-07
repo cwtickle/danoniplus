@@ -8462,13 +8462,19 @@ const createOptionWindow = _sprite => {
 
 	const viewAdjustment = () => {
 		if (g_headerObj.playbackRate !== 1) {
-			const adjustmentVal = isLocalMusicFile(g_stateObj.scoreId) ?
-				Math.round(g_stateObj.adjustment / g_headerObj.playbackRate) :
-				(g_stateObj.adjustment / g_headerObj.playbackRate).toFixed(1);
-			document.getElementById(`lnkAdjustment`).innerHTML = `${adjustmentVal}${g_lblNameObj.frame}`
-				+ `<span style="font-size:${g_limitObj.adjustmentViewOrgSiz}px"> (${g_stateObj.adjustment.toFixed(1)}${g_localStorage.adjustment === g_stateObj.adjustment ? '*' : ''})</span>`;
-			document.getElementById(`lnkAdjustment`).style.fontSize = `${g_limitObj.adjustmentViewSiz}px`;
-			document.getElementById(`lnkAdjustment`).style.lineHeight = `${g_limitObj.adjustmentLineHeight}px`;
+			const adjustmentVal = isLocalMusicFile(g_stateObj.scoreId)
+				? Math.round(g_stateObj.adjustment / g_headerObj.playbackRate)
+				: (g_stateObj.adjustment / g_headerObj.playbackRate).toFixed(1);
+			document.getElementById(`lnkAdjustment`).textContent = ``;
+			if (document.getElementById(`lnkAdjustment1`) === null) {
+				multiAppend(
+					adjustmentSprite,
+					createDivCss2Label(`lnkAdjustment1`, ``, g_lblPosObj.lnkAdjustment1),
+					createDivCss2Label(`lnkAdjustment2`, ``, g_lblPosObj.lnkAdjustment2),
+				);
+			}
+			document.getElementById(`lnkAdjustment1`).textContent = `${adjustmentVal}${g_lblNameObj.frame}`;
+			document.getElementById(`lnkAdjustment2`).textContent = `(${g_stateObj.adjustment.toFixed(1)}${g_localStorage.adjustment === g_stateObj.adjustment ? '*' : ''})`;
 		}
 	};
 	viewAdjustment();
@@ -10628,7 +10634,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	 * ColorPicker（一式）の切替
 	 */
 	const changeColorPickers = () => {
-		lnkColorR.innerHTML = `[${g_keycons.colorCursorNum + 1} /`;
+		lnkColorR.textContent = `[${g_keycons.colorCursorNum + 1} /`;
 		for (let j = 0; j < g_limitObj.kcColorPickerNum; j++) {
 			const m = getGroupNum(j);
 			changeColorPicker(j, `arrow`, g_headerObj.setColor[m]);
@@ -16282,23 +16288,41 @@ const judgeArrow = _j => {
  * @param {number} _justFrames Fast/Slowの表示条件フレーム数
  */
 const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames) => {
-	let diffJDisp = ``;
 	g_workObj.diffList.push(_difFrame);
+
 	const difCnt = Math.abs(_difFrame);
+	const diffJ = document.getElementById(`diff${_fjdg}J`);
+
+	let text = ``;
+	let activeClass = ``;
+
+	// 1. 各条件の処理
 	if (_difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
-		diffJDisp = `<span class="common_excessive">Excessive</span>`;
+		text = `Excessive`;
+		activeClass = g_cssObj.common_Excessive;
 		g_resultObj.excessive++;
 		lifeDamage(true);
+
 	} else if (_difFrame > _justFrames) {
-		diffJDisp = `<span class="common_diffFast">Fast ${difCnt} Frames</span>`;
+		text = `Fast ${difCnt} Frames`;
+		activeClass = g_cssObj.common_diffFast;
 		g_resultObj.fast++;
 		quickRetry(`Fast/Slow`);
-	} else if (_difFrame < _justFrames * (-1)) {
-		diffJDisp = `<span class="common_diffSlow">Slow ${difCnt} Frames</span>`;
+
+	} else if (_difFrame < _justFrames * -1) {
+		text = `Slow ${difCnt} Frames`;
+		activeClass = g_cssObj.common_diffSlow;
 		g_resultObj.slow++;
 		quickRetry(`Fast/Slow`);
+
 	}
-	document.getElementById(`diff${_fjdg}J`).innerHTML = diffJDisp;
+
+	// 2. DOMへの反映
+	diffJ.textContent = text;
+	diffJ.classList.value = ``;
+	if (activeClass) {
+		diffJ.classList.add(activeClass);
+	}
 };
 
 /**
@@ -16368,8 +16392,11 @@ const lifeDamage = (_excessive = false) => {
 const changeJudgeCharacter = (_name, _character, _fjdg = ``) => {
 	g_resultObj[_name]++;
 	g_currentArrows++;
-	document.getElementById(`chara${_fjdg}J`).innerHTML = `<span class="common_${_name}">${_character}</span>`;
-	document.getElementById(`chara${_fjdg}J`).setAttribute(`cnt`, C_FRM_JDGMOTION);
+	const jdgJ = document.getElementById(`chara${_fjdg}J`);
+	jdgJ.classList.value = ``;
+	jdgJ.classList.add(g_cssObj[`common_${_name}`]);
+	jdgJ.textContent = _character;
+	jdgJ.setAttribute(`cnt`, C_FRM_JDGMOTION);
 	document.getElementById(`lbl${toCapitalize(_name)}`).textContent = g_resultObj[_name];
 };
 
