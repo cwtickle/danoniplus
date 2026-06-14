@@ -5447,6 +5447,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 			// 位置マニュアル化 (initManualX)
 			g_keyObj[`initManual${newKey}`] = setBoolVal(_dosObj[`initManual${newKey}`] ?? g_keyObj[`initManual${newKey}`], false);
 
+			// カスタムキーの説明ページ（keyHelpJaX / keyHelpEnX）
+			Object.keys(g_lang_lblNameObj).forEach(lang => g_lang_lblNameObj[lang][`keyHelp${newKey}`] = _dosObj[`keyHelp${lang}${newKey}`]);
+
 			// キーコンフィグ (keyCtrlX_Y)
 			g_keyObj.minPatterns = newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, {
 				errCd: `E_0104`, baseCopyFlg: true,
@@ -8013,7 +8016,10 @@ const setDifficulty = (_initFlg) => {
 	}
 	// 特殊キーフラグ
 	g_stateObj.extraKeyFlg = g_headerObj.keyExtraList.includes(g_keyObj.currentKey);
-	btnKeymodeHelp.style.display = (g_keyObj.defaultKeyList.includes(g_keyObj.currentKey) ? `` : C_DIS_NONE);
+	btnKeymodeHelp.style.display = (
+		g_keyObj.defaultKeyList.includes(g_keyObj.currentKey) || g_lblNameObj[`keyHelp${g_keyObj.currentKey}`]
+			? `` : C_DIS_NONE
+	);
 
 	// ---------------------------------------------------
 	// 2. 初期化設定
@@ -8226,11 +8232,13 @@ const createOptionWindow = _sprite => {
 	);
 	createScText(spriteList.difficulty, `Difficulty`);
 	if (g_headerObj.difSelectorUse) {
-		createScText(spriteList.difficulty, `DifficultyList`, { x: 147, y: -10, targetLabel: `lnkDifficulty` });
+		createScText(spriteList.difficulty, `DifficultyList`, { x: 152, y: -10, targetLabel: `lnkDifficulty` });
 	}
 	multiAppend(difficultySprite,
 		createCss2Button(`btnKeymodeHelp`, `?`, () => {
-			openLink(g_lblNameObj.keymodeUrl + g_keyObj.currentKey);
+			openLink(g_keyObj.defaultKeyList.includes(g_keyObj.currentKey)
+				? g_lblNameObj.keymodeUrl + g_keyObj.currentKey
+				: g_lblNameObj[`keyHelp${g_keyObj.currentKey}`]);
 		}, g_lblPosObj.btnKeymodeHelp, g_cssObj.button_Setting),
 	)
 
