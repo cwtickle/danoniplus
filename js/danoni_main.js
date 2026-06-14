@@ -8013,6 +8013,7 @@ const setDifficulty = (_initFlg) => {
 	}
 	// 特殊キーフラグ
 	g_stateObj.extraKeyFlg = g_headerObj.keyExtraList.includes(g_keyObj.currentKey);
+	btnKeymodeHelp.style.display = (g_keyObj.defaultKeyList.includes(g_keyObj.currentKey) ? `` : C_DIS_NONE);
 
 	// ---------------------------------------------------
 	// 2. 初期化設定
@@ -8227,6 +8228,11 @@ const createOptionWindow = _sprite => {
 	if (g_headerObj.difSelectorUse) {
 		createScText(spriteList.difficulty, `DifficultyList`, { x: 147, y: -10, targetLabel: `lnkDifficulty` });
 	}
+	multiAppend(difficultySprite,
+		createCss2Button(`btnKeymodeHelp`, `?`, () => {
+			openLink(g_lblNameObj.keymodeUrl + g_keyObj.currentKey);
+		}, g_lblPosObj.btnKeymodeHelp, g_cssObj.button_Setting),
+	)
 
 	// ---------------------------------------------------
 	// ハイスコア機能実装時に使用予定のスペース
