@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/06/05
+ * Revised : 2026/06/14
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 48.4.2`;
-const g_revisedDate = `2026/06/06`;
+const g_version = `Ver 48.5.0`;
+const g_revisedDate = `2026/06/14`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -2763,6 +2763,10 @@ const initialControl = async () => {
 			.sort((a, b) => parseInt(a) - parseInt(b));
 	}
 
+	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
+	Object.assign(g_lblNameObj, g_lang_lblNameObj[g_localeObj.val], g_presetObj.lblName?.[g_localeObj.val]);
+	Object.assign(g_msgObj, g_lang_msgObj[g_localeObj.val], g_presetObj.msg?.[g_localeObj.val]);
+
 	// デフォルトのカラー・シャッフルグループ設定を退避
 	g_keycons.groups.forEach(type =>
 		Object.keys(g_keyObj).filter(val => val.startsWith(type))
@@ -3932,10 +3936,6 @@ const headerConvert = _dosObj => {
 	} else {
 		g_imgObj.titleArrow = C_IMG_ARROW;
 	}
-
-	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
-	Object.assign(g_lblNameObj, g_lang_lblNameObj[g_localeObj.val], g_presetObj.lblName?.[g_localeObj.val]);
-	Object.assign(g_msgObj, g_lang_msgObj[g_localeObj.val], g_presetObj.msg?.[g_localeObj.val]);
 
 	// 自動横幅拡張設定
 	obj.autoSpread = setBoolVal(_dosObj.autoSpread, g_presetObj.autoSpread ?? true);
@@ -5446,6 +5446,10 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 
 			// 位置マニュアル化 (initManualX)
 			g_keyObj[`initManual${newKey}`] = setBoolVal(_dosObj[`initManual${newKey}`] ?? g_keyObj[`initManual${newKey}`], false);
+
+			// カスタムキーの説明ページ（keyHelpJaX / keyHelpEnX）
+			Object.keys(g_lang_lblNameObj).forEach(lang =>
+				g_lang_lblNameObj[lang][`keyHelp${newKey}`] = _dosObj[`keyHelp${lang}${newKey}`] ?? _dosObj[`keyHelp${newKey}`] ?? ``);
 
 			// キーコンフィグ (keyCtrlX_Y)
 			g_keyObj.minPatterns = newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, {
@@ -8013,6 +8017,10 @@ const setDifficulty = (_initFlg) => {
 	}
 	// 特殊キーフラグ
 	g_stateObj.extraKeyFlg = g_headerObj.keyExtraList.includes(g_keyObj.currentKey);
+	btnKeymodeHelp.style.display = (
+		g_keyObj.defaultKeyList.includes(g_keyObj.currentKey) || g_lblNameObj[`keyHelp${g_keyObj.currentKey}`]
+			? `` : C_DIS_NONE
+	);
 
 	// ---------------------------------------------------
 	// 2. 初期化設定
@@ -8225,8 +8233,15 @@ const createOptionWindow = _sprite => {
 	);
 	createScText(spriteList.difficulty, `Difficulty`);
 	if (g_headerObj.difSelectorUse) {
-		createScText(spriteList.difficulty, `DifficultyList`, { x: 147, y: -10, targetLabel: `lnkDifficulty` });
+		createScText(spriteList.difficulty, `DifficultyList`, { x: 154, y: -10, targetLabel: `lnkDifficulty` });
 	}
+	multiAppend(difficultySprite,
+		createCss2Button(`btnKeymodeHelp`, `?`, () => {
+			openLink(g_keyObj.defaultKeyList.includes(g_keyObj.currentKey)
+				? g_lblNameObj.keymodeUrl + g_keyObj.currentKey
+				: g_lblNameObj[`keyHelp${g_keyObj.currentKey}`]);
+		}, g_lblPosObj.btnKeymodeHelp, g_cssObj.button_Setting),
+	)
 
 	// ---------------------------------------------------
 	// ハイスコア機能実装時に使用予定のスペース
@@ -8462,13 +8477,19 @@ const createOptionWindow = _sprite => {
 
 	const viewAdjustment = () => {
 		if (g_headerObj.playbackRate !== 1) {
-			const adjustmentVal = isLocalMusicFile(g_stateObj.scoreId) ?
-				Math.round(g_stateObj.adjustment / g_headerObj.playbackRate) :
-				(g_stateObj.adjustment / g_headerObj.playbackRate).toFixed(1);
-			document.getElementById(`lnkAdjustment`).innerHTML = `${adjustmentVal}${g_lblNameObj.frame}`
-				+ `<span style="font-size:${g_limitObj.adjustmentViewOrgSiz}px"> (${g_stateObj.adjustment.toFixed(1)}${g_localStorage.adjustment === g_stateObj.adjustment ? '*' : ''})</span>`;
-			document.getElementById(`lnkAdjustment`).style.fontSize = `${g_limitObj.adjustmentViewSiz}px`;
-			document.getElementById(`lnkAdjustment`).style.lineHeight = `${g_limitObj.adjustmentLineHeight}px`;
+			const adjustmentVal = isLocalMusicFile(g_stateObj.scoreId)
+				? Math.round(g_stateObj.adjustment / g_headerObj.playbackRate)
+				: (g_stateObj.adjustment / g_headerObj.playbackRate).toFixed(1);
+			document.getElementById(`lnkAdjustment`).textContent = ``;
+			if (document.getElementById(`lnkAdjustment1`) === null) {
+				multiAppend(
+					adjustmentSprite,
+					createDivCss2Label(`lnkAdjustment1`, ``, g_lblPosObj.lnkAdjustment1),
+					createDivCss2Label(`lnkAdjustment2`, ``, g_lblPosObj.lnkAdjustment2),
+				);
+			}
+			document.getElementById(`lnkAdjustment1`).textContent = `${adjustmentVal}${g_lblNameObj.frame}`;
+			document.getElementById(`lnkAdjustment2`).textContent = `(${g_stateObj.adjustment.toFixed(1)}${g_localStorage.adjustment === g_stateObj.adjustment ? '*' : ''})`;
 		}
 	};
 	viewAdjustment();
@@ -10628,7 +10649,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	 * ColorPicker（一式）の切替
 	 */
 	const changeColorPickers = () => {
-		lnkColorR.innerHTML = `[${g_keycons.colorCursorNum + 1} /`;
+		lnkColorR.textContent = `[${g_keycons.colorCursorNum + 1} /`;
 		for (let j = 0; j < g_limitObj.kcColorPickerNum; j++) {
 			const m = getGroupNum(j);
 			changeColorPicker(j, `arrow`, g_headerObj.setColor[m]);
@@ -16282,23 +16303,41 @@ const judgeArrow = _j => {
  * @param {number} _justFrames Fast/Slowの表示条件フレーム数
  */
 const displayDiff = (_difFrame, _fjdg = ``, _justFrames = g_headerObj.justFrames) => {
-	let diffJDisp = ``;
 	g_workObj.diffList.push(_difFrame);
+
 	const difCnt = Math.abs(_difFrame);
+	const diffJ = document.getElementById(`diff${_fjdg}J`);
+
+	let text = ``;
+	let activeClass = ``;
+
+	// 1. 各条件の処理
 	if (_difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
-		diffJDisp = `<span class="common_excessive">Excessive</span>`;
+		text = `Excessive`;
+		activeClass = g_cssObj.common_Excessive;
 		g_resultObj.excessive++;
 		lifeDamage(true);
+
 	} else if (_difFrame > _justFrames) {
-		diffJDisp = `<span class="common_diffFast">Fast ${difCnt} Frames</span>`;
+		text = `Fast ${difCnt} Frames`;
+		activeClass = g_cssObj.common_diffFast;
 		g_resultObj.fast++;
 		quickRetry(`Fast/Slow`);
-	} else if (_difFrame < _justFrames * (-1)) {
-		diffJDisp = `<span class="common_diffSlow">Slow ${difCnt} Frames</span>`;
+
+	} else if (_difFrame < _justFrames * -1) {
+		text = `Slow ${difCnt} Frames`;
+		activeClass = g_cssObj.common_diffSlow;
 		g_resultObj.slow++;
 		quickRetry(`Fast/Slow`);
+
 	}
-	document.getElementById(`diff${_fjdg}J`).innerHTML = diffJDisp;
+
+	// 2. DOMへの反映
+	diffJ.textContent = text;
+	diffJ.classList.value = ``;
+	if (activeClass) {
+		diffJ.classList.add(activeClass);
+	}
 };
 
 /**
@@ -16368,8 +16407,11 @@ const lifeDamage = (_excessive = false) => {
 const changeJudgeCharacter = (_name, _character, _fjdg = ``) => {
 	g_resultObj[_name]++;
 	g_currentArrows++;
-	document.getElementById(`chara${_fjdg}J`).innerHTML = `<span class="common_${_name}">${_character}</span>`;
-	document.getElementById(`chara${_fjdg}J`).setAttribute(`cnt`, C_FRM_JDGMOTION);
+	const jdgJ = document.getElementById(`chara${_fjdg}J`);
+	jdgJ.classList.value = ``;
+	jdgJ.classList.add(g_cssObj[`common_${_name}`]);
+	jdgJ.textContent = _character;
+	jdgJ.setAttribute(`cnt`, C_FRM_JDGMOTION);
 	document.getElementById(`lbl${toCapitalize(_name)}`).textContent = g_resultObj[_name];
 };
 

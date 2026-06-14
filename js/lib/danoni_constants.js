@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/06/02 (v48.4.0)
+ * Revised : 2026/06/14 (v48.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -424,6 +424,10 @@ const updateWindowSiz = () => {
             x: 70, y: 65, w: g_btnWidth() - 120, h: 20, siz: 12, align: C_ALIGN_LEFT,
         },
 
+        btnKeymodeHelp: {
+            x: 150, y: -10, w: 15, h: 30, siz: 16, title: g_msgObj.keymodeHelp,
+            border: `solid 1px #666666`, borderRadius: 5,
+        },
         lblMusicInfo: {
             x: g_btnX(1 / 4), y: 0, w: g_btnWidth(3 / 4), h: 20, align: C_ALIGN_RIGHT
         },
@@ -448,6 +452,14 @@ const updateWindowSiz = () => {
         },
         lblFadeinBar: {
             x: g_limitObj.setLblLeft, y: 0, type: `range`,
+        },
+        lnkAdjustment1: {
+            x: g_limitObj.setLblLeft, y: -3, w: g_limitObj.setLblWidth, h: g_limitObj.setLblHeight,
+            siz: g_limitObj.adjustmentViewSiz,
+        },
+        lnkAdjustment2: {
+            x: g_limitObj.setLblLeft, y: 10, w: g_limitObj.setLblWidth, h: g_limitObj.setLblHeight,
+            siz: g_limitObj.adjustmentViewOrgSiz,
         },
 
         /** 設定: 譜面明細子画面 */
@@ -2717,6 +2729,8 @@ const g_shortcutObj = {
         ShiftLeft_KeyD: { id: `lnkDifficultyL` },
         ShiftRight_KeyD: { id: `lnkDifficultyL` },
         KeyD: { id: `lnkDifficultyR` },
+        Slash: { id: `btnKeymodeHelp`, reset: true },
+        F1: { id: `btnKeymodeHelp`, reset: true },
 
         ShiftLeft_ArrowRight: { id: `lnkSpeedR` },
         ShiftRight_ArrowRight: { id: `lnkSpeedR` },
@@ -4860,6 +4874,7 @@ const g_lang_lblNameObj = {
 
         helpUrl: `https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`,
         securityUrl: `https://github.com/cwtickle/danoniplus/security/policy`,
+        keymodeUrl: `https://github.com/cwtickle/danoniplus/wiki/Keys-`,
     },
     En: {
         dataDeleteOFFDesc: `Select the type of data you wish to delete and press "Reset".`,
@@ -4922,6 +4937,7 @@ const g_lang_lblNameObj = {
 
         helpUrl: `https://github.com/cwtickle/danoniplus-docs/wiki/AboutGameSystem`,
         securityUrl: `https://github.com/cwtickle/danoniplus-docs/wiki/SecurityPolicy`,
+        keymodeUrl: `https://github.com/cwtickle/danoniplus-docs/wiki/Keys-`,
     },
 };
 
@@ -4971,6 +4987,8 @@ const g_lang_msgObj = {
         adjustment: `曲とのタイミングにズレを感じる場合、\n数値を変えることでフレーム単位のズレを直すことができます。\n外側のボタンは5f刻み、真ん中は1f刻み、内側は0.5f刻みで調整できます。`,
         fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
         volume: `ゲーム内の音量を設定します。`,
+
+        keymodeHelp: `現在選択中の譜面のキータイプの説明ページへリンクします（外部リンク）`,
 
         graph: `譜面密度や速度変化状況、\n譜面の難易度などの情報を表示します。`,
         dataSave: `ハイスコア、リバース設定、\nキーコンフィグの保存の有無を設定します。`,
@@ -5077,6 +5095,8 @@ const g_lang_msgObj = {
         adjustment: `If you feel that the timing is out of sync with the music, \nyou can correct the shift in frame units by changing the value.\nThe outer button can be adjusted in 5 frame increments, the middle in 1 frame increments, \nand the inner button in 0.5 frame increments.`,
         fadein: `Plays the chart from the middle.\nIf you start in the middle, the high score will not be saved.`,
         volume: `Set the in-game volume.`,
+
+        keymodeHelp: `Go to the explanation page for the key type of the currently selected chart (External Link).`,
 
         graph: `Displays detailed information about the chart, such as chart's density status, sequences' velocity changes, and chart's difficulty.`,
         dataSave: `Set whether to save the high score, reverse setting, and key config.`,
