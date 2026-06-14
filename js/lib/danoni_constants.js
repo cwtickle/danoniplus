@@ -4988,7 +4988,7 @@ const g_lang_msgObj = {
         fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
         volume: `ゲーム内の音量を設定します。`,
 
-        keymodeHelp: `現在選択中の譜面のキータイプの説明ページへリンクします（GitHub Wiki）`,
+        keymodeHelp: `現在選択中の譜面のキータイプの説明ページへリンクします（外部リンク）`,
 
         graph: `譜面密度や速度変化状況、\n譜面の難易度などの情報を表示します。`,
         dataSave: `ハイスコア、リバース設定、\nキーコンフィグの保存の有無を設定します。`,
@@ -5096,7 +5096,7 @@ const g_lang_msgObj = {
         fadein: `Plays the chart from the middle.\nIf you start in the middle, the high score will not be saved.`,
         volume: `Set the in-game volume.`,
 
-        keymodeHelp: `Go to the explanation page for the key type of the currently selected chart (GitHub Wiki).`,
+        keymodeHelp: `Go to the explanation page for the key type of the currently selected chart (External Link).`,
 
         graph: `Displays detailed information about the chart, such as chart's density status, sequences' velocity changes, and chart's difficulty.`,
         dataSave: `Set whether to save the high score, reverse setting, and key config.`,
