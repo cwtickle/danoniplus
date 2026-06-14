@@ -2730,6 +2730,7 @@ const g_shortcutObj = {
         ShiftRight_KeyD: { id: `lnkDifficultyL` },
         KeyD: { id: `lnkDifficultyR` },
         Slash: { id: `btnKeymodeHelp`, reset: true },
+        F1: { id: `btnKeymodeHelp`, reset: true },
 
         ShiftLeft_ArrowRight: { id: `lnkSpeedR` },
         ShiftRight_ArrowRight: { id: `lnkSpeedR` },
