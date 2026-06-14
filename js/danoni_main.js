@@ -8233,7 +8233,7 @@ const createOptionWindow = _sprite => {
 	);
 	createScText(spriteList.difficulty, `Difficulty`);
 	if (g_headerObj.difSelectorUse) {
-		createScText(spriteList.difficulty, `DifficultyList`, { x: 152, y: -10, targetLabel: `lnkDifficulty` });
+		createScText(spriteList.difficulty, `DifficultyList`, { x: 154, y: -10, targetLabel: `lnkDifficulty` });
 	}
 	multiAppend(difficultySprite,
 		createCss2Button(`btnKeymodeHelp`, `?`, () => {
