@@ -2763,6 +2763,10 @@ const initialControl = async () => {
 			.sort((a, b) => parseInt(a) - parseInt(b));
 	}
 
+	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
+	Object.assign(g_lblNameObj, g_lang_lblNameObj[g_localeObj.val], g_presetObj.lblName?.[g_localeObj.val]);
+	Object.assign(g_msgObj, g_lang_msgObj[g_localeObj.val], g_presetObj.msg?.[g_localeObj.val]);
+
 	// デフォルトのカラー・シャッフルグループ設定を退避
 	g_keycons.groups.forEach(type =>
 		Object.keys(g_keyObj).filter(val => val.startsWith(type))
@@ -3932,10 +3936,6 @@ const headerConvert = _dosObj => {
 	} else {
 		g_imgObj.titleArrow = C_IMG_ARROW;
 	}
-
-	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
-	Object.assign(g_lblNameObj, g_lang_lblNameObj[g_localeObj.val], g_presetObj.lblName?.[g_localeObj.val]);
-	Object.assign(g_msgObj, g_lang_msgObj[g_localeObj.val], g_presetObj.msg?.[g_localeObj.val]);
 
 	// 自動横幅拡張設定
 	obj.autoSpread = setBoolVal(_dosObj.autoSpread, g_presetObj.autoSpread ?? true);
@@ -5446,6 +5446,10 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 
 			// 位置マニュアル化 (initManualX)
 			g_keyObj[`initManual${newKey}`] = setBoolVal(_dosObj[`initManual${newKey}`] ?? g_keyObj[`initManual${newKey}`], false);
+
+			// カスタムキーの説明ページ（keyHelpJaX / keyHelpEnX）
+			Object.keys(g_lang_lblNameObj).forEach(lang =>
+				g_lang_lblNameObj[lang][`keyHelp${newKey}`] = _dosObj[`keyHelp${lang}${newKey}`] ?? _dosObj[`keyHelp${newKey}`] ?? ``);
 
 			// キーコンフィグ (keyCtrlX_Y)
 			g_keyObj.minPatterns = newKeyMultiParam(newKey, `keyCtrl`, toKeyCtrlArray, {
@@ -8013,6 +8017,10 @@ const setDifficulty = (_initFlg) => {
 	}
 	// 特殊キーフラグ
 	g_stateObj.extraKeyFlg = g_headerObj.keyExtraList.includes(g_keyObj.currentKey);
+	btnKeymodeHelp.style.display = (
+		g_keyObj.defaultKeyList.includes(g_keyObj.currentKey) || g_lblNameObj[`keyHelp${g_keyObj.currentKey}`]
+			? `` : C_DIS_NONE
+	);
 
 	// ---------------------------------------------------
 	// 2. 初期化設定
@@ -8225,8 +8233,15 @@ const createOptionWindow = _sprite => {
 	);
 	createScText(spriteList.difficulty, `Difficulty`);
 	if (g_headerObj.difSelectorUse) {
-		createScText(spriteList.difficulty, `DifficultyList`, { x: 147, y: -10, targetLabel: `lnkDifficulty` });
+		createScText(spriteList.difficulty, `DifficultyList`, { x: 152, y: -10, targetLabel: `lnkDifficulty` });
 	}
+	multiAppend(difficultySprite,
+		createCss2Button(`btnKeymodeHelp`, `?`, () => {
+			openLink(g_keyObj.defaultKeyList.includes(g_keyObj.currentKey)
+				? g_lblNameObj.keymodeUrl + g_keyObj.currentKey
+				: g_lblNameObj[`keyHelp${g_keyObj.currentKey}`]);
+		}, g_lblPosObj.btnKeymodeHelp, g_cssObj.button_Setting),
+	)
 
 	// ---------------------------------------------------
 	// ハイスコア機能実装時に使用予定のスペース
