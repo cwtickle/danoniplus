@@ -8017,8 +8017,12 @@ const setDifficulty = (_initFlg) => {
 	}
 	// 特殊キーフラグ
 	g_stateObj.extraKeyFlg = g_headerObj.keyExtraList.includes(g_keyObj.currentKey);
+
+	// 選択中のキーのヘルプ表示
+	const targetKeymode = hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])
+		? g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] : g_keyObj.currentKey;
 	btnKeymodeHelp.style.display = (
-		g_keyObj.defaultKeyList.includes(g_keyObj.currentKey) || g_lblNameObj[`keyHelp${g_keyObj.currentKey}`]
+		g_keyObj.defaultKeyList.includes(targetKeymode) || g_lblNameObj[`keyHelp${targetKeymode}`]
 			? `` : C_DIS_NONE
 	);
 
@@ -8237,9 +8241,12 @@ const createOptionWindow = _sprite => {
 	}
 	multiAppend(difficultySprite,
 		createCss2Button(`btnKeymodeHelp`, `?`, () => {
-			openLink(g_keyObj.defaultKeyList.includes(g_keyObj.currentKey)
-				? g_lblNameObj.keymodeUrl + g_keyObj.currentKey
-				: g_lblNameObj[`keyHelp${g_keyObj.currentKey}`]);
+			const targetKeymode = hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])
+				? g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] : g_keyObj.currentKey;
+			openLink(
+				g_keyObj.defaultKeyList.includes(targetKeymode)
+					? g_lblNameObj.keymodeUrl + targetKeymode
+					: g_lblNameObj[`keyHelp${targetKeymode}`]);
 		}, g_lblPosObj.btnKeymodeHelp, g_cssObj.button_Setting),
 	)
 
