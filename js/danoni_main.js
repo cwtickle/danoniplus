@@ -8018,14 +8018,6 @@ const setDifficulty = (_initFlg) => {
 	// 特殊キーフラグ
 	g_stateObj.extraKeyFlg = g_headerObj.keyExtraList.includes(g_keyObj.currentKey);
 
-	// 選択中のキーのヘルプ表示
-	const targetKeymode = hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])
-		? g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] : g_keyObj.currentKey;
-	btnKeymodeHelp.style.display = (
-		g_keyObj.defaultKeyList.includes(targetKeymode) || g_lblNameObj[`keyHelp${targetKeymode}`]
-			? `` : C_DIS_NONE
-	);
-
 	// ---------------------------------------------------
 	// 2. 初期化設定
 
@@ -8122,6 +8114,20 @@ const setDifficulty = (_initFlg) => {
 	}
 	g_settings.scrollNum = getCurrentNo(g_settings.scrolls, g_stateObj.scroll);
 	g_settings.autoPlayNum = getCurrentNo(g_settings.autoPlays, g_stateObj.autoPlay);
+
+
+	// 選択中のキーのヘルプ表示
+	const targetKeymode = hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])
+		? g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] : g_keyObj.currentKey;
+	btnKeymodeHelp.classList.remove(g_cssObj.button_Setting, g_cssObj.button_Tweet);
+	btnKeymodeHelp.classList.add(
+		g_cssObj[`button_${targetKeymode !== g_keyObj.currentKey
+			&& (g_keyObj.defaultKeyList.includes(targetKeymode) || g_lblNameObj[`keyHelp${targetKeymode}`]) ? `Tweet` : `Setting`}`]
+	);
+	btnKeymodeHelp.style.display = (
+		g_keyObj.defaultKeyList.includes(targetKeymode) || g_lblNameObj[`keyHelp${targetKeymode}`]
+			? `` : C_DIS_NONE
+	);
 
 	// ---------------------------------------------------
 	// 3. 名称の設定
