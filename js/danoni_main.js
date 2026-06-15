@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/06/14
+ * Revised : 2026/06/15
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 48.5.0`;
-const g_revisedDate = `2026/06/14`;
+const g_version = `Ver 48.5.1`;
+const g_revisedDate = `2026/06/15`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -8017,10 +8017,6 @@ const setDifficulty = (_initFlg) => {
 	}
 	// 特殊キーフラグ
 	g_stateObj.extraKeyFlg = g_headerObj.keyExtraList.includes(g_keyObj.currentKey);
-	btnKeymodeHelp.style.display = (
-		g_keyObj.defaultKeyList.includes(g_keyObj.currentKey) || g_lblNameObj[`keyHelp${g_keyObj.currentKey}`]
-			? `` : C_DIS_NONE
-	);
 
 	// ---------------------------------------------------
 	// 2. 初期化設定
@@ -8118,6 +8114,20 @@ const setDifficulty = (_initFlg) => {
 	}
 	g_settings.scrollNum = getCurrentNo(g_settings.scrolls, g_stateObj.scroll);
 	g_settings.autoPlayNum = getCurrentNo(g_settings.autoPlays, g_stateObj.autoPlay);
+
+
+	// 選択中のキーのヘルプ表示
+	const targetKeymode = hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])
+		? g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] : g_keyObj.currentKey;
+	btnKeymodeHelp.classList.remove(g_cssObj.button_Setting, g_cssObj.button_Tweet);
+	btnKeymodeHelp.classList.add(
+		g_cssObj[`button_${targetKeymode !== g_keyObj.currentKey
+			&& (g_keyObj.defaultKeyList.includes(targetKeymode) || g_lblNameObj[`keyHelp${targetKeymode}`]) ? `Tweet` : `Setting`}`]
+	);
+	btnKeymodeHelp.style.display = (
+		g_keyObj.defaultKeyList.includes(targetKeymode) || g_lblNameObj[`keyHelp${targetKeymode}`]
+			? `` : C_DIS_NONE
+	);
 
 	// ---------------------------------------------------
 	// 3. 名称の設定
@@ -8237,9 +8247,12 @@ const createOptionWindow = _sprite => {
 	}
 	multiAppend(difficultySprite,
 		createCss2Button(`btnKeymodeHelp`, `?`, () => {
-			openLink(g_keyObj.defaultKeyList.includes(g_keyObj.currentKey)
-				? g_lblNameObj.keymodeUrl + g_keyObj.currentKey
-				: g_lblNameObj[`keyHelp${g_keyObj.currentKey}`]);
+			const targetKeymode = hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])
+				? g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] : g_keyObj.currentKey;
+			openLink(
+				g_keyObj.defaultKeyList.includes(targetKeymode)
+					? g_lblNameObj.keymodeUrl + targetKeymode
+					: g_lblNameObj[`keyHelp${targetKeymode}`]);
 		}, g_lblPosObj.btnKeymodeHelp, g_cssObj.button_Setting),
 	)
 
