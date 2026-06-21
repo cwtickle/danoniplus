@@ -3597,7 +3597,7 @@ const g_keyObj = {
     // - _0 の数字部分をカウントアップすることで実現できる。
     keyCtrl5_1: [[`Space`], [`Left`], [`Down`], [`Up`], [`Right`]],
     keyCtrl7_1: [[`S`], [`E`], [`F`], [`Space`, `G`, `H`], [`J`], [`I`], [`L`]],
-    keyCtrl8_1: [[`Enter`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
+    keyCtrl8_1: [[`Tab`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
     keyCtrl9A_1: [[`S`], [`D`], [`E`, `R`], [`F`], [`Space`], [`Left`], [`Down`], [`Up`], [`Right`]],
     keyCtrl9i_1: [[`A`], [`S`], [`D`], [`F`], [`Space`], [`Left`], [`Down`], [`Up`], [`Right`]],
     keyCtrl11_1: [[`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`], [`Left`], [`Down`], [`Up`], [`Right`]],
@@ -3658,7 +3658,7 @@ const g_keyObj = {
     // ショートカットキーコード
     keyRetry: 8,            // 8: Backspace
     keyRetry8_0: 9,         // 9: Tab
-    keyRetry8_1: 9,
+    keyRetry8_1: 8,         // 8: Backspace
     keyRetry11j_0: 123,     // 123: F12
 
     keyTitleBack: 46,       // 46: Delete
