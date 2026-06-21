@@ -5602,6 +5602,7 @@ const titleInit = (_initFlg = false) => {
 	});
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	g_stateObj.keyLockFlg = false;
 
 	// 譜面初期情報ロード許可フラグ
 	// (初回読み込み時はローカルストレージのロードが必要なため、
@@ -10108,8 +10109,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 			`<div class="settings_Title">${g_lblNameObj.key}</div><div class="settings_Title2">${g_lblNameObj.config}</div>`
 				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
 
-		createDescDiv(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY])
-			.split(`{1}:`).join(g_isMac ? `` : `Delete:`)),
+		createDescDiv(`kcDesc`, getKcDescMsg()),
 
 		createDescDiv(`kcShuffleDesc`,
 			g_headerObj.shuffleUse && g_settings.shuffles.filter(val => val.endsWith(`+`)).length > 0
@@ -10239,11 +10239,24 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	 * @param {number} _scrollNum 
 	 */
 	const changeTmpColor = (_j, _scrollNum = 1) => {
-		changeTmpData(`color`, g_headerObj.setColor.length, _j, _scrollNum);
-		const arrowColor = getKeyConfigColor(_j, g_keyObj[`color${keyCtrlPtn}`][_j]);
-		$id(`arrow${_j}`).background = arrowColor;
-		$id(`arrowShadow${_j}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_j], arrowColor);
+		const changeTmpOneColor = _idx => {
+			changeTmpData(`color`, g_headerObj.setColor.length, _idx, _scrollNum);
+			const arrowColor = getKeyConfigColor(_idx, g_keyObj[`color${keyCtrlPtn}`][_idx]);
+			$id(`arrow${_idx}`).background = arrowColor;
+			$id(`arrowShadow${_idx}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_idx], arrowColor);
+		};
 
+		if (g_stateObj.keyLockFlg && keyIsShift()) {
+			const tmpList = [];
+			g_keyObj[`color${keyCtrlPtn}`].forEach((val, idx) => {
+				if (val === g_keyObj[`color${keyCtrlPtn}`][_j]) {
+					tmpList.push(idx);
+				}
+			});
+			tmpList.forEach(idx => changeTmpOneColor(idx));
+		} else {
+			changeTmpOneColor(_j);
+		}
 		adjustScrollPoint(parseFloat($id(`arrow${_j}`).left));
 	};
 
@@ -10253,10 +10266,23 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	 * @param {number} _scrollNum 
 	 */
 	const changeTmpShuffleNum = (_j, _scrollNum = 1) => {
-		const tmpShuffle = changeTmpData(`shuffle`, g_keyObj[`keyCtrl${keyCtrlPtn}`].length - 1, _j, _scrollNum);
-		document.getElementById(`sArrow${_j}`).textContent = tmpShuffle + 1;
+		const changeTmpOneShuffle = _idx => {
+			const tmpShuffle = changeTmpData(`shuffle`, g_keyObj[`keyCtrl${keyCtrlPtn}`].length - 1, _idx, _scrollNum);
+			document.getElementById(`sArrow${_idx}`).textContent = tmpShuffle + 1;
+			changeShuffleConfigColor(keyCtrlPtn, g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_idx], _idx);
+		};
 
-		changeShuffleConfigColor(keyCtrlPtn, g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`][_j], _j);
+		if (g_stateObj.keyLockFlg && keyIsShift()) {
+			const tmpList = [];
+			g_keyObj[`shuffle${keyCtrlPtn}`].forEach((val, idx) => {
+				if (val === g_keyObj[`shuffle${keyCtrlPtn}`][_j]) {
+					tmpList.push(idx);
+				}
+			});
+			tmpList.forEach(idx => changeTmpOneShuffle(idx));
+		} else {
+			changeTmpOneShuffle(_j);
+		}
 		adjustScrollPoint(parseFloat($id(`arrow${_j}`).left));
 	};
 
@@ -10944,17 +10970,30 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 			}
 		}, g_lblPosObj.btnKcReset, g_cssObj.button_Reset),
 
+		createCss2Button(`btnKeyLock`, getKeyLockName(), () => {
+			g_stateObj.keyLockFlg = !g_stateObj.keyLockFlg;
+			makeInfoWindow(g_msgInfoObj.I_0012.split(`{0}`).join(boolToSwitch(!g_stateObj.keyLockFlg)), `leftToRightFade`);
+			toggleKcDesc();
+		}, g_lblPosObj.btnKcKeyLock, g_cssObj.button_Mini),
+
 		// プレイ開始
 		makePlayButton(() => loadMusic())
 	);
+	toggleKcDesc();
 
 	// キーボード押下時処理
 	setShortcutEvent(g_currentPage, (kbCode) => {
+		const C_KEY_ESCAPE = 27;
+		const C_KEY_IME = 229;
 		const keyCdObj = document.getElementById(`keycon${g_currentj}_${g_currentk}`);
 		let setKey = g_kCdN.findIndex(kCd => kCd === kbCode);
 
-		const C_KEY_ESCAPE = 27;
-		const C_KEY_IME = 229;
+		if (g_stateObj.keyLockFlg) {
+			if (setKey === C_KEY_ESCAPE) {
+				btnBack.click();
+			}
+			return;
+		}
 
 		// 全角切替、BackSpace、Deleteキー、Escキーは割り当て禁止
 		// また、直前と同じキーを押した場合(BackSpaceを除く)はキー操作を無効にする
@@ -11039,6 +11078,24 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	document.onkeyup = evt => commonKeyUp(evt);
 	document.oncontextmenu = () => false;
 };
+
+const toggleKcDesc = () => {
+	if (document.getElementById(`kcDesc`) !== null) {
+		kcDesc.textContent = getKcDescMsg();
+		kcDesc.style.fontSize = wUnit(getFontSize2(kcDesc.textContent, g_lblPosObj.kcDesc.w, { maxSiz: g_limitObj.mainSiz }));
+		kcDesc.classList.remove(g_cssObj.title_base, g_cssObj.keyconfig_Defaultkey);
+		kcDesc.classList.add(g_stateObj.keyLockFlg ? g_cssObj.keyconfig_Defaultkey : g_cssObj.title_base);
+		btnKeyLock.innerHTML = getKeyLockName();
+	}
+};
+
+const getKcDescMsg = () =>
+	g_stateObj.keyLockFlg
+		? g_lblNameObj.kcNonDesc
+		: g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY]).split(`{1}:`).join(g_isMac ? `` : `Delete:`);
+
+const getKeyLockName = () =>
+	`${g_lblNameObj.b_keyLock}${g_stateObj.keyLockFlg ? g_emojiObj.locked : g_emojiObj.unlocked}`;
 
 /**
  * キーボードレイアウトプレビュー（Canvas版）
@@ -11615,7 +11672,8 @@ const keyconfigKeyboardPreview = (() => {
 
 		_state.visible = !_state.visible;
 		area.style.display = _state.visible ? `block` : `none`;
-
+		g_stateObj.keyLockFlg = _state.visible;
+		toggleKcDesc();
 		if (_state.visible) refresh();
 	};
 
