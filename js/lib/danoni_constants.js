@@ -642,6 +642,7 @@ const updateWindowSiz = () => {
         },
         btnKcKeyLock: {
             x: g_btnX() + Math.floor((g_btnWidth() - 80) / 2) + 100, y: 3, w: 80, h: 18, siz: 11,
+            title: g_msgObj.keyLock,
         },
 
         btnKcBack: {
@@ -5063,6 +5064,7 @@ const g_lang_msgObj = {
         stepRtnGroup: `矢印などノーツの種類、回転に関するパターンを切り替えます。\nあらかじめ設定されている場合のみ変更可能です。`,
         kcReset: `対応するキーの割り当てを元に戻します。`,
         kcPreview: `キーボードレイアウトのプレビューを表示/非表示します。`,
+        keyLock: `キー割り当ての有効/無効を切り替えます。\n無効化時はシフトキー+番号/矢印クリックで同一グループの矢印群をまとめてグループ変更できます。`,
 
         pickArrow: `色番号ごとの矢印色（枠、塗りつぶし）、通常時のフリーズアロー色（枠、帯）を\nカラーピッカーから選んで変更できます。`,
         pickColorR: `設定する矢印色の種類を切り替えます。`,
@@ -5170,6 +5172,7 @@ const g_lang_msgObj = {
         stepRtnGroup: `Switches the type of notes, such as arrows, and the pattern regarding rotation.\nThis can only be changed if it has been set in advance.`,
         kcReset: `Restores the corresponding key assignments.`,
         kcPreview: `Show/hide the preview of the keyboard layout.`,
+        keyLock: `Toggles key assignments on or off. \nWhen disabled, you can use the Shift key plus a number or arrow key \nto change the group of all arrows in the same group at once.`,
 
         pickArrow: `Change the frame or fill of arrow color and the frame or bar of normal freeze-arrow color\nfor each color number from the color picker.`,
         pickColorR: `Switches the arrow color type to be set.`,
