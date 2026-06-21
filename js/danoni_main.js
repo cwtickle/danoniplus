@@ -10109,8 +10109,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 			`<div class="settings_Title">${g_lblNameObj.key}</div><div class="settings_Title2">${g_lblNameObj.config}</div>`
 				.replace(/[\t\n]/g, ``), 0, 15, g_cssObj.flex_centering),
 
-		createDescDiv(`kcDesc`, g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY])
-			.split(`{1}:`).join(g_isMac ? `` : `Delete:`)),
+		createDescDiv(`kcDesc`, getKcDescMsg()),
 
 		createDescDiv(`kcShuffleDesc`,
 			g_headerObj.shuffleUse && g_settings.shuffles.filter(val => val.endsWith(`+`)).length > 0
@@ -10974,12 +10973,13 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		createCss2Button(`btnKeyLock`, getKeyLockName(), () => {
 			g_stateObj.keyLockFlg = !g_stateObj.keyLockFlg;
 			makeInfoWindow(g_msgInfoObj.I_0012.split(`{0}`).join(boolToSwitch(!g_stateObj.keyLockFlg)), `leftToRightFade`);
-			btnKeyLock.innerHTML = getKeyLockName();
+			toggleKcDesc();
 		}, g_lblPosObj.btnKcKeyLock, g_cssObj.button_Mini),
 
 		// プレイ開始
 		makePlayButton(() => loadMusic())
 	);
+	toggleKcDesc();
 
 	// キーボード押下時処理
 	setShortcutEvent(g_currentPage, (kbCode) => {
@@ -11079,9 +11079,23 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	document.oncontextmenu = () => false;
 };
 
+const toggleKcDesc = () => {
+	if (document.getElementById(`kcDesc`) !== null) {
+		kcDesc.textContent = getKcDescMsg();
+		kcDesc.style.fontSize = wUnit(getFontSize2(kcDesc.textContent, g_lblPosObj.kcDesc.w, { maxSiz: g_limitObj.mainSiz }));
+		kcDesc.classList.remove(g_cssObj.title_base, g_cssObj.keyconfig_Defaultkey);
+		kcDesc.classList.add(g_stateObj.keyLockFlg ? g_cssObj.keyconfig_Defaultkey : g_cssObj.title_base);
+		btnKeyLock.innerHTML = getKeyLockName();
+	}
+};
+
+const getKcDescMsg = () =>
+	g_stateObj.keyLockFlg
+		? g_lblNameObj.kcNonDesc
+		: g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY]).split(`{1}:`).join(g_isMac ? `` : `Delete:`);
+
 const getKeyLockName = () =>
 	`${g_lblNameObj.b_keyLock}${g_stateObj.keyLockFlg ? g_emojiObj.locked : g_emojiObj.unlocked}`;
-
 
 /**
  * キーボードレイアウトプレビュー（Canvas版）
@@ -11659,8 +11673,7 @@ const keyconfigKeyboardPreview = (() => {
 		_state.visible = !_state.visible;
 		area.style.display = _state.visible ? `block` : `none`;
 		g_stateObj.keyLockFlg = _state.visible;
-		btnKeyLock.innerHTML = getKeyLockName();
-
+		toggleKcDesc();
 		if (_state.visible) refresh();
 	};
 

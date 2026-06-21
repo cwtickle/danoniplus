@@ -4827,6 +4827,7 @@ const g_lang_lblNameObj = {
         dataDeleteONDesc: `セーフモード適用中はデータ消去は行えません。変更するにはセーフモードを解除してください`,
 
         kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
+        kcNonDesc: `キー割り当て無効化中です。解除するには「KeyLock」を押してください`,
         kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを変更`,
         kcNoShuffleDesc: `矢印をクリックでカラーグループを変更`,
         sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
@@ -4890,6 +4891,7 @@ const g_lang_lblNameObj = {
         dataDeleteONDesc: `Data erasure cannot be performed while safe mode is applied. <br>Please deactivate the safe mode to change the data.`,
 
         kcDesc: `[{0}:Skip / {1}:Key invalidation (Alternate keys only)]`,
+        kcNonDesc: `Key assignments are currently disabled. Press "KeyLock" to disable this setting.`,
         kcShuffleDesc: `Click the number to change the shuffle group, and click the arrow to change the color.`,
         kcNoShuffleDesc: `Click the arrow to change the color group.`,
         sdDesc: `[Click to switch, gray to OFF]`,
