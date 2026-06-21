@@ -8998,6 +8998,9 @@ const setExcessive = (_btn, _val) => {
 const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 	g_keyObj.storagePtn = _localStorage[`keyCtrlPtn${_extraKeyName}`];
 	const basePtn = `${g_keyObj.currentKey}_${g_keyObj.storagePtn}`;
+	if (g_keyObj[`keyCtrl${basePtn}`] === undefined || hasVal(g_keyObj[`transKey${basePtn}`])) {
+		return;
+	}
 	const baseKeyNum = g_keyObj[`${g_keyObj.defaultProp}${basePtn}`].length;
 
 	if (_localStorage[`keyCtrl${_extraKeyName}`]?.[0].length > 0) {

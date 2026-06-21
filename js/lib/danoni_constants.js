@@ -3666,9 +3666,8 @@ const g_keyObj = {
 
     // 別キー
     transKey8_2: '12',
-    transKey15A_1: '',
-    transKey15B_0: '',
-    transKey15B_1: '',
+    transKey15A_1: '15B',   // 15A/15Bはキーパターンをコピーして生成するため、transKeyを明示的に指定
+    transKey15B_0: '',      // 15A/15Bはキーパターンをコピーして生成するため、transKeyを明示的に指定
 
     // キー置換用(ParaFla版との互換)
     keyTransPattern: {
