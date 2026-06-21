@@ -641,7 +641,7 @@ const updateWindowSiz = () => {
             title: g_msgObj.displayPreview,
         },
         btnKcKeyLock: {
-            x: g_btnX() + Math.floor((g_btnWidth() - 80) / 2) + 100, y: 3, w: 80, h: 18, siz: 11,
+            x: g_btnX() + Math.floor((g_btnWidth() - 80) / 2) + 90, y: 3, w: 80, h: 18, siz: 11,
             title: g_msgObj.keyLock,
         },
 
