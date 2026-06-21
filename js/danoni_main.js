@@ -10242,7 +10242,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	const changeTmpColor = (_j, _scrollNum = 1) => {
 		const changeTmpOneColor = _idx => {
 			changeTmpData(`color`, g_headerObj.setColor.length, _idx, _scrollNum);
-			const arrowColor = getKeyConfigColor(_j, g_keyObj[`color${keyCtrlPtn}`][_idx]);
+			const arrowColor = getKeyConfigColor(_idx, g_keyObj[`color${keyCtrlPtn}`][_idx]);
 			$id(`arrow${_idx}`).background = arrowColor;
 			$id(`arrowShadow${_idx}`).background = getShadowColor(g_keyObj[`color${keyCtrlPtn}`][_idx], arrowColor);
 		};
