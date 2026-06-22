@@ -1516,7 +1516,7 @@ const getFontSizeMulti = (_targetStr, _maxWidth, { font = getBasicFont(),
 
 		// 文字列の中央から前に向かってスペースを探す
 		for (let j = halfIndex; j > 0; j--) {
-			if (_targetStr[j] === ' ') {
+			if (_targetStr[j] === delim) {
 				breakNum = j;
 				break;
 			}
@@ -1525,9 +1525,9 @@ const getFontSizeMulti = (_targetStr, _maxWidth, { font = getBasicFont(),
 		if (breakNum === -1) {
 			breakNum = halfIndex;
 		}
-		const isSpace = _targetStr[breakNum] === ' ';
+		const isSpace = _targetStr[breakNum] === delim;
 		const firstPart = _targetStr.slice(0, breakNum);
-		const secondPart = _targetStr.slice(isSpace ? breakNum + 1 : breakNum);
+		const secondPart = _targetStr.slice(isSpace ? breakNum + delim.length : breakNum);
 
 		// 難易度名の中に <br> を仕込む
 		_targetStr = `${firstPart}<br>${secondPart}`;
