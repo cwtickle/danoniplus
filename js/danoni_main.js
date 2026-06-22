@@ -1507,7 +1507,7 @@ const getEmojiForCanvas = _str => {
  * @returns {[string, number]}
  */
 const getFontSizeMulti = (_targetStr, _maxWidth, { font = getBasicFont(),
-	maxSiz = 14, minSiz = 5, maxSizMulti = maxSiz, prefix = ``, len = 30, delim = ` ` } = {}) => {
+	maxSiz = 14, minSiz = 5, maxSizMulti = maxSiz, prefix = ``, len = 20, delim = ` ` } = {}) => {
 
 	// _targetStr が長い場合のみ、その中身を 2つ に分解する
 	if (_targetStr.length > len) {
@@ -7244,7 +7244,7 @@ const makeDifList = (_difList, _targetKey = ``) => {
 			}
 			// キー種と譜面名に分割し、譜面名が長すぎる場合は二段に分割して表示
 			const [difText, difSiz] = getFontSizeMulti(text, g_limitObj.difSelectorWidth, {
-				maxSiz: g_limitObj.difSelectorSiz, maxSizMulti: 9, prefix,
+				maxSiz: g_limitObj.difSelectorSiz, maxSizMulti: 9, prefix, len: 30,
 			})
 			_difList.appendChild(makeDifLblCssButton(`dif${k}`, difText, k, () => nextDifficulty(j - g_stateObj.scoreId), {
 				btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`), siz: difSiz,
