@@ -7235,12 +7235,21 @@ const makeDifList = (_difList, _targetKey = ``) => {
 	g_headerObj.viewLists.forEach(j => {
 		const keyLabel = g_headerObj.keyLabels[j];
 		if (_targetKey === `` || keyLabel === _targetKey) {
-			let text = `${getKeyName(keyLabel)} / ${g_headerObj.difLabels[j]}`;
+
+			// 譜面名の表示
+			const prefix = `${getKeyName(keyLabel)} / `;
+			let text = `${g_headerObj.difLabels[j]}`;
 			if (g_headerObj.makerView) {
 				text += ` (${g_headerObj.creatorNames[j]})`;
 			}
-			_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, () => nextDifficulty(j - g_stateObj.scoreId),
-				{ btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`) }));
+			// キー種と譜面名に分割し、譜面名が長すぎる場合は二段に分割して表示
+			const [difText, difSiz] = getFontSizeMulti(text, g_limitObj.difSelectorWidth, {
+				maxSiz: g_limitObj.difSelectorSiz, maxSizMulti: 9, prefix,
+			})
+			_difList.appendChild(makeDifLblCssButton(`dif${k}`, difText, k, () => nextDifficulty(j - g_stateObj.scoreId), {
+				btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`), siz: difSiz,
+			}));
+			document.getElementById(`dif${k}`).style.lineHeight = `9px`;
 			if (j === g_stateObj.scoreId) {
 				pos = k + 6.5 * (g_sHeight - 239) / 261;
 				curk = k;
