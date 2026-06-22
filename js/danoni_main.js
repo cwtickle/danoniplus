@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/06/15
+ * Revised : 2026/06/23
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 48.5.1`;
-const g_revisedDate = `2026/06/15`;
+const g_version = `Ver 48.5.2`;
+const g_revisedDate = `2026/06/23`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -8133,7 +8133,7 @@ const setDifficulty = (_initFlg) => {
 	// 3. 名称の設定
 
 	// 譜面名設定 (Difficulty)
-	const difWidth = parseFloat(lnkDifficulty.style.width);
+	const difWidth = parseFloat(lnkDifficulty.style.width) - 20;
 	const transKeyName = getTransKeyName();
 	const keyUnitName = getStgDetailName(getKeyUnitName(g_keyObj.currentKey));
 	const difNames = [`${getKeyName(g_keyObj.currentKey)}${transKeyName} ${keyUnitName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
