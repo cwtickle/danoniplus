@@ -1493,6 +1493,53 @@ const getEmojiForCanvas = _str => {
 };
 
 /**
+ * 複数行に跨る可能性のある文字列を、改行タグ付きの文字列とフォントサイズに変換
+ * @param {string} _targetStr 
+ * @param {number} _maxWidth 
+ * @param {object} object
+ * @param {string} [object.font=getBasicFont()]
+ * @param {number} [object.maxSiz=14]
+ * @param {number} [object.minSiz=5]
+ * @param {number} [object.maxSizMulti=maxSiz]
+ * @param {string} [object.prefix='']
+ * @param {number} [object.len=30]
+ * @param {string} [object.delim=' ']
+ * @returns {[string, number]}
+ */
+const getFontSizeMulti = (_targetStr, _maxWidth, { font = getBasicFont(),
+	maxSiz = 14, minSiz = 5, maxSizMulti = maxSiz, prefix = ``, len = 20, delim = ` ` } = {}) => {
+
+	// _targetStr が長い場合のみ、その中身を 2つ に分解する
+	if (_targetStr.length > len) {
+		let breakNum = -1;
+		const halfIndex = Math.floor(_targetStr.length / 2);
+
+		// 文字列の中央から前に向かってスペースを探す
+		for (let j = halfIndex; j > 0; j--) {
+			if (_targetStr[j] === delim) {
+				breakNum = j;
+				break;
+			}
+		}
+		// スペースがなければ、中央（よりやや左）で強制分割
+		if (breakNum === -1) {
+			breakNum = halfIndex;
+		}
+		const isSpace = _targetStr[breakNum] === delim;
+		const firstPart = _targetStr.slice(0, breakNum);
+		const secondPart = _targetStr.slice(isSpace ? breakNum + delim.length : breakNum);
+
+		// 難易度名の中に <br> を仕込む
+		_targetStr = `${firstPart}<br>${secondPart}`;
+	}
+
+	// 3. 最終的な文字列を結合（prefix と難易度名の1つ目の塊が1行目になる）
+	const fullStr = `${prefix}${_targetStr}`;
+
+	return [fullStr, getFontSize2(fullStr, _maxWidth, { font, maxSiz: _targetStr.includes(`<br>`) ? maxSizMulti : maxSiz, minSiz })];
+};
+
+/**
  * 指定した横幅に合ったフォントサイズを取得
  * @param {string} _str 
  * @param {number} _maxWidth 
@@ -1502,8 +1549,16 @@ const getEmojiForCanvas = _str => {
  * @returns {number}
  */
 const getFontSize2 = (_str, _maxWidth, { font = getBasicFont(), maxSiz = 14, minSiz = 5 } = {}) => {
+	// 文字列を改行で分割（null/undefined 対策も含む）
+	const lines = _str ? _str.split('<br>') : [];
+	if (lines.length === 0) return maxSiz;
+
+	// 大きいサイズから順に試す
 	for (let siz = maxSiz; siz >= minSiz; siz--) {
-		if (_maxWidth >= getStrWidth(getLongestStr(_str?.split(`<br>`)), siz, font)) {
+		// すべての行が _maxWidth 以内に収まるかチェック
+		const isFitAllLines = lines.every(line => _maxWidth >= getStrWidth(line, siz, font));
+
+		if (isFitAllLines) {
 			return siz;
 		}
 	}
@@ -7180,12 +7235,21 @@ const makeDifList = (_difList, _targetKey = ``) => {
 	g_headerObj.viewLists.forEach(j => {
 		const keyLabel = g_headerObj.keyLabels[j];
 		if (_targetKey === `` || keyLabel === _targetKey) {
-			let text = `${getKeyName(keyLabel)} / ${g_headerObj.difLabels[j]}`;
+
+			// 譜面名の表示
+			const prefix = `${getKeyName(keyLabel)} / `;
+			let text = `${g_headerObj.difLabels[j]}`;
 			if (g_headerObj.makerView) {
 				text += ` (${g_headerObj.creatorNames[j]})`;
 			}
-			_difList.appendChild(makeDifLblCssButton(`dif${k}`, text, k, () => nextDifficulty(j - g_stateObj.scoreId),
-				{ btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`) }));
+			// キー種と譜面名に分割し、譜面名が長すぎる場合は二段に分割して表示
+			const [difText, difSiz] = getFontSizeMulti(text, g_limitObj.difSelectorWidth, {
+				maxSiz: g_limitObj.difSelectorSiz, maxSizMulti: 9, prefix, len: 30,
+			})
+			_difList.appendChild(makeDifLblCssButton(`dif${k}`, difText, k, () => nextDifficulty(j - g_stateObj.scoreId), {
+				btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`), siz: difSiz,
+			}));
+			document.getElementById(`dif${k}`).style.lineHeight = `9px`;
 			if (j === g_stateObj.scoreId) {
 				pos = k + 6.5 * (g_sHeight - 239) / 261;
 				curk = k;
@@ -8134,12 +8198,17 @@ const setDifficulty = (_initFlg) => {
 	// 3. 名称の設定
 
 	// 譜面名設定 (Difficulty)
-	const difWidth = parseFloat(lnkDifficulty.style.width);
+	const difWidth = parseFloat(lnkDifficulty.style.width) - 20;
 	const transKeyName = getTransKeyName();
 	const keyUnitName = getStgDetailName(getKeyUnitName(g_keyObj.currentKey));
-	const difNames = [`${getKeyName(g_keyObj.currentKey)}${transKeyName} ${keyUnitName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}`];
-	lnkDifficulty.style.fontSize = wUnit(getFontSize2(difNames[0], difWidth, { maxSiz: g_limitObj.setLblSiz }));
 
+	const prefix = `${getKeyName(g_keyObj.currentKey)}${transKeyName} ${keyUnitName} / `;
+	let difLabel = `${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+
+	const [difName, difSiz] = getFontSizeMulti(difLabel, difWidth, { maxSiz: g_limitObj.setLblSiz, prefix });
+	lnkDifficulty.style.fontSize = wUnit(difSiz);
+
+	const difNames = [difName];
 	if (g_headerObj.makerView) {
 		difNames.push(`(${g_headerObj.creatorNames[g_stateObj.scoreId]})`);
 		difNames.forEach((difName, j) => {
@@ -16786,7 +16855,8 @@ const resultInit = () => {
 		makeCssResultPlayData(`lblMusicData`, dataRX, g_cssObj.result_style, 0, mTitleForView[0]),
 		makeCssResultPlayData(`lblMusicData2`, dataRX, g_cssObj.result_style, 1, mTitleForView[1]),
 		makeCssResultPlayData(`lblDifficulty`, lblRX, g_cssObj.result_lbl, 2, g_lblNameObj.rt_Difficulty, C_ALIGN_LEFT),
-		makeCssResultPlayData(`lblDifData`, dataRX, g_cssObj.result_style, 2, settingData.difData),
+		makeCssResultPlayData(`lblDifData`, dataRX, g_cssObj.result_style, 2, settingData.difData, C_ALIGN_CENTER,
+			{ siz: getFontSize2(settingData.difData, 350) }),
 		makeCssResultPlayData(`lblStyle`, lblRX, g_cssObj.result_lbl, 3, g_lblNameObj.rt_Style, C_ALIGN_LEFT),
 		makeCssResultPlayData(`lblStyleData`, dataRX, g_cssObj.result_style, 3, settingData.playStyleData),
 		makeCssResultPlayData(`lblDisplay`, lblRX, g_cssObj.result_lbl, 4, g_lblNameObj.rt_Display, C_ALIGN_LEFT),
@@ -16795,21 +16865,9 @@ const resultInit = () => {
 	);
 
 	// 設定項目が多い場合に2行に分解して表示する処理
-	let playStyleBreakNum = lblStyleData.textContent.length;
-	if (lblStyleData.textContent.length > 60) {
-		for (let j = Math.floor(lblStyleData.textContent.length / 2); j > 0; j--) {
-			if (lblStyleData.textContent[j] === `,`) {
-				playStyleBreakNum = j + 2;
-				break;
-			}
-		}
-		lblStyleData.style.top = `${parseFloat(lblStyleData.style.top) - 3}px`;
-		lblStyleData.innerHTML = `${lblStyleData.textContent.slice(0, playStyleBreakNum)}<br>` +
-			`${lblStyleData.textContent.slice(playStyleBreakNum)}`;
-		lblStyleData.style.fontSize = `${getFontSize2(lblStyleData.textContent.slice(0, playStyleBreakNum), 350, { maxSiz: 10 })}px`;
-	} else {
-		lblStyleData.style.fontSize = `${getFontSize2(lblStyleData.textContent, 350)}px`;
-	}
+	const [styleStr, styleSiz] = getFontSizeMulti(settingData.playStyleData, 350, { maxSizMulti: 10, len: 60 });
+	lblStyleData.innerHTML = styleStr;
+	lblStyleData.style.fontSize = wUnit(styleSiz);
 
 	/**
 	 * キャラクタ、スコア描画のID共通部、色CSS名、スコア変数名
@@ -17243,6 +17301,7 @@ const resultInit = () => {
 		const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
 		const logicalWidth = 400;
 		const logicalHeight = g_sHeight - 90;
+		const flapWidth = 370;
 
 		canvas.id = `resultImage`;
 		canvas.width = logicalWidth * g_dpr;
@@ -17271,13 +17330,14 @@ const resultInit = () => {
 		drawText(unEscapeHtml(mTitleForView[1]), { hy: 2 });
 		drawText(`${getEmojiForCanvas(g_emojiObj.memo)} ${unEscapeHtml(g_headerObj.tuning)} / ${getEmojiForCanvas(g_emojiObj.musical)} ${unEscapeHtml(artistName)}`,
 			{ hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
-		drawText(unEscapeHtml(settingData.difDataForImage), { hy: 4 });
+		drawText(unEscapeHtml(settingData.difDataForImage), { hy: 4, siz: getFontSize2(settingData.difDataForImage, flapWidth) });
 
 		if (settingData.playStyleData.length > 60) {
-			drawText(settingData.playStyleData.slice(0, playStyleBreakNum), { hy: 5, siz: getFontSize2(settingData.playStyleData.slice(0, playStyleBreakNum), 370) });
-			drawText(settingData.playStyleData.slice(playStyleBreakNum), { hy: 6, siz: getFontSize2(settingData.playStyleData.slice(playStyleBreakNum), 370) });
+			const strs = styleStr.split(`<br>`);
+			drawText(strs[0], { hy: 5, siz: getFontSize2(strs[0], flapWidth) });
+			drawText(strs[1], { hy: 6, siz: getFontSize2(strs[1], flapWidth) });
 		} else {
-			drawText(settingData.playStyleData, { hy: 5, siz: getFontSize2(settingData.playStyleData, 370, { maxSiz: 15 }) });
+			drawText(settingData.playStyleData, { hy: 5, siz: getFontSize2(settingData.playStyleData, flapWidth, { maxSiz: 15 }) });
 		}
 		Object.keys(jdgScoreObj).forEach(score => {
 			drawText(g_lblNameObj[`j_${score}`], { hy: 7 + jdgScoreObj[score].pos, color: jdgScoreObj[score].dfColor });
