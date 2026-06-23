@@ -1291,6 +1291,7 @@ const g_stateObj = {
     flatStepHeight: C_ARW_WIDTH,
 
     keyLockFlg: false,
+    kbPreviewFlg: false,
 
     dm_environment: C_FLG_OFF,
     dm_highscores: C_FLG_OFF,

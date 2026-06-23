@@ -5657,7 +5657,6 @@ const titleInit = (_initFlg = false) => {
 	});
 
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	g_stateObj.keyLockFlg = false;
 
 	// 譜面初期情報ロード許可フラグ
 	// (初回読み込み時はローカルストレージのロードが必要なため、
@@ -10171,6 +10170,11 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	// 譜面初期情報ロード許可フラグ
 	g_canLoadDifInfoFlg = false;
 
+	if (_initFlg) {
+		g_stateObj.keyLockFlg = false;
+		g_stateObj.kbPreviewFlg = false;
+	}
+
 	multiAppend(divRoot,
 
 		// キーコンフィグ画面タイトル
@@ -11143,6 +11147,10 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		})
 	);
 
+	if (g_stateObj.kbPreviewFlg) {
+		btnKbPreview.click();
+	}
+
 	safeExecuteCustomHooks(`g_skinJsObj.keyconfig`, g_skinJsObj.keyconfig);
 	document.onkeyup = evt => commonKeyUp(evt);
 	document.oncontextmenu = () => false;
@@ -11741,6 +11749,7 @@ const keyconfigKeyboardPreview = (() => {
 
 		_state.visible = !_state.visible;
 		area.style.display = _state.visible ? `block` : `none`;
+		g_stateObj.kbPreviewFlg = _state.visible;
 		g_stateObj.keyLockFlg = _state.visible;
 		toggleKcDesc();
 		if (_state.visible) refresh();
