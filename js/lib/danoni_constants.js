@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/06/14 (v48.5.0)
+ * Revised : 2026/06/23 (v49.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -640,6 +640,10 @@ const updateWindowSiz = () => {
             x: g_btnX() + Math.floor((g_btnWidth() - 80) / 2), y: 3, w: 80, h: 18, siz: 11,
             title: g_msgObj.displayPreview,
         },
+        btnKcKeyLock: {
+            x: g_btnX() + Math.floor((g_btnWidth() - 80) / 2) + 90, y: 3, w: 80, h: 18, siz: 11,
+            title: g_msgObj.keyLock,
+        },
 
         btnKcBack: {
             x: g_btnX(1 / 3), y: g_sHeight - 75,
@@ -1062,6 +1066,8 @@ const g_emojiObj = {
     memo: `&#x1f4dd;`,        // メモ (memo)
     musical: `&#x1f3b5;`,     // 音符 (musical note)
     camera: `&#x1f4f7;`,      // カメラ (camera)
+    locked: `&#x1f512;`,      // 鍵 (locked)
+    unlocked: `&#x1f513;`,    // 鍵開 (unlocked)
 };
 
 /** 設定・オプション画面用共通 */
@@ -1283,6 +1289,9 @@ const g_stateObj = {
 
     rotateEnabled: true,
     flatStepHeight: C_ARW_WIDTH,
+
+    keyLockFlg: false,
+    kbPreviewFlg: false,
 
     dm_environment: C_FLG_OFF,
     dm_highscores: C_FLG_OFF,
@@ -3597,7 +3606,7 @@ const g_keyObj = {
     // - _0 の数字部分をカウントアップすることで実現できる。
     keyCtrl5_1: [[`Space`], [`Left`], [`Down`], [`Up`], [`Right`]],
     keyCtrl7_1: [[`S`], [`E`], [`F`], [`Space`, `G`, `H`], [`J`], [`I`], [`L`]],
-    keyCtrl8_1: [[`Enter`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
+    keyCtrl8_1: [[`Tab`], [`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`]],
     keyCtrl9A_1: [[`S`], [`D`], [`E`, `R`], [`F`], [`Space`], [`Left`], [`Down`], [`Up`], [`Right`]],
     keyCtrl9i_1: [[`A`], [`S`], [`D`], [`F`], [`Space`], [`Left`], [`Down`], [`Up`], [`Right`]],
     keyCtrl11_1: [[`S`], [`D`], [`F`], [`Space`], [`J`], [`K`], [`L`], [`Left`], [`Down`], [`Up`], [`Right`]],
@@ -3658,7 +3667,7 @@ const g_keyObj = {
     // ショートカットキーコード
     keyRetry: 8,            // 8: Backspace
     keyRetry8_0: 9,         // 9: Tab
-    keyRetry8_1: 9,
+    keyRetry8_1: 8,         // 8: Backspace
     keyRetry11j_0: 123,     // 123: F12
 
     keyTitleBack: 46,       // 46: Delete
@@ -3666,9 +3675,8 @@ const g_keyObj = {
 
     // 別キー
     transKey8_2: '12',
-    transKey15A_1: '',
-    transKey15B_0: '',
-    transKey15B_1: '',
+    transKey15A_1: '15B',   // 15A/15Bはキーパターンをコピーして生成するため、transKeyを明示的に指定
+    transKey15B_0: '',      // 15A/15Bはキーパターンをコピーして生成するため、transKeyを明示的に指定
 
     // キー置換用(ParaFla版との互換)
     keyTransPattern: {
@@ -4461,6 +4469,7 @@ const g_lang_msgInfoObj = {
         I_0006: `ローカルストレージ情報をクリップボードにコピーしました！`,
         I_0007: `オブジェクト情報をクリップボードにコピーしました！`,
         I_0011: `指定した部分キーが未定義のため、画面表示できません。設定を見直してください。`,
+        I_0012: `キー割り当てモードを{0}に変更しました。`,
     },
     En: {
         W_0001: `Your browser is not guaranteed to work.<br>
@@ -4511,6 +4520,7 @@ const g_lang_msgInfoObj = {
         I_0006: `Local storage information copied to clipboard!`,
         I_0007: `Object information copied to clipboard!`,
         I_0011: `The specified partial key is undefined and cannot be displayed on the screen. Please review your settings.`,
+        I_0012: `Key assignment mode changed to {0}.`,
     },
 };
 
@@ -4566,6 +4576,7 @@ const g_lblNameObj = {
     b_close: `Close`,
     b_cReset: `Reset`,
     b_precond: `Precondition`,
+    b_keyLock: `KeyLock`,
 
     Difficulty: `Difficulty`,
     Speed: `Speed`,
@@ -4818,6 +4829,7 @@ const g_lang_lblNameObj = {
         dataDeleteONDesc: `セーフモード適用中はデータ消去は行えません。変更するにはセーフモードを解除してください`,
 
         kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
+        kcNonDesc: `キー割り当て無効化中です。解除するには「KeyLock」を押してください`,
         kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを変更`,
         kcNoShuffleDesc: `矢印をクリックでカラーグループを変更`,
         sdDesc: `[クリックでON/OFFを切替、灰色でOFF]`,
@@ -4881,6 +4893,7 @@ const g_lang_lblNameObj = {
         dataDeleteONDesc: `Data erasure cannot be performed while safe mode is applied. <br>Please deactivate the safe mode to change the data.`,
 
         kcDesc: `[{0}:Skip / {1}:Key invalidation (Alternate keys only)]`,
+        kcNonDesc: `Key assignments are currently disabled. Press "KeyLock" to disable this setting.`,
         kcShuffleDesc: `Click the number to change the shuffle group, and click the arrow to change the color.`,
         kcNoShuffleDesc: `Click the arrow to change the color group.`,
         sdDesc: `[Click to switch, gray to OFF]`,
@@ -5052,6 +5065,7 @@ const g_lang_msgObj = {
         stepRtnGroup: `矢印などノーツの種類、回転に関するパターンを切り替えます。\nあらかじめ設定されている場合のみ変更可能です。`,
         kcReset: `対応するキーの割り当てを元に戻します。`,
         kcPreview: `キーボードレイアウトのプレビューを表示/非表示します。`,
+        keyLock: `キー割り当ての有効/無効を切り替えます。\n無効化時はシフトキー+番号/矢印クリックで同一グループの矢印群をまとめてグループ変更できます。`,
 
         pickArrow: `色番号ごとの矢印色（枠、塗りつぶし）、通常時のフリーズアロー色（枠、帯）を\nカラーピッカーから選んで変更できます。`,
         pickColorR: `設定する矢印色の種類を切り替えます。`,
@@ -5159,6 +5173,7 @@ const g_lang_msgObj = {
         stepRtnGroup: `Switches the type of notes, such as arrows, and the pattern regarding rotation.\nThis can only be changed if it has been set in advance.`,
         kcReset: `Restores the corresponding key assignments.`,
         kcPreview: `Show/hide the preview of the keyboard layout.`,
+        keyLock: `Toggles key assignments on or off. \nWhen disabled, you can use the Shift key plus a number or arrow key \nto change the group of all arrows in the same group at once.`,
 
         pickArrow: `Change the frame or fill of arrow color and the frame or bar of normal freeze-arrow color\nfor each color number from the color picker.`,
         pickColorR: `Switches the arrow color type to be set.`,
