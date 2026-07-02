@@ -2514,7 +2514,7 @@ const drawTitleResultMotion = _displayName =>
 // WebAudioAPIでAudio要素風に再生するクラス
 class AudioPlayer {
 	constructor() {
-		this._context = new AudioContext();
+		this._context = getSharedAudioContext();
 		this._gain = this._context.createGain();
 		this._gain.connect(this._context.destination);
 		this._startTime = 0;
@@ -2562,11 +2562,8 @@ class AudioPlayer {
 	}
 
 	close() {
-		if (this._context) {
-			this._context.close()?.catch(() => {/* ignore double-close */ });
-			this._buffer = null;
-		}
 		if (this._source) {
+			this._source.stop(0);
 			this._source.disconnect(this._gain);
 			this._source = null;
 		}
@@ -2641,9 +2638,32 @@ class AudioPlayer {
 		this._eventListeners[_type] = this._eventListeners[_type].filter(_element => _element !== _listener);
 	}
 
+	getBuffer() {
+		return this._buffer;
+	}
+
+	setBuffer(_buffer) {
+		this._buffer = _buffer;
+		this._duration = _buffer.duration;
+		this._eventListeners[`canplaythrough`]?.forEach(_listener => _listener());
+	}
+
 	load() { }
 	dispatchEvent() { }
 }
+
+// グローバルで1つだけ保持(遅延生成)
+let g_sharedAudioContext = null;
+const getSharedAudioContext = () => {
+	if (!g_sharedAudioContext) {
+		g_sharedAudioContext = new AudioContext();
+	}
+	// タブのバックグラウンド化等でsuspendedになることがあるため念のためresume
+	if (g_sharedAudioContext.state === `suspended`) {
+		g_sharedAudioContext.resume();
+	}
+	return g_sharedAudioContext;
+};
 
 /**
  * クリップボードコピー関数
@@ -6370,23 +6390,22 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 
 	if (encodeFlg) {
 		try {
-			// base64エンコードは読込に時間が掛かるため、曲変更時のみ読込
-			if (!hasVal(g_musicdata) || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
-				closeExistingAudio();
+			closeExistingAudio();
+			if (g_audioBufferCache.has(url)) {
+				const tmpAudio = new AudioPlayer();
+				tmpAudio.setBuffer(g_audioBufferCache.get(url)); // 新設メソッド、decode不要
+				g_audioForMS = tmpAudio;
+			} else {
 				await loadScript2(url);
 				musicInit();
-				if (!isTitle()) {
-					g_musicdata = ``;
-					return;
-				}
+				if (!isTitle()) { g_musicdata = ``; return; }
+
 				const tmpAudio = new AudioPlayer();
-				const array = Uint8Array.from(atob(g_musicdata), v => v.charCodeAt(0));
+				const array = base64ToUint8Array(g_musicdata);
 				await tmpAudio.init(array.buffer);
-				if (!isTitle()) {
-					g_musicdata = ``;
-					tmpAudio.close();
-					return;
-				}
+				if (!isTitle()) { g_musicdata = ``; tmpAudio.close(); return; }
+
+				cacheAudioBuffer(url, tmpAudio.getBuffer());
 				g_audioForMS = tmpAudio;
 			}
 			g_audioForMS.volume = g_stateObj.bgmVolume / 100;
@@ -11969,7 +11988,7 @@ const loadMusic = () => {
 			const blobUrl = URL.createObjectURL(request.response);
 			createEmptySprite(divRoot, `loader`, g_windowObj.loader);
 			lblLoading.textContent = g_lblNameObj.pleaseWait;
-			setAudio(blobUrl);
+			setAudio(blobUrl, url);
 		} else {
 			makeWarningWindow(`${g_msgInfoObj.E_0041.split('{0}').join(getFullPath(url))}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
 		}
@@ -12001,8 +12020,9 @@ const loadMusic = () => {
  * 音楽データの設定
  * iOSの場合はAudioタグによる再生
  * @param {string} _url 
+ * @param {string} _cacheKey 
  */
-const setAudio = async (_url) => {
+const setAudio = async (_url, _cacheKey = _url) => {
 
 	const loadMp3 = () => {
 		if (g_isFile) {
@@ -12034,7 +12054,7 @@ const setAudio = async (_url) => {
 		await loadScript2(_url);
 		if (typeof musicInit === C_TYP_FUNCTION) {
 			musicInit();
-			readyToStart(() => initWebAudioAPIfromBase64(g_musicdata));
+			readyToStart(() => initWebAudioAPIfromBase64(g_musicdata, _cacheKey));
 		} else {
 			makeWarningWindow(g_msgInfoObj.E_0031);
 			musicAfterLoaded();
@@ -12045,11 +12065,19 @@ const setAudio = async (_url) => {
 };
 
 // Base64から音声データに変換してWebAudioAPIで再生する準備
-const initWebAudioAPIfromBase64 = async (_base64) => {
+const initWebAudioAPIfromBase64 = async (_base64, _cacheKey) => {
 	g_audio = new AudioPlayer();
 	musicAfterLoaded();
-	const array = Uint8Array.from(atob(_base64), v => v.charCodeAt(0))
+
+	if (_cacheKey && g_audioBufferCache.has(_cacheKey)) {
+		g_audio.setBuffer(g_audioBufferCache.get(_cacheKey)); // デコード完全スキップ
+		return;
+	}
+	const array = base64ToUint8Array(_base64);
 	await g_audio.init(array.buffer);
+	if (_cacheKey) {
+		cacheAudioBuffer(_cacheKey, g_audio.getBuffer());
+	}
 };
 
 // 音声ファイルを読み込んでWebAudioAPIで再生する準備
@@ -12059,6 +12087,26 @@ const initWebAudioAPIfromURL = async (_url) => {
 	const promise = await fetch(_url);
 	const arrayBuffer = await promise.arrayBuffer();
 	await g_audio.init(arrayBuffer);
+};
+
+const g_audioBufferCache = new Map();
+const AUDIO_CACHE_MAX = 5;
+
+const cacheAudioBuffer = (_key, _buffer) => {
+	g_audioBufferCache.set(_key, _buffer);
+	if (g_audioBufferCache.size > AUDIO_CACHE_MAX) {
+		g_audioBufferCache.delete(g_audioBufferCache.keys().next().value); // 古い順に破棄
+	}
+};
+
+const base64ToUint8Array = (_base64Str) => {
+	const binaryStr = atob(_base64Str);
+	const len = binaryStr.length;
+	const array = new Uint8Array(len);
+	for (let i = 0; i < len; i++) {
+		array[i] = binaryStr.charCodeAt(i);
+	}
+	return array;
 };
 
 const musicAfterLoaded = () => {
