@@ -12039,6 +12039,7 @@ const setAudio = async (_url, _cacheKey = _url) => {
 			g_currentPage = `loadingIos`;
 			lblLoading.textContent = `Click to Start!`;
 			divRoot.appendChild(makePlayButton(evt => {
+				getSharedAudioContext().resume();
 				g_currentPage = `loading`;
 				resetKeyControl();
 				divRoot.removeChild(evt.target);
