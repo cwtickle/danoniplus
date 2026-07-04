@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/03/15 (v44.5.10)
+ * Revised : 2026/07/04 (v44.5.18)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -142,7 +142,8 @@ const g_localeObj = {
 };
 
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
-const g_isIos = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`]);
+const g_isIos = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`]) ||
+    (navigator.maxTouchPoints > 1 && /macintosh/i.test(g_userAgent));
 const g_isMac = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`, `mac os`]);
 
 // 変数型
