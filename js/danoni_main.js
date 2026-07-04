@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/07/02
+ * Revised : 2026/07/04
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 49.1.0`;
-const g_revisedDate = `2026/07/02`;
+const g_version = `Ver 49.1.1`;
+const g_revisedDate = `2026/07/04`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -12039,6 +12039,7 @@ const setAudio = async (_url, _cacheKey = _url) => {
 			g_currentPage = `loadingIos`;
 			lblLoading.textContent = `Click to Start!`;
 			divRoot.appendChild(makePlayButton(evt => {
+				getSharedAudioContext().resume();
 				g_currentPage = `loading`;
 				resetKeyControl();
 				divRoot.removeChild(evt.target);
