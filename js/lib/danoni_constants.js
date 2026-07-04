@@ -145,7 +145,8 @@ const g_localeObj = {
 };
 
 const g_userAgent = window.navigator.userAgent.toLowerCase(); // msie, edge, chrome, safari, firefox, opera
-const g_isIos = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`]);
+const g_isIos = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`]) ||
+    (navigator.maxTouchPoints > 1 && /macintosh/i.test(g_userAgent));
 const g_isMac = listMatching(g_userAgent, [`iphone`, `ipad`, `ipod`, `mac os`]);
 
 // 変数型
