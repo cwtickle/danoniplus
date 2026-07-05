@@ -177,7 +177,8 @@ let g_maxScore = 1000000;
 let g_gameOverFlg = false;
 let g_finishFlg = true;
 
-// リトライ中フラグ
+// 音源のAudioContext管理、リトライ中フラグ
+let g_sharedAudioContext = null;
 let g_retryInProgress = false;
 
 /** 共通オブジェクト */
@@ -2656,7 +2657,6 @@ class AudioPlayer {
 }
 
 // グローバルで1つだけ保持(遅延生成)
-let g_sharedAudioContext = null;
 const getSharedAudioContext = () => {
 	if (!g_sharedAudioContext) {
 		g_sharedAudioContext = new AudioContext();
