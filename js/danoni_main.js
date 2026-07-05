@@ -177,6 +177,10 @@ let g_maxScore = 1000000;
 let g_gameOverFlg = false;
 let g_finishFlg = true;
 
+// 音源のAudioContext管理、リトライ中フラグ
+let g_sharedAudioContext = null;
+let g_retryInProgress = false;
+
 /** 共通オブジェクト */
 const g_loadObj = {};
 const g_rootObj = {};
@@ -2653,7 +2657,6 @@ class AudioPlayer {
 }
 
 // グローバルで1つだけ保持(遅延生成)
-let g_sharedAudioContext = null;
 const getSharedAudioContext = () => {
 	if (!g_sharedAudioContext) {
 		g_sharedAudioContext = new AudioContext();
@@ -3254,7 +3257,6 @@ const loadChartFile = async (_scoreId = g_stateObj.scoreId) => {
 
 		await loadScript2(`${filename}?${Date.now()}`, false, charset);
 		if (typeof externalDosInit === C_TYP_FUNCTION) {
-			deleteDiv(divRoot, `lblLoading`);
 
 			// 外部データを読込（ファイルが見つからなかった場合は譜面追記をスキップ）
 			externalDosInit();
@@ -11956,7 +11958,7 @@ const changeShuffleConfigColor = (_keyCtrlPtn, _vals, _j = -1) => {
 /* Scene : LOADING [strawberry] */
 /*-----------------------------------------------------------*/
 
-const loadMusic = () => {
+const loadMusic = async () => {
 
 	clearWindow(true);
 	pauseBGM();
@@ -11971,50 +11973,94 @@ const loadMusic = () => {
 	const lblLoading = getLoadingLabel();
 	divRoot.appendChild(lblLoading);
 
-	// ローカル動作時
-	if (g_isFile) {
-		setAudio(url);
-		return;
+	// 音源準備Promise(ローカル/オンライン双方を吸収)
+	const audioReadyPromise = g_isFile
+		? setAudio(url)
+		: loadMusicViaXhr(url, lblLoading);
+
+	// 譜面データ準備Promise(DOM削除処理は含まない)
+	const chartReadyPromise = loadChartFile();
+
+	// 両方の完了を待つ
+	let loadSucceeded = true;
+	try {
+		await Promise.all([audioReadyPromise, chartReadyPromise]);
+	} catch (e) {
+		console.warn(`Loading error: ${e}`);
+		loadSucceeded = false;
+	} finally {
+		deleteDiv(divRoot, `lblLoading`);
 	}
 
-	// XHRで読み込み
+	if (loadSucceeded) {
+		loadingScoreInit();
+	}
+};
+
+/**
+ * XHRによる音源読み込み(Promise化)
+ * @param {string} _url
+ * @param {HTMLDivElement} _lblLoading
+ * @returns {Promise<void>}
+ */
+const loadMusicViaXhr = (_url, _lblLoading) => new Promise((resolve, reject) => {
 	const request = new XMLHttpRequest();
-	request.open(`GET`, url, true);
+	request.open(`GET`, _url, true);
 	request.responseType = `blob`;
+
+	const STALL_TIMEOUT_MS = 30000; // 30秒間、進捗がなければ停滞とみなす
+	let stallTimer = null;
+
+	const resetStallTimer = () => {
+		clearTimeout(stallTimer);
+		stallTimer = setTimeout(() => {
+			request.abort();
+			makeWarningWindow(g_msgInfoObj.E_0033, { backBtnUse: true });
+			reject(new Error(`stalled`));
+		}, STALL_TIMEOUT_MS);
+	};
 
 	// 読み込み完了時
 	request.addEventListener(`load`, () => {
+		clearTimeout(stallTimer);
 		if (request.status >= 200 && request.status < 300) {
 			const blobUrl = URL.createObjectURL(request.response);
 			createEmptySprite(divRoot, `loader`, g_windowObj.loader);
-			lblLoading.textContent = g_lblNameObj.pleaseWait;
-			setAudio(blobUrl, url);
+			_lblLoading.textContent = g_lblNameObj.pleaseWait;
+			// 読込用はblobUrl、キャッシュキーは変化しない元のurlを渡す
+			setAudio(blobUrl, _url).then(resolve).catch(reject);
 		} else {
-			makeWarningWindow(`${g_msgInfoObj.E_0041.split('{0}').join(getFullPath(url))}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
+			makeWarningWindow(`${g_msgInfoObj.E_0041.split('{0}').join(getFullPath(_url))}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
+			reject(new Error(`HTTP ${request.status}`));
 		}
 	});
 
 	// 進捗時
 	request.addEventListener(`progress`, _event => {
-		const lblLoading = document.getElementById(`lblLoading`);
+		resetStallTimer(); // 進捗があるたびにタイマーをリセット
+		const lblLoadingElem = document.getElementById(`lblLoading`);
+		if (lblLoadingElem === null) return; // 並列処理で先に削除されている場合の防御
 
 		if (_event.lengthComputable) {
 			const rate = _event.loaded / _event.total;
 			createEmptySprite(divRoot, `loader`, { y: g_sHeight - 10, h: 10, w: g_sWidth * rate, backgroundColor: `#eeeeee` });
-			lblLoading.textContent = `${g_lblNameObj.nowLoading} ${Math.floor(rate * 100)}%`;
+			lblLoadingElem.textContent = `${g_lblNameObj.nowLoading} ${Math.floor(rate * 100)}%`;
 		} else {
-			lblLoading.textContent = `${g_lblNameObj.nowLoading} ${_event.loaded}Bytes`;
+			lblLoadingElem.textContent = `${g_lblNameObj.nowLoading} ${_event.loaded}Bytes`;
 		}
 		// ユーザカスタムイベント
 		safeExecuteCustomHooks(`g_customJsObj.progress`, g_customJsObj.progress, _event);
 	});
 
-	// エラー処理
-	request.addEventListener(`timeout`, () => makeWarningWindow(g_msgInfoObj.E_0033, { backBtnUse: true }));
-	request.addEventListener(`error`, () => makeWarningWindow(g_msgInfoObj.E_0034, { backBtnUse: true }));
+	request.addEventListener(`error`, () => {
+		clearTimeout(stallTimer);
+		makeWarningWindow(g_msgInfoObj.E_0034, { backBtnUse: true });
+		reject(new Error(`network error`));
+	});
 
+	resetStallTimer(); // 初回(最初のprogressが来るまで)のタイマーも開始
 	request.send();
-};
+});
 
 /**
  * 音楽データの設定
@@ -12028,13 +12074,13 @@ const setAudio = async (_url, _cacheKey = _url) => {
 		if (g_isFile) {
 			g_audio = new Audio();
 			g_audio.src = _url;
-			musicAfterLoaded();
+			return musicAfterLoaded();
 		} else {
-			initWebAudioAPIfromURL(_url);
+			return initWebAudioAPIfromURL(_url);
 		}
 	};
 
-	const readyToStart = _func => {
+	const readyToStart = _func => new Promise((resolve, reject) => {
 		if (g_isIos) {
 			g_currentPage = `loadingIos`;
 			lblLoading.textContent = `Click to Start!`;
@@ -12043,51 +12089,53 @@ const setAudio = async (_url, _cacheKey = _url) => {
 				g_currentPage = `loading`;
 				resetKeyControl();
 				divRoot.removeChild(evt.target);
-				_func();
+				_func().then(resolve).catch(reject);
 			}));
 			setShortcutEvent(g_currentPage);
 		} else {
-			_func();
+			_func().then(resolve).catch(reject);
 		}
-	};
+	});
 
 	if (g_musicEncodedFlg) {
 		await loadScript2(_url);
 		if (typeof musicInit === C_TYP_FUNCTION) {
 			musicInit();
-			readyToStart(() => initWebAudioAPIfromBase64(g_musicdata, _cacheKey));
+			return readyToStart(() => initWebAudioAPIfromBase64(g_musicdata, _cacheKey));
 		} else {
 			makeWarningWindow(g_msgInfoObj.E_0031);
-			musicAfterLoaded();
+			return musicAfterLoaded();
 		}
 	} else {
-		readyToStart(() => loadMp3());
+		return readyToStart(() => loadMp3());
 	}
 };
 
 // Base64から音声データに変換してWebAudioAPIで再生する準備
 const initWebAudioAPIfromBase64 = async (_base64, _cacheKey) => {
 	g_audio = new AudioPlayer();
-	musicAfterLoaded();
+	const loadedPromise = musicAfterLoaded(); // canplaythrough/errorの発火をここで待つ
 
 	if (_cacheKey && g_audioBufferCache.has(_cacheKey)) {
 		g_audio.setBuffer(g_audioBufferCache.get(_cacheKey)); // デコード完全スキップ
-		return;
+	} else {
+		const array = base64ToUint8Array(_base64);
+		await g_audio.init(array.buffer);
+		if (_cacheKey) {
+			cacheAudioBuffer(_cacheKey, g_audio.getBuffer());
+		}
 	}
-	const array = base64ToUint8Array(_base64);
-	await g_audio.init(array.buffer);
-	if (_cacheKey) {
-		cacheAudioBuffer(_cacheKey, g_audio.getBuffer());
-	}
+	return loadedPromise;
 };
 
 // 音声ファイルを読み込んでWebAudioAPIで再生する準備
 const initWebAudioAPIfromURL = async (_url) => {
 	g_audio = new AudioPlayer();
-	musicAfterLoaded();
+	const loadedPromise = musicAfterLoaded();
 	const promise = await fetch(_url);
 	const arrayBuffer = await promise.arrayBuffer();
 	await g_audio.init(arrayBuffer);
+	return loadedPromise;
 };
 
 const g_audioBufferCache = new Map();
@@ -12110,26 +12158,26 @@ const base64ToUint8Array = (_base64Str) => {
 	return array;
 };
 
-const musicAfterLoaded = () => {
+const musicAfterLoaded = () => new Promise((resolve, reject) => {
 	g_audio.load();
 
 	if (g_audio.readyState === 4) {
-		// audioの読み込みが終わった後の処理
-		loadingScoreInit();
+		resolve();
 	} else {
-		// 読込中の状態
-		g_audio.addEventListener(`canplaythrough`, (() => function f() {
-			g_audio.removeEventListener(`canplaythrough`, f, false);
-			loadingScoreInit();
-		})(), false);
-
-		// エラー時
-		g_audio.addEventListener(`error`, (() => function f() {
-			g_audio.removeEventListener(`error`, f, false);
+		const onCanPlay = () => { cleanup(); resolve(); };
+		const onError = () => {
+			cleanup();
 			makeWarningWindow(g_msgInfoObj.E_0041.split(`{0}`).join(g_audio.src), { backBtnUse: true });
-		})(), false);
+			reject(new Error(`audio load error`));
+		};
+		const cleanup = () => {
+			g_audio.removeEventListener(`canplaythrough`, onCanPlay, false);
+			g_audio.removeEventListener(`error`, onError, false);
+		};
+		g_audio.addEventListener(`canplaythrough`, onCanPlay, false);
+		g_audio.addEventListener(`error`, onError, false);
 	}
-};
+});
 
 /**
  * 読込画面初期化
@@ -14876,7 +14924,7 @@ const mainInit = () => {
 	};
 
 	// キー操作イベント
-	document.onkeydown = evt => {
+	document.onkeydown = async evt => {
 		evt.preventDefault();
 		const setCode = transCode(evt);
 
@@ -14897,8 +14945,17 @@ const mainInit = () => {
 
 			} else {
 				// その他の環境では単にRetryに対応するキーのみで適用
+				if (g_retryInProgress) return blockCode(setCode);
+				g_retryInProgress = true;
 				clearWindow();
-				musicAfterLoaded();
+				try {
+					await musicAfterLoaded();
+					loadingScoreInit();
+				} catch (e) {
+					console.warn(`Retry audio load error: ${e}`);
+				} finally {
+					g_retryInProgress = false;
+				}
 			}
 
 		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
