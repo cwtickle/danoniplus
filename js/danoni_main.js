@@ -11999,6 +11999,8 @@ const loadMusic = async () => {
  * 音源の取得とセットアップ
  * - エンコード形式(base64)か通常の音声ファイルかを判定し、それぞれの準備処理に振り分ける
  * - iOSの場合はユーザー操作(ジェスチャー)を待ってから再生準備を行う(readyToStart経由)
+ * - キャッシュヒット時はダウンロード自体を行わないよう、取得処理はsetupWebAudioへ
+ *   コールバックとして渡し、キャッシュミス時にのみ評価されるようにしている
  * @param {string} _url 音源の取得元URL
  * @param {HTMLDivElement} _lblLoading ローディング表示用のDiv要素
  * @returns {Promise<void>} 再生準備(canplaythrough相当)が完了したら解決するPromise
@@ -12029,32 +12031,49 @@ const loadAndSetupAudio = async (_url, _lblLoading) => {
 		});
 	};
 
-	const audioUrl = g_isFile ? _url : await fetchMusicBlobUrl(_url, _lblLoading);
-
 	// エンコードなしの場合
 	// - ファイルの場合はAudioタグで再生、オンラインの場合はWebAudioAPI(URL)で再生
 	if (!g_musicEncodedFlg) {
-		return readyToStart(() => {
-			if (g_isFile) {
+		// ローカル実行時: Audio要素で直接再生(WebAudioAPIキャッシュの対象外)
+		if (g_isFile) {
+			return readyToStart(() => {
 				g_audio = new Audio();
-				g_audio.src = audioUrl;
+				g_audio.src = _url;
 				return musicAfterLoaded();
-			}
-			return setupWebAudio(async () => {
-				const response = await fetch(audioUrl);
-				return response.arrayBuffer();
-			}, _url);
-		});
+			});
+		}
+		// オンライン時: WebAudioAPI経由。ダウンロード処理はsetupWebAudioへ委譲する
+		return readyToStart(() =>
+			setupWebAudio(async () => {
+				// この関数はキャッシュミス時のみ呼ばれる
+				const blobUrl = await fetchMusicBlobUrl(_url, _lblLoading);
+				try {
+					const response = await fetch(blobUrl);
+					return await response.arrayBuffer();
+				} finally {
+					URL.revokeObjectURL(blobUrl); // 使用後は必ず解放
+				}
+			}, _url)
+		);
 	}
 
-	// エンコードありの場合
-	await loadScript2(audioUrl);
-	if (typeof musicInit !== C_TYP_FUNCTION) {
-		makeWarningWindow(g_msgInfoObj.E_0031, { backBtnUse: true });
-		throw new Error(`musicInit is not defined`);
-	}
-	musicInit();
-	return readyToStart(() => setupWebAudio(() => Promise.resolve(base64ToUint8Array(g_musicdata).buffer), _url));
+	// エンコードありの場合。スクリプト読込・musicInit実行もキャッシュミス時のみ行う
+	return readyToStart(() => setupWebAudio(async () => {
+		const scriptSrc = g_isFile ? _url : await fetchMusicBlobUrl(_url, _lblLoading);
+		try {
+			await loadScript2(scriptSrc);
+		} finally {
+			if (!g_isFile) {
+				URL.revokeObjectURL(scriptSrc); // 使用後は必ず解放
+			}
+		}
+		if (typeof musicInit !== C_TYP_FUNCTION) {
+			makeWarningWindow(g_msgInfoObj.E_0031, { backBtnUse: true });
+			throw new Error(`musicInit is not defined`);
+		}
+		musicInit();
+		return base64ToUint8Array(g_musicdata).buffer;
+	}, _url));
 };
 
 /**
@@ -12125,9 +12144,11 @@ const fetchMusicBlobUrl = (_url, _lblLoading) => new Promise((resolve, reject) =
 
 /**
  * WebAudioAPIによる音源再生の準備(共通処理)
- * @param {() => Promise<ArrayBuffer>} _fetchArrayBuffer
- * @param {string} [_cacheKey]
- * @returns {Promise<void>}
+ * - AudioPlayerを生成し、canplaythrough/errorの発火待ちを開始した上で、
+ *   ArrayBufferを取得してデコードする(キャッシュヒット時はデコードをスキップ)
+ * @param {() => Promise<ArrayBuffer>} _fetchArrayBuffer 未キャッシュの場合にArrayBufferを取得する関数
+ * @param {string} [_cacheKey] AudioBufferキャッシュ照合用のキー(省略時はキャッシュを使わない)
+ * @returns {Promise<void>} 再生準備(canplaythrough相当)が完了したら解決するPromise
  */
 const setupWebAudio = async (_fetchArrayBuffer, _cacheKey) => {
 	g_audio = new AudioPlayer();
