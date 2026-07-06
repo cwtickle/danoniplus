@@ -11996,22 +11996,68 @@ const loadMusic = async () => {
 };
 
 /**
- * 音源の取得とセットアップ(ローカル/オンライン双方を吸収する橋渡し役)
- * @param {string} _url
- * @param {HTMLDivElement} _lblLoading
- * @returns {Promise<void>}
+ * 音源の取得とセットアップ
+ * - エンコード形式(base64)か通常の音声ファイルかを判定し、それぞれの準備処理に振り分ける
+ * - iOSの場合はユーザー操作(ジェスチャー)を待ってから再生準備を行う(readyToStart経由)
+ * @param {string} _url 音源の取得元URL
+ * @param {HTMLDivElement} _lblLoading ローディング表示用のDiv要素
+ * @returns {Promise<void>} 再生準備(canplaythrough相当)が完了したら解決するPromise
  */
 const loadAndSetupAudio = async (_url, _lblLoading) => {
+
+	/**
+	 * iOSの場合はユーザー操作(ジェスチャー)を待ってから_funcを実行する
+	 * - AudioContextの制約上、iOSはジェスチャーを起点にしないと音声再生が許可されないため
+	 * @param {() => Promise<void>} _func 実行する音源準備処理
+	 * @returns {Promise<void>}
+	 */
+	const readyToStart = _func => {
+		if (!g_isIos) {
+			return _func(); // 通常環境はそのまま実行するだけ
+		}
+		return new Promise((resolve, reject) => {
+			g_currentPage = `loadingIos`;
+			_lblLoading.textContent = `Click to Start!`;
+			divRoot.appendChild(makePlayButton(evt => {
+				getSharedAudioContext().resume();
+				g_currentPage = `loading`;
+				resetKeyControl();
+				divRoot.removeChild(evt.target);
+				_func().then(resolve).catch(reject);
+			}));
+			setShortcutEvent(g_currentPage);
+		});
+	};
+
 	const audioUrl = g_isFile ? _url : await fetchMusicBlobUrl(_url, _lblLoading);
-	// キャッシュキーは常に変化しない元のurlを使う(Blob URLは毎回一意になるため)
-	return setAudio(audioUrl, _url);
+
+	// エンコードなしの場合
+	if (!g_musicEncodedFlg) {
+		return readyToStart(() => {
+			if (g_isFile) {
+				g_audio = new Audio();
+				g_audio.src = _url;
+				return musicAfterLoaded();
+			}
+			return initWebAudioAPIfromURL(_url);
+		});
+	}
+
+	// エンコードありの場合は、まずスクリプトを読み込む
+	await loadScript2(audioUrl);
+	if (typeof musicInit !== C_TYP_FUNCTION) {
+		makeWarningWindow(g_msgInfoObj.E_0031);
+		return musicAfterLoaded();
+	}
+	musicInit();
+	return readyToStart(() => initWebAudioAPIfromBase64(g_musicdata, _url));
 };
 
 /**
  * XHRによる音源ファイルのダウンロード(Promise化)
  * - ダウンロードして Blob URL を返す
- * @param {string} _url
- * @param {HTMLDivElement} _lblLoading
+ * @param {string} _url 音源ファイルのURL
+ * @param {HTMLDivElement} _lblLoading ローディング表示用のDiv要素
  * @returns {Promise<string>} Blob URL
  */
 const fetchMusicBlobUrl = (_url, _lblLoading) => new Promise((resolve, reject) => {
@@ -12071,72 +12117,6 @@ const fetchMusicBlobUrl = (_url, _lblLoading) => new Promise((resolve, reject) =
 	resetStallTimer(); // 初回(最初のprogressが来るまで)のタイマーも開始
 	request.send();
 });
-
-/**
- * 音源のセットアップ
- * - エンコード形式(base64)か通常の音声ファイルかを判定し、それぞれの準備処理に振り分ける
- * - iOSの場合はユーザー操作(ジェスチャー)を待ってから再生準備を行う(readyToStart経由)
- * @param {string} _url 音源の取得元URL(ローカルパス、または loadAndSetupAudio 経由のBlob URL)
- * @param {string} [_cacheKey=_url] AudioBufferキャッシュ照合用のキー(常に変化しない楽曲の実URLを渡す)
- * @returns {Promise<void>} 再生準備(canplaythrough相当)が完了したら解決するPromise
- */
-const setAudio = async (_url, _cacheKey = _url) => {
-
-	/**
-	 * iOSの場合はユーザー操作(ジェスチャー)を待ってから_funcを実行する
-	 * - AudioContextの制約上、iOSはジェスチャーを起点にしないと音声再生が許可されないため
-	 * @param {() => Promise<void>} _func 実行する音源準備処理
-	 * @returns {Promise<void>}
-	 */
-	const readyToStart = _func => {
-		if (!g_isIos) {
-			return _func(); // 通常環境はそのまま実行するだけ
-		}
-		return new Promise((resolve, reject) => {
-			g_currentPage = `loadingIos`;
-			if (document.getElementById(`lblLoading`) === null) {
-				divRoot.appendChild(getLoadingLabel());
-			}
-			lblLoading.textContent = `Click to Start!`;
-			divRoot.appendChild(makePlayButton(evt => {
-				getSharedAudioContext().resume();
-				g_currentPage = `loading`;
-				resetKeyControl();
-				divRoot.removeChild(evt.target);
-				_func().then(resolve).catch(reject);
-			}));
-			setShortcutEvent(g_currentPage);
-		});
-	};
-
-	/**
-	 * mp3等、非エンコード形式の音源準備
-	 * - ローカル実行時は Audio 要素で直接再生、オンライン時は WebAudioAPI 経由で取得・デコードする
-	 * @returns {Promise<void>}
-	 */
-	const loadMp3 = () => {
-		if (g_isFile) {
-			g_audio = new Audio();
-			g_audio.src = _url;
-			return musicAfterLoaded();
-		}
-		return initWebAudioAPIfromURL(_url);
-	};
-
-	// エンコードなしの場合
-	if (!g_musicEncodedFlg) {
-		return readyToStart(loadMp3);
-	}
-
-	// エンコードありの場合は、まずスクリプトを読み込む
-	await loadScript2(_url);
-	if (typeof musicInit !== C_TYP_FUNCTION) {
-		makeWarningWindow(g_msgInfoObj.E_0031);
-		return musicAfterLoaded();
-	}
-	musicInit();
-	return readyToStart(() => initWebAudioAPIfromBase64(g_musicdata, _cacheKey));
-};
 
 // Base64から音声データに変換してWebAudioAPIで再生する準備
 const initWebAudioAPIfromBase64 = async (_base64, _cacheKey) => {
