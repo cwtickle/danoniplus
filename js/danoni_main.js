@@ -12036,10 +12036,10 @@ const loadAndSetupAudio = async (_url, _lblLoading) => {
 		return readyToStart(() => {
 			if (g_isFile) {
 				g_audio = new Audio();
-				g_audio.src = _url;
+				g_audio.src = audioUrl;
 				return musicAfterLoaded();
 			}
-			return initWebAudioAPIfromURL(_url);
+			return initWebAudioAPIfromURL(audioUrl);
 		});
 	}
 
