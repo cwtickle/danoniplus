@@ -11974,12 +11974,10 @@ const loadMusic = async () => {
 	divRoot.appendChild(lblLoading);
 
 	// 音源準備Promise(ローカル/オンライン双方を吸収)
-	const audioReadyPromise = g_isFile
-		? setAudio(url)
-		: loadMusicViaXhr(url, lblLoading);
+	const audioReadyPromise = loadAndSetupAudio(url, lblLoading);
 
-	// 譜面データ準備Promise(DOM削除処理は含まない)
-	const chartReadyPromise = loadChartFile();
+	// 譜面データ読込・変換処理Promise(g_audioに依存しない部分)
+	const chartReadyPromise = loadChartFile().then(() => prepareScoreData());
 
 	// 両方の完了を待つ
 	let loadSucceeded = true;
@@ -11993,17 +11991,30 @@ const loadMusic = async () => {
 	}
 
 	if (loadSucceeded) {
-		loadingScoreInit();
+		mainInit(); // 音源・譜面変換双方の完了後にまとめて呼ぶ
 	}
 };
 
 /**
- * XHRによる音源読み込み(Promise化)
+ * 音源の取得とセットアップ(ローカル/オンライン双方を吸収する橋渡し役)
  * @param {string} _url
  * @param {HTMLDivElement} _lblLoading
  * @returns {Promise<void>}
  */
-const loadMusicViaXhr = (_url, _lblLoading) => new Promise((resolve, reject) => {
+const loadAndSetupAudio = async (_url, _lblLoading) => {
+	const audioUrl = g_isFile ? _url : await fetchMusicBlobUrl(_url, _lblLoading);
+	// キャッシュキーは常に変化しない元のurlを使う(Blob URLは毎回一意になるため)
+	return setAudio(audioUrl, _url);
+};
+
+/**
+ * XHRによる音源ファイルのダウンロード(Promise化)
+ * - ダウンロードして Blob URL を返す
+ * @param {string} _url
+ * @param {HTMLDivElement} _lblLoading
+ * @returns {Promise<string>} Blob URL
+ */
+const fetchMusicBlobUrl = (_url, _lblLoading) => new Promise((resolve, reject) => {
 	const request = new XMLHttpRequest();
 	request.open(`GET`, _url, true);
 	request.responseType = `blob`;
@@ -12027,8 +12038,7 @@ const loadMusicViaXhr = (_url, _lblLoading) => new Promise((resolve, reject) => 
 			const blobUrl = URL.createObjectURL(request.response);
 			createEmptySprite(divRoot, `loader`, g_windowObj.loader);
 			_lblLoading.textContent = g_lblNameObj.pleaseWait;
-			// 読込用はblobUrl、キャッシュキーは変化しない元のurlを渡す
-			setAudio(blobUrl, _url).then(resolve).catch(reject);
+			resolve(blobUrl);
 		} else {
 			makeWarningWindow(`${g_msgInfoObj.E_0041.split('{0}').join(getFullPath(_url))}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
 			reject(new Error(`HTTP ${request.status}`));
@@ -12063,25 +12073,26 @@ const loadMusicViaXhr = (_url, _lblLoading) => new Promise((resolve, reject) => 
 });
 
 /**
- * 音楽データの設定
- * iOSの場合はAudioタグによる再生
- * @param {string} _url 
- * @param {string} _cacheKey 
+ * 音源のセットアップ
+ * - エンコード形式(base64)か通常の音声ファイルかを判定し、それぞれの準備処理に振り分ける
+ * - iOSの場合はユーザー操作(ジェスチャー)を待ってから再生準備を行う(readyToStart経由)
+ * @param {string} _url 音源の取得元URL(ローカルパス、または loadAndSetupAudio 経由のBlob URL)
+ * @param {string} [_cacheKey=_url] AudioBufferキャッシュ照合用のキー(常に変化しない楽曲の実URLを渡す)
+ * @returns {Promise<void>} 再生準備(canplaythrough相当)が完了したら解決するPromise
  */
 const setAudio = async (_url, _cacheKey = _url) => {
 
-	const loadMp3 = () => {
-		if (g_isFile) {
-			g_audio = new Audio();
-			g_audio.src = _url;
-			return musicAfterLoaded();
-		} else {
-			return initWebAudioAPIfromURL(_url);
+	/**
+	 * iOSの場合はユーザー操作(ジェスチャー)を待ってから_funcを実行する
+	 * - AudioContextの制約上、iOSはジェスチャーを起点にしないと音声再生が許可されないため
+	 * @param {() => Promise<void>} _func 実行する音源準備処理
+	 * @returns {Promise<void>}
+	 */
+	const readyToStart = _func => {
+		if (!g_isIos) {
+			return _func(); // 通常環境はそのまま実行するだけ
 		}
-	};
-
-	const readyToStart = _func => new Promise((resolve, reject) => {
-		if (g_isIos) {
+		return new Promise((resolve, reject) => {
 			g_currentPage = `loadingIos`;
 			lblLoading.textContent = `Click to Start!`;
 			divRoot.appendChild(makePlayButton(evt => {
@@ -12092,23 +12103,36 @@ const setAudio = async (_url, _cacheKey = _url) => {
 				_func().then(resolve).catch(reject);
 			}));
 			setShortcutEvent(g_currentPage);
-		} else {
-			_func().then(resolve).catch(reject);
-		}
-	});
+		});
+	};
 
-	if (g_musicEncodedFlg) {
-		await loadScript2(_url);
-		if (typeof musicInit === C_TYP_FUNCTION) {
-			musicInit();
-			return readyToStart(() => initWebAudioAPIfromBase64(g_musicdata, _cacheKey));
-		} else {
-			makeWarningWindow(g_msgInfoObj.E_0031);
+	/**
+	 * mp3等、非エンコード形式の音源準備
+	 * - ローカル実行時は Audio 要素で直接再生、オンライン時は WebAudioAPI 経由で取得・デコードする
+	 * @returns {Promise<void>}
+	 */
+	const loadMp3 = () => {
+		if (g_isFile) {
+			g_audio = new Audio();
+			g_audio.src = _url;
 			return musicAfterLoaded();
 		}
-	} else {
-		return readyToStart(() => loadMp3());
+		return initWebAudioAPIfromURL(_url);
+	};
+
+	// エンコードなしの場合
+	if (!g_musicEncodedFlg) {
+		return readyToStart(loadMp3);
 	}
+
+	// エンコードありの場合は、まずスクリプトを読み込む
+	await loadScript2(_url);
+	if (typeof musicInit !== C_TYP_FUNCTION) {
+		makeWarningWindow(g_msgInfoObj.E_0031);
+		return musicAfterLoaded();
+	}
+	musicInit();
+	return readyToStart(() => initWebAudioAPIfromBase64(g_musicdata, _cacheKey));
 };
 
 // Base64から音声データに変換してWebAudioAPIで再生する準備
@@ -12180,14 +12204,12 @@ const musicAfterLoaded = () => new Promise((resolve, reject) => {
 });
 
 /**
- * 読込画面初期化
+ * 譜面データの変換処理
+ * - 音源データの状態に依存しない部分のみを担う(g_audio非参照)
+ * - loadMusic経由(並行フロー)、loadingScoreInit経由(曲中リトライ)の両方から呼ばれる
  */
-const loadingScoreInit = async (_reloadChart = false) => {
+const prepareScoreData = () => {
 
-	// リトライ時のみ、譜面データの読み込みを行う
-	if (_reloadChart) {
-		await loadChartFile();
-	}
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 	g_headerObj.blankFrameDef = setVal(g_headerObj.blankFrameDefs[g_stateObj.scoreId], g_headerObj.blankFrameDefs[0]);
@@ -12335,7 +12357,16 @@ const loadingScoreInit = async (_reloadChart = false) => {
 
 	// ユーザカスタムイベント
 	safeExecuteCustomHooks(`g_customJsObj.loading`, g_customJsObj.loading);
+};
 
+/**
+ * 読込画面初期化
+ * - 曲中リトライ専用。loadMusic経由(初回起動)の並行フローとは別に、
+ *   譜面再読込からmainInitまでを一括で直列実行する。
+ */
+const loadingScoreInit = async () => {
+	await loadChartFile();
+	prepareScoreData();
 	mainInit();
 };
 
@@ -14949,7 +14980,7 @@ const mainInit = () => {
 				clearWindow();
 				try {
 					await musicAfterLoaded();
-					await loadingScoreInit(true); // 譜面データを再読込
+					await loadingScoreInit(); // 譜面データを再読込
 				} catch (e) {
 					console.warn(`Retry audio load error: ${e}`);
 				} finally {
@@ -16253,7 +16284,7 @@ const quickRetry = (_retryCondition) => {
 			clearWindow();
 			try {
 				await musicAfterLoaded();
-				await loadingScoreInit(true); // 譜面データを再読込
+				await loadingScoreInit(); // 譜面データを再読込
 			} catch (e) {
 				console.warn(`AutoRetry audio load error: ${e}`);
 			} finally {
