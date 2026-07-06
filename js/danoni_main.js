@@ -12032,6 +12032,7 @@ const loadAndSetupAudio = async (_url, _lblLoading) => {
 	const audioUrl = g_isFile ? _url : await fetchMusicBlobUrl(_url, _lblLoading);
 
 	// エンコードなしの場合
+	// - ファイルの場合はAudioタグで再生、オンラインの場合はWebAudioAPI(URL)で再生
 	if (!g_musicEncodedFlg) {
 		return readyToStart(() => {
 			if (g_isFile) {
@@ -12039,18 +12040,21 @@ const loadAndSetupAudio = async (_url, _lblLoading) => {
 				g_audio.src = audioUrl;
 				return musicAfterLoaded();
 			}
-			return initWebAudioAPIfromURL(audioUrl);
+			return setupWebAudio(async () => {
+				const response = await fetch(audioUrl);
+				return response.arrayBuffer();
+			}, _url);
 		});
 	}
 
-	// エンコードありの場合は、まずスクリプトを読み込む
+	// エンコードありの場合
 	await loadScript2(audioUrl);
 	if (typeof musicInit !== C_TYP_FUNCTION) {
-		makeWarningWindow(g_msgInfoObj.E_0031);
-		return musicAfterLoaded();
+		makeWarningWindow(g_msgInfoObj.E_0031, { backBtnUse: true });
+		throw new Error(`musicInit is not defined`);
 	}
 	musicInit();
-	return readyToStart(() => initWebAudioAPIfromBase64(g_musicdata, _url));
+	return readyToStart(() => setupWebAudio(() => Promise.resolve(base64ToUint8Array(g_musicdata).buffer), _url));
 };
 
 /**
@@ -12068,6 +12072,7 @@ const fetchMusicBlobUrl = (_url, _lblLoading) => new Promise((resolve, reject) =
 	const STALL_TIMEOUT_MS = 30000; // 30秒間、進捗がなければ停滞とみなす
 	let stallTimer = null;
 
+	// 停滞タイマーをリセット
 	const resetStallTimer = () => {
 		clearTimeout(stallTimer);
 		stallTimer = setTimeout(() => {
@@ -12118,16 +12123,21 @@ const fetchMusicBlobUrl = (_url, _lblLoading) => new Promise((resolve, reject) =
 	request.send();
 });
 
-// Base64から音声データに変換してWebAudioAPIで再生する準備
-const initWebAudioAPIfromBase64 = async (_base64, _cacheKey) => {
+/**
+ * WebAudioAPIによる音源再生の準備(共通処理)
+ * @param {() => Promise<ArrayBuffer>} _fetchArrayBuffer
+ * @param {string} [_cacheKey]
+ * @returns {Promise<void>}
+ */
+const setupWebAudio = async (_fetchArrayBuffer, _cacheKey) => {
 	g_audio = new AudioPlayer();
 	const loadedPromise = musicAfterLoaded(); // canplaythrough/errorの発火をここで待つ
 
 	if (_cacheKey && g_audioBufferCache.has(_cacheKey)) {
 		g_audio.setBuffer(g_audioBufferCache.get(_cacheKey)); // デコード完全スキップ
 	} else {
-		const array = base64ToUint8Array(_base64);
-		await g_audio.init(array.buffer);
+		const arrayBuffer = await _fetchArrayBuffer();
+		await g_audio.init(arrayBuffer);
 		if (_cacheKey) {
 			cacheAudioBuffer(_cacheKey, g_audio.getBuffer());
 		}
@@ -12135,19 +12145,15 @@ const initWebAudioAPIfromBase64 = async (_base64, _cacheKey) => {
 	return loadedPromise;
 };
 
-// 音声ファイルを読み込んでWebAudioAPIで再生する準備
-const initWebAudioAPIfromURL = async (_url) => {
-	g_audio = new AudioPlayer();
-	const loadedPromise = musicAfterLoaded();
-	const promise = await fetch(_url);
-	const arrayBuffer = await promise.arrayBuffer();
-	await g_audio.init(arrayBuffer);
-	return loadedPromise;
-};
-
 const g_audioBufferCache = new Map();
 const AUDIO_CACHE_MAX = 5;
 
+/**
+ * デコード済みAudioBufferのキャッシュへの登録
+ * - 直近 AUDIO_CACHE_MAX 件を保持するLRU方式。上限を超えた場合は最も古いエントリから破棄する
+ * @param {string} _key キャッシュキー(楽曲の実URL)
+ * @param {AudioBuffer} _buffer デコード済みのAudioBuffer
+ */
 const cacheAudioBuffer = (_key, _buffer) => {
 	g_audioBufferCache.set(_key, _buffer);
 	if (g_audioBufferCache.size > AUDIO_CACHE_MAX) {
@@ -12155,6 +12161,13 @@ const cacheAudioBuffer = (_key, _buffer) => {
 	}
 };
 
+/**
+ * base64文字列をUint8Arrayに変換
+ * - Uint8Array.from(atob(str), callback)によるコールバック呼び出し形式は
+ *   大容量データで変換オーバーヘッドが大きいため、forループによる直接代入で高速化している
+ * @param {string} _base64Str base64エンコードされた文字列
+ * @returns {Uint8Array} 変換後のバイト配列
+ */
 const base64ToUint8Array = (_base64Str) => {
 	const binaryStr = atob(_base64Str);
 	const len = binaryStr.length;
@@ -12165,6 +12178,13 @@ const base64ToUint8Array = (_base64Str) => {
 	return array;
 };
 
+/**
+ * 音源の再生準備完了を待つ
+ * - g_audio が Audio要素の場合は canplaythrough/error イベントの発火を待つ
+ * - g_audio が AudioPlayer の場合、readyState が既に4(デコード済み、キャッシュヒット時など)であれば即時解決する
+ * - canplaythrough/error のどちらが発火しても、もう一方のリスナーも確実に削除する(cleanup)
+ * @returns {Promise<void>} 再生準備が完了したら解決し、読込エラー時は例外を投げて拒否するPromise
+ */
 const musicAfterLoaded = () => new Promise((resolve, reject) => {
 	g_audio.load();
 
