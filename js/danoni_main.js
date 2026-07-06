@@ -12182,10 +12182,12 @@ const musicAfterLoaded = () => new Promise((resolve, reject) => {
 /**
  * 読込画面初期化
  */
-const loadingScoreInit = async () => {
+const loadingScoreInit = async (_reloadChart = false) => {
 
-	// 譜面データの読み込み
-	await loadChartFile();
+	// リトライ時のみ、譜面データの読み込みを行う
+	if (_reloadChart) {
+		await loadChartFile();
+	}
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 	g_headerObj.blankFrameDef = setVal(g_headerObj.blankFrameDefs[g_stateObj.scoreId], g_headerObj.blankFrameDefs[0]);
@@ -14950,7 +14952,7 @@ const mainInit = () => {
 				clearWindow();
 				try {
 					await musicAfterLoaded();
-					loadingScoreInit();
+					await loadingScoreInit(true); // 譜面データを再読込
 				} catch (e) {
 					console.warn(`Retry audio load error: ${e}`);
 				} finally {
@@ -16248,11 +16250,16 @@ const quickRetry = (_retryCondition) => {
 	}
 	if (g_settings.autoRetryNum >= retryNum && !g_workObj.autoRetryFlg) {
 		g_workObj.autoRetryFlg = true;
-		setTimeout(() => {
+		setTimeout(async () => {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
 			clearWindow();
-			musicAfterLoaded();
+			try {
+				await musicAfterLoaded();
+				await loadingScoreInit(true); // 譜面データを再読込
+			} catch (e) {
+				console.warn(`AutoRetry audio load error: ${e}`);
+			}
 		}, 16);
 	}
 };
