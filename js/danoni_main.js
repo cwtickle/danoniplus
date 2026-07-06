@@ -12094,6 +12094,9 @@ const setAudio = async (_url, _cacheKey = _url) => {
 		}
 		return new Promise((resolve, reject) => {
 			g_currentPage = `loadingIos`;
+			if (document.getElementById(`lblLoading`) === null) {
+				divRoot.appendChild(getLoadingLabel());
+			}
 			lblLoading.textContent = `Click to Start!`;
 			divRoot.appendChild(makePlayButton(evt => {
 				getSharedAudioContext().resume();
