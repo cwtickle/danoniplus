@@ -14294,9 +14294,6 @@ const getArrowSettings = () => {
 		g_workObj.frzReturnTimerId = null;
 	}
 
-	// AutoRetryの初期化
-	g_workObj.autoRetryFlg = false;
-
 	// Camoufrageの設定
 	if (g_stateObj.camoufrage !== C_FLG_OFF) {
 
@@ -16248,8 +16245,8 @@ const quickRetry = (_retryCondition) => {
 	if (retryNum < 0) {
 		return;
 	}
-	if (g_settings.autoRetryNum >= retryNum && !g_workObj.autoRetryFlg) {
-		g_workObj.autoRetryFlg = true;
+	if (g_settings.autoRetryNum >= retryNum && !g_retryInProgress) {
+		g_retryInProgress = true;
 		setTimeout(async () => {
 			g_audio.pause();
 			clearTimeout(g_timeoutEvtId);
@@ -16259,6 +16256,8 @@ const quickRetry = (_retryCondition) => {
 				await loadingScoreInit(true); // 譜面データを再読込
 			} catch (e) {
 				console.warn(`AutoRetry audio load error: ${e}`);
+			} finally {
+				g_retryInProgress = false;
 			}
 		}, 16);
 	}
