@@ -6393,9 +6393,10 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	if (encodeFlg) {
 		try {
 			closeExistingAudio();
-			if (g_audioBufferCache.has(url)) {
+			const cachedBuffer = getAudioBufferFromCache(url);
+			if (cachedBuffer !== undefined) {
 				const tmpAudio = new AudioPlayer();
-				tmpAudio.setBuffer(g_audioBufferCache.get(url)); // 新設メソッド、decode不要
+				tmpAudio.setBuffer(cachedBuffer);
 				g_audioForMS = tmpAudio;
 			} else {
 				await loadScript2(url);
@@ -12154,8 +12155,9 @@ const setupWebAudio = async (_fetchArrayBuffer, _cacheKey) => {
 	g_audio = new AudioPlayer();
 	const loadedPromise = musicAfterLoaded(); // canplaythrough/errorの発火をここで待つ
 
-	if (_cacheKey && g_audioBufferCache.has(_cacheKey)) {
-		g_audio.setBuffer(g_audioBufferCache.get(_cacheKey)); // デコード完全スキップ
+	const cachedBuffer = _cacheKey ? getAudioBufferFromCache(_cacheKey) : undefined;
+	if (cachedBuffer !== undefined) {
+		g_audio.setBuffer(cachedBuffer);
 	} else {
 		const arrayBuffer = await _fetchArrayBuffer();
 		await g_audio.init(arrayBuffer);
@@ -12168,6 +12170,23 @@ const setupWebAudio = async (_fetchArrayBuffer, _cacheKey) => {
 
 const g_audioBufferCache = new Map();
 const AUDIO_CACHE_MAX = 5;
+
+/**
+ * デコード済みAudioBufferのキャッシュからの取得
+ * - Mapは挿入順を保持するのみでアクセス順を保持しないため、
+ *   ヒット時にエントリを一度削除して再挿入し、最新として扱う(LRU方式)
+ * @param {string} _key キャッシュキー(楽曲の実URL)
+ * @returns {AudioBuffer|undefined} キャッシュされたAudioBuffer。存在しない場合はundefined
+ */
+const getAudioBufferFromCache = (_key) => {
+	if (!g_audioBufferCache.has(_key)) {
+		return undefined;
+	}
+	const buffer = g_audioBufferCache.get(_key);
+	g_audioBufferCache.delete(_key);
+	g_audioBufferCache.set(_key, buffer); // 末尾(最新)に再挿入
+	return buffer;
+};
 
 /**
  * デコード済みAudioBufferのキャッシュへの登録
