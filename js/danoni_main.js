@@ -2064,10 +2064,9 @@ const makeBgCanvas = (_ctx, { w = g_sWidth, h = g_sHeight } = {}) => {
  * - divオブジェクト(ボタンなど)はdivRoot配下で管理しているため、子要素のみを全削除している。
  * - dicRoot自体を削除しないよう注意すること。
  * - 再描画時に共通で表示する箇所はここで指定している。
- * @param {boolean} [_redrawFlg=false] 画面横幅を再定義し、Canvas背景を再描画するかどうか
  * @param {string} [_customDisplayName=''] 画面名(メイン画面: 'Main', それ以外: 空)
  */
-const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
+const clearWindow = (_customDisplayName = ``) => {
 	closeDisplayPreview();
 	resetKeyControl();
 	resetTransform();
@@ -2114,37 +2113,33 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 			getLayerWithClear(`layer2`);
 		}
 
-		if (_redrawFlg) {
-			// 画面背景を指定 (background-color)
-			$id(`canvas-frame`).width = wUnit(g_sWidth + diffX);
-			layer0.width = g_sWidth + diffX;
-			if (!g_headerObj[`customBack${_customDisplayName}Use`]) {
-				makeBgCanvas(l0ctx, { w: g_sWidth + diffX });
-			}
+		// 画面背景を指定 (background-color)
+		$id(`canvas-frame`).width = wUnit(g_sWidth + diffX);
+		layer0.width = g_sWidth + diffX;
+		if (!g_headerObj[`customBack${_customDisplayName}Use`]) {
+			makeBgCanvas(l0ctx, { w: g_sWidth + diffX });
 		}
 	}
 
 	// 背景を再描画
-	if (_redrawFlg) {
-		g_btnAddFunc = {};
-		g_btnDeleteFlg = {};
-		g_cxtAddFunc = {};
-		g_cxtDeleteFlg = {};
+	g_btnAddFunc = {};
+	g_btnDeleteFlg = {};
+	g_cxtAddFunc = {};
+	g_cxtDeleteFlg = {};
 
-		if (document.getElementById(`layer0`) === null ||
-			(!g_headerObj[`customBack${_customDisplayName}Use`] && !g_headerObj.defaultSkinFlg)) {
+	if (document.getElementById(`layer0`) === null ||
+		(!g_headerObj[`customBack${_customDisplayName}Use`] && !g_headerObj.defaultSkinFlg)) {
 
-			$id(`canvas-frame`).width = wUnit(g_sWidth + diffX);
-			createEmptySprite(divRoot, `divBack`, { w: g_sWidth + diffX });
-		}
-
-		// CSSスタイルの初期化
-		Object.keys(g_cssBkProperties).forEach(prop =>
-			document.documentElement.style.setProperty(prop, g_cssBkProperties[prop]));
-
-		Object.keys(g_headerObj).filter(val => val.startsWith(`--`) && hasVal(g_headerObj[val])).forEach(prop =>
-			document.documentElement.style.setProperty(prop, getCssCustomProperty(prop, g_headerObj[prop])));
+		$id(`canvas-frame`).width = wUnit(g_sWidth + diffX);
+		createEmptySprite(divRoot, `divBack`, { w: g_sWidth + diffX });
 	}
+
+	// CSSスタイルの初期化
+	Object.keys(g_cssBkProperties).forEach(prop =>
+		document.documentElement.style.setProperty(prop, g_cssBkProperties[prop]));
+
+	Object.keys(g_headerObj).filter(val => val.startsWith(`--`) && hasVal(g_headerObj[val])).forEach(prop =>
+		document.documentElement.style.setProperty(prop, getCssCustomProperty(prop, g_headerObj[prop])));
 };
 
 /**
@@ -5662,7 +5657,7 @@ const setKeyDfVal = _ptnName => {
  */
 const titleInit = (_initFlg = false) => {
 
-	clearWindow(true);
+	clearWindow();
 	g_currentPage = `title`;
 	g_stateObj.settingSummaryVisible = false;
 
@@ -6393,9 +6388,10 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 	if (encodeFlg) {
 		try {
 			closeExistingAudio();
-			if (g_audioBufferCache.has(url)) {
+			const cachedBuffer = getAudioBufferFromCache(url);
+			if (cachedBuffer !== undefined) {
 				const tmpAudio = new AudioPlayer();
-				tmpAudio.setBuffer(g_audioBufferCache.get(url)); // 新設メソッド、decode不要
+				tmpAudio.setBuffer(cachedBuffer);
 				g_audioForMS = tmpAudio;
 			} else {
 				await loadScript2(url);
@@ -6670,7 +6666,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x
 /*-----------------------------------------------------------*/
 
 const dataMgtInit = () => {
-	clearWindow(true);
+	clearWindow();
 	pauseBGM();
 	const prevPage = g_currentPage;
 	g_currentPage = `dataMgt`;
@@ -6908,7 +6904,7 @@ const dataMgtInit = () => {
 /*-----------------------------------------------------------*/
 
 const preconditionInit = () => {
-	clearWindow(true);
+	clearWindow();
 	pauseBGM();
 	const prevPage = g_currentPage;
 	g_currentPage = `precondition`;
@@ -7136,7 +7132,7 @@ const makePlayButton = _func => createCss2Button(`btnPlay`, g_lblNameObj.b_play,
  */
 const optionInit = () => {
 
-	clearWindow(true);
+	clearWindow();
 	pauseBGM();
 	const divRoot = document.getElementById(`divRoot`);
 	g_currentPage = `option`;
@@ -9214,7 +9210,7 @@ const resetGroupList = (_type, _keyCtrlPtn) => {
 
 const settingsDisplayInit = () => {
 
-	clearWindow(true);
+	clearWindow();
 	const divRoot = document.getElementById(`divRoot`);
 	g_currentPage = `settingsDisplay`;
 
@@ -10021,7 +10017,7 @@ const interlockingButton = (_headerObj, _name, _current, _next, _buttonFlg = fal
 /*-----------------------------------------------------------*/
 
 const exSettingInit = () => {
-	clearWindow(true);
+	clearWindow();
 	g_currentPage = `exSetting`;
 
 	multiAppend(divRoot,
@@ -10182,7 +10178,7 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
  */
 const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 
-	clearWindow(true);
+	clearWindow();
 	const divRoot = document.getElementById(`divRoot`);
 	g_kcType = _kcType;
 	g_currentPage = `keyConfig`;
@@ -11960,7 +11956,7 @@ const changeShuffleConfigColor = (_keyCtrlPtn, _vals, _j = -1) => {
 
 const loadMusic = async () => {
 
-	clearWindow(true);
+	clearWindow();
 	pauseBGM();
 	g_currentPage = `loading`;
 
@@ -11996,22 +11992,93 @@ const loadMusic = async () => {
 };
 
 /**
- * 音源の取得とセットアップ(ローカル/オンライン双方を吸収する橋渡し役)
- * @param {string} _url
- * @param {HTMLDivElement} _lblLoading
- * @returns {Promise<void>}
+ * 音源の取得とセットアップ
+ * - エンコード形式(base64)か通常の音声ファイルかを判定し、それぞれの準備処理に振り分ける
+ * - iOSの場合はユーザー操作(ジェスチャー)を待ってから再生準備を行う(readyToStart経由)
+ * - キャッシュヒット時はダウンロード自体を行わないよう、取得処理はsetupWebAudioへ
+ *   コールバックとして渡し、キャッシュミス時にのみ評価されるようにしている
+ * @param {string} _url 音源の取得元URL
+ * @param {HTMLDivElement} _lblLoading ローディング表示用のDiv要素
+ * @returns {Promise<void>} 再生準備(canplaythrough相当)が完了したら解決するPromise
  */
 const loadAndSetupAudio = async (_url, _lblLoading) => {
-	const audioUrl = g_isFile ? _url : await fetchMusicBlobUrl(_url, _lblLoading);
-	// キャッシュキーは常に変化しない元のurlを使う(Blob URLは毎回一意になるため)
-	return setAudio(audioUrl, _url);
+
+	/**
+	 * iOSの場合はユーザー操作(ジェスチャー)を待ってから_funcを実行する
+	 * - AudioContextの制約上、iOSはジェスチャーを起点にしないと音声再生が許可されないため
+	 * @param {() => Promise<void>} _func 実行する音源準備処理
+	 * @returns {Promise<void>}
+	 */
+	const readyToStart = _func => {
+		if (!g_isIos) {
+			return _func(); // 通常環境はそのまま実行するだけ
+		}
+		return new Promise((resolve, reject) => {
+			g_currentPage = `loadingIos`;
+			_lblLoading.textContent = `Click to Start!`;
+			divRoot.appendChild(makePlayButton(evt => {
+				getSharedAudioContext().resume();
+				g_currentPage = `loading`;
+				resetKeyControl();
+				divRoot.removeChild(evt.target);
+				_func().then(resolve).catch(reject);
+			}));
+			setShortcutEvent(g_currentPage);
+		});
+	};
+
+	// 音源準備処理そのものを、条件に応じて組み立てる
+	const setupAudioFunc = (() => {
+
+		// エンコードなし & ローカル実行: Audio要素で直接再生
+		if (!g_musicEncodedFlg && g_isFile) {
+			return () => {
+				g_audio = new Audio();
+				g_audio.src = _url;
+				return musicAfterLoaded();
+			};
+		}
+
+		// エンコードなし & オンライン: WebAudioAPI経由(URLからfetch)
+		if (!g_musicEncodedFlg) {
+			return () => setupWebAudio(async () => {
+				const blobUrl = await fetchMusicBlobUrl(_url, _lblLoading);
+				try {
+					const response = await fetch(blobUrl);
+					return await response.arrayBuffer();
+				} finally {
+					URL.revokeObjectURL(blobUrl);
+				}
+			}, _url);
+		}
+
+		// エンコードあり: スクリプト読込・musicInit実行を経てWebAudioAPI準備
+		return () => setupWebAudio(async () => {
+			const scriptSrc = g_isFile ? _url : await fetchMusicBlobUrl(_url, _lblLoading);
+			try {
+				await loadScript2(scriptSrc);
+			} finally {
+				if (!g_isFile) {
+					URL.revokeObjectURL(scriptSrc);
+				}
+			}
+			if (typeof musicInit !== C_TYP_FUNCTION) {
+				makeWarningWindow(g_msgInfoObj.E_0031, { backBtnUse: true });
+				throw new Error(`musicInit is not defined`);
+			}
+			musicInit();
+			return base64ToUint8Array(g_musicdata).buffer;
+		}, _url);
+	})();
+
+	return readyToStart(setupAudioFunc);
 };
 
 /**
  * XHRによる音源ファイルのダウンロード(Promise化)
  * - ダウンロードして Blob URL を返す
- * @param {string} _url
- * @param {HTMLDivElement} _lblLoading
+ * @param {string} _url 音源ファイルのURL
+ * @param {HTMLDivElement} _lblLoading ローディング表示用のDiv要素
  * @returns {Promise<string>} Blob URL
  */
 const fetchMusicBlobUrl = (_url, _lblLoading) => new Promise((resolve, reject) => {
@@ -12022,6 +12089,7 @@ const fetchMusicBlobUrl = (_url, _lblLoading) => new Promise((resolve, reject) =
 	const STALL_TIMEOUT_MS = 30000; // 30秒間、進捗がなければ停滞とみなす
 	let stallTimer = null;
 
+	// 停滞タイマーをリセット
 	const resetStallTimer = () => {
 		clearTimeout(stallTimer);
 		stallTimer = setTimeout(() => {
@@ -12073,81 +12141,23 @@ const fetchMusicBlobUrl = (_url, _lblLoading) => new Promise((resolve, reject) =
 });
 
 /**
- * 音源のセットアップ
- * - エンコード形式(base64)か通常の音声ファイルかを判定し、それぞれの準備処理に振り分ける
- * - iOSの場合はユーザー操作(ジェスチャー)を待ってから再生準備を行う(readyToStart経由)
- * @param {string} _url 音源の取得元URL(ローカルパス、または loadAndSetupAudio 経由のBlob URL)
- * @param {string} [_cacheKey=_url] AudioBufferキャッシュ照合用のキー(常に変化しない楽曲の実URLを渡す)
+ * WebAudioAPIによる音源再生の準備(共通処理)
+ * - AudioPlayerを生成し、canplaythrough/errorの発火待ちを開始した上で、
+ *   ArrayBufferを取得してデコードする(キャッシュヒット時はデコードをスキップ)
+ * @param {() => Promise<ArrayBuffer>} _fetchArrayBuffer 未キャッシュの場合にArrayBufferを取得する関数
+ * @param {string} [_cacheKey] AudioBufferキャッシュ照合用のキー(省略時はキャッシュを使わない)
  * @returns {Promise<void>} 再生準備(canplaythrough相当)が完了したら解決するPromise
  */
-const setAudio = async (_url, _cacheKey = _url) => {
-
-	/**
-	 * iOSの場合はユーザー操作(ジェスチャー)を待ってから_funcを実行する
-	 * - AudioContextの制約上、iOSはジェスチャーを起点にしないと音声再生が許可されないため
-	 * @param {() => Promise<void>} _func 実行する音源準備処理
-	 * @returns {Promise<void>}
-	 */
-	const readyToStart = _func => {
-		if (!g_isIos) {
-			return _func(); // 通常環境はそのまま実行するだけ
-		}
-		return new Promise((resolve, reject) => {
-			g_currentPage = `loadingIos`;
-			if (document.getElementById(`lblLoading`) === null) {
-				divRoot.appendChild(getLoadingLabel());
-			}
-			lblLoading.textContent = `Click to Start!`;
-			divRoot.appendChild(makePlayButton(evt => {
-				getSharedAudioContext().resume();
-				g_currentPage = `loading`;
-				resetKeyControl();
-				divRoot.removeChild(evt.target);
-				_func().then(resolve).catch(reject);
-			}));
-			setShortcutEvent(g_currentPage);
-		});
-	};
-
-	/**
-	 * mp3等、非エンコード形式の音源準備
-	 * - ローカル実行時は Audio 要素で直接再生、オンライン時は WebAudioAPI 経由で取得・デコードする
-	 * @returns {Promise<void>}
-	 */
-	const loadMp3 = () => {
-		if (g_isFile) {
-			g_audio = new Audio();
-			g_audio.src = _url;
-			return musicAfterLoaded();
-		}
-		return initWebAudioAPIfromURL(_url);
-	};
-
-	// エンコードなしの場合
-	if (!g_musicEncodedFlg) {
-		return readyToStart(loadMp3);
-	}
-
-	// エンコードありの場合は、まずスクリプトを読み込む
-	await loadScript2(_url);
-	if (typeof musicInit !== C_TYP_FUNCTION) {
-		makeWarningWindow(g_msgInfoObj.E_0031);
-		return musicAfterLoaded();
-	}
-	musicInit();
-	return readyToStart(() => initWebAudioAPIfromBase64(g_musicdata, _cacheKey));
-};
-
-// Base64から音声データに変換してWebAudioAPIで再生する準備
-const initWebAudioAPIfromBase64 = async (_base64, _cacheKey) => {
+const setupWebAudio = async (_fetchArrayBuffer, _cacheKey) => {
 	g_audio = new AudioPlayer();
 	const loadedPromise = musicAfterLoaded(); // canplaythrough/errorの発火をここで待つ
 
-	if (_cacheKey && g_audioBufferCache.has(_cacheKey)) {
-		g_audio.setBuffer(g_audioBufferCache.get(_cacheKey)); // デコード完全スキップ
+	const cachedBuffer = _cacheKey ? getAudioBufferFromCache(_cacheKey) : undefined;
+	if (cachedBuffer !== undefined) {
+		g_audio.setBuffer(cachedBuffer);
 	} else {
-		const array = base64ToUint8Array(_base64);
-		await g_audio.init(array.buffer);
+		const arrayBuffer = await _fetchArrayBuffer();
+		await g_audio.init(arrayBuffer);
 		if (_cacheKey) {
 			cacheAudioBuffer(_cacheKey, g_audio.getBuffer());
 		}
@@ -12155,19 +12165,32 @@ const initWebAudioAPIfromBase64 = async (_base64, _cacheKey) => {
 	return loadedPromise;
 };
 
-// 音声ファイルを読み込んでWebAudioAPIで再生する準備
-const initWebAudioAPIfromURL = async (_url) => {
-	g_audio = new AudioPlayer();
-	const loadedPromise = musicAfterLoaded();
-	const promise = await fetch(_url);
-	const arrayBuffer = await promise.arrayBuffer();
-	await g_audio.init(arrayBuffer);
-	return loadedPromise;
-};
-
 const g_audioBufferCache = new Map();
 const AUDIO_CACHE_MAX = 5;
 
+/**
+ * デコード済みAudioBufferのキャッシュからの取得
+ * - Mapは挿入順を保持するのみでアクセス順を保持しないため、
+ *   ヒット時にエントリを一度削除して再挿入し、最新として扱う(LRU方式)
+ * @param {string} _key キャッシュキー(楽曲の実URL)
+ * @returns {AudioBuffer|undefined} キャッシュされたAudioBuffer。存在しない場合はundefined
+ */
+const getAudioBufferFromCache = (_key) => {
+	if (!g_audioBufferCache.has(_key)) {
+		return undefined;
+	}
+	const buffer = g_audioBufferCache.get(_key);
+	g_audioBufferCache.delete(_key);
+	g_audioBufferCache.set(_key, buffer); // 末尾(最新)に再挿入
+	return buffer;
+};
+
+/**
+ * デコード済みAudioBufferのキャッシュへの登録
+ * - 直近 AUDIO_CACHE_MAX 件を保持するLRU方式。上限を超えた場合は最も古いエントリから破棄する
+ * @param {string} _key キャッシュキー(楽曲の実URL)
+ * @param {AudioBuffer} _buffer デコード済みのAudioBuffer
+ */
 const cacheAudioBuffer = (_key, _buffer) => {
 	g_audioBufferCache.set(_key, _buffer);
 	if (g_audioBufferCache.size > AUDIO_CACHE_MAX) {
@@ -12175,6 +12198,13 @@ const cacheAudioBuffer = (_key, _buffer) => {
 	}
 };
 
+/**
+ * base64文字列をUint8Arrayに変換
+ * - Uint8Array.from(atob(str), callback)によるコールバック呼び出し形式は
+ *   大容量データで変換オーバーヘッドが大きいため、forループによる直接代入で高速化している
+ * @param {string} _base64Str base64エンコードされた文字列
+ * @returns {Uint8Array} 変換後のバイト配列
+ */
 const base64ToUint8Array = (_base64Str) => {
 	const binaryStr = atob(_base64Str);
 	const len = binaryStr.length;
@@ -12185,6 +12215,13 @@ const base64ToUint8Array = (_base64Str) => {
 	return array;
 };
 
+/**
+ * 音源の再生準備完了を待つ
+ * - g_audio が Audio要素の場合は canplaythrough/error イベントの発火を待つ
+ * - g_audio が AudioPlayer の場合、readyState が既に4(デコード済み、キャッシュヒット時など)であれば即時解決する
+ * - canplaythrough/error のどちらが発火しても、もう一方のリスナーも確実に削除する(cleanup)
+ * @returns {Promise<void>} 再生準備が完了したら解決し、読込エラー時は例外を投げて拒否するPromise
+ */
 const musicAfterLoaded = () => new Promise((resolve, reject) => {
 	g_audio.load();
 
@@ -12209,7 +12246,7 @@ const musicAfterLoaded = () => new Promise((resolve, reject) => {
 /**
  * 譜面データの変換処理
  * - 音源データの状態に依存しない部分のみを担う(g_audio非参照)
- * - loadMusic経由(並行フロー)、loadingScoreInit経由(曲中リトライ)の両方から呼ばれる
+ * - loadMusic経由(並行フロー)、executeRetry経由(曲中リトライ)の両方から呼ばれる
  */
 const prepareScoreData = () => {
 
@@ -12360,17 +12397,6 @@ const prepareScoreData = () => {
 
 	// ユーザカスタムイベント
 	safeExecuteCustomHooks(`g_customJsObj.loading`, g_customJsObj.loading);
-};
-
-/**
- * 読込画面初期化
- * - 曲中リトライ専用。loadMusic経由(初回起動)の並行フローとは別に、
- *   譜面再読込からmainInitまでを一括で直列実行する。
- */
-const loadingScoreInit = async () => {
-	await loadChartFile();
-	prepareScoreData();
-	mainInit();
 };
 
 /**
@@ -14504,7 +14530,7 @@ const setKeyCtrl = (_localStorage, _keyNum, _keyCtrlPtn) => {
  * メイン画面初期化
  */
 const mainInit = () => {
-	clearWindow(true, `Main`);
+	clearWindow(`Main`);
 	const divRoot = document.getElementById(`divRoot`);
 	document.oncontextmenu = () => false;
 	g_currentPage = `main`;
@@ -14969,26 +14995,16 @@ const mainInit = () => {
 
 		// 曲中リトライ、タイトルバック
 		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
-			g_audio.pause();
-			clearTimeout(g_timeoutEvtId);
 
 			if (g_isMac && keyIsShift()) {
 				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
+				g_audio.pause();
+				clearTimeout(g_timeoutEvtId);
 				titleInit();
 
 			} else {
 				// その他の環境では単にRetryに対応するキーのみで適用
-				if (g_retryInProgress) return blockCode(setCode);
-				g_retryInProgress = true;
-				clearWindow();
-				try {
-					await musicAfterLoaded();
-					await loadingScoreInit(); // 譜面データを再読込
-				} catch (e) {
-					console.warn(`Retry audio load error: ${e}`);
-				} finally {
-					g_retryInProgress = false;
-				}
+				await executeRetry(`Retry`);
 			}
 
 		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
@@ -16271,6 +16287,32 @@ const executeFrzReturn = (_seq, _idx, _axis) => {
 };
 
 /**
+ * 曲中リトライの共通処理
+ * - 手動リトライ、AutoRetryの両方から呼ばれる
+ * - g_retryInProgressによる多重実行防止、失敗時のログ出力・フラグ復帰を一括で行う
+ * @param {string} [_logLabel='Retry'] エラーログに表示するラベル(手動/自動の区別用)
+ */
+const executeRetry = async (_logLabel = `Retry`) => {
+	if (g_retryInProgress) {
+		return;
+	}
+	g_retryInProgress = true;
+	try {
+		g_audio.pause();
+		clearTimeout(g_timeoutEvtId);
+		clearWindow(`Main`);
+		await musicAfterLoaded();
+		await loadChartFile();
+		prepareScoreData();
+		mainInit();
+	} catch (e) {
+		console.warn(`${_logLabel} audio load error: ${e}`);
+	} finally {
+		g_retryInProgress = false;
+	}
+};
+
+/**
  * AutoRetryの設定
  * @param {string} _retryCondition リトライ基準となるAutoRetry名
  */
@@ -16280,19 +16322,8 @@ const quickRetry = (_retryCondition) => {
 		return;
 	}
 	if (g_settings.autoRetryNum >= retryNum && !g_retryInProgress) {
-		g_retryInProgress = true;
 		setTimeout(async () => {
-			g_audio.pause();
-			clearTimeout(g_timeoutEvtId);
-			clearWindow();
-			try {
-				await musicAfterLoaded();
-				await loadingScoreInit(); // 譜面データを再読込
-			} catch (e) {
-				console.warn(`AutoRetry audio load error: ${e}`);
-			} finally {
-				g_retryInProgress = false;
-			}
+			await executeRetry(`AutoRetry`);
 		}, 16);
 	}
 };
@@ -16893,7 +16924,7 @@ const finishViewing = () => {
  */
 const resultInit = () => {
 
-	clearWindow(true);
+	clearWindow();
 	g_currentPage = `result`;
 
 	// 結果画面用フレーム初期化
