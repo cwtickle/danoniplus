@@ -2064,10 +2064,9 @@ const makeBgCanvas = (_ctx, { w = g_sWidth, h = g_sHeight } = {}) => {
  * - divオブジェクト(ボタンなど)はdivRoot配下で管理しているため、子要素のみを全削除している。
  * - dicRoot自体を削除しないよう注意すること。
  * - 再描画時に共通で表示する箇所はここで指定している。
- * @param {boolean} [_redrawFlg=false] 画面横幅を再定義し、Canvas背景を再描画するかどうか
  * @param {string} [_customDisplayName=''] 画面名(メイン画面: 'Main', それ以外: 空)
  */
-const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
+const clearWindow = (_customDisplayName = ``) => {
 	closeDisplayPreview();
 	resetKeyControl();
 	resetTransform();
@@ -2114,37 +2113,33 @@ const clearWindow = (_redrawFlg = false, _customDisplayName = ``) => {
 			getLayerWithClear(`layer2`);
 		}
 
-		if (_redrawFlg) {
-			// 画面背景を指定 (background-color)
-			$id(`canvas-frame`).width = wUnit(g_sWidth + diffX);
-			layer0.width = g_sWidth + diffX;
-			if (!g_headerObj[`customBack${_customDisplayName}Use`]) {
-				makeBgCanvas(l0ctx, { w: g_sWidth + diffX });
-			}
+		// 画面背景を指定 (background-color)
+		$id(`canvas-frame`).width = wUnit(g_sWidth + diffX);
+		layer0.width = g_sWidth + diffX;
+		if (!g_headerObj[`customBack${_customDisplayName}Use`]) {
+			makeBgCanvas(l0ctx, { w: g_sWidth + diffX });
 		}
 	}
 
 	// 背景を再描画
-	if (_redrawFlg) {
-		g_btnAddFunc = {};
-		g_btnDeleteFlg = {};
-		g_cxtAddFunc = {};
-		g_cxtDeleteFlg = {};
+	g_btnAddFunc = {};
+	g_btnDeleteFlg = {};
+	g_cxtAddFunc = {};
+	g_cxtDeleteFlg = {};
 
-		if (document.getElementById(`layer0`) === null ||
-			(!g_headerObj[`customBack${_customDisplayName}Use`] && !g_headerObj.defaultSkinFlg)) {
+	if (document.getElementById(`layer0`) === null ||
+		(!g_headerObj[`customBack${_customDisplayName}Use`] && !g_headerObj.defaultSkinFlg)) {
 
-			$id(`canvas-frame`).width = wUnit(g_sWidth + diffX);
-			createEmptySprite(divRoot, `divBack`, { w: g_sWidth + diffX });
-		}
-
-		// CSSスタイルの初期化
-		Object.keys(g_cssBkProperties).forEach(prop =>
-			document.documentElement.style.setProperty(prop, g_cssBkProperties[prop]));
-
-		Object.keys(g_headerObj).filter(val => val.startsWith(`--`) && hasVal(g_headerObj[val])).forEach(prop =>
-			document.documentElement.style.setProperty(prop, getCssCustomProperty(prop, g_headerObj[prop])));
+		$id(`canvas-frame`).width = wUnit(g_sWidth + diffX);
+		createEmptySprite(divRoot, `divBack`, { w: g_sWidth + diffX });
 	}
+
+	// CSSスタイルの初期化
+	Object.keys(g_cssBkProperties).forEach(prop =>
+		document.documentElement.style.setProperty(prop, g_cssBkProperties[prop]));
+
+	Object.keys(g_headerObj).filter(val => val.startsWith(`--`) && hasVal(g_headerObj[val])).forEach(prop =>
+		document.documentElement.style.setProperty(prop, getCssCustomProperty(prop, g_headerObj[prop])));
 };
 
 /**
@@ -5662,7 +5657,7 @@ const setKeyDfVal = _ptnName => {
  */
 const titleInit = (_initFlg = false) => {
 
-	clearWindow(true);
+	clearWindow();
 	g_currentPage = `title`;
 	g_stateObj.settingSummaryVisible = false;
 
@@ -6671,7 +6666,7 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x
 /*-----------------------------------------------------------*/
 
 const dataMgtInit = () => {
-	clearWindow(true);
+	clearWindow();
 	pauseBGM();
 	const prevPage = g_currentPage;
 	g_currentPage = `dataMgt`;
@@ -6909,7 +6904,7 @@ const dataMgtInit = () => {
 /*-----------------------------------------------------------*/
 
 const preconditionInit = () => {
-	clearWindow(true);
+	clearWindow();
 	pauseBGM();
 	const prevPage = g_currentPage;
 	g_currentPage = `precondition`;
@@ -7137,7 +7132,7 @@ const makePlayButton = _func => createCss2Button(`btnPlay`, g_lblNameObj.b_play,
  */
 const optionInit = () => {
 
-	clearWindow(true);
+	clearWindow();
 	pauseBGM();
 	const divRoot = document.getElementById(`divRoot`);
 	g_currentPage = `option`;
@@ -9215,7 +9210,7 @@ const resetGroupList = (_type, _keyCtrlPtn) => {
 
 const settingsDisplayInit = () => {
 
-	clearWindow(true);
+	clearWindow();
 	const divRoot = document.getElementById(`divRoot`);
 	g_currentPage = `settingsDisplay`;
 
@@ -10022,7 +10017,7 @@ const interlockingButton = (_headerObj, _name, _current, _next, _buttonFlg = fal
 /*-----------------------------------------------------------*/
 
 const exSettingInit = () => {
-	clearWindow(true);
+	clearWindow();
 	g_currentPage = `exSetting`;
 
 	multiAppend(divRoot,
@@ -10183,7 +10178,7 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
  */
 const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 
-	clearWindow(true);
+	clearWindow();
 	const divRoot = document.getElementById(`divRoot`);
 	g_kcType = _kcType;
 	g_currentPage = `keyConfig`;
@@ -11961,7 +11956,7 @@ const changeShuffleConfigColor = (_keyCtrlPtn, _vals, _j = -1) => {
 
 const loadMusic = async () => {
 
-	clearWindow(true);
+	clearWindow();
 	pauseBGM();
 	g_currentPage = `loading`;
 
@@ -14535,7 +14530,7 @@ const setKeyCtrl = (_localStorage, _keyNum, _keyCtrlPtn) => {
  * メイン画面初期化
  */
 const mainInit = () => {
-	clearWindow(true, `Main`);
+	clearWindow(`Main`);
 	const divRoot = document.getElementById(`divRoot`);
 	document.oncontextmenu = () => false;
 	g_currentPage = `main`;
@@ -16305,7 +16300,7 @@ const executeRetry = async (_logLabel = `Retry`) => {
 	try {
 		g_audio.pause();
 		clearTimeout(g_timeoutEvtId);
-		clearWindow();
+		clearWindow(`Main`);
 		await musicAfterLoaded();
 		await loadChartFile();
 		prepareScoreData();
@@ -16929,7 +16924,7 @@ const finishViewing = () => {
  */
 const resultInit = () => {
 
-	clearWindow(true);
+	clearWindow();
 	g_currentPage = `result`;
 
 	// 結果画面用フレーム初期化
