@@ -12032,49 +12032,51 @@ const loadAndSetupAudio = async (_url, _lblLoading) => {
 		});
 	};
 
-	// エンコードなしの場合
-	// - ファイルの場合はAudioタグで再生、オンラインの場合はWebAudioAPI(URL)で再生
-	if (!g_musicEncodedFlg) {
-		// ローカル実行時: Audio要素で直接再生(WebAudioAPIキャッシュの対象外)
-		if (g_isFile) {
-			return readyToStart(() => {
+	// 音源準備処理そのものを、条件に応じて組み立てる
+	const setupAudioFunc = (() => {
+
+		// エンコードなし & ローカル実行: Audio要素で直接再生
+		if (!g_musicEncodedFlg && g_isFile) {
+			return () => {
 				g_audio = new Audio();
 				g_audio.src = _url;
 				return musicAfterLoaded();
-			});
+			};
 		}
-		// オンライン時: WebAudioAPI経由。ダウンロード処理はsetupWebAudioへ委譲する
-		return readyToStart(() =>
-			setupWebAudio(async () => {
-				// この関数はキャッシュミス時のみ呼ばれる
+
+		// エンコードなし & オンライン: WebAudioAPI経由(URLからfetch)
+		if (!g_musicEncodedFlg) {
+			return () => setupWebAudio(async () => {
 				const blobUrl = await fetchMusicBlobUrl(_url, _lblLoading);
 				try {
 					const response = await fetch(blobUrl);
 					return await response.arrayBuffer();
 				} finally {
-					URL.revokeObjectURL(blobUrl); // 使用後は必ず解放
+					URL.revokeObjectURL(blobUrl);
 				}
-			}, _url)
-		);
-	}
+			}, _url);
+		}
 
-	// エンコードありの場合。スクリプト読込・musicInit実行もキャッシュミス時のみ行う
-	return readyToStart(() => setupWebAudio(async () => {
-		const scriptSrc = g_isFile ? _url : await fetchMusicBlobUrl(_url, _lblLoading);
-		try {
-			await loadScript2(scriptSrc);
-		} finally {
-			if (!g_isFile) {
-				URL.revokeObjectURL(scriptSrc); // 使用後は必ず解放
+		// エンコードあり: スクリプト読込・musicInit実行を経てWebAudioAPI準備
+		return () => setupWebAudio(async () => {
+			const scriptSrc = g_isFile ? _url : await fetchMusicBlobUrl(_url, _lblLoading);
+			try {
+				await loadScript2(scriptSrc);
+			} finally {
+				if (!g_isFile) {
+					URL.revokeObjectURL(scriptSrc);
+				}
 			}
-		}
-		if (typeof musicInit !== C_TYP_FUNCTION) {
-			makeWarningWindow(g_msgInfoObj.E_0031, { backBtnUse: true });
-			throw new Error(`musicInit is not defined`);
-		}
-		musicInit();
-		return base64ToUint8Array(g_musicdata).buffer;
-	}, _url));
+			if (typeof musicInit !== C_TYP_FUNCTION) {
+				makeWarningWindow(g_msgInfoObj.E_0031, { backBtnUse: true });
+				throw new Error(`musicInit is not defined`);
+			}
+			musicInit();
+			return base64ToUint8Array(g_musicdata).buffer;
+		}, _url);
+	})();
+
+	return readyToStart(setupAudioFunc);
 };
 
 /**
