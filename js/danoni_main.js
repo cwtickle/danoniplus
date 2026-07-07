@@ -12251,7 +12251,7 @@ const musicAfterLoaded = () => new Promise((resolve, reject) => {
 /**
  * 譜面データの変換処理
  * - 音源データの状態に依存しない部分のみを担う(g_audio非参照)
- * - loadMusic経由(並行フロー)、loadingScoreInit経由(曲中リトライ)の両方から呼ばれる
+ * - loadMusic経由(並行フロー)、executeRetry経由(曲中リトライ)の両方から呼ばれる
  */
 const prepareScoreData = () => {
 
@@ -12402,17 +12402,6 @@ const prepareScoreData = () => {
 
 	// ユーザカスタムイベント
 	safeExecuteCustomHooks(`g_customJsObj.loading`, g_customJsObj.loading);
-};
-
-/**
- * 読込画面初期化
- * - 曲中リトライ専用。loadMusic経由(初回起動)の並行フローとは別に、
- *   譜面再読込からmainInitまでを一括で直列実行する。
- */
-const loadingScoreInit = async () => {
-	await loadChartFile();
-	prepareScoreData();
-	mainInit();
 };
 
 /**
@@ -15011,26 +15000,16 @@ const mainInit = () => {
 
 		// 曲中リトライ、タイトルバック
 		if (setCode === g_kCdN[g_headerObj.keyRetry]) {
-			g_audio.pause();
-			clearTimeout(g_timeoutEvtId);
 
 			if (g_isMac && keyIsShift()) {
 				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
+				g_audio.pause();
+				clearTimeout(g_timeoutEvtId);
 				titleInit();
 
 			} else {
 				// その他の環境では単にRetryに対応するキーのみで適用
-				if (g_retryInProgress) return blockCode(setCode);
-				g_retryInProgress = true;
-				clearWindow();
-				try {
-					await musicAfterLoaded();
-					await loadingScoreInit(); // 譜面データを再読込
-				} catch (e) {
-					console.warn(`Retry audio load error: ${e}`);
-				} finally {
-					g_retryInProgress = false;
-				}
+				await executeRetry(`Retry`);
 			}
 
 		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
@@ -16313,6 +16292,32 @@ const executeFrzReturn = (_seq, _idx, _axis) => {
 };
 
 /**
+ * 曲中リトライの共通処理
+ * - 手動リトライ、AutoRetryの両方から呼ばれる
+ * - g_retryInProgressによる多重実行防止、失敗時のログ出力・フラグ復帰を一括で行う
+ * @param {string} [_logLabel='Retry'] エラーログに表示するラベル(手動/自動の区別用)
+ */
+const executeRetry = async (_logLabel = `Retry`) => {
+	if (g_retryInProgress) {
+		return;
+	}
+	g_retryInProgress = true;
+	try {
+		g_audio.pause();
+		clearTimeout(g_timeoutEvtId);
+		clearWindow();
+		await musicAfterLoaded();
+		await loadChartFile();
+		prepareScoreData();
+		mainInit();
+	} catch (e) {
+		console.warn(`${_logLabel} audio load error: ${e}`);
+	} finally {
+		g_retryInProgress = false;
+	}
+};
+
+/**
  * AutoRetryの設定
  * @param {string} _retryCondition リトライ基準となるAutoRetry名
  */
@@ -16322,19 +16327,8 @@ const quickRetry = (_retryCondition) => {
 		return;
 	}
 	if (g_settings.autoRetryNum >= retryNum && !g_retryInProgress) {
-		g_retryInProgress = true;
 		setTimeout(async () => {
-			g_audio.pause();
-			clearTimeout(g_timeoutEvtId);
-			clearWindow();
-			try {
-				await musicAfterLoaded();
-				await loadingScoreInit(); // 譜面データを再読込
-			} catch (e) {
-				console.warn(`AutoRetry audio load error: ${e}`);
-			} finally {
-				g_retryInProgress = false;
-			}
+			await executeRetry(`AutoRetry`);
 		}, 16);
 	}
 };
