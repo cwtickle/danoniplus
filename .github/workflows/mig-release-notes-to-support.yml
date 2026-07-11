@@ -1,0 +1,86 @@
+name: Migrate Release Notes to Support Branch
+
+# 手動実行専用。自動トリガーは一切設定しない。
+on:
+  workflow_dispatch:
+    inputs:
+      major_version:
+        description: '移行対象のメジャーバージョン (例: v48)'
+        required: true
+        type: string
+      dry_run:
+        description: 'true の場合は変更内容の確認のみ行い、実際の更新はしない'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  migrate-release-notes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up variables
+        id: vars
+        run: |
+          echo "major=${{ inputs.major_version }}" >> "$GITHUB_OUTPUT"
+
+      - name: Migrate releases
+        env:
+          # Contents: Read and write 権限を持つ、対象リポジトリ限定のトークンを
+          # リポジトリのSecretsに事前登録しておくこと。
+          GH_TOKEN: ${{ secrets.RELEASE_EDIT_TOKEN }}
+          REPO: cwtickle/danoniplus
+          MAJOR: ${{ steps.vars.outputs.major }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+
+          echo "=== 対象メジャー: ${MAJOR} ==="
+          echo "=== dry_run: ${DRY_RUN} ==="
+
+          # 対象メジャーに属するリリース一覧を取得 (例: v48.0.0, v48.1.0, ..., v48.5.3)
+          # per_page=100 で足りない場合はページネーション対応を追加すること
+          releases=$(gh api "repos/${REPO}/releases?per_page=100" \
+            --jq ".[] | select(.tag_name | startswith(\"${MAJOR}.\")) | .id")
+
+          if [ -z "$releases" ]; then
+            echo "対象バージョンが見つかりませんでした。MAJOR の指定を確認してください。"
+            exit 1
+          fi
+
+          for release_id in $releases; do
+            tag=$(gh api "repos/${REPO}/releases/${release_id}" --jq ".tag_name")
+            body=$(gh api "repos/${REPO}/releases/${release_id}" --jq ".body")
+
+            # --- 置換ルール ---
+            # 区切り文字は | を使用(置換後の文字列に # が含まれるため # は使えない)
+
+            # 1. commits-since バッジのブランチ指定
+            #    /{tag}/master?style=social -> /{tag}/support/{MAJOR}?style=social
+            new_body=$(echo "$body" | sed "s|/${tag}/master?style=social|/${tag}/support/${MAJOR}?style=social|g")
+
+            # 2. compare リンクの比較先ブランチ
+            #    {tag}...master#files_bucket -> {tag}...support/{MAJOR}#files_bucket
+            new_body=$(echo "$new_body" | sed "s|${tag}\.\.\.master#files_bucket|${tag}...support/${MAJOR}#files_bucket|g")
+
+            # 3. Changelog Wiki アンカーリンク
+            #    Changelog-latest -> Changelog-{MAJOR}
+            new_body=$(echo "$new_body" | sed "s|Changelog-latest|Changelog-${MAJOR}|g")
+
+            if [ "$body" = "$new_body" ]; then
+              echo "--- ${tag}: 変更なし(対象文字列が見つかりませんでした) ---"
+              continue
+            fi
+
+            echo "--- ${tag}: 変更あり ---"
+            diff <(echo "$body") <(echo "$new_body") || true
+
+            if [ "$DRY_RUN" = "false" ]; then
+              gh api \
+                --method PATCH \
+                "repos/${REPO}/releases/${release_id}" \
+                -f body="$new_body"
+              echo "${tag}: 更新完了"
+            else
+              echo "${tag}: dry_run のため更新はスキップしました"
+            fi
+          done
