@@ -5013,7 +5013,7 @@ const setColorList = (_data, _colorInit, _colorInitLength,
 
 /**
  * 複合カスタムゲージの定義設定
- * |customGauge=Original::F,Normal::V,Escape::V|
+ * |customGauge=_Original::F::Original,_Normal::V::Normal,Escape::V|
  * @param {object} _dosObj 
  * @param {string} [object.scoreId=0]
  * @returns {object} ※Object.assign(obj, resetCustomGauge(...))の形で呼び出しが必要
@@ -5041,6 +5041,9 @@ const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
 				const customGaugeSets = customGauges[j].split(`::`);
 				obj[`custom${scoreId}`][j] = customGaugeSets[0];
 				obj[`varCustom${scoreId}`][j] = boolToSwitch(customGaugeSets[1] === `V`);
+				if (hasVal(customGaugeSets[2])) {
+					g_lblNameObj[`u_${customGaugeSets[0]}`] = customGaugeSets[2];
+				}
 			}
 			if (scoreId === 0) {
 				obj.custom = obj.custom0.concat();
