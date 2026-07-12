@@ -1,0 +1,188 @@
+name: Migrate Wiki Changelog Links to Support Branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      major_version:
+        description: '移行対象のメジャーバージョン (例: v48)'
+        required: true
+        type: string
+      dry_run:
+        description: 'true の場合は差分確認のみ、実際の push はしない'
+        required: true
+        type: boolean
+        default: true
+      exclude_files:
+        description: '追加で除外するファイル名をカンマ区切りで指定 (basename一致、例: Home.md)。空欄ならDEFAULT_EXCLUDESのみ適用'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  migrate-wiki-changelog:
+    runs-on: ubuntu-latest
+    env:
+      MAJOR: ${{ inputs.major_version }}
+      DRY_RUN: ${{ inputs.dry_run }}
+      GITLAB_NAMESPACE: "cwtickle"
+      # リポジトリごとの常時除外(basename一致)
+      DEFAULT_EXCLUDES_GH_MAIN: "Changelog-latest.md,_sidebar.md,AboutReleaseInfo.md,AccessMap.md,HowToUpdate.md,MigrationGuide.md,UpdateInfo.md,Release-Procedures.md,Release-Templates.md"
+      DEFAULT_EXCLUDES_GH_DOCS: "Changelog-latest.md,kirizma-Changelog-latest.md,kirizma-Changelog-v1.md,_sidebar.md,AboutReleaseInfo.md,AccessMap.md,HowToUpdate.md,MigrationGuide.md,SecurityPolicy.md,UpdateInfo.md"
+      DEFAULT_EXCLUDES_GITLAB: "Changelog-latest.md,AboutReleaseInfo.md,AccessMap.md,HowToUpdate.md,MigrationGuide.md,Security-Policy.md,UpdateInfo.md,Release-Procedures.md,Release-Templates.md"
+
+    steps:
+      - name: Set up git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Build exclude lists
+        id: excl
+        run: |
+          EXTRA="${{ inputs.exclude_files }}"
+          echo "gh_main=${DEFAULT_EXCLUDES_GH_MAIN}${EXTRA:+,${EXTRA}}" >> "$GITHUB_OUTPUT"
+          echo "gh_docs=${DEFAULT_EXCLUDES_GH_DOCS}${EXTRA:+,${EXTRA}}" >> "$GITHUB_OUTPUT"
+          echo "gitlab=${DEFAULT_EXCLUDES_GITLAB}${EXTRA:+,${EXTRA}}" >> "$GITHUB_OUTPUT"
+
+      - name: Compute next major version
+        run: |
+          NUM=$(echo "${MAJOR#v}")
+          NEXT=$((NUM + 1))
+          echo "NEXT_MAJOR=v${NEXT}" >> "$GITHUB_ENV"
+
+      - name: Create migration scripts
+        run: |
+          # ---- 1) 全ページ一括置換 (Changelog-latest → Changelog-vXX のみ) ----
+          cat > sweep.sh << 'SCRIPT'
+          #!/bin/bash
+          set -euo pipefail
+          DIR="$1"; EXCLUDES="$2"; SUBDIRS="${3:-.}"
+          IFS=',' read -ra EXCL_ARR <<< "$EXCLUDES"
+          cd "$DIR"
+          CHANGED=""
+          for FILE in $(find $SUBDIRS -name "*.md" -type f | sed 's|^\./||'); do
+            BASENAME=$(basename "$FILE")
+            SKIP=false
+            for EX in "${EXCL_ARR[@]}"; do
+              EX_TRIM=$(echo "$EX" | xargs)
+              [ "$BASENAME" = "$EX_TRIM" ] && { SKIP=true; break; }
+            done
+            if [ "$SKIP" = true ]; then
+              echo "スキップ(除外): $FILE"
+              continue
+            fi
+            cp "$FILE" "$FILE.bak"
+            sed -i "s|Changelog-latest|Changelog-${MAJOR}|g" "$FILE"
+            if ! diff -q "$FILE.bak" "$FILE" > /dev/null; then
+              echo "=== 変更: $FILE ==="
+              diff "$FILE.bak" "$FILE" || true
+              CHANGED="${CHANGED} ${FILE}"
+            fi
+            rm "$FILE.bak"
+          done
+          echo "${CHANGED}" > /tmp/changed_$(basename "$DIR").txt
+          SCRIPT
+          chmod +x sweep.sh
+
+          # ---- 2) latest ページを vXX として複製し、複製先にのみ追加の置換を実行 ----
+          cat > archive.sh << 'SCRIPT'
+          #!/bin/bash
+          set -euo pipefail
+          DIR="$1"; SRC="$2"; DEST="$3"
+          cd "$DIR"
+          if [ ! -f "$SRC" ]; then
+            echo "コピー元が見つかりません: $SRC"
+            exit 1
+          fi
+          mkdir -p "$(dirname "$DEST")"
+          cp "$SRC" "$DEST"
+          sed -i \
+            -e "s|Changelog-latest|Changelog-${MAJOR}|g" \
+            -e "s|master|support/${MAJOR}|g" \
+            -e "s#| \*\*${MAJOR}\*\* |#[**<- ${NEXT_MAJOR}**](./Changelog-latest) | **${MAJOR}** |#" \
+            "$DEST"
+          echo "=== 新規作成: $DEST ==="
+          diff "$SRC" "$DEST" || true
+          echo "$DEST" >> /tmp/new_files_$(basename "$DIR").txt
+          SCRIPT
+          chmod +x archive.sh
+
+      # ---------- 1. GitHub Wiki (danoniplus) ----------
+      - name: Clone GitHub wiki (danoniplus)
+        env:
+          TOKEN: ${{ secrets.RELEASE_EDIT_TOKEN }}
+        run: git clone "https://x-access-token:${TOKEN}@github.com/cwtickle/danoniplus.wiki.git" wiki-gh-main
+
+      - name: Sweep GitHub wiki (danoniplus)
+        run: ./sweep.sh wiki-gh-main "${{ steps.excl.outputs.gh_main }}"
+
+      - name: Archive latest → vXX (danoniplus)
+        run: ./archive.sh wiki-gh-main "Changelog-latest.md" "Changelog-${{ inputs.major_version }}.md"
+
+      - name: Commit & push GitHub wiki (danoniplus)
+        if: ${{ inputs.dry_run == false }}
+        working-directory: wiki-gh-main
+        run: |
+          CHANGED=$(cat /tmp/changed_wiki-gh-main.txt 2>/dev/null || true)
+          NEW=$(cat /tmp/new_files_wiki-gh-main.txt 2>/dev/null || true)
+          if [ -z "$CHANGED" ] && [ -z "$NEW" ]; then
+            echo "変更なし"
+          else
+            git add $CHANGED $NEW
+            git commit -m "Archive Changelog-${MAJOR} and update latest links to support/${MAJOR}"
+            git push
+          fi
+
+      # ---------- 2. GitHub Wiki (danoniplus-docs) ----------
+      - name: Clone GitHub wiki (danoniplus-docs)
+        env:
+          TOKEN: ${{ secrets.RELEASE_EDIT_TOKEN }}
+        run: git clone "https://x-access-token:${TOKEN}@github.com/cwtickle/danoniplus-docs.wiki.git" wiki-gh-docs
+
+      - name: Sweep GitHub wiki (danoniplus-docs)
+        run: ./sweep.sh wiki-gh-docs "${{ steps.excl.outputs.gh_docs }}"
+
+      - name: Archive latest → vXX (danoniplus-docs)
+        run: ./archive.sh wiki-gh-docs "Changelog-latest.md" "Changelog-${{ inputs.major_version }}.md"
+
+      - name: Commit & push GitHub wiki (danoniplus-docs)
+        if: ${{ inputs.dry_run == false }}
+        working-directory: wiki-gh-docs
+        run: |
+          CHANGED=$(cat /tmp/changed_wiki-gh-docs.txt 2>/dev/null || true)
+          NEW=$(cat /tmp/new_files_wiki-gh-docs.txt 2>/dev/null || true)
+          if [ -z "$CHANGED" ] && [ -z "$NEW" ]; then
+            echo "変更なし"
+          else
+            git add $CHANGED $NEW
+            git commit -m "Archive Changelog-${MAJOR} and update latest links to support/${MAJOR}"
+            git push
+          fi
+
+      # ---------- 3. GitLab Wiki (danonicw) ----------
+      - name: Clone GitLab wiki (danonicw)
+        env:
+          TOKEN: ${{ secrets.GITLAB_WIKI_TOKEN }}
+        run: git clone "https://oauth2:${TOKEN}@gitlab.com/${GITLAB_NAMESPACE}/danonicw.wiki.git" wiki-gitlab
+
+      - name: Sweep GitLab wiki (danonicw)
+        run: ./sweep.sh wiki-gitlab "${{ steps.excl.outputs.gitlab }}" "Ja En"
+
+      - name: Archive latest → vXX (danonicw, Ja + En)
+        run: |
+          ./archive.sh wiki-gitlab "Ja/Changelog-latest.md" "Ja/Changelog-${{ inputs.major_version }}.md"
+          ./archive.sh wiki-gitlab "En/Changelog-latest.md" "En/Changelog-${{ inputs.major_version }}.md"
+
+      - name: Commit & push GitLab wiki (danonicw)
+        if: ${{ inputs.dry_run == false }}
+        working-directory: wiki-gitlab
+        run: |
+          CHANGED=$(cat /tmp/changed_wiki-gitlab.txt 2>/dev/null || true)
+          NEW=$(cat /tmp/new_files_wiki-gitlab.txt 2>/dev/null || true)
+          if [ -z "$CHANGED" ] && [ -z "$NEW" ]; then
+            echo "変更なし"
+          else
+            git add $CHANGED $NEW
+            git commit -m "Archive Changelog-${MAJOR} and update latest links to support/${MAJOR}"
+            git push
+          fi
