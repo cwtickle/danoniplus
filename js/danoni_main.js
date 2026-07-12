@@ -11463,7 +11463,7 @@ const keyconfigKeyboardPreview = (() => {
 		const configKeyGroupList = g_headerObj.keyGroupOrder[g_stateObj.scoreId] ??
 			g_keyObj[`keyGroupOrder${keyCtrlPtn}`] ?? tkObj.keyGroupList;
 
-		const availW = g_btnWidth() + (configKeyGroupList.length > 1 ? -60 : 0);
+		const availW = g_btnWidth() + (configKeyGroupList.length > 1 ? -g_lblPosObj.lnkKeySwitch.w - 10 : 0);
 		const availH = g_sHeight - 200 - LEGEND_H;  // 下部 UI ぶんを除いた高さ
 
 		// 縦幅基準: MAIN/NAV 高さ と テンキー高さ（余白込み）の大きい方
@@ -11473,7 +11473,7 @@ const keyconfigKeyboardPreview = (() => {
 		const scaleH = availH / totalH;
 		_state.scale = Math.min(scaleW, scaleH, 1.5);  // 最大 1.5 倍まで拡大可
 
-		_state.cvsX = configKeyGroupList.length > 1 ? -30 : 0;
+		_state.cvsX = configKeyGroupList.length > 1 ? (-g_lblPosObj.lnkKeySwitch.w - 10) / 2 : 0;
 		_state.cvsW = Math.floor(totalW * _state.scale);
 		_state.cvsH = Math.floor(totalH * _state.scale) + LEGEND_H;
 	};
