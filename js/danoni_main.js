@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/07/07
+ * Revised : 2026/07/12
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 49.2.0`;
-const g_revisedDate = `2026/07/07`;
+const g_version = `Ver 49.3.0`;
+const g_revisedDate = `2026/07/12`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -5013,7 +5013,7 @@ const setColorList = (_data, _colorInit, _colorInitLength,
 
 /**
  * 複合カスタムゲージの定義設定
- * |customGauge=Original::F,Normal::V,Escape::V|
+ * |customGauge=_Original::F::Original,_Normal::V::Normal,Escape::V|
  * @param {object} _dosObj 
  * @param {string} [object.scoreId=0]
  * @returns {object} ※Object.assign(obj, resetCustomGauge(...))の形で呼び出しが必要
@@ -5041,6 +5041,9 @@ const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
 				const customGaugeSets = customGauges[j].split(`::`);
 				obj[`custom${scoreId}`][j] = customGaugeSets[0];
 				obj[`varCustom${scoreId}`][j] = boolToSwitch(customGaugeSets[1] === `V`);
+				if (hasVal(customGaugeSets[2])) {
+					g_lblNameObj[`u_${customGaugeSets[0]}`] = customGaugeSets[2];
+				}
 			}
 			if (scoreId === 0) {
 				obj.custom = obj.custom0.concat();
@@ -10754,6 +10757,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 				document.getElementById(`key${_num}`).classList.replace(g_cssObj.button_Mini, g_cssObj.button_Next);
 			}
 		}
+		keyconfigKeyboardPreview.refresh();
 	};
 
 	/**
@@ -11412,6 +11416,7 @@ const keyconfigKeyboardPreview = (() => {
 		canvasMap: null,
 		keyDataList: [],          // { code, x, y, w, h, label } — drawMap で照合するキャッシュ
 		scale: 1,                 // BASE_KEY_W/H に掛けるスケール係数
+		cvsX: 0,                  // Canvas の左上 X 座標（divRoot 内の相対座標）
 		cvsW: 500,                // 実際の Canvas 幅（スケール計算後）
 		cvsH: 240,                // 実際の Canvas 高さ（スケール計算後）
 	};
@@ -11453,7 +11458,12 @@ const keyconfigKeyboardPreview = (() => {
 		const totalW = baseMainW + BASE_KEY_GAP * 2 + BASE_NAV_W + BASE_KEY_GAP * 2
 			+ BASE_KEY_GAP * 3 + BASE_NUM_W;
 
-		const availW = g_btnWidth();
+		const tkObj = getKeyInfo();
+		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+		const configKeyGroupList = g_headerObj.keyGroupOrder[g_stateObj.scoreId] ??
+			g_keyObj[`keyGroupOrder${keyCtrlPtn}`] ?? tkObj.keyGroupList;
+
+		const availW = g_btnWidth() + (configKeyGroupList.length > 1 ? -g_lblPosObj.lnkKeySwitch.w - 10 : 0);
 		const availH = g_sHeight - 200 - LEGEND_H;  // 下部 UI ぶんを除いた高さ
 
 		// 縦幅基準: MAIN/NAV 高さ と テンキー高さ（余白込み）の大きい方
@@ -11463,6 +11473,7 @@ const keyconfigKeyboardPreview = (() => {
 		const scaleH = availH / totalH;
 		_state.scale = Math.min(scaleW, scaleH, 1.5);  // 最大 1.5 倍まで拡大可
 
+		_state.cvsX = configKeyGroupList.length > 1 ? (-g_lblPosObj.lnkKeySwitch.w - 10) / 2 : 0;
 		_state.cvsW = Math.floor(totalW * _state.scale);
 		_state.cvsH = Math.floor(totalH * _state.scale) + LEGEND_H;
 	};
@@ -11735,7 +11746,7 @@ const keyconfigKeyboardPreview = (() => {
 		divRoot.appendChild(btn);
 
 		// プレビューエリア: 水平・垂直センタリング
-		const areaX = g_btnX() + Math.floor((g_btnWidth() - _state.cvsW) / 2);
+		const areaX = g_btnX() + Math.floor((g_btnWidth() - _state.cvsW) / 2) + _state.cvsX;
 		const areaY = 130;
 
 		const areaDiv = createEmptySprite(divRoot, C_PREVIEW_ID, {
