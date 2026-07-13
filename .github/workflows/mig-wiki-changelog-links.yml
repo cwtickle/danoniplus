@@ -62,10 +62,12 @@ jobs:
           CHANGED=""
           for FILE in $(find $SUBDIRS -name "*.md" -type f | sed 's|^\./||'); do
             BASENAME=$(basename "$FILE")
+            BASENAME_LC=$(echo "$BASENAME" | tr '[:upper:]' '[:lower:]')
             SKIP=false
             for EX in "${EXCL_ARR[@]}"; do
               EX_TRIM=$(echo "$EX" | xargs)
-              [ "$BASENAME" = "$EX_TRIM" ] && { SKIP=true; break; }
+              EX_TRIM_LC=$(echo "$EX_TRIM" | tr '[:upper:]' '[:lower:]')
+              [ "$BASENAME_LC" = "$EX_TRIM_LC" ] && { SKIP=true; break; }
             done
             if [ "$SKIP" = true ]; then
               echo "スキップ(除外): $FILE"
