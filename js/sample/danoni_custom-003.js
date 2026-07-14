@@ -19,6 +19,8 @@
 /*
  * 独自の変数名や関数名は、"c_"などの接頭辞をつけると、
  * danoni_main.jsの変数名と衝突しないのでおすすめです。
+ * 
+ * このサンプルは横幅650px以上の動作を確認しています。
  */
 
 /**
@@ -134,17 +136,18 @@ const c_infoInit = () => {
 	// 拡張設定表示用div要素を作成（divRootの中に作成）
 	// 親div, 子divのid, 子divのCSS設定を記述
 	const c_extraSet = createEmptySprite(divRoot, `c_extraSet`, {
-		x: g_sWidth / 2 - 300,
+		x: g_sWidth / 2 - 305,
 		y: 250,
-		w: 600,
-		h: 400,
+		w: 610,
+		h: 140,
 		overflow: `auto`,
+		// border: `1px dashed #999999`,  // 枠がわかるように表示
 	});
 
 	// 拡張設定ヘッダー表示
 	c_extraSet.appendChild(
 		createDivCss2Label(`c_lblExtraSet`, `Original Settings`, {
-			x: 0,
+			x: 5,
 			y: 0,
 			w: 600,
 			h: 22,
@@ -158,11 +161,12 @@ const c_infoInit = () => {
 
 	// 設定用項目のdiv要素を作成
 	const c_backColor = createEmptySprite(c_extraSet, `c_backColor`, {
-		x: g_sWidth / 2 - 300,
+		x: 105,
 		y: 40,
-		w: 600,
+		w: 410,
 		h: 22,
 		overflow: `auto`,
+		// border: `1px dashed #999999`,  // 枠がわかるように表示
 	});
 	createGeneralSetting(c_backColor, `backColor`, {
 		addRFunc: () => {
@@ -227,7 +231,7 @@ const c_infoInit = () => {
 		// 外部リンク用ボタン描画
 		createCss2Button(`c_btnLink`, `Custom JSに関する情報はGitHub WikiのTipsへ`, _ => true, {
 			x: g_btnX() + g_btnWidth(1 / 2) - 300,
-			y: g_sHeight - 110,
+			y: g_sHeight - 100,
 			w: 600,
 			h: 25,
 			siz: 14,
