@@ -69,6 +69,7 @@ g_customJsObj.preTitle.push(() => {
 		KeyC: { id: `lnkBackColorR` },
 		Escape: { id: `c_btnBack` },
 		Enter: { id: `c_btnNext` },
+		KeyT: { id: `c_btnLink`, reset: true },
 	};
 });
 
@@ -282,6 +283,7 @@ const c_infoInit = () => {
 	// ショートカットキー表示
 	createScText(c_btnBack, `c_btnBack`, { displayName: `c_info`, targetLabel: `c_btnBack` });
 	createScText(c_btnNext, `c_btnNext`, { displayName: `c_info`, targetLabel: `c_btnNext` });
+	createScText(c_btnLink, `c_btnLink`, { displayName: `c_info`, targetLabel: `c_btnLink` });
 
 	// カスタム画面のショートカット表示
 	setShortcutEvent(g_currentPage);
