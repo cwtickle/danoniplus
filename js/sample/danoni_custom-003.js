@@ -32,6 +32,7 @@
 
 /**
  * 初期化
+ * - タイトル画面より前で定義するため、タイトル画面に戻ってもこの処理は通過しない
  */
 g_customJsObj.preTitle.push(() => {
 
@@ -41,13 +42,6 @@ g_customJsObj.preTitle.push(() => {
 
 	// 設定項目名
 	g_lblNameObj.BackColor = `BackColor`;
-
-	// 設定項目の選択肢と初期カーソル位置
-	g_settings.backColors = [`Default`, `Black`, `Gray`, `Red`, `Green`, `Blue`, `Yellow`];
-	g_settings.backColorNum = 0;
-
-	// 設定項目の初期値
-	g_stateObj.backColor = g_settings.backColors[g_settings.backColorNum];
 
 	// 設定項目の選択肢に対応する背景色
 	// 0番目の色がdivBackの背景色、1番目の色がc_backSampleの背景色
@@ -61,9 +55,20 @@ g_customJsObj.preTitle.push(() => {
 		Yellow: [`#111100`, `#333311`],
 	};
 
+	// 設定項目の選択肢と初期カーソル位置
+	g_settings.backColors = Object.keys(g_settings.c_backColorset);  // [`Default`, `Black`, ... , `Yellow`]
+	g_settings.backColorNum = 0;
+
+	// 設定項目の初期値
+	g_stateObj.backColor = g_settings.backColors[g_settings.backColorNum];
+
 	// カスタム画面のショートカット定義
 	g_shortcutObj.c_info = {
-		KeyC: { id: `lnkBackColor` },
+		ShiftLeft_KeyC: { id: `lnkBackColorL` },
+		ShiftRight_KeyC: { id: `lnkBackColorL` },
+		KeyC: { id: `lnkBackColorR` },
+		Escape: { id: `c_btnBack` },
+		Enter: { id: `c_btnNext` },
 	};
 });
 
@@ -192,6 +197,9 @@ const c_infoInit = () => {
 	});
 	c_changeBackColor();
 
+	// ショートカットキー表示
+	createScText(c_backColor, `backColor`, { displayName: `c_info` });
+
 	// △ BackColor設定　ここまで
 	// ---------------------------------------------------------------
 
@@ -228,6 +236,9 @@ const c_infoInit = () => {
 			w: 100,
 			h: 100,
 			rotate: c_aaList[c_randomidx],
+			animationDuration: `3s`,
+			animationName: `spinY`,
+			animationIterationCount: `infinite`,
 			background: `#ffffff`,
 		}),
 
@@ -267,6 +278,10 @@ const c_infoInit = () => {
 			),
 		}, g_cssObj.button_Default),
 	);
+
+	// ショートカットキー表示
+	createScText(c_btnBack, `c_btnBack`, { displayName: `c_info`, targetLabel: `c_btnBack` });
+	createScText(c_btnNext, `c_btnNext`, { displayName: `c_info`, targetLabel: `c_btnNext` });
 
 	// カスタム画面のショートカット表示
 	setShortcutEvent(g_currentPage);
