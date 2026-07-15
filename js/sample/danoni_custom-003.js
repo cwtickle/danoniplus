@@ -7,7 +7,7 @@
  * danoni_main.js の中身を変えることなく設定が可能です。
  * 
  * 設定例：
- * |customjs=danoni_custom-003.js|
+ * |customjs=sample/danoni_custom-003.js|
  * 
  * ・グローバル変数、div要素、関数は danoni_main.js のものがそのまま利用できます。
  * ・danoni_main.jsの変数を直接書き換えると、動かなくなることがあります。
@@ -21,6 +21,13 @@
  * danoni_main.jsの変数名と衝突しないのでおすすめです。
  * 
  * このサンプルは横幅650px以上の動作を確認しています。
+ * 
+ * 参考）主要変数の説明 (danoni_main.js側で定義)
+ *   - g_btnX()     : ボタンの初期X座標。引数でg_btnWidth()を足した効果。
+ *   - g_btnWidth() : ボタンが配置できる最大横幅長。引数で比率を指定できる。
+ *   - g_sWidth     : 画面の横幅
+ *   - g_sHeight    : 画面の高さ
+ *   - clearWindow  : 画面の消去
  */
 
 /**
@@ -53,6 +60,11 @@ g_customJsObj.preTitle.push(() => {
 		Blue: [`#000011`, `#111144`],
 		Yellow: [`#111100`, `#333311`],
 	};
+
+	// カスタム画面のショートカット定義
+	g_shortcutObj.c_info = {
+		KeyC: { id: `lnkBackColor` },
+	};
 });
 
 /**
@@ -77,7 +89,7 @@ const c_changeBackColor = () => {
 
 		if (document.getElementById(`c_backSampleR`) === null) {
 			createEmptySprite(divBack, `c_backSampleR`, {
-				x: g_btnX() + g_btnWidth() - 100,
+				x: g_btnX(1) - 100,
 				y: 0,
 				w: 50,
 				h: g_sHeight,
@@ -96,7 +108,7 @@ g_customJsObj.title.push(() => {
 	multiAppend(divRoot,
 		// 背景の矢印オブジェクトを表示
 		createColorObject2(`c_lblC`, {
-			x: g_sWidth / 2 - 300,
+			x: g_btnX(1 / 2) - 300,
 			y: 0,
 			w: 100,
 			h: 100,
@@ -107,7 +119,7 @@ g_customJsObj.title.push(() => {
 
 		// Infoボタン描画
 		createCss2Button(`c_btnInfo`, `Info`, _ => clearTimeout(g_timeoutEvtTitleId), {
-			x: g_btnX() + g_btnWidth(3 / 4),
+			x: g_btnX(3 / 4),
 			y: 340,
 			w: g_btnWidth(1 / 4),
 			resetFunc: _ => c_infoInit(),
@@ -121,6 +133,7 @@ g_customJsObj.title.push(() => {
 const c_infoInit = () => {
 
 	clearWindow();
+	g_currentPage = `c_info`;
 
 	// テキスト
 	const c_comment = `
@@ -144,6 +157,9 @@ const c_infoInit = () => {
 		// border: `1px dashed #999999`,  // 枠がわかるように表示
 	});
 
+	// ---------------------------------------------------------------
+	// ▽ BackColor設定
+	// ---------------------------------------------------------------
 	// 拡張設定ヘッダー表示
 	c_extraSet.appendChild(
 		createDivCss2Label(`c_lblExtraSet`, `Original Settings`, {
@@ -176,6 +192,13 @@ const c_infoInit = () => {
 	});
 	c_changeBackColor();
 
+	// △ BackColor設定　ここまで
+	// ---------------------------------------------------------------
+
+	// AAオブジェクトをランダムに表示
+	const c_aaList = [`onigiri`, `giko`, `iyo`, `c`, `morara`, `monar`];
+	const c_randomidx = Math.floor(Math.random() * c_aaList.length);
+
 	// 各種ラベル追加
 	multiAppend(divRoot,
 
@@ -198,13 +221,13 @@ const c_infoInit = () => {
 			padding: `5px`,
 		}),
 
-		// おにぎりオブジェクトの配置
+		// オブジェクトの配置（ページごとに切り替え、ランダム）
 		createColorObject2(`c_lblC`, {
 			x: g_sWidth / 2 + 200,
 			y: 100,
 			w: 100,
 			h: 100,
-			rotate: `onigiri`,
+			rotate: c_aaList[c_randomidx],
 			background: `#ffffff`,
 		}),
 
@@ -220,7 +243,7 @@ const c_infoInit = () => {
 
 		// 次へボタン描画
 		createCss2Button(`c_btnNext`, `Setting`, _ => true, {
-			x: g_btnX() + g_btnWidth(1 / 2),
+			x: g_btnX(1 / 2),
 			y: g_sHeight - 50,
 			w: g_btnWidth(1 / 2),
 			h: 25,
@@ -230,7 +253,7 @@ const c_infoInit = () => {
 
 		// 外部リンク用ボタン描画
 		createCss2Button(`c_btnLink`, `Custom JSに関する情報はGitHub WikiのTipsへ`, _ => true, {
-			x: g_btnX() + g_btnWidth(1 / 2) - 300,
+			x: g_btnX(1 / 2) - 300,
 			y: g_sHeight - 100,
 			w: 600,
 			h: 25,
@@ -244,6 +267,12 @@ const c_infoInit = () => {
 			),
 		}, g_cssObj.button_Default),
 	);
+
+	// カスタム画面のショートカット表示
+	setShortcutEvent(g_currentPage);
+
+	document.oncontextmenu = () => true;
+	divRoot.oncontextmenu = () => false;
 };
 
 // 各画面で背景色を変更する
