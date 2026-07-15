@@ -260,7 +260,7 @@ const c_infoInit = () => {
 			w: g_btnWidth(1 / 2),
 			h: 25,
 			siz: 20,
-			resetFunc: _ => optionInit()
+			resetFunc: _ => g_moveSettingWindow(false)
 		}, g_cssObj.button_Setting),
 
 		// 外部リンク用ボタン描画
@@ -291,6 +291,23 @@ const c_infoInit = () => {
 	document.oncontextmenu = () => true;
 	divRoot.oncontextmenu = () => false;
 };
+
+// 各種設定よりカスタム画面へのリンクを追加
+const c_addButton = () => {
+	divRoot.appendChild(
+		createCss2Button(`c_btnInfo`, `Info &amp; Original`, _ => true, {
+			x: g_btnX(1 / 2),
+			y: g_sHeight - 20,
+			w: g_btnWidth(1 / 4),
+			h: 15,
+			siz: 12,
+			resetFunc: _ => c_infoInit(),
+		}, g_cssObj.button_Tweet)
+	);
+};
+g_customJsObj.option.push(() => c_addButton());
+g_customJsObj.settingsDisplay.push(() => c_addButton());
+g_customJsObj.exSetting.push(() => c_addButton());
 
 // 各画面で背景色を変更する
 g_skinJsObj.title.push(() => c_changeBackColor());
