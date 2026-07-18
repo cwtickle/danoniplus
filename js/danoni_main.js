@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/07/12
+ * Revised : 2026/07/18
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 49.3.0`;
-const g_revisedDate = `2026/07/12`;
+const g_version = `Ver 49.3.1`;
+const g_revisedDate = `2026/07/18`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -10106,7 +10106,8 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 	 */
 	const setExpandedBtnSiz = () => {
 		const camelH = toCapitalize(_name);
-		if (defaultList.includes(g_stateObj[_name])) {
+		const isDefault = defaultList.includes(g_stateObj[_name]);
+		if (isDefault) {
 			$id(`lnk${camelH}Type`).display = C_DIS_NONE;
 			$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeft);
 			$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidth);
@@ -10115,7 +10116,8 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 			$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeftShort);
 			$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidthShort);
 		}
-		$id(`lnk${camelH}`).fontSize = wUnit(getFontSize2(getStgDetailName(g_stateObj[_name]), g_limitObj.setLblWidthShort, { maxSiz: g_limitObj.setLblSiz }));
+		const labelWidth = isDefault ? g_limitObj.setLblWidth : g_limitObj.setLblWidthShort - 10;
+		$id(`lnk${camelH}`).fontSize = wUnit(getFontSize2(getStgDetailName(g_stateObj[_name]), labelWidth, { maxSiz: g_limitObj.setLblSiz }));
 	};
 
 	/**
