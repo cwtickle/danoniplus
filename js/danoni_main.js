@@ -10115,7 +10115,7 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 			$id(`lnk${camelH}`).left = wUnit(g_limitObj.setLblLeftShort);
 			$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidthShort);
 		}
-		$id(`lnk${camelH}`).fontSize = wUnit(getFontSize2(getStgDetailName(g_stateObj[_name]), g_limitObj.setLblWidthShort, { maxSiz: g_limitObj.setLblSiz }));
+		$id(`lnk${camelH}`).fontSize = wUnit(getFontSize2(getStgDetailName(g_stateObj[_name]), g_limitObj.setLblWidthShort - 10, { maxSiz: g_limitObj.setLblSiz }));
 	};
 
 	/**
