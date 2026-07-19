@@ -1,0 +1,50 @@
+name: Publish Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  id-token: write # npmへのOIDC認証に必須
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish to npm
+        run: |
+          # 1. package.jsonからリリース対象バージョンを取得
+          VERSION=$(node -p "require('./package.json').version")
+          
+          # 2. npm上の最新版を取得 (存在しない場合は 0.0.0 と判定)
+          LATEST_VERSION=$(npm view danoniplus version 2>/dev/null || echo "0.0.0")
+          
+          echo "公開対象バージョン: $VERSION"
+          echo "npm上の最新バージョン: $LATEST_VERSION"
+          
+          # 3. バージョン比較 (sort -V で数値として比較し、最新版より新しいか判定)
+          IS_NEWER=$(echo -e "$VERSION\n$LATEST_VERSION" | sort -V | tail -n1)
+          
+          # 共通オプション
+          PUBLISH_OPTS="--provenance --access=public"
+
+          # 4. バージョン判定と公開処理
+          if [ "$VERSION" == "$LATEST_VERSION" ]; then
+            echo "既に公開されている同一バージョンです。処理をスキップします。"
+            exit 0
+          elif [ "$IS_NEWER" == "$VERSION" ]; then
+            echo "最新版より新しいバージョンを検出しました。'latest' タグで公開します。"
+            npm publish $PUBLISH_OPTS
+          else
+            echo "過去バージョンのため 'legacy' タグで公開します。"
+            npm publish $PUBLISH_OPTS --tag legacy
+          fi
