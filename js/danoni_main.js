@@ -12903,8 +12903,11 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const arrowNum = parseFloat(tmpScrollchData[1]);
 				const scrollDir = parseFloat(tmpScrollchData[2] ?? `1`);
 				const layerGroup = parseFloat(tmpScrollchData[3] ?? `-1`);
-				const layerTrans = tmpScrollchData[4] ?? ``;
+				let layerTrans = tmpScrollchData[4] ?? ``;
 				maxLayerGroup = Math.max(maxLayerGroup, layerGroup);
+				if (g_stateObj.reverse === C_FLG_ON) {
+					layerTrans = invertSpecificTransforms(layerTrans);
+				}
 
 				scrollchData.push([frame, arrowNum, frame, scrollDir, layerGroup, layerTrans]);
 			});
