@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/07/04
+ * Revised : 2026/07/31
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 44.5.18`;
-const g_revisedDate = `2026/07/04`;
+const g_version = `Ver 44.5.19`;
+const g_revisedDate = `2026/07/31`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -10525,8 +10525,11 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				const arrowNum = parseFloat(tmpScrollchData[1]);
 				const scrollDir = parseFloat(tmpScrollchData[2] ?? `1`);
 				const layerGroup = parseFloat(tmpScrollchData[3] ?? `-1`);
-				const layerTrans = tmpScrollchData[4] ?? ``;
+				let layerTrans = tmpScrollchData[4] ?? ``;
 				maxLayerGroup = Math.max(maxLayerGroup, layerGroup);
+				if (g_stateObj.reverse === C_FLG_ON) {
+					layerTrans = invertSpecificTransforms(layerTrans);
+				}
 
 				scrollchData.push([frame, arrowNum, frame, scrollDir, layerGroup, layerTrans]);
 			});
@@ -11638,6 +11641,32 @@ const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir, _laye
 };
 
 /**
+ * ホワイトリストに登録されたCSS関数内の数値符号のみを反転する関数
+ * @param {string} cssString 
+ * @returns {string} 
+ */
+const invertSpecificTransforms = (cssString) => {
+	// 反転対象にしたいCSS関数名を指定（ホワイトリスト）
+	const targetFunctions = [
+		`rotate`, `rotateX`, `rotateY`, `rotateZ`, `rotate3d`,
+		`translate`, `translateX`, `translateY`, `translateZ`, `translate3d`,
+		`skew`, `skewX`, `skewY`
+	];
+
+	// RegExパターンを作成: /(rotate|translate...)\(([^)]+)\)/g
+	const pattern = new RegExp(`\\b(${targetFunctions.join(`|`)})\\(([^)]+)\\)`, `g`);
+
+	return cssString.replace(pattern, (match, funcName, args) => {
+		// 関数の中身（引数）に含まれる数値だけを符号反転
+		const invertedArgs = args.replace(/(-?\d+(?:\.\d+)?)/g, (numStr) => {
+			return numStr.startsWith(`-`) ? numStr.slice(1) : `-` + numStr;
+		});
+
+		return `${funcName}(${invertedArgs})`;
+	});
+}
+
+/**
  * メイン画面前の初期化処理
  */
 const getArrowSettings = () => {
@@ -11666,6 +11695,7 @@ const getArrowSettings = () => {
 	g_workObj.keyCtrl = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 	g_workObj.diffList = [];
 	g_workObj.mainEndTime = 0;
+	g_workObj.layerTrans = [];
 
 	const rotateBy = (val, delta) => {
 		// numeric
@@ -11697,6 +11727,13 @@ const getArrowSettings = () => {
 
 	g_workObj.keyGroupMaps = tkObj.keyGroupMaps;
 	g_workObj.keyGroupList = tkObj.keyGroupList;
+
+	if (g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]) {
+		g_workObj.layerTrans = structuredClone(g_keyObj[`layerTrans${keyCtrlPtn}`][0]);
+		if (g_stateObj.reverse === C_FLG_ON) {
+			g_workObj.layerTrans = g_workObj.layerTrans.map(val => invertSpecificTransforms(val));
+		}
+	}
 
 	const keyCtrlLen = g_workObj.keyCtrl.length;
 	g_workObj.keyCtrlN = [...Array(keyCtrlLen)].map(() => []);
@@ -12173,7 +12210,7 @@ const mainInit = () => {
 		// StepAreaオプションにより、レイヤーが倍化される場合があるため基準レイヤー数ごとに設定
 		const transj = j % g_stateObj.layerNumDf;
 		addTransform(`mainSprite${j}`, `mainSprite${j}`,
-			g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]?.[Math.floor(transj / 2) * 2 + (transj + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
+			g_workObj.layerTrans[Math.floor(transj / 2) * 2 + (transj + Number(g_stateObj.reverse === C_FLG_ON)) % 2]);
 
 		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
 		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, Object.assign({ y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }, mainCommonPos)));
