@@ -14070,20 +14070,20 @@ const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir, _laye
  * @returns {string} 
  */
 const invertSpecificTransforms = (cssString) => {
-	// 1. 反転対象にしたいCSS関数名を指定（ホワイトリスト）
+	// 反転対象にしたいCSS関数名を指定（ホワイトリスト）
 	const targetFunctions = [
-		'rotate', 'rotateX', 'rotateY', 'rotateZ', 'rotate3d',
-		'translate', 'translateX', 'translateY', 'translateZ', 'translate3d',
-		'skew', 'skewX', 'skewY'
+		`rotate`, `rotateX`, `rotateY`, `rotateZ`, `rotate3d`,
+		`translate`, `translateX`, `translateY`, `translateZ`, `translate3d`,
+		`skew`, `skewX`, `skewY`
 	];
 
 	// RegExパターンを作成: /(rotate|translate...)\(([^)]+)\)/g
-	const pattern = new RegExp(`\\b(${targetFunctions.join('|')})\\(([^)]+)\\)`, 'g');
+	const pattern = new RegExp(`\\b(${targetFunctions.join(`|`)})\\(([^)]+)\\)`, `g`);
 
 	return cssString.replace(pattern, (match, funcName, args) => {
 		// 関数の中身（引数）に含まれる数値だけを符号反転
 		const invertedArgs = args.replace(/(-?\d+(?:\.\d+)?)/g, (numStr) => {
-			return numStr.startsWith('-') ? numStr.slice(1) : '-' + numStr;
+			return numStr.startsWith(`-`) ? numStr.slice(1) : `-` + numStr;
 		});
 
 		return `${funcName}(${invertedArgs})`;
