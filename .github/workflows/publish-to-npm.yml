@@ -5,10 +5,6 @@ on:
     tags:
       - 'v*'
 
-permissions:
-  id-token: write # npmへのOIDC認証に必須
-  contents: read
-
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -21,6 +17,8 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           # 1. package.jsonからリリース対象バージョンを取得
           VERSION=$(node -p "require('./package.json').version")
@@ -34,8 +32,8 @@ jobs:
           # 3. バージョン比較 (sort -V で数値として比較し、最新版より新しいか判定)
           IS_NEWER=$(echo -e "$VERSION\n$LATEST_VERSION" | sort -V | tail -n1)
           
-          # 共通オプション
-          PUBLISH_OPTS="--provenance --access=public"
+          # 共通オプション (--provenance はトークン認証環境ではエラーになる場合があるため除外)
+          PUBLISH_OPTS="--access=public"
 
           # 4. バージョン判定と公開処理
           if [ "$VERSION" == "$LATEST_VERSION" ]; then
