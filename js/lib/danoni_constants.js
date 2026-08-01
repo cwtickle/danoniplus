@@ -3343,11 +3343,11 @@ const g_keyObj = {
     chara5_2: [`left`, `down`, `space`, `up`, `right`],
     chara8_2: [`sleft`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
     chara9h_2: [`1x`, `ax`, `zx`, `sx`, `hx`, `yx`, `ux`, `mx`, `ix`],
-    chara11L_2: [`left`, `sleft`, `sdown`, `leftdia`, `down`, `space`,
-        `up`, `sup`, `sright`, `rightdia`, `right`],
 
     chara9h_3: [`1x`, `ax`, `zx`, `sx`, `hx`, `yx`, `ux`, `mx`, `ix`],
     chara11_3: [`left`, `sleft`, `sdown`, `leftdia`, `down`, `space`,
+        `up`, `sup`, `sright`, `rightdia`, `right`],
+    chara11L_3: [`left`, `sleft`, `sdown`, `leftdia`, `down`, `space`,
         `up`, `sup`, `sright`, `rightdia`, `right`],
 
     chara9h_4: [`1x`, `ax`, `gor`, `zx`, `sx`, `hx`, `yx`, `ux`, `siyo`, `mx`, `ix`],
