@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/07/04 (v47.6.6)
+ * Revised : 2026/08/01 (v47.6.9)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3230,12 +3230,13 @@ const g_keyObj = {
     chara5_2: [`left`, `down`, `space`, `up`, `right`],
     chara8_2: [`sleft`, `left`, `leftdia`, `down`, `space`, `up`, `rightdia`, `right`],
     chara9h_2: [`1x`, `ax`, `zx`, `sx`, `hx`, `yx`, `ux`, `mx`, `ix`],
-    chara11_2: [`left`, `sleft`, `sdown`, `leftdia`, `down`, `space`,
-        `up`, `sup`, `sright`, `rightdia`, `right`],
     chara11L_2: [`left`, `sleft`, `sdown`, `leftdia`, `down`, `space`,
         `up`, `sup`, `sright`, `rightdia`, `right`],
 
     chara9h_3: [`1x`, `ax`, `zx`, `sx`, `hx`, `yx`, `ux`, `mx`, `ix`],
+    chara11_3: [`left`, `sleft`, `sdown`, `leftdia`, `down`, `space`,
+        `up`, `sup`, `sright`, `rightdia`, `right`],
+
     chara9h_4: [`1x`, `ax`, `gor`, `zx`, `sx`, `hx`, `yx`, `ux`, `siyo`, `mx`, `ix`],
     chara9h_5: [`1x`, `ax`, `zx`, `sx`, `hx`, `yx`, `ux`, `mx`, `ix`],
     chara9h_6: [`1x`, `ax`, `zx`, `sx`, `hx`, `yx`, `ux`, `mx`, `ix`],
