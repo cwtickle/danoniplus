@@ -10422,7 +10422,8 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		if (g_isDebug) {
 			keyconSprite.appendChild(
 				createDivCss2Label(`arrowChara${j}`, g_keyObj[`chara${keyCtrlPtn}`][j], {
-					x: keyconX, y: keyconY + 40, w: C_ARW_WIDTH, h: 10, siz: 10, align: C_ALIGN_CENTER, background: `rgba(0,0,0,0.5)`,
+					x: keyconX, y: keyconY + 40, w: C_ARW_WIDTH, h: 10, siz: 10, align: C_ALIGN_CENTER,
+					background: g_headerObj.baseBrightFlg ? `rgba(255,255,255,0.5)` : `rgba(0,0,0,0.5)`,
 				}, g_cssObj.title_base)
 			);
 		}
