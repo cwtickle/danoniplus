@@ -10419,6 +10419,13 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 				}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 			);
 		}
+		if (g_isDebug) {
+			keyconSprite.appendChild(
+				createDivCss2Label(`arrowChara${j}`, g_keyObj[`chara${keyCtrlPtn}`][j], {
+					x: keyconX, y: keyconY + 40, w: C_ARW_WIDTH, h: 10, siz: 10, align: C_ALIGN_CENTER, background: `rgba(0,0,0,0.5)`,
+				}, g_cssObj.title_base)
+			);
+		}
 
 		// 割り当て先のキー名を表示
 		for (let k = 0; k < g_keyObj[`keyCtrl${keyCtrlPtn}`][j].length; k++) {
@@ -10729,6 +10736,9 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 			$id(`color${_j}`).display = _display;
 			if (document.getElementById(`sArrow${_j}`) !== null) {
 				$id(`sArrow${_j}`).display = _display;
+			}
+			if (document.getElementById(`arrowChara${_j}`) !== null) {
+				$id(`arrowChara${_j}`).display = _display;
 			}
 			const ctrlPtn = g_keyObj[`keyCtrl${g_headerObj.keyLabels[g_stateObj.scoreId]}_${g_keyObj.currentPtn}`][_j];
 			for (let k = 0; k < ctrlPtn.length; k++) {
