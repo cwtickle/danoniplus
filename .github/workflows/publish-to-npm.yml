@@ -17,8 +17,11 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Upgrade npm
+        run: npm install -g npm@latest
 
       - name: Publish to npm
         run: |
