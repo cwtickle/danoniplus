@@ -27,7 +27,7 @@ jobs:
       GITLAB_NAMESPACE: "cwtickle"
       # リポジトリごとの常時除外(basename一致)
       DEFAULT_EXCLUDES_GH_MAIN: "Changelog-latest.md,_sidebar.md,AboutReleaseInfo.md,AccessMap.md,HowToUpdate.md,MigrationGuide.md,UpdateInfo.md,Release-Procedures.md,Release-Templates.md"
-      DEFAULT_EXCLUDES_GH_DOCS: "Changelog-latest.md,kirizma-Changelog-latest.md,kirizma-Changelog-v1.md,_sidebar.md,AboutReleaseInfo.md,AccessMap.md,HowToUpdate.md,MigrationGuide.md,SecurityPolicy.md,UpdateInfo.md"
+      DEFAULT_EXCLUDES_GH_DOCS: "Changelog-latest.md,kirizma-Changelog-latest.md,kirizma-Changelog-v1.md,kirizma-Changelog-v2.md,_sidebar.md,AboutReleaseInfo.md,AccessMap.md,HowToUpdate.md,MigrationGuide.md,SecurityPolicy.md,UpdateInfo.md"
       DEFAULT_EXCLUDES_GITLAB: "Changelog-latest.md,AboutReleaseInfo.md,AccessMap.md,HowToUpdate.md,MigrationGuide.md,Security-Policy.md,UpdateInfo.md,Release-Procedures.md,Release-Templates.md"
 
     steps:

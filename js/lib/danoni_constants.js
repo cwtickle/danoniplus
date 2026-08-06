@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/08/01 (v49.3.3)
+ * Revised : 2026/08/06 (v49.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3676,7 +3676,7 @@ const g_keyObj = {
     keyTitleBack11j_0: 27,  // 27: Escape
 
     // 別キー
-    transKey8_2: '12',
+    transKey8_2: '12u',
     transKey15A_1: '15B',   // 15A/15Bはキーパターンをコピーして生成するため、transKeyを明示的に指定
     transKey15B_0: '',      // 15A/15Bはキーパターンをコピーして生成するため、transKeyを明示的に指定
 
@@ -4136,6 +4136,9 @@ g_keycons.groups.forEach(type => {
     tmpName.forEach(property => g_keyObj[`${property.slice(0, -2)}`] = g_keyObj[property].concat());
 });
 
+// デフォルトで定義されたキーパターンのtransKeyPtnを補完する
+completeTransKeyPtn(g_keyObj.defaultKeyList);
+
 // 外部エディター用テンプレート
 // g_editorTmp: Dancing☆Onigiriエディター (CW Edition対応)
 // g_editorTmp2: ダンおに譜面作成エディタ ver3.x
@@ -4177,7 +4180,7 @@ const g_editorTmp2Template = `
 // 後でプロパティ削除に影響するため、先頭文字が全く同じ場合は長い方を先に定義する (例: divMax, div)
 const g_keyCopyLists = {
     simpleDef: [`blank`, `scale`],
-    simple: [`divMax`, `div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKey`, `scrollDir`, `assistPos`, `flatMode`],
+    simple: [`divMax`, `div`, `blank`, `scale`, `keyRetry`, `keyTitleBack`, `transKeyPtn`, `transKey`, `scrollDir`, `assistPos`, `flatMode`],
     multiple: [`chara`, `color`, `stepRtn`, `pos`, `shuffle`, `keyGroupOrder`, `keyGroup`, `layerGroup`, `layerTrans`],
 };
 
@@ -4902,7 +4905,7 @@ const g_lang_lblNameObj = {
         kcShortcutDesc: `Shortcut during play:`,
         kcShortcutDesc1: `Return to title: {0}`,
         kcShortcutDesc2: `Retry the game: {1}`,
-        transKeyDesc: `Key config, Color type, etc. are not saved in another key mode`,
+        transKeyDesc: `Key config, Color type, etc. are not saved for alternate keymode`,
         colorTypeDesc: `With the current ColorType setting, color change (Display:Color) will be automatically turned OFF.`,
         sdShortcutDesc: `When "Hidden+" or "Sudden+" select, "pageUp" cover up / "pageDown" cover down`,
         displayPreviewDesc: `If you drag the judgment character section or shortcut display, it will be adjusted to that position.`,
@@ -5073,6 +5076,7 @@ const g_lang_msgObj = {
         pickColorR: `設定する矢印色の種類を切り替えます。`,
         pickColorCopy: `このボタンを押すと、フリーズアローの配色を矢印（枠）の色で上書きします。\nヒット時のフリーズアローの色も上書きします。`,
         pickColorReset: `矢印・フリーズアローの配色を元に戻します。`,
+        ptnSelfImport: `対応する別キーで保存されているキーコンフィグを読み込みます。`,
 
         customFunctionError: `初回の実行エラーが発生しました。修正されるまでこの処理は無視されます。`,
     },
@@ -5181,6 +5185,7 @@ const g_lang_msgObj = {
         pickColorR: `Switches the arrow color type to be set.`,
         pickColorCopy: `Pressing this button will override the color scheme of the freeze arrow with the frame color of the arrow. \nIt also overrides the color of the freeze arrow on hit.`,
         pickColorReset: `Restore the color scheme for arrows and freeze arrows.`,
+        ptnSelfImport: `Load the key config saved for the corresponding alternate keymode.`,
 
         customFunctionError: `An error occurred during the first execution. This process will be ignored until the error is resolved.`,
     },
