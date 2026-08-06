@@ -5619,6 +5619,8 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 					},
 				});
 			}
+			// カスタムキーで定義されたtransKeyPtnを補完
+			completeTransKeyPtn([newKey]);
 
 			// keyRetry, keyTitleBackのキー名をキーコードに変換
 			const keyTypePatterns = Object.keys(g_keyObj).filter(val => val.startsWith(`keyRetry${newKey}`) || val.startsWith(`keyTitleBack${newKey}`));
@@ -8079,6 +8081,66 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 };
 
 /**
+ * 指定したキー名のキー別ストレージオブジェクトを取得
+ * @param {string} _keyName
+ * @returns {[Object, string]} [storageObj, addKey]
+ */
+const getKeyStorageObjByName = (_keyName) => {
+	if (g_headerObj.keyExtraList.includes(_keyName)) {
+		return [g_localStorage, _keyName];
+	}
+	return [parseStorageData(`danonicw-${_keyName}k`, {
+		reverse: C_FLG_OFF, keyCtrl: [[]], keyCtrlPtn: 0, setColor: [],
+	}), ``];
+};
+
+/**
+ * 別キーモード時、移行先キーが保持するSelf保存パターンの取得可否チェック
+ * @param {string} _keyCtrlPtn 例: "7_2"
+ * @returns {number[][]|undefined} 適用可能な場合はSelf保存済みkeyCtrl配列、不可ならundefined
+ */
+const getTransKeySelfCtrl = (_keyCtrlPtn) => {
+	const transKeyName = g_keyObj[`transKey${_keyCtrlPtn}`];
+	const transKeyPtn = g_keyObj[`transKeyPtn${_keyCtrlPtn}`];
+	if (!hasVal(transKeyName) || transKeyPtn === undefined) {
+		return undefined;
+	}
+	const [storageObj, addKey] = getKeyStorageObjByName(transKeyName);
+	const savedCtrl = storageObj[`keyCtrl${addKey}`];
+	const savedPtn = storageObj[`keyCtrlPtn${addKey}`];
+
+	if (savedPtn !== transKeyPtn) {
+		return undefined;
+	}
+
+	// 現在のキー配置(基準形状)とレーン数・各レーン長が完全一致することを確認
+	const baseCtrl = g_keyObj[`keyCtrl${_keyCtrlPtn}`];
+	const isValidShape = hasArrayList(savedCtrl, baseCtrl.length) &&
+		savedCtrl.length === baseCtrl.length &&
+		baseCtrl.every((lane, j) => hasArrayList(savedCtrl[j], lane.length) && savedCtrl[j].length === lane.length);
+
+	return isValidShape ? savedCtrl : undefined;
+};
+
+/**
+ * 別キーモードの移行先Selfパターンを現在のキー配置へ反映（保存はしない）
+ */
+const applyTransKeySelfPattern = () => {
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const savedCtrl = getTransKeySelfCtrl(keyCtrlPtn);
+	if (savedCtrl === undefined) {
+		return;
+	}
+	const baseKeyNum = g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length;
+	for (let j = 0; j < baseKeyNum; j++) {
+		for (let k = 0; k < (savedCtrl[j]?.length ?? 0); k++) {
+			g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setIntVal(savedCtrl[j][k], 0);
+		}
+	}
+	keyConfigInit();
+};
+
+/**
  * 譜面初期化処理
  * - 譜面の基本設定（キー数、初期速度、リバース、ゲージ設定）をここで行う
  * - g_canLoadDifInfoFlg は譜面初期化フラグで、初期化したくない場合は対象画面にて false にしておく
@@ -8114,24 +8176,11 @@ const setDifficulty = (_initFlg) => {
 			g_keyObj.currentPtn = 0;
 			g_keycons.keySwitchNum = 0;
 		}
-		let storageObj, addKey = ``;
-
-		if (!g_stateObj.extraKeyFlg) {
-
-			// キー別のローカルストレージの初期設定 ※特殊キーは除く
-			g_localKeyStorage = parseStorageData(`danonicw-${g_keyObj.currentKey}k`, {
-				reverse: C_FLG_OFF,
-				keyCtrl: [[]],
-				keyCtrlPtn: 0,
-				setColor: [],
-			});
-			storageObj = g_localKeyStorage;
-
-		} else {
-			storageObj = g_localStorage;
-			addKey = g_keyObj.currentKey;
-		}
+		const [storageObj, addKey] = getKeyStorageObjByName(g_keyObj.currentKey);
 		if (isNotSameKey) {
+			if (!g_stateObj.extraKeyFlg) {
+				g_localKeyStorage = storageObj;
+			}
 			getKeyReverse(storageObj, addKey);
 
 			// キーコンフィグ初期値設定
@@ -11088,6 +11137,18 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	);
 	toggleKcDesc();
 
+	// Selfパターン取込ボタン（条件成立時のみ表示）
+	const keyCtrlPtnForSelf = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	if (getTransKeySelfCtrl(keyCtrlPtnForSelf) !== undefined) {
+		divRoot.appendChild(
+			createCss2Button(`btnPtnSelf`, `Self`, () => applyTransKeySelfPattern(), {
+				x: g_lblPosObj.lblPattern.x + g_lblPosObj.lblPattern.w - 50,
+				y: g_lblPosObj.lblPattern.y - 14,
+				w: 50, h: 14, siz: 10, title: g_msgObj.ptnSelfImport,
+			}, g_cssObj.button_Mini)
+		);
+	}
+
 	// キーボード押下時処理
 	setShortcutEvent(g_currentPage, (kbCode) => {
 		const C_KEY_ESCAPE = 27;
@@ -11188,6 +11249,35 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	safeExecuteCustomHooks(`g_skinJsObj.keyconfig`, g_skinJsObj.keyconfig);
 	document.onkeyup = evt => commonKeyUp(evt);
 	document.oncontextmenu = () => false;
+};
+
+/**
+ * transKeyPtnの自動補完処理
+ * - 明示指定(transKeyPtn)が無いパターンについて、
+ *   キー内で同一のtransKey対象へ向かうパターンを出現順(パターン番号昇順)に
+ *   0から連番で補完する
+ * @param {string[]} _keyList 対象とするキー名一覧
+ */
+const completeTransKeyPtn = (_keyList) => {
+	_keyList.forEach(keyName => {
+		const counterMap = {};
+		let ptnNum = 0;
+		while (g_keyObj[`keyCtrl${keyName}_${ptnNum}`] !== undefined) {
+			const keyPtn = `${keyName}_${ptnNum}`;
+			const targetKey = g_keyObj[`transKey${keyPtn}`];
+			if (hasVal(targetKey)) {
+				if (g_keyObj[`transKeyPtn${keyPtn}`] === undefined) {
+					counterMap[targetKey] = counterMap[targetKey] ?? 0;
+					g_keyObj[`transKeyPtn${keyPtn}`] = counterMap[targetKey];
+					counterMap[targetKey]++;
+				} else {
+					// 明示指定がある場合は以降の自動採番と重複しないよう位置を合わせる
+					counterMap[targetKey] = Math.max(counterMap[targetKey] ?? 0, g_keyObj[`transKeyPtn${keyPtn}`] + 1);
+				}
+			}
+			ptnNum++;
+		}
+	});
 };
 
 const toggleKcDesc = () => {
