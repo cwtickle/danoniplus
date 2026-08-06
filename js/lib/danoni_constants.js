@@ -4905,7 +4905,7 @@ const g_lang_lblNameObj = {
         kcShortcutDesc: `Shortcut during play:`,
         kcShortcutDesc1: `Return to title: {0}`,
         kcShortcutDesc2: `Retry the game: {1}`,
-        transKeyDesc: `Key config, Color type, etc. are not saved in another key mode`,
+        transKeyDesc: `Key config, Color type, etc. are not saved for alternate keymode`,
         colorTypeDesc: `With the current ColorType setting, color change (Display:Color) will be automatically turned OFF.`,
         sdShortcutDesc: `When "Hidden+" or "Sudden+" select, "pageUp" cover up / "pageDown" cover down`,
         displayPreviewDesc: `If you drag the judgment character section or shortcut display, it will be adjusted to that position.`,
@@ -5185,7 +5185,7 @@ const g_lang_msgObj = {
         pickColorR: `Switches the arrow color type to be set.`,
         pickColorCopy: `Pressing this button will override the color scheme of the freeze arrow with the frame color of the arrow. \nIt also overrides the color of the freeze arrow on hit.`,
         pickColorReset: `Restore the color scheme for arrows and freeze arrows.`,
-        ptnSelfImport: `Load the key config saved in the corresponding another keymode.`,
+        ptnSelfImport: `Load the key config saved for the corresponding alternate keymode.`,
 
         customFunctionError: `An error occurred during the first execution. This process will be ignored until the error is resolved.`,
     },

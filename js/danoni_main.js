@@ -8109,10 +8109,17 @@ const getTransKeySelfCtrl = (_keyCtrlPtn) => {
 	const savedCtrl = storageObj[`keyCtrl${addKey}`];
 	const savedPtn = storageObj[`keyCtrlPtn${addKey}`];
 
-	if (!hasArrayList(savedCtrl?.[0], 1) || savedPtn !== transKeyPtn) {
+	if (savedPtn !== transKeyPtn) {
 		return undefined;
 	}
-	return savedCtrl;
+
+	// 現在のキー配置(基準形状)とレーン数・各レーン長が完全一致することを確認
+	const baseCtrl = g_keyObj[`keyCtrl${_keyCtrlPtn}`];
+	const isValidShape = hasArrayList(savedCtrl, baseCtrl.length) &&
+		savedCtrl.length === baseCtrl.length &&
+		baseCtrl.every((lane, j) => hasArrayList(savedCtrl[j], lane.length) && savedCtrl[j].length === lane.length);
+
+	return isValidShape ? savedCtrl : undefined;
 };
 
 /**
