@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/08/01
+ * Revised : 2026/08/12
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 44.5.21`;
-const g_revisedDate = `2026/08/01`;
+const g_version = `Ver 44.5.22`;
+const g_revisedDate = `2026/08/12`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -10528,7 +10528,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				let layerTrans = tmpScrollchData[4] ?? ``;
 				maxLayerGroup = Math.max(maxLayerGroup, layerGroup);
 				if (g_stateObj.reverse === C_FLG_ON) {
-					layerTrans = invertSpecificTransforms(layerTrans);
+					layerTrans = invertSpecificTransforms(layerTrans, [`translateX`]);
 				}
 
 				scrollchData.push([frame, arrowNum, frame, scrollDir, layerGroup, layerTrans]);
@@ -11643,15 +11643,20 @@ const pushScrollchs = (_header, _frameArrow, _val, _frameStep, _scrollDir, _laye
 /**
  * ホワイトリストに登録されたCSS関数内の数値符号のみを反転する関数
  * @param {string} cssString 
+ * @param {string[]} exceptList 反転対象から除外するCSS関数名のリスト
  * @returns {string} 
  */
-const invertSpecificTransforms = (cssString) => {
+const invertSpecificTransforms = (cssString, exceptList = []) => {
 	// 反転対象にしたいCSS関数名を指定（ホワイトリスト）
-	const targetFunctions = [
+	const baseTargetFunctions = [
 		`rotate`, `rotateX`, `rotateY`, `rotateZ`, `rotate3d`,
 		`translate`, `translateX`, `translateY`, `translateZ`, `translate3d`,
 		`skew`, `skewX`, `skewY`
 	];
+	const targetFunctions = baseTargetFunctions.filter(pattern => !exceptList.includes(pattern));
+	if (targetFunctions.length === 0) {
+		return cssString; // 反転対象がない場合は元の文字列を返す
+	}
 
 	// RegExパターンを作成: /(rotate|translate...)\(([^)]+)\)/g
 	const pattern = new RegExp(`\\b(${targetFunctions.join(`|`)})\\(([^)]+)\\)`, `g`);
@@ -11731,7 +11736,8 @@ const getArrowSettings = () => {
 	if (g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0]) {
 		g_workObj.layerTrans = structuredClone(g_keyObj[`layerTrans${keyCtrlPtn}`][0]);
 		if (g_stateObj.reverse === C_FLG_ON) {
-			g_workObj.layerTrans = g_workObj.layerTrans.map(val => invertSpecificTransforms(val));
+			// Reverse時はX軸反転のため、X軸の座標変換では符号を変換しない
+			g_workObj.layerTrans = g_workObj.layerTrans.map(val => invertSpecificTransforms(val, [`translateX`]));
 		}
 	}
 
