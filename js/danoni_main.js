@@ -10351,7 +10351,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		} else {
 			changeTmpOneColor(_j);
 		}
-		adjustScrollPoint(parseFloat($id(`arrow${_j}`).left));
+		adjustScrollPoint(parseFloat($id(`keyGroup${_j}`).left));
 	};
 
 	/**
@@ -10377,7 +10377,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		} else {
 			changeTmpOneShuffle(_j);
 		}
-		adjustScrollPoint(parseFloat($id(`arrow${_j}`).left));
+		adjustScrollPoint(parseFloat($id(`keyGroup${_j}`).left));
 	};
 
 	/**
