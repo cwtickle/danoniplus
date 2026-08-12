@@ -8,7 +8,7 @@
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 49.4.2`;
+const g_version = `Ver 49.5.0`;
 const g_revisedDate = `2026/08/12`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -10260,56 +10260,6 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 				? g_lblNameObj.kcShuffleDesc : g_lblNameObj.kcNoShuffleDesc),
 	);
 
-	// キーの一覧を表示
-	const keyconSprite = createEmptySprite(divRoot, `keyconSprite`, g_windowObj.keyconSprite);
-	const tkObj = getKeyInfo();
-	const [keyCtrlPtn, keyNum, posMax, divideCnt] =
-		[tkObj.keyCtrlPtn, tkObj.keyNum, tkObj.posMax, tkObj.divideCnt];
-
-	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
-	addTransform(`keyconSprite`, `root`, `scale(${g_keyObj.scale})`, g_transPriority.scale);
-	keyconSprite.style.height = `${parseFloat(keyconSprite.style.height) / ((1 + g_keyObj.scale) / 2)}px`;
-	const kWidth = parseInt(keyconSprite.style.width);
-	changeSetColor();
-
-	const maxLeftPos = Math.max(divideCnt, posMax - divideCnt - 2) / 2;
-	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
-
-	g_keycons.cursorNumList = [...Array(keyNum).keys()].map(i => i);
-	const configKeyGroupList = g_headerObj.keyGroupOrder[g_stateObj.scoreId] ??
-		g_keyObj[`keyGroupOrder${keyCtrlPtn}`] ?? tkObj.keyGroupList;
-	g_keycons.colorCursorNum = 0;
-
-	// 色変化中の初期色を取得（矢印枠のみ）
-	const arrowColorTmp = g_detailObj.miniMapParams[g_stateObj.scoreId]._scoreObj.ncolorData.Arrow;
-	const arrowColors = Array.from({ length: Math.ceil(arrowColorTmp.length / 5) }, (_, i) =>
-		arrowColorTmp.slice(i * 5, i * 5 + 5)
-	).filter(val => val[0] === 0);
-	const initColors = [];
-	arrowColors.forEach(val => {
-		const laneToken = val[1];
-		const laneStr = String(laneToken ?? ``);
-		if (laneStr.startsWith('g')) {
-			// g付きの場合は矢印グループから対象の矢印番号を検索
-			const groupVal = setIntVal(laneStr.slice(1));
-			for (let j = 0; j < tkObj.keyNum; j++) {
-				if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === groupVal) {
-					initColors[j] = makeColorGradation(val[2]);
-				}
-			}
-		} else {
-			const laneIdx = setIntVal(laneToken, -1);
-			if (laneIdx >= 0 && laneIdx < tkObj.keyNum) {
-				initColors[laneIdx] = makeColorGradation(val[2]);
-			}
-		}
-	});
-	if (_initFlg) {
-		g_baseColorGrs = {};
-		const colorKey = Object.keys(g_keyObj).filter(val => val.startsWith(`color${g_keyObj.currentKey}`));
-		colorKey.forEach(val => g_baseColorGrs[val] = g_keyObj[val]);
-	}
-
 	/**
 	 * keyconSpriteのスクロール位置調整
 	 * @param {number} _targetX 
@@ -10401,7 +10351,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		} else {
 			changeTmpOneColor(_j);
 		}
-		adjustScrollPoint(parseFloat($id(`arrow${_j}`).left));
+		adjustScrollPoint(parseFloat($id(`keyGroup${_j}`).left));
 	};
 
 	/**
@@ -10427,17 +10377,101 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		} else {
 			changeTmpOneShuffle(_j);
 		}
-		adjustScrollPoint(parseFloat($id(`arrow${_j}`).left));
+		adjustScrollPoint(parseFloat($id(`keyGroup${_j}`).left));
 	};
 
+	/**
+	 * 指定関数群だけを抽出したtransform文字列を作成
+	 */
+	const extractTransformFuncs = (cssString, funcNames) => {
+		const pattern = new RegExp(`\\b(${funcNames.join(`|`)})\\([^)]*\\)`, `g`);
+		return (cssString.match(pattern) || []).join(` `);
+	};
+
+	/**
+	 * 対象レーンのレイヤー番号を取得
+	 */
+	const getLayerIdx = (_j, _posj) => {
+		const baseLayer = g_keyObj[`layerGroup${keyCtrlPtn}`]?.[_j] || 0;
+		const rowFlg = Number(_posj > divideCnt); // reverse/scrollDirは考慮せず固定
+		return baseLayer * 2 + rowFlg;
+	};
+
+	/**
+	 * 対象レイヤーの回転変形を取得
+	 */
+	const getLayerRotateParts = _keyCtrlPtn => {
+		const raw = g_keyObj[`layerTrans${_keyCtrlPtn}`]?.[0] ?? [``, ``, ``, ``];
+		return raw.map(trans => trans === `` ? `` : extractTransformFuncs(trans, [`rotate`, `rotateX`, `rotateY`, `rotateZ`, `rotate3d`]));
+	};
+
+	// キーの一覧を表示するための準備
+	const C_LAYER_Y_OFFSET = 10; // baseLayerごとの縦オフセット量
+	const keyconSprite = createEmptySprite(divRoot, `keyconSprite`, g_windowObj.keyconSprite);
+	const tkObj = getKeyInfo();
+	const [keyCtrlPtn, keyNum, posMax, divideCnt] =
+		[tkObj.keyCtrlPtn, tkObj.keyNum, tkObj.posMax, tkObj.divideCnt];
+
+	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
+	addTransform(`keyconSprite`, `root`, `scale(${g_keyObj.scale})`, g_transPriority.scale);
+	keyconSprite.style.height = `${parseFloat(keyconSprite.style.height) / ((1 + g_keyObj.scale) / 2)}px`;
+	const kWidth = parseInt(keyconSprite.style.width);
+	changeSetColor();
+
+	const maxLeftPos = Math.max(divideCnt, posMax - divideCnt - 2) / 2;
+	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
+
+	g_keycons.cursorNumList = [...Array(keyNum).keys()].map(i => i);
+	const configKeyGroupList = g_headerObj.keyGroupOrder[g_stateObj.scoreId] ??
+		g_keyObj[`keyGroupOrder${keyCtrlPtn}`] ?? tkObj.keyGroupList;
+	g_keycons.colorCursorNum = 0;
+
+	// 色変化中の初期色を取得（矢印枠のみ）
+	const arrowColorTmp = g_detailObj.miniMapParams[g_stateObj.scoreId]._scoreObj.ncolorData.Arrow;
+	const arrowColors = Array.from({ length: Math.ceil(arrowColorTmp.length / 5) }, (_, i) =>
+		arrowColorTmp.slice(i * 5, i * 5 + 5)
+	).filter(val => val[0] === 0);
+	const initColors = [];
+	arrowColors.forEach(val => {
+		const laneToken = val[1];
+		const laneStr = String(laneToken ?? ``);
+		if (laneStr.startsWith('g')) {
+			// g付きの場合は矢印グループから対象の矢印番号を検索
+			const groupVal = setIntVal(laneStr.slice(1));
+			for (let j = 0; j < tkObj.keyNum; j++) {
+				if (g_keyObj[`color${tkObj.keyCtrlPtn}`][j] === groupVal) {
+					initColors[j] = makeColorGradation(val[2]);
+				}
+			}
+		} else {
+			const laneIdx = setIntVal(laneToken, -1);
+			if (laneIdx >= 0 && laneIdx < tkObj.keyNum) {
+				initColors[laneIdx] = makeColorGradation(val[2]);
+			}
+		}
+	});
+	if (_initFlg) {
+		g_baseColorGrs = {};
+		const colorKey = Object.keys(g_keyObj).filter(val => val.startsWith(`color${g_keyObj.currentKey}`));
+		colorKey.forEach(val => g_baseColorGrs[val] = g_keyObj[val]);
+	}
+
+	const layerParts = getLayerRotateParts(keyCtrlPtn);
+	g_keycons.layerIdxList = [];
+
+	// キーコンフィグの矢印表示
 	const addLeft = (maxLeftX === 0 ? 0 : - maxLeftX + g_limitObj.kcColorPickerX);
 	for (let j = 0; j < keyNum; j++) {
 
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][j];
 		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
+		const baseLayer = g_keyObj[`layerGroup${keyCtrlPtn}`]?.[j] || 0;
+		const layerIdx = getLayerIdx(j, posj); // baseLayer*2 + Number(posj > divideCnt)
+		const layerRotate = layerParts[layerIdx] || ``;
+		g_keycons.layerIdxList[j] = layerIdx;
 
 		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2 + addLeft;
-		const keyconY = C_KYC_HEIGHT * (Number(posj > divideCnt)) + 12;
+		const keyconY = C_KYC_HEIGHT * (Number(posj > divideCnt)) + 12 + baseLayer * C_LAYER_Y_OFFSET;
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 		const arrowColor = getKeyConfigColor(j, colorPos);
 
@@ -10447,16 +10481,22 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 				cxtFunc: () => changeTmpColor(j, -1),
 			}, g_cssObj.button_Default_NoColor, g_cssObj.title_base)
 		);
+
+		// キーごとの親コンテナ（矢印要素を囲う）
+		const keyGroup = createEmptySprite(keyconSprite, `keyGroup${j}`, { x: keyconX, y: keyconY, w: C_ARW_WIDTH, h: C_ARW_WIDTH });
+		if (layerRotate !== ``) {
+			keyGroup.style.transform = layerRotate; // ここだけがlayer変形の適用箇所
+		}
 		// キーコンフィグ表示用の矢印・おにぎりを表示
-		multiAppend(keyconSprite,
+		multiAppend(keyGroup,
 			// 矢印の塗り部分
 			createColorObject2(`arrowShadow${j}`, {
-				x: keyconX, y: keyconY, background: hasVal(g_headerObj[`setShadowColor${g_colorType}`][colorPos]) ? getShadowColor(colorPos, arrowColor) : ``,
+				background: hasVal(g_headerObj[`setShadowColor${g_colorType}`][colorPos]) ? getShadowColor(colorPos, arrowColor) : ``,
 				rotate: g_keyObj[`stepRtn${keyCtrlPtn}_${g_keycons.stepRtnGroupNum}`][j], styleName: `Shadow`,
 			}),
 			// 矢印本体
 			createColorObject2(`arrow${j}`, {
-				x: keyconX, y: keyconY, background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}_${g_keycons.stepRtnGroupNum}`][j],
+				background: arrowColor, rotate: g_keyObj[`stepRtn${keyCtrlPtn}_${g_keycons.stepRtnGroupNum}`][j],
 			}),
 		);
 		if (g_headerObj.shuffleUse && g_keyObj[`shuffle${keyCtrlPtn}`] !== undefined) {
@@ -10716,10 +10756,11 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	const setKeyConfigCursor = () => {
 		const posj = g_keyObj[`pos${keyCtrlPtn}`][g_currentj];
 		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
+		const baseLayer = g_keyObj[`layerGroup${keyCtrlPtn}`]?.[g_currentj] || 0;
 
 		const nextLeft = (kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos + addLeft - 10;
 		cursor.style.left = wUnit(nextLeft);
-		cursor.style.top = wUnit(C_KYC_HEIGHT * Number(posj > divideCnt) + 57 + C_KYC_REPHEIGHT * g_currentk);
+		cursor.style.top = wUnit(C_KYC_HEIGHT * Number(posj > divideCnt) + 57 + C_KYC_REPHEIGHT * g_currentk + baseLayer * C_LAYER_Y_OFFSET);
 		g_kcType = (g_currentk === 0 ? `Main` : `Replaced`);
 
 		// 次の位置が見えなくなったらkeyconSpriteの位置を調整する
