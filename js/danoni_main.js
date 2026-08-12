@@ -13007,10 +13007,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 				let layerTrans = tmpScrollchData[4] ?? ``;
 				maxLayerGroup = Math.max(maxLayerGroup, layerGroup);
 				if (g_stateObj.reverse === C_FLG_ON) {
-					layerTrans = layerTrans.map(val => invertSpecificTransforms(val, [`translateX`]));
+					layerTrans = invertSpecificTransforms(layerTrans, [`translateX`]);
 				}
 				if (g_stateObj.swapping === `Mirror+`) {
-					layerTrans = layerTrans.map(val => invertSpecificTransforms(val, [`translateY`]));
+					layerTrans = invertSpecificTransforms(layerTrans, [`translateY`]);
 				}
 
 				scrollchData.push([frame, arrowNum, frame, scrollDir, layerGroup, layerTrans]);
@@ -14182,6 +14182,9 @@ const invertSpecificTransforms = (cssString, exceptList = []) => {
 		`skew`, `skewX`, `skewY`
 	];
 	const targetFunctions = baseTargetFunctions.filter(pattern => !exceptList.includes(pattern));
+	if (targetFunctions.length === 0) {
+		return cssString; // 反転対象がない場合は元の文字列を返す
+	}
 
 	// RegExパターンを作成: /(rotate|translate...)\(([^)]+)\)/g
 	const pattern = new RegExp(`\\b(${targetFunctions.join(`|`)})\\(([^)]+)\\)`, `g`);
