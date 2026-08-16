@@ -2447,12 +2447,30 @@ const drawBaseSpriteData = (_spriteData, _name, _condition = true) => {
 				);
 			}
 			if (_spriteData.transform !== undefined) {
+				const targetId = `${_name}Sprite${_spriteData.depth}`;
+
 				if (!isNaN(parseInt(_spriteData.transform))) {
-					let mainTransform = getTransform(`mainSprite`, `playWindow`);
-					if (hasVal(mainTransform))
-						addTransform(`${_name}Sprite${_spriteData.depth}`, `${_name}${_spriteData.depth}`, mainTransform, g_transPriority.playWindow);
+					// PlayWindow由来のtransformを継承（別transformId）
+					const transformId = `${_name}${_spriteData.depth}PlayWindow`;
+					const transformData = getTransform(`mainSprite`, `playWindow`);
+
+					if (hasVal(transformData)) {
+						if (transformData !== getTransform(targetId, transformId)) {
+							addTransform(targetId, transformId, transformData, g_transPriority.playWindow);
+						}
+					} else {
+						delTransform(targetId, transformId);
+					}
 				} else {
-					addTransform(`${_name}Sprite${_spriteData.depth}`, `${_name}${_spriteData.depth}`, _spriteData.transform, parseInt(_spriteData.transPriority || 1000));
+					// 明示指定のtransformを適用
+					const transformId = `${_name}${_spriteData.depth}`;
+
+					if (hasVal(_spriteData.transform)) {
+						addTransform(targetId, transformId, _spriteData.transform,
+							parseInt(_spriteData.transPriority || 1000));
+					} else {
+						delTransform(targetId, transformId);
+					}
 				}
 			}
 		}
