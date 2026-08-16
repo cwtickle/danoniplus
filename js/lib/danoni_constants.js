@@ -163,8 +163,8 @@ const C_TYP_CALC = `calc`;
 let [g_sWidth, g_sHeight] = [
     setVal($id(`canvas-frame`).width, 500, C_TYP_FLOAT), setVal($id(`canvas-frame`).height, 500, C_TYP_FLOAT)
 ];
-$id(`canvas-frame`).width = `${Math.max(g_sWidth, 500)}px`;
-$id(`canvas-frame`).height = `${Math.max(g_sHeight, 500)}px`;
+$id(`canvas-frame`).width = wUnit(Math.max(g_sWidth, 500));
+$id(`canvas-frame`).height = wUnit(Math.max(g_sHeight, 500));
 $id(`canvas-frame`).margin = C_DIS_AUTO;
 
 const g_btnWidth = (_multi = 1) => Math.min(g_sWidth, g_limitObj.btnBaseWidth) * _multi;
@@ -1615,7 +1615,7 @@ const addX = (_id, _typeId, _x = 0, { overwrite = false, priority = 1000 } = {})
     }
     if (g_posXs[_id].get(_typeId) !== _x) {
         g_posXs[_id].set(_typeId, _x);
-        addTransform(_id, `posX`, `translateX(${sumData(Array.from(g_posXs[_id].values()))}px)`, priority);
+        addTransform(_id, `posX`, `translateX(${wUnit(sumData(Array.from(g_posXs[_id].values())))})`, priority);
     }
 };
 
@@ -1636,7 +1636,7 @@ const addY = (_id, _typeId, _y = 0, { overwrite = false, priority = 1000 } = {})
     }
     if (g_posYs[_id].get(_typeId) !== _y) {
         g_posYs[_id].set(_typeId, _y);
-        addTransform(_id, `posY`, `translateY(${sumData(Array.from(g_posYs[_id].values()))}px)`, priority);
+        addTransform(_id, `posY`, `translateY(${wUnit(sumData(Array.from(g_posYs[_id].values())))})`, priority);
     }
 };
 
@@ -1653,7 +1653,7 @@ const delX = (_id, _typeId) => {
         return;
     }
     const priority = g_transforms[_id]?.get(`posX`)?.priority ?? 1000;
-    addTransform(_id, `posX`, `translateX(${sumData(Array.from(g_posXs[_id].values()))}px)`, priority);
+    addTransform(_id, `posX`, `translateX(${wUnit(sumData(Array.from(g_posXs[_id].values())))})`, priority);
 };
 
 /**
@@ -1669,7 +1669,7 @@ const delY = (_id, _typeId) => {
         return;
     }
     const priority = g_transforms[_id]?.get(`posY`)?.priority ?? 1000;
-    addTransform(_id, `posY`, `translateY(${sumData(Array.from(g_posYs[_id].values()))}px)`, priority);
+    addTransform(_id, `posY`, `translateY(${wUnit(sumData(Array.from(g_posYs[_id].values())))})`, priority);
 };
 
 /**
@@ -1866,7 +1866,7 @@ const g_stepAreaFunc = new Map([
     ['Halfway', () => {
         g_arrowGroupSprite.forEach(sprite => {
             for (let j = 0; j < g_stateObj.layerNum; j++) {
-                addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
+                addTransform(`${sprite}${j}`, `stepArea`, `translateY(${wUnit(halfwayOffset(j))})`, g_transPriority.stepArea);
             }
         });
 
@@ -1877,7 +1877,7 @@ const g_stepAreaFunc = new Map([
             for (let j = 0; j < g_stateObj.layerNumDf; j++) {
                 addTransform(
                     `filterBar${j}`, `stepArea`,
-                    `translateY(calc(${g_hidSudObj[g_stateObj.appearance] === 0 ? 1 : -1} * ${halfwayOffset(j)}px))`,
+                    `translateY(calc(${g_hidSudObj[g_stateObj.appearance] === 0 ? 1 : -1} * ${wUnit(halfwayOffset(j))}))`,
                     g_transPriority.stepArea
                 );
             }
@@ -1888,12 +1888,12 @@ const g_stepAreaFunc = new Map([
                 for (let j = 0; j < g_stateObj.layerNumDf; j++) {
                     addTransform(
                         `filterBar${j}_HS`, `stepArea`,
-                        `translateY(calc(${(-1) * (g_hidSudObj[g_stateObj.appearance] === 0 ? 1 : -1)} * ${halfwayOffset(j)}px))`,
+                        `translateY(calc(${(-1) * (g_hidSudObj[g_stateObj.appearance] === 0 ? 1 : -1)} * ${wUnit(halfwayOffset(j))}))`,
                         g_transPriority.stepArea
                     );
                 }
             }
-            addTransform(`filterView`, `stepArea`, `translateY(${halfwayOffset(Number(g_settings.reverseNum))}px)`, g_transPriority.stepArea);
+            addTransform(`filterView`, `stepArea`, `translateY(${wUnit(halfwayOffset(Number(g_settings.reverseNum)))})`, g_transPriority.stepArea);
         }
     }],
     ['Mismatched', () => {
@@ -1903,7 +1903,7 @@ const g_stepAreaFunc = new Map([
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
                 for (let j = g_stateObj.layerNumDf; j < g_stateObj.layerNum; j++) {
-                    addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
+                    addTransform(`${sprite}${j}`, `stepArea`, `translateY(${wUnit(halfwayOffset(j))})`, g_transPriority.stepArea);
                 }
             });
 
@@ -1914,14 +1914,14 @@ const g_stepAreaFunc = new Map([
                         // Hidden+用のフィルターバー補正
                         addTransform(
                             `filterBar${j + Number(g_settings.reverseNum)}_HS`, `stepArea`,
-                            `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
+                            `translateY(calc((${getDirFromRev()}) * ${wUnit(halfwayOffset(j))}))`,
                             g_transPriority.stepArea
                         );
                     } else {
                         // Sudden+用のフィルターバー補正
                         addTransform(
                             `filterBar${j - Number(g_settings.reverseNum)}`, `stepArea`,
-                            `translateY(calc((${(-1) * getDirFromRev()}) * ${halfwayOffset(j)}px))`,
+                            `translateY(calc((${(-1) * getDirFromRev()}) * ${wUnit(halfwayOffset(j))}))`,
                             g_transPriority.stepArea
                         );
                     }
@@ -1936,7 +1936,7 @@ const g_stepAreaFunc = new Map([
         if (g_workObj.orgFlatFlg) {
             g_arrowGroupSprite.forEach(sprite => {
                 for (let j = 0; j < g_stateObj.layerNumDf; j++) {
-                    addTransform(`${sprite}${j}`, `stepArea`, `translateY(${halfwayOffset(j)}px)`, g_transPriority.stepArea);
+                    addTransform(`${sprite}${j}`, `stepArea`, `translateY(${wUnit(halfwayOffset(j))})`, g_transPriority.stepArea);
                 }
             });
 
@@ -1947,14 +1947,14 @@ const g_stepAreaFunc = new Map([
                         // Hidden+用のフィルターバー補正
                         addTransform(
                             `filterBar${j + Number(g_settings.reverseNum)}`, `stepArea`,
-                            `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
+                            `translateY(calc((${getDirFromRev()}) * ${wUnit(halfwayOffset(j))}))`,
                             g_transPriority.stepArea
                         );
                     } else {
                         // Sudden+用のフィルターバー補正
                         addTransform(
                             `filterBar${j - Number(g_settings.reverseNum)}_HS`, `stepArea`,
-                            `translateY(calc((${(-1) * getDirFromRev()}) * ${halfwayOffset(j)}px))`,
+                            `translateY(calc((${(-1) * getDirFromRev()}) * ${wUnit(halfwayOffset(j))}))`,
                             g_transPriority.stepArea
                         );
                     }
@@ -1974,7 +1974,7 @@ const g_stepAreaFunc = new Map([
             for (let j = 0; j < g_stateObj.layerNumDf; j++) {
                 addTransform(
                     `filterBar${j}_HS`, `stepArea`,
-                    `translateY(calc((${g_hidSudObj[g_stateObj.appearance] === 0 ? 1 : -1}) * ${halfwayOffset(j)}px))`,
+                    `translateY(calc((${g_hidSudObj[g_stateObj.appearance] === 0 ? 1 : -1}) * ${wUnit(halfwayOffset(j))}))`,
                     g_transPriority.stepArea
                 );
             }
@@ -1983,7 +1983,7 @@ const g_stepAreaFunc = new Map([
                 for (let j = 0; j < g_stateObj.layerNumDf; j += 2) {
                     addTransform(
                         `filterBar${j + Number(g_settings.reverseNum)}_HS`, `stepArea`,
-                        `translateY(calc((${getDirFromRev()}) * ${halfwayOffset(j)}px))`,
+                        `translateY(calc((${getDirFromRev()}) * ${wUnit(halfwayOffset(j))}))`,
                         g_transPriority.stepArea
                     );
                 }
@@ -1998,7 +1998,7 @@ const g_stepAreaFunc = new Map([
     ['Alt-Crossing', () => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
             addTransform(`mainSprite${j}`, `stepArea`, `rotate(${getDirFromLayer(j) * -10}deg) ` +
-                `translateX(${getDirFromLayer(j) * 20}px)`, g_transPriority.stepArea);
+                `translateX(${wUnit(getDirFromLayer(j) * 20)})`, g_transPriority.stepArea);
         }
     }],
 ]);
@@ -2012,34 +2012,34 @@ const getShakingDist = () => (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 
 const g_shakingFunc = new Map([
     ['OFF', () => true],
     ['Horizontal', (_multi = 1) => {
-        addTransform(`mainSprite`, `shakingX_base`, `translateX(${getShakingDist() * _multi}px)`, g_transPriority.shakingX)
+        addTransform(`mainSprite`, `shakingX_base`, `translateX(${wUnit(getShakingDist() * _multi)})`, g_transPriority.shakingX)
     }],
     ['Vertical', (_multi = 1) => {
-        addTransform(`mainSprite`, `shakingY_base`, `translateY(${getShakingDist() / 2 * _multi}px)`, g_transPriority.shakingY)
+        addTransform(`mainSprite`, `shakingY_base`, `translateY(${wUnit(getShakingDist() / 2 * _multi)})`, g_transPriority.shakingY)
     }],
     ['X-Horizontal', (_multi = 1) => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addTransform(`mainSprite${j}`, `shakingX_layer`, `translateX(${getDirFromLayer(j) * (4 / 3) * getShakingDist() * _multi}px)`, g_transPriority.shakingX);
+            addTransform(`mainSprite${j}`, `shakingX_layer`, `translateX(${wUnit(getDirFromLayer(j) * (4 / 3) * getShakingDist() * _multi)})`, g_transPriority.shakingX);
         }
     }],
     ['X-Vertical', (_multi = 1) => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
-            addTransform(`mainSprite${j}`, `shakingY_layer`, `translateY(${getDirFromLayer(j) * getShakingDist() * _multi}px)`, g_transPriority.shakingY);
+            addTransform(`mainSprite${j}`, `shakingY_layer`, `translateY(${wUnit(getDirFromLayer(j) * getShakingDist() * _multi)})`, g_transPriority.shakingY);
         }
     }],
     ['Drunk', (_multi = 1) => {
         const dist = getShakingDist();
         if (g_workObj.drunkXFlg) {
             const deltaX = dist * _multi;
-            addTransform(`mainSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
-            addTransform(`infoSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
-            addTransform(`judgeSprite`, `shakingX_drunk`, `translateX(${deltaX}px)`, g_transPriority.shakingX);
+            addTransform(`mainSprite`, `shakingX_drunk`, `translateX(${wUnit(deltaX)})`, g_transPriority.shakingX);
+            addTransform(`infoSprite`, `shakingX_drunk`, `translateX(${wUnit(deltaX)})`, g_transPriority.shakingX);
+            addTransform(`judgeSprite`, `shakingX_drunk`, `translateX(${wUnit(deltaX)})`, g_transPriority.shakingX);
         }
         if (g_workObj.drunkYFlg) {
             const deltaY = dist / 2 * _multi;
-            addTransform(`mainSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
-            addTransform(`infoSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
-            addTransform(`judgeSprite`, `shakingY_drunk`, `translateY(${deltaY}px)`, g_transPriority.shakingY);
+            addTransform(`mainSprite`, `shakingY_drunk`, `translateY(${wUnit(deltaY)})`, g_transPriority.shakingY);
+            addTransform(`infoSprite`, `shakingY_drunk`, `translateY(${wUnit(deltaY)})`, g_transPriority.shakingY);
+            addTransform(`judgeSprite`, `shakingY_drunk`, `translateY(${wUnit(deltaY)})`, g_transPriority.shakingY);
         }
         // 補正がゼロになったときに軸の移動方法をランダムで決定
         if (dist === 0) {
@@ -2298,7 +2298,7 @@ let g_canDisabledSettings = [`speed`, `motion`, `scroll`, `reverse`, `shuffle`, 
 
 const g_hidSudFunc = new Map([
     ['filterPos', _filterPos => `${_filterPos}${g_lblNameObj.percent}`],
-    ['range', () => `${Math.round(g_posObj.arrowHeight - g_posObj.stepY)}px`],
+    ['range', () => wUnit(Math.round(g_posObj.arrowHeight - g_posObj.stepY))],
     ['hidden', _filterPos => `${Math.min(Math.round(g_posObj.arrowHeight * (100 - _filterPos) / 100), g_posObj.arrowHeight - g_posObj.stepY)}`],
     ['sudden', _filterPos => `${Math.max(Math.round(g_posObj.arrowHeight * (100 - _filterPos) / 100) - g_posObj.stepY, 0)}`],
 ]);
