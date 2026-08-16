@@ -2350,7 +2350,8 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 			// [t]始まりの場合、レイヤーに対してtransformを掛ける準備を行う
 			const transformData = tmpObj.path.slice(`[t]`.length);
 			spriteFrameData.transform = transformData || ``;
-			spriteFrameData.transPriority = tmpObj.class;
+			spriteFrameData.transformId = tmpObj.class;
+			spriteFrameData.transPriority = tmpObj.left;
 
 		} else if (tmpObj.path === ``) {
 			spriteFrameData.command = ``;
@@ -2463,7 +2464,7 @@ const drawBaseSpriteData = (_spriteData, _name, _condition = true) => {
 					}
 				} else {
 					// 明示指定のtransformを適用
-					const transformId = `${_name}${_spriteData.depth}`;
+					const transformId = _spriteData.transformId || `${_name}${_spriteData.depth}`;
 
 					if (hasVal(_spriteData.transform)) {
 						addTransform(targetId, transformId, _spriteData.transform,
