@@ -1688,8 +1688,8 @@ const dragDiv = (_divName, { minX = 0, minY = 0, maxX = g_sWidth, maxY = g_sHeig
 			const nextY = div.offsetTop + evt.movementY;
 			const clampMaxX = (maxX === minX) ? maxX : (maxX - div.offsetWidth);
 			const clampMaxY = (maxY === minY) ? maxY : (maxY - div.offsetHeight);
-			div.style.left = Math.min(Math.max(nextX, minX), clampMaxX) + 'px';
-			div.style.top = Math.min(Math.max(nextY, minY), clampMaxY) + 'px';
+			div.style.left = wUnit(Math.min(Math.max(nextX, minX), clampMaxX));
+			div.style.top = wUnit(Math.min(Math.max(nextY, minY), clampMaxY));
 			div.style.position = 'absolute';
 			div.draggable = false;
 			div.setPointerCapture(evt.pointerId);
@@ -1826,7 +1826,7 @@ const createMultipleSprite = (_baseName, _num, { x = 0, priority = g_transPriori
 	for (let j = 0; j <= _num; j++) {
 		createEmptySprite(sprite, `${_baseName}${j}`);
 	}
-	addTransform(_baseName, `root`, `translateX(${x}px)`, priority);
+	addTransform(_baseName, `root`, `translateX(${wUnit(x)})`, priority);
 	return sprite;
 };
 
@@ -3507,8 +3507,8 @@ const createSplitCanvases = (_width, _totalHeight) => {
 		cvs.height = logicalH * g_dpr;
 
 		// ブラウザ上の表示サイズをセット
-		cvs.style.width = `${_width}px`;
-		cvs.style.height = `${logicalH}px`;
+		cvs.style.width = wUnit(_width);
+		cvs.style.height = wUnit(logicalH);
 		cvs.style.display = 'block';
 
 		const ctx = cvs.getContext('2d');
@@ -3568,8 +3568,8 @@ const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
 	// 解像度と表示サイズの設定
 	canvas.width = logicalWidth * g_dpr;
 	canvas.height = headerHeight * g_dpr;
-	canvas.style.width = `${logicalWidth}px`;
-	canvas.style.height = `${headerHeight}px`;
+	canvas.style.width = wUnit(logicalWidth);
+	canvas.style.height = wUnit(headerHeight);
 	canvas.style.display = 'block';
 
 	ctx.scale(g_dpr, g_dpr);
@@ -4419,8 +4419,8 @@ const headerConvert = _dosObj => {
 	obj.playingY = setIntVal(_dosObj.playingY, g_presetObj.playingY ?? 0);
 
 	// ステップゾーン位置
-	g_posObj.stepY = (isNaN(parseFloat(_dosObj.stepY)) ? C_STEP_Y : parseFloat(_dosObj.stepY));
-	g_posObj.stepYR = (isNaN(parseFloat(_dosObj.stepYR)) ? C_STEP_YR : parseFloat(_dosObj.stepYR));
+	g_posObj.stepY = setVal(_dosObj.stepY, C_STEP_Y, C_TYP_FLOAT);
+	g_posObj.stepYR = setVal(_dosObj.stepYR, C_STEP_YR, C_TYP_FLOAT);
 	g_posObj.stepDiffY = g_posObj.stepY - C_STEP_Y;
 	g_posObj.distY = obj.playingHeight - C_STEP_Y + g_posObj.stepYR;
 	g_posObj.reverseStepY = g_posObj.distY - g_posObj.stepY - g_posObj.stepDiffY - C_ARW_WIDTH;
@@ -4431,18 +4431,18 @@ const headerConvert = _dosObj => {
 	obj.baseSpeed = 1 + ((g_posObj.distY - (g_posObj.stepY - C_STEP_Y) * 2) / (500 - C_STEP_Y) - 1) * 0.85;
 
 	// 矢印・フリーズアロー判定位置補正
-	g_diffObj.arrowJdgX = (isNaN(parseFloat(_dosObj.arrowJdgX)) ? 0 : parseFloat(_dosObj.arrowJdgX));
-	g_diffObj.arrowJdgY = (isNaN(parseFloat(_dosObj.arrowJdgY)) ? 0 : parseFloat(_dosObj.arrowJdgY));
-	g_diffObj.frzJdgX = (isNaN(parseFloat(_dosObj.frzJdgX)) ? 0 : parseFloat(_dosObj.frzJdgX));
-	g_diffObj.frzJdgY = (isNaN(parseFloat(_dosObj.frzJdgY)) ? 0 : parseFloat(_dosObj.frzJdgY));
+	g_diffObj.arrowJdgX = setVal(_dosObj.arrowJdgX, 0, C_TYP_FLOAT);
+	g_diffObj.arrowJdgY = setVal(_dosObj.arrowJdgY, 0, C_TYP_FLOAT);
+	g_diffObj.frzJdgX = setVal(_dosObj.frzJdgX, 0, C_TYP_FLOAT);
+	g_diffObj.frzJdgY = setVal(_dosObj.frzJdgY, 0, C_TYP_FLOAT);
 	g_diffInitObj.arrowJdgX = g_diffObj.arrowJdgX;
 	g_diffInitObj.arrowJdgY = g_diffObj.arrowJdgY;
 	g_diffInitObj.frzJdgX = g_diffObj.frzJdgX;
 	g_diffInitObj.frzJdgY = g_diffObj.frzJdgY;
 
 	// ショートカット表示位置補正
-	g_diffObj.shortcutX = (isNaN(parseFloat(_dosObj.shortcutX)) ? 0 : parseFloat(_dosObj.shortcutX));
-	g_diffObj.shortcutY = (isNaN(parseFloat(_dosObj.shortcutY)) ? 0 : parseFloat(_dosObj.shortcutY));
+	g_diffObj.shortcutX = setVal(_dosObj.shortcutX, 0, C_TYP_FLOAT);
+	g_diffObj.shortcutY = setVal(_dosObj.shortcutY, 0, C_TYP_FLOAT);
 	g_diffInitObj.shortcutX = g_diffObj.shortcutX;
 	g_diffInitObj.shortcutY = g_diffObj.shortcutY;
 
@@ -6011,7 +6011,7 @@ const titleInit = (_initFlg = false) => {
 				}, g_lblPosObj.btnComment, g_cssObj.button_Default),
 			);
 			if (g_headerObj.musicSelectUse && getQueryParamVal(`scoreId`) === null) {
-				lblComment.style.height = `${g_sHeight - 100}px`;
+				lblComment.style.height = wUnit(g_sHeight - 100);
 			}
 			setUserSelect(lblComment.style, `text`);
 		}
@@ -6555,7 +6555,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 		g_lblPosObj.lblDifNameInfoM.w, { maxSiz: g_lblPosObj.lblDifNameInfoM.siz }));
 	lblDiffiInfoM.style.fontSize = lblDifNameInfoM.style.fontSize;
 	lblNotesInfoM.style.fontSize = lblDifNameInfoM.style.fontSize;
-	lblCommentInfoM.style.top = `${getStrHeight(lblDifNameInfoM.innerHTML, parseFloat(lblDifNameInfoM.style.fontSize))}px`;
+	lblCommentInfoM.style.top = wUnit(getStrHeight(lblDifNameInfoM.innerHTML, parseFloat(lblDifNameInfoM.style.fontSize)));
 	lblCommentInfoM.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
 	lblCommentM.scrollTop = 0;
 
@@ -8012,12 +8012,12 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 
 	// --- ヘッダー部分 ---
 	const detailMiniMapHeader = createEmptySprite(detailMiniMap, `detailMiniMapHeader`, g_windowObj.detailMiniMapHeader);
-	$id(`detailMiniMapHeader`).top = (g_stateObj.miniMapRevFlg ? 230 + g_sHeight - 500 : 0) + `px`;
+	$id(`detailMiniMapHeader`).top = wUnit(g_stateObj.miniMapRevFlg ? 230 + g_sHeight - 500 : 0);
 	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[kPtn]);
 
 	// --- メイン（譜面）部分 ---
 	const detailMiniMapSub = createEmptySprite(detailMiniMap, `detailMiniMapSub`, g_windowObj.detailMiniMapSub);
-	$id(`detailMiniMapSub`).top = (g_stateObj.miniMapRevFlg ? 0 : 15) + `px`;
+	$id(`detailMiniMapSub`).top = wUnit(g_stateObj.miniMapRevFlg ? 0 : 15);
 
 	Object.assign(detailMiniMapSub.style, {
 		overflowX: 'hidden',
@@ -9854,17 +9854,16 @@ const showToast = _msg => {
 	if (existing) existing.remove();
 
 	const toast = createDivCss2Label(`previewToast`, _msg, {
-		x: g_btnX() + g_btnWidth() / 2, y: 50, w: g_btnWidth() / 2, h: 10,
+		x: g_btnX() + g_btnWidth() / 2, y: 50, w: g_btnWidth() / 2, h: 10, siz: 12,
 		transform: `translateX(-50%)`,
 		background: `rgba(0,40,80,0.92)`,
 		color: `#aaddff`,
 		border: `1px solid #3366aa`,
 		borderRadius: `6px`,
 		padding: `6px 16px`,
-		fontSize: `12px`,
 		fontFamily: `monospace`,
 		whiteSpace: `nowrap`,
-		pointerEvents: `none`,
+		pointerEvents: C_DIS_NONE,
 		transition: `opacity 0.4s`,
 		opacity: `1`,
 	});
@@ -10414,7 +10413,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 
 	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
 	addTransform(`keyconSprite`, `root`, `scale(${g_keyObj.scale})`, g_transPriority.scale);
-	keyconSprite.style.height = `${parseFloat(keyconSprite.style.height) / ((1 + g_keyObj.scale) / 2)}px`;
+	keyconSprite.style.height = wUnit(parseFloat(keyconSprite.style.height) / ((1 + g_keyObj.scale) / 2));
 	const kWidth = parseInt(keyconSprite.style.width);
 	changeSetColor();
 
@@ -11228,10 +11227,10 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 			g_headerObj[`key${selectedKc}Def`] = setKey;
 			document.getElementById(`sc${selectedKc}`).textContent = getScMsg[selectedKc]();
 			document.getElementById(`sc${selectedKc}`).style.fontSize =
-				`${getFontSize2(getScMsg[selectedKc](), g_btnWidth(5 / 12) - 40, { maxSiz: g_limitObj.mainSiz })}px`;
+				wUnit(getFontSize2(getScMsg[selectedKc](), g_btnWidth(5 / 12) - 40, { maxSiz: g_limitObj.mainSiz }));
 			if (g_isMac) {
 				scTitleBack.textContent = getScMsg.TitleBack();
-				scTitleBack.style.fontSize = `${getFontSize2(getScMsg.TitleBack(), g_btnWidth(5 / 12) - 40, { maxSiz: g_limitObj.mainSiz })}px`;
+				scTitleBack.style.fontSize = wUnit(getFontSize2(getScMsg.TitleBack(), g_btnWidth(5 / 12) - 40, { maxSiz: g_limitObj.mainSiz }));
 			}
 			changeConfigColor(document.getElementById(`sc${selectedKc}`),
 				g_headerObj[`key${selectedKc}`] === g_headerObj[`key${selectedKc}Def2`] ?
@@ -11321,6 +11320,7 @@ const completeTransKeyPtn = (_keyList) => {
 	});
 };
 
+// KeyLockボタンを押したときの表示切替
 const toggleKcDesc = () => {
 	if (document.getElementById(`kcDesc`) !== null) {
 		kcDesc.textContent = getKcDescMsg();
@@ -11331,11 +11331,13 @@ const toggleKcDesc = () => {
 	}
 };
 
+// KeyLockボタンの表示文字列を取得
 const getKcDescMsg = () =>
 	g_stateObj.keyLockFlg
 		? g_lblNameObj.kcNonDesc
 		: g_lblNameObj.kcDesc.split(`{0}`).join(g_kCd[C_KEY_RETRY]).split(`{1}:`).join(g_isMac ? `` : `Delete:`);
 
+// KeyLockボタンで使用する絵文字の取得
 const getKeyLockName = () =>
 	`${g_lblNameObj.b_keyLock}${g_stateObj.keyLockFlg ? g_emojiObj.locked : g_emojiObj.unlocked}`;
 
@@ -14761,15 +14763,15 @@ const mainInit = () => {
 	}
 
 	addTransform(`mainSprite`, `root`, `scale(${g_workObj.scale})`, g_transPriority.scale);
-	addTransform(`mainSprite`, `main`, `translateX(${g_workObj.playingX}px) translateY(${g_posObj.stepY - C_STEP_Y + g_headerObj.playingY}px)`, g_transPriority.base);
+	addTransform(`mainSprite`, `main`, `translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_posObj.stepY - C_STEP_Y + g_headerObj.playingY)})`, g_transPriority.base);
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
 	const infoSprite = createEmptySprite(divRoot, `infoSprite`, mainCommonPos);
-	addTransform(`infoSprite`, `main`, `translateX(${g_workObj.playingX}px) translateY(${g_headerObj.playingY}px)`, g_transPriority.base);
+	addTransform(`infoSprite`, `main`, `translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
 
 	// 判定系スプライトを作成（メインスプライトより上位）
 	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, mainCommonPos);
-	addTransform(`judgeSprite`, `main`, `translateX(${g_workObj.playingX}px) translateY(${g_headerObj.playingY}px)`, g_transPriority.base);
+	addTransform(`judgeSprite`, `main`, `translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 
@@ -15634,7 +15636,7 @@ const mainInit = () => {
 		const setArrowYCondition = `${String(g_attrObj[arrowName].movLockFlg)}_${String(initManualFlg)}`;
 		setArrowY.get(setArrowYCondition)(arrowName, firstPosY, stepY);
 		if (!initManualFlg) {
-			addTransform(arrowName, `rootX`, `translateX(${g_workObj.stepX[_j]}px)`);
+			addTransform(arrowName, `rootX`, `translateX(${wUnit(g_workObj.stepX[_j])})`);
 		}
 
 		/**
@@ -15824,7 +15826,7 @@ const mainInit = () => {
 		const setArrowYCondition = `${String(g_attrObj[frzName].movLockFlg)}_${String(initManualFlg)}`;
 		setArrowY.get(setArrowYCondition)(frzName, firstPosY, stepY);
 		if (!initManualFlg) {
-			addTransform(frzName, `rootX`, `translateX(${g_workObj.stepX[_j]}px)`);
+			addTransform(frzName, `rootX`, `translateX(${wUnit(g_workObj.stepX[_j])})`);
 		}
 
 		safeExecuteCustomHooks(`g_customJsObj.makeFrzArrow`, g_customJsObj.makeFrzArrow, _attrs, frzName, _name, _arrowCnt);
@@ -16340,20 +16342,20 @@ const changeAppearanceFilter = (_num = 10) => {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
 		$id(`arrowSprite${bottomNum + j}`).clipPath = bottomShape;
 
-		addTransform(`filterBar${topNum + j}`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j}`).top) + topDist}px)`, g_transPriority.layer);
-		addTransform(`filterBar${bottomNum + j}`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist}px)`, g_transPriority.layer);
+		addTransform(`filterBar${topNum + j}`, `appearance`, `translateY(${wUnit(parseFloat($id(`arrowSprite${j}`).top) + topDist)})`, g_transPriority.layer);
+		addTransform(`filterBar${bottomNum + j}`, `appearance`, `translateY(${wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist)})`, g_transPriority.layer);
 
 		if (doubleFilterFlg) {
-			addTransform(`filterBar${bottomNum + j}_HS`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j}`).top) + bottomDist}px)`, g_transPriority.layer);
-			addTransform(`filterBar${topNum + j}_HS`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${j + 1}`).top) + topDist}px)`, g_transPriority.layer);
+			addTransform(`filterBar${bottomNum + j}_HS`, `appearance`, `translateY(${wUnit(parseFloat($id(`arrowSprite${j}`).top) + bottomDist)})`, g_transPriority.layer);
+			addTransform(`filterBar${topNum + j}_HS`, `appearance`, `translateY(${wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + topDist)})`, g_transPriority.layer);
 		}
 	}
 
 	// フィルターバーのパーセント表示（フィルターバーが複数表示されるなど複雑なため、最初の階層グループの位置に追従）
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		const currentBarNum = g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse];
-		addTransform(`filterView`, `appearance`, `translateY(${parseFloat($id(`arrowSprite${currentBarNum % 2}`).top) +
-			(currentBarNum % 2 === 0 ? bottomDist : topDist)}px)`, g_transPriority.layer);
+		addTransform(`filterView`, `appearance`, `translateY(${wUnit(parseFloat($id(`arrowSprite${currentBarNum % 2}`).top) +
+			(currentBarNum % 2 === 0 ? bottomDist : topDist))})`, g_transPriority.layer);
 		filterView.textContent = `${_num}%`;
 		g_hidSudObj.filterPos = _num;
 	}
