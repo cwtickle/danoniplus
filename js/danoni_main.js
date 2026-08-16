@@ -2296,13 +2296,19 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 			maxDepth = tmpDepth;
 		}
 
+		const colorObjFlg = tmpSpriteData[2]?.startsWith(`[c]`) || false;
+		const transformFlg = tmpSpriteData[2]?.startsWith(`[t]`) || false;
 		const tmpObj = {
 			path: escapeHtml(tmpSpriteData[2] ?? ``, g_escapeStr.escapeCode),   // 画像パス or テキスト
 			class: escapeHtml(tmpSpriteData[3] ?? ``),                          // CSSクラス
-			left: setVal(tmpSpriteData[4], `0`).includes(`{`) ?
-				`${setVal(tmpSpriteData[4], 0)}` : `{${setVal(tmpSpriteData[4], 0)}}`, // X座標
-			top: setVal(tmpSpriteData[5], `0`).includes(`{`) ?
-				`${setVal(tmpSpriteData[5], 0)}` : `{${setVal(tmpSpriteData[5], 0)}}`, // Y座標
+			left: transformFlg
+				? setVal(tmpSpriteData[4], 1000, C_TYP_NUMBER)					// [t]のみtransformのPriority
+				: setVal(tmpSpriteData[4], `0`).includes(`{`)
+					? `${setVal(tmpSpriteData[4], 0)}`
+					: `{${setVal(tmpSpriteData[4], 0)}}`,                       // X座標
+			top: setVal(tmpSpriteData[5], `0`).includes(`{`)
+				? `${setVal(tmpSpriteData[5], 0)}`
+				: `{${setVal(tmpSpriteData[5], 0)}}`, 							// Y座標
 			width: `${setIntVal(tmpSpriteData[6])}`,                            // spanタグの場合は font-size
 			height: `${escapeHtml(tmpSpriteData[7] ?? ``)}`,                    // spanタグの場合は color(文字列可)
 			opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
@@ -2319,8 +2325,6 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 			checkDuplicatedObjects(spriteData[tmpFrame]);
 
 		const emptyPatterns = [`[loop]`, `[jump]`];
-		const colorObjFlg = tmpSpriteData[2]?.startsWith(`[c]`) || false;
-		const transformFlg = tmpSpriteData[2]?.startsWith(`[t]`) || false;
 		const spriteFrameData = spriteData[tmpFrame][dataCnts] = {
 			depth: tmpDepth,
 		};
@@ -2350,7 +2354,8 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 			// [t]始まりの場合、レイヤーに対してtransformを掛ける準備を行う
 			const transformData = tmpObj.path.slice(`[t]`.length);
 			spriteFrameData.transform = transformData || ``;
-			spriteFrameData.transPriority = tmpObj.class;
+			spriteFrameData.transformId = tmpObj.class;
+			spriteFrameData.transPriority = tmpObj.left;
 
 		} else if (tmpObj.path === ``) {
 			spriteFrameData.command = ``;
@@ -2463,11 +2468,10 @@ const drawBaseSpriteData = (_spriteData, _name, _condition = true) => {
 					}
 				} else {
 					// 明示指定のtransformを適用
-					const transformId = `${_name}${_spriteData.depth}`;
+					const transformId = _spriteData.transformId || `${_name}${_spriteData.depth}`;
 
 					if (hasVal(_spriteData.transform)) {
-						addTransform(targetId, transformId, _spriteData.transform,
-							parseInt(_spriteData.transPriority || 1000));
+						addTransform(targetId, transformId, _spriteData.transform, _spriteData.transPriority);
 					} else {
 						delTransform(targetId, transformId);
 					}
