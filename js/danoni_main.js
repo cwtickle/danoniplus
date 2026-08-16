@@ -384,7 +384,7 @@ const g_convFunc = {
  * @param {string} _checkStr 
  * @param {string} _default 
  * @param {string} [_type='string'] 
- * @returns 
+ * @returns {number|boolean|string}
  */
 const setVal = (_checkStr, _default, _type = C_TYP_STRING) =>
 	hasValN(_checkStr) ? g_convFunc[_type](_checkStr, _default) : _default;
@@ -1570,7 +1570,7 @@ const getFontSize2 = (_str, _maxWidth, { font = getBasicFont(), maxSiz = 14, min
 };
 
 /**
- * 配列中から最も長い文字列を抽出
+ * 配列中から最も長い文字列を抽出（本体では未使用）
  * @param {string[]} _array 
  * @returns {string}
  */
@@ -10381,14 +10381,20 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 
 	/**
 	 * 指定関数群だけを抽出したtransform文字列を作成
+	 * @param {string} _cssString
+	 * @param {string[]} _funcNames
+	 * @returns {string}
 	 */
-	const extractTransformFuncs = (cssString, funcNames) => {
-		const pattern = new RegExp(`\\b(${funcNames.join(`|`)})\\([^)]*\\)`, `g`);
-		return (cssString.match(pattern) || []).join(` `);
+	const extractTransformFuncs = (_cssString, _funcNames) => {
+		const pattern = new RegExp(`\\b(${_funcNames.join(`|`)})\\([^)]*\\)`, `g`);
+		return (_cssString.match(pattern) || []).join(` `);
 	};
 
 	/**
 	 * 対象レーンのレイヤー番号を取得
+	 * @param {number} _j
+	 * @param {number} _posj
+	 * @returns {number}
 	 */
 	const getLayerIdx = (_j, _posj) => {
 		const baseLayer = g_keyObj[`layerGroup${keyCtrlPtn}`]?.[_j] || 0;
@@ -10398,6 +10404,8 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 
 	/**
 	 * 対象レイヤーの回転変形を取得
+	 * @param {string} _keyCtrlPtn
+	 * @returns {string[]}
 	 */
 	const getLayerRotateParts = _keyCtrlPtn => {
 		const raw = g_keyObj[`layerTrans${_keyCtrlPtn}`]?.[0] ?? [``, ``, ``, ``];
@@ -11663,6 +11671,8 @@ const keyconfigKeyboardPreview = (() => {
 
 	/**
 	 * Canvasの共通初期化処理
+	 * @param {HTMLCanvasElement} canvas
+	 * @returns {CanvasRenderingContext2D|null}
 	 */
 	const setupCanvasContext = (canvas) => {
 		if (!canvas) return null;
@@ -11677,6 +11687,15 @@ const keyconfigKeyboardPreview = (() => {
 		return ctx;
 	};
 
+	/**
+	 * 円角矩形を描画する
+	 * @param {CanvasRenderingContext2D} ctx 
+	 * @param {number} x 
+	 * @param {number} y 
+	 * @param {number} w 
+	 * @param {number} h 
+	 * @param {number} r 
+	 */
 	const roundRect = (ctx, x, y, w, h, r) => {
 		ctx.beginPath();
 		ctx.moveTo(x + r, y);
@@ -12619,7 +12638,7 @@ const applyShuffle = (_keyNum, _shuffleGroup, _style) => {
  * @param {number[]} _group 
  * @param {number} _i 
  * @param {number} _divideNum 
- * @returns 
+ * @returns {number[][]}
  */
 const swapGroupNums = (_style, _group, _i, _divideNum) => {
 	if (_group.length % _divideNum === 0) {
@@ -12793,7 +12812,7 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
  * @param {string} [_dummyNo] ダミー用譜面番号添え字
  * @param {string} [_keyCtrlPtn] 選択キー及びパターン
  * @param {boolean} [_scoreAnalyzeFlg=false] 譜面詳細データのために必要分で読込を中断
- * @returns
+ * @returns {object} 矢印・フリーズアロー・速度/色変化データの格納オブジェクト
  */
 const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	_keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`, _scoreAnalyzeFlg = false) => {
@@ -12936,7 +12955,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * - 個別・全体色変化を一体で管理するため通常の配列で返却
 	 * @param {string} _header 
 	 * @param {number} _scoreNo 
-	 * @returns 
+	 * @returns {any[][]}
 	 */
 	const setColor2Data = (_header, _scoreNo) => {
 		const dosColorData = getRefData(_header, `${_scoreNo}_data`);
@@ -13069,7 +13088,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * 例) |backA2_data=back_data| -> back_dataで定義された値を使用
 	 * @param {string} _header 
 	 * @param {string} _dataName 
-	 * @returns
+	 * @returns {string|undefined}
 	 */
 	const getRefData = (_header, _dataName) => {
 		const data = _dosObj[`${_header}${_dataName}`];
@@ -13126,7 +13145,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	/**
 	 * 歌詞データの分解
 	 * @param {string} _scoreNo 
-	 * @returns
+	 * @returns {string[][]}
 	 */
 	const makeWordData = _scoreNo => {
 		const wordDataList = [];
@@ -13227,7 +13246,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @param {string} _header 
 	 * @param {string} _scoreNo 譜面番号
 	 * @param {string[]} [object.resultTypes] リザルトモーションの種類 (result, failedB, failedS)
-	 * @returns
+	 * @returns {any[][]}
 	 */
 	const makeBackgroundData = (_header, _scoreNo, { resultTypes = [] } = {}) => {
 		const dataList = [];
@@ -13367,6 +13386,7 @@ const calcLifeVals = _allArrows => {
  * ライフ回復量・ダメージ量の算出
  * @param {number} _val 
  * @param {number} _allArrows 
+ * @returns {number}
  */
 const calcLifeVal = (_val, _allArrows) => _val * g_headerObj.maxLifeVal / _allArrows;
 
@@ -13486,6 +13506,7 @@ const setSpeedOnFrame = (_speedData, _lastFrame) => {
 /**
  * Motionオプション適用時の矢印別の速度設定
  * - 矢印が表示される最大フレーム数を 101フレーム と定義。
+ * @returns {number[]}
  */
 const setMotionOnFrame = () => g_motionFunc.get(g_stateObj.motion)(fillArray(101));
 
@@ -13830,7 +13851,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 	 * 歌詞表示、背景・マスク表示のフェードイン時調整処理
 	 * @param {string} _type
 	 * @param {object} _data 
-	 * @returns
+	 * @returns {object}
 	 */
 	const calcAnimationData = (_type, _data) => {
 
