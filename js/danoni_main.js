@@ -384,7 +384,7 @@ const g_convFunc = {
  * @param {string} _checkStr 
  * @param {string} _default 
  * @param {string} [_type='string'] 
- * @returns 
+ * @returns {number|boolean|string}
  */
 const setVal = (_checkStr, _default, _type = C_TYP_STRING) =>
 	hasValN(_checkStr) ? g_convFunc[_type](_checkStr, _default) : _default;
