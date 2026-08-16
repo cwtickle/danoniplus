@@ -2303,10 +2303,12 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 			class: escapeHtml(tmpSpriteData[3] ?? ``),                          // CSSクラス
 			left: transformFlg
 				? setVal(tmpSpriteData[4], 1000, C_TYP_NUMBER)					// [t]のみtransformのPriority
-				: setVal(tmpSpriteData[4], `0`).includes(`{`) ?
-					`${setVal(tmpSpriteData[4], 0)}` : `{${setVal(tmpSpriteData[4], 0)}}`, // X座標
-			top: setVal(tmpSpriteData[5], `0`).includes(`{`) ?
-				`${setVal(tmpSpriteData[5], 0)}` : `{${setVal(tmpSpriteData[5], 0)}}`, // Y座標
+				: setVal(tmpSpriteData[4], `0`).includes(`{`)
+					? `${setVal(tmpSpriteData[4], 0)}`
+					: `{${setVal(tmpSpriteData[4], 0)}}`,                       // X座標
+			top: setVal(tmpSpriteData[5], `0`).includes(`{`)
+				? `${setVal(tmpSpriteData[5], 0)}`
+				: `{${setVal(tmpSpriteData[5], 0)}}`, 							// Y座標
 			width: `${setIntVal(tmpSpriteData[6])}`,                            // spanタグの場合は font-size
 			height: `${escapeHtml(tmpSpriteData[7] ?? ``)}`,                    // spanタグの場合は color(文字列可)
 			opacity: setVal(tmpSpriteData[8], 1, C_TYP_FLOAT),
