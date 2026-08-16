@@ -2349,7 +2349,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 		} else if (transformFlg) {
 			// [t]始まりの場合、レイヤーに対してtransformを掛ける準備を行う
 			const transformData = tmpObj.path.slice(`[t]`.length);
-			spriteFrameData.transform = transformData;
+			spriteFrameData.transform = transformData || ``;
 			spriteFrameData.transPriority = tmpObj.class;
 
 		} else if (tmpObj.path === ``) {
@@ -2450,9 +2450,9 @@ const drawBaseSpriteData = (_spriteData, _name, _condition = true) => {
 				if (!isNaN(parseInt(_spriteData.transform))) {
 					let mainTransform = getTransform(`mainSprite`, `playWindow`);
 					if (hasVal(mainTransform))
-						addTransform(`${_name}Sprite${_spriteData.depth}`, `main${_name}${_spriteData.depth}`, mainTransform, g_transPriority.playWindow);
+						addTransform(`${_name}Sprite${_spriteData.depth}`, `${_name}${_spriteData.depth}`, mainTransform, g_transPriority.playWindow);
 				} else {
-					addTransform(`${_name}Sprite${_spriteData.depth}`, `main${_name}${_spriteData.depth}`, _spriteData.transform, parseInt(_spriteData.transPriority || 1000));
+					addTransform(`${_name}Sprite${_spriteData.depth}`, `${_name}${_spriteData.depth}`, _spriteData.transform, parseInt(_spriteData.transPriority || 1000));
 				}
 			}
 		}
