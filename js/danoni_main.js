@@ -2320,6 +2320,7 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 
 		const emptyPatterns = [`[loop]`, `[jump]`];
 		const colorObjFlg = tmpSpriteData[2]?.startsWith(`[c]`) || false;
+		const transformFlg = tmpSpriteData[2]?.startsWith(`[t]`) || false;
 		const spriteFrameData = spriteData[tmpFrame][dataCnts] = {
 			depth: tmpDepth,
 		};
@@ -2327,9 +2328,15 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 		if (colorObjFlg) {
 			// [c]始まりの場合、カラーオブジェクト用の作成準備を行う
 			const data = tmpObj.path.slice(`[c]`.length).split(`/`);
+			let objPart = data[0];
+			if (!isNaN(parseInt(data[0]))) {
+				const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+				objPart = g_keyObj[`stepRtn${keyCtrlPtn}`][data[0]];
+				spriteFrameData.transform = parseInt(data[0]);
+			}
 			spriteFrameData.colorObjInfo = {
 				x: tmpObj.left, y: tmpObj.top, w: tmpObj.width, h: tmpObj.height,
-				rotate: setVal(data[0], `0`), opacity: tmpObj.opacity,
+				rotate: setVal(objPart, `0`), opacity: tmpObj.opacity,
 				background: makeColorGradation(setVal(data[1], `#ffffff`), { _defaultColorgrd: false }),
 				animationName: tmpObj.animationName,
 				animationDuration: `${tmpObj.animationDuration}s`,
@@ -2339,6 +2346,10 @@ const makeSpriteData = (_data, _calcFrame = _frame => _frame) => {
 			if (tmpObj.animationFillMode !== undefined) {
 				spriteFrameData.colorObjInfo.animationFillMode = tmpObj.animationFillMode;
 			}
+		} else if (transformFlg) {
+			// [t]始まりの場合、レイヤーに対してtransformを掛ける準備を行う
+			const transformData = tmpObj.path.slice(`[t]`.length);
+			spriteFrameData.transform = transformData;
 
 		} else if (tmpObj.path === ``) {
 			spriteFrameData.command = ``;
@@ -2422,6 +2433,10 @@ const drawBaseSpriteData = (_spriteData, _name, _condition = true) => {
 		}
 	} else {
 		if (_condition) {
+			if (_spriteData.colorObjInfo === undefined && _spriteData.transform === undefined) {
+				baseSprite.innerHTML = convertStrToVal(_spriteData.htmlText);
+				return;
+			}
 			if (_spriteData.colorObjInfo !== undefined) {
 				const colorObjClass = _spriteData.colorObjClass?.split(`/`) ?? [];
 				const id = `${_name}${_spriteData.depth}${_spriteData.colorObjId}`;
@@ -2429,8 +2444,13 @@ const drawBaseSpriteData = (_spriteData, _name, _condition = true) => {
 				baseSprite.appendChild(
 					createColorObject2(id, _spriteData.colorObjInfo, ...colorObjClass)
 				);
-			} else {
-				baseSprite.innerHTML = convertStrToVal(_spriteData.htmlText);
+			}
+			if (_spriteData.transform !== undefined) {
+				if (!isNaN(parseInt(_spriteData.transform))) {
+					let mainTransform = getTransform(`mainSprite`, `playWindow`);
+					if (hasVal(mainTransform))
+						addTransform(`${_name}Sprite${_spriteData.depth}`, `main${_name}${_spriteData.depth}`, mainTransform);
+				}
 			}
 		}
 	}
