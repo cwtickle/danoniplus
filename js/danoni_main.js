@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/08/12
+ * Revised : 2026/08/19
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 48.5.7`;
-const g_revisedDate = `2026/08/12`;
+const g_version = `Ver 48.5.8`;
+const g_revisedDate = `2026/08/19`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -135,6 +135,19 @@ let g_fps = 60;
 // プレイ画面再生時の内部スケジューリング用のマージン時間(100ms)
 let g_scheduleLead = 0.1;
 
+// フレーム進行を音源クロック(AudioContext.currentTime)基準で補正するか
+// - false の場合は従来通り performance.now() 基準で動作
+let g_audioClockSync = true;
+
+// 出力遅延(AudioContext.outputLatency)をタイミング補正に含めるか
+// - true にすると出力デバイス(有線/Bluetooth等)によらず同じAdjustmentが使えるが、
+//   既存のAdjustment設定値と互換性がなくなるため既定は false
+let g_audioLatencyCompensation = false;
+
+// 次フレームまでの待機時間の上限(ms)
+// - 音源クロックが一時的に停止した際に待ち続けないようにするための保険
+let g_maxFrameWait = 50;
+
 // 譜面データの&区切りを有効にするか
 let g_enableAmpersandSplit = true;
 
@@ -176,6 +189,9 @@ let g_imgType = `Original`;
 let g_maxScore = 1000000;
 let g_gameOverFlg = false;
 let g_finishFlg = true;
+
+// 音源のAudioContext管理
+let g_sharedAudioContext = null;
 
 /** 共通オブジェクト */
 const g_loadObj = {};
@@ -2459,10 +2475,11 @@ const drawTitleResultMotion = _displayName =>
 // WebAudioAPIでAudio要素風に再生するクラス
 class AudioPlayer {
 	constructor() {
-		this._context = new AudioContext();
+		this._context = getSharedAudioContext();
 		this._gain = this._context.createGain();
 		this._gain.connect(this._context.destination);
 		this._startTime = 0;
+		this._scheduledTime = 0;
 		this._fadeinPosition = 0;
 		this._eventListeners = {};
 		this.playbackRate = 1;
@@ -2487,17 +2504,25 @@ class AudioPlayer {
 	 * - scheduleLead は安定した再生タイミングを確保するための内部マージン
 	 */
 	play(_adjustmentTime = 0) {
+		// AudioContextの時計は1回だけ読み、以降はその値を使い回す
+		// - currentTimeはレンダークォンタム単位でしか進まないため、複数回読むと
+		//   予約時刻と論理開始時刻が最大1クォンタム分ずれる
+		const ctxNow = this._context.currentTime;
+
 		this._source = this._context.createBufferSource();
 		this._source.buffer = this._buffer;
 		this._source.playbackRate.value = this.playbackRate;
 		this._source.connect(this._gain);
 
 		// 実際の予約時刻（内部スケジューリング用のマージンを含む）
-		const startAt = this._context.currentTime + g_scheduleLead + _adjustmentTime;
+		const startAt = ctxNow + g_scheduleLead + _adjustmentTime;
 		this._source.start(startAt, this._fadeinPosition);
 
 		// ゲーム側の論理的開始時刻（g_scheduleLead を含めない）
-		this._startTime = this._context.currentTime + _adjustmentTime;
+		this._startTime = ctxNow + _adjustmentTime;
+
+		// 実際に音が鳴り始めるAudioContext上の時刻（フレーム同期の基準）
+		this._scheduledTime = startAt;
 	}
 
 	pause() {
@@ -2523,6 +2548,26 @@ class AudioPlayer {
 
 	get elapsedTime() {
 		return this._context.currentTime - this._startTime + this._fadeinPosition;
+	}
+
+	/** AudioContextの現在時刻(秒) */
+	get contextTime() {
+		return this._context.currentTime;
+	}
+
+	/** 実際に音が鳴り始めるAudioContext上の時刻(秒) */
+	get scheduledTime() {
+		return this._scheduledTime;
+	}
+
+	/** 音が出力デバイスから実際に出るまでの遅延(秒) */
+	get outputLatency() {
+		return this._context.outputLatency || this._context.baseLatency || 0;
+	}
+
+	/** AudioContextの状態(running / suspended / closed) */
+	get contextState() {
+		return this._context.state;
 	}
 
 	set currentTime(_currentTime) {
@@ -2589,6 +2634,47 @@ class AudioPlayer {
 	load() { }
 	dispatchEvent() { }
 }
+// グローバルで1つだけ保持(遅延生成)
+const getSharedAudioContext = () => {
+	if (!g_sharedAudioContext) {
+		g_sharedAudioContext = new AudioContext();
+	}
+	// タブのバックグラウンド化等でsuspendedになることがあるため念のためresume
+	if (g_sharedAudioContext.state === `suspended`) {
+		g_sharedAudioContext.resume();
+	}
+	return g_sharedAudioContext;
+};
+/**
+ * AudioContextのウォームアップ
+ * - 生成直後・resume直後のAudioContextは出力デバイスの起動待ちのため、
+ *   しばらく currentTime が進まない(環境により数十〜数百ms)
+ * - この状態で音源をスケジュールすると、起動に要した時間がそのまま
+ *   音源と譜面のずれになるため、無音を1回鳴らして時計が動き出すまで待つ
+ * @returns {Promise<void>}
+ */
+const warmUpAudioContext = async () => {
+	const ctx = getSharedAudioContext();
+	if (ctx.state !== `running`) {
+		await ctx.resume().catch(() => { });
+	}
+	if (ctx.state !== `running`) {
+		return; // ジェスチャー未取得等でresumeできない場合は何もしない
+	}
+
+	// 無音を1サンプルだけ鳴らして出力デバイスを起動させる
+	const source = ctx.createBufferSource();
+	source.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+	source.connect(ctx.destination);
+	source.start();
+
+	// currentTimeが実際に進み始めるまで待機(最大500ms)
+	const baseTime = ctx.currentTime;
+	const limitTime = performance.now() + 500;
+	while (ctx.currentTime === baseTime && performance.now() < limitTime) {
+		await new Promise(resolve => setTimeout(resolve, 10));
+	}
+};
 
 /**
  * クリップボードコピー関数
@@ -11882,6 +11968,7 @@ const setAudio = async (_url) => {
 			g_currentPage = `loadingIos`;
 			lblLoading.textContent = `Click to Start!`;
 			divRoot.appendChild(makePlayButton(evt => {
+				getSharedAudioContext().resume();
 				g_currentPage = `loading`;
 				resetKeyControl();
 				divRoot.removeChild(evt.target);
@@ -12100,6 +12187,9 @@ const loadingScoreInit = async () => {
 	// ユーザカスタムイベント
 	safeExecuteCustomHooks(`g_customJsObj.loading`, g_customJsObj.loading);
 
+	// 初回プレイ時に出力デバイスの起動待ちでずれるのを防ぐため、
+	// メイン画面へ移行する前にAudioContextを起動させておく
+	await warmUpAudioContext();
 	mainInit();
 };
 
@@ -14448,6 +14538,7 @@ const mainInit = () => {
 	let thisTime;
 	let buffTime;
 	let musicStartTime;
+	let musicStartCtxTime;
 	let musicStartFlg = false;
 
 	g_inputKeyBuffer = {};
@@ -15682,14 +15773,32 @@ const mainInit = () => {
 			}
 
 			// 60fpsから遅延するため、その差分を取って次回のタイミングで遅れをリカバリする
+			// - WebAudioAPI使用時は音源クロック(AudioContext.currentTime)を基準とする
+			//   performance.now()とAudioContextの時計は独立して進むため、後者を基準にしないと
+			//   再生開始時のオフセットずれやsuspend/resumeによるずれを吸収できない
 			thisTime = performance.now();
 			buffTime = 0;
-			if (g_audio instanceof AudioPlayer || currentFrame >= musicStartFrame) {
+			let holdFrame = false;
+
+			if (g_audio instanceof AudioPlayer && g_audioClockSync && musicStartCtxTime !== undefined) {
+				if (g_audio.contextState === `running`) {
+					buffTime = (g_audio.contextTime - musicStartCtxTime) * 1000
+						- (currentFrame - musicStartFrame) * 1000 / g_fps;
+				} else {
+					// AudioContext停止中は音源も止まっているため、フレーム進行も止めて復帰を待つ
+					getSharedAudioContext(); // suspended時はresumeを試行
+					holdFrame = true;
+				}
+			} else if (g_audio instanceof AudioPlayer || currentFrame >= musicStartFrame) {
 				buffTime = (thisTime - musicStartTime - (currentFrame - musicStartFrame) * 1000 / g_fps);
 			}
-			g_scoreObj.frameNum++;
-			g_scoreObj.baseFrame++;
-			g_timeoutEvtId = setTimeout(flowTimeline, 1000 / g_fps - buffTime);
+
+			if (!holdFrame) {
+				g_scoreObj.frameNum++;
+				g_scoreObj.baseFrame++;
+			}
+			g_timeoutEvtId = setTimeout(flowTimeline, holdFrame ? g_maxFrameWait :
+				Math.min(Math.max(1000 / g_fps - buffTime, 0), g_maxFrameWait));
 		}
 	};
 	safeExecuteCustomHooks(`g_skinJsObj.main`, g_skinJsObj.main);
@@ -15702,6 +15811,11 @@ const mainInit = () => {
 		const musicStartAdjustment = (g_headerObj.blankFrame - g_stateObj.decimalAdjustment + 1) / g_fps;
 		musicStartTime = performance.now() + (musicStartAdjustment + g_scheduleLead) * 1000;
 		g_audio.play(musicStartAdjustment);
+
+		// 音源クロック基準の開始時刻(フレーム進行の基準)
+		// - g_audioLatencyCompensationが有効な場合は出力遅延分だけ表示を後ろへずらす
+		musicStartCtxTime = g_audio.scheduledTime
+			+ (g_audioLatencyCompensation ? g_audio.outputLatency : 0);
 	}
 
 	g_timeoutEvtId = setTimeout(flowTimeline, 1000 / g_fps);
