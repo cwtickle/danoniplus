@@ -8461,6 +8461,7 @@ const setDifficulty = (_initFlg) => {
 
 	// ユーザカスタムイベント(初期)
 	safeExecuteCustomHooks(`g_customJsObj.difficulty`, g_customJsObj.difficulty, _initFlg, g_canLoadDifInfoFlg);
+	resolveKeyFamily();
 
 	// 設定サマリー表示の更新
 	updateSettingSummary();
@@ -8468,6 +8469,51 @@ const setDifficulty = (_initFlg) => {
 	// ---------------------------------------------------
 	// 4. 譜面初期情報ロード許可フラグの設定
 	g_canLoadDifInfoFlg = true;
+};
+
+/**
+ * keyLabelの系統ごとに、選択時に強制したい設定値・選択/離脱時の個別処理を登録する
+ * @param {string} _name 系統名
+ * @param {(key: string) => boolean} _match この系統に属するkeyLabelかどうか
+ * @param {object} [_fields] path -> 値 or 値を返す関数（単純代入で済むもの）
+ * @param {object} [_hooks] { onAcquire, onRelease } 選択/離脱の瞬間に1回だけ呼ばれる（複合処理用）
+ * @param {object} [_appliers] path -> 個別の適用関数（単純代入で済まないfields用）
+ */
+const registerKeyFamily = (_name, _match, _fields = {}, _hooks = {}, _appliers = {}) => {
+	g_familyObj.families.push({ name: _name, match: _match, fields: _fields, appliers: _appliers, ..._hooks });
+};
+
+const resolveKeyFamily = () => {
+	const newFamily = g_familyObj.families.find(f => f.match(g_keyObj.currentKey)) ?? null;
+
+	if (newFamily !== g_familyObj.currentFamily) {
+		g_familyObj.currentFamily?.onRelease?.();
+		newFamily?.onAcquire?.();
+		g_familyObj.currentFamily = newFamily;
+	}
+
+	const allPaths = new Set(g_familyObj.families.flatMap(f => Object.keys(f.fields)));
+	allPaths.forEach(path => {
+		const spec = newFamily?.fields[path];
+		const applier = g_familyObj.families.map(f => f.appliers[path]).find(Boolean) ?? (v => setPathVal(path, v));
+
+		if (spec !== undefined) {
+			if (!g_familyObj.ownership[path]) {
+				g_familyObj.snapshot[path] = getPathVal(path);
+				g_familyObj.ownership[path] = true;
+			}
+			applyIfChanged(path, typeof spec === `function` ? spec() : spec, applier);
+		} else if (g_familyObj.ownership[path]) {
+			applyIfChanged(path, g_familyObj.snapshot[path], applier);
+			g_familyObj.ownership[path] = false;
+		}
+	});
+};
+
+const applyIfChanged = (_path, _value, _applier) => {
+	if (g_familyObj.applied[_path] === _value) return;
+	g_familyObj.applied[_path] = _value;
+	_applier(_value);
 };
 
 /**
