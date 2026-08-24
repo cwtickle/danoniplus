@@ -5285,8 +5285,8 @@ const setPathVal = (_path, _value) => {
     const keys = _path.split(`.`);
     const last = keys.pop();
     const target = keys.reduce((o, k) => o?.[k], g_root);
-    if (target === undefined) {
-        console.warn(`setPathVal: intermediate path not found for "${_path}"`);
+    if (target == null || !Object.hasOwn(target, last)) {
+        console.warn(`setPathVal: path not found for "${_path}"`);
         return;
     }
     target[last] = _value;
