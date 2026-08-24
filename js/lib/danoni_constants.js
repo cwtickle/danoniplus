@@ -5284,10 +5284,15 @@ const getPathVal = _path => _path.split(`.`).reduce((o, k) => o?.[k], g_root);
 const setPathVal = (_path, _value) => {
     const keys = _path.split(`.`);
     const last = keys.pop();
-    keys.reduce((o, k) => o[k], g_root)[last] = _value;
+    const target = keys.reduce((o, k) => o?.[k], g_root);
+    if (target === undefined) {
+        console.warn(`setPathVal: intermediate path not found for "${_path}"`);
+        return;
+    }
+    target[last] = _value;
 };
 
-const g_familyObj = { families: [], currentFamily: null, ownership: {}, snapshot: {}, applied: {} };
+const g_familyObj = { families: [], currentFamily: null, ownership: {}, snapshot: {}, applied: {}, appliedPaths: new Set() };
 
 const g_errorCache = {
     'g_customJsObj.titleEnterFrame': [],
