@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/08/19
+ * Revised : 2026/08/24
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 49.6.1`;
-const g_revisedDate = `2026/08/19`;
+const g_version = `Ver 50.0.0`;
+const g_revisedDate = `2026/08/24`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -8461,6 +8461,7 @@ const setDifficulty = (_initFlg) => {
 
 	// ユーザカスタムイベント(初期)
 	safeExecuteCustomHooks(`g_customJsObj.difficulty`, g_customJsObj.difficulty, _initFlg, g_canLoadDifInfoFlg);
+	resolveKeyFamily();
 
 	// 設定サマリー表示の更新
 	updateSettingSummary();
@@ -8468,6 +8469,77 @@ const setDifficulty = (_initFlg) => {
 	// ---------------------------------------------------
 	// 4. 譜面初期情報ロード許可フラグの設定
 	g_canLoadDifInfoFlg = true;
+};
+
+/**
+ * keyLabelの系統ごとに、選択時に強制したい設定値・選択/離脱時の個別処理を登録する
+ * @param {string} _name 系統名
+ * @param {(key: string) => boolean} _match この系統に属するkeyLabelかどうか
+ * @param {object} [_fields] path -> 値 or 値を返す関数（単純代入で済むもの）
+ * @param {object} [_hooks] { onAcquire, onRelease } 選択/離脱の瞬間に1回だけ呼ばれる（複合処理用）
+ * @param {object} [_appliers] path -> 個別の適用関数（単純代入で済まないfields用）
+ */
+const registerKeyFamily = (_name, _match, _fields = {}, _hooks = {}, _appliers = {}) => {
+	g_familyObj.families.push({ name: _name, match: _match, fields: _fields, appliers: _appliers, ..._hooks });
+};
+
+/**
+ * 現在のキー状態に応じて適用すべき設定群を判定し、
+ * 各パラメータの値・スナップショット・フックを管理・適用する
+ */
+const resolveKeyFamily = () => {
+	// 1. 現在のキーに一致するファミリーを検索（見つからなければ null ＝ 標準状態）
+	const newFamily = g_familyObj.families.find(f => f.match(g_keyObj.currentKey)) ?? null;
+
+	// 2. ファミリーが切り替わった瞬間（入場・離脱）にフック（固有の副作用）を実行
+	if (newFamily !== g_familyObj.currentFamily) {
+		g_familyObj.currentFamily?.onRelease?.();
+		newFamily?.onAcquire?.();
+		g_familyObj.currentFamily = newFamily;
+	}
+
+	// 3. 登録されているすべてのファミリーが持つパス（プロパティ）の全リストを取得
+	const allPaths = new Set(g_familyObj.families.flatMap(f => Object.keys(f.fields)));
+	allPaths.forEach(path => {
+		const spec = newFamily?.fields[path];
+		// 該当プロパティのカスタム処理があれば優先し、なければ通常のプロパティ代入を使用
+		const applier = g_familyObj.families.map(f => f.appliers[path]).find(Boolean) ?? (v => setPathVal(path, v));
+
+		if (spec !== undefined) {
+			// 【変更値の適用】現在のファミリーにそのプロパティの設定がある場合
+			// 初めて書き換えるプロパティの場合のみ、元の値をスナップショット（初期値）として退避
+			if (!g_familyObj.ownership[path]) {
+				g_familyObj.snapshot[path] = getPathVal(path);
+				g_familyObj.ownership[path] = true;
+			}
+			// 関数なら評価し、値ならそのまま適用値とする
+			applyIfChanged(path, typeof spec === `function` ? spec() : spec, applier);
+		} else if (g_familyObj.ownership[path]) {
+			// 【標準への復元】別のファミリーに移行し、かつ元々自分が書き換えていたプロパティの場合
+			// スナップショットから元の値（初期値）を復元し、オーナーシップを解放
+			applyIfChanged(path, g_familyObj.snapshot[path], applier);
+			g_familyObj.ownership[path] = false;
+		}
+		// ownership[path]がfalseのままなら、標準同士の切り替えでも一切触らない
+	});
+};
+
+/**
+ * 値に変更がある場合のみ、代入またはカスタム処理を実行してキャッシュを更新する
+ * @param {string} _path 設定のパス
+ * @param {string|number} _value 適用する値
+ * @param {Function} _applier 実際の適用処理を行う関数
+ */
+const applyIfChanged = (_path, _value, _applier) => {
+	// すでに同じ値が適用済みの場合は、無駄な再描画や再代入を防ぐためスキップ
+	if (g_familyObj.appliedPaths.has(_path) && g_familyObj.applied[_path] === _value) return;
+
+	// 適用値をキャッシュに保存
+	g_familyObj.applied[_path] = _value;
+	g_familyObj.appliedPaths.add(_path);
+
+	// 実際の反映処理（値の代入、または画像再描画などの副作用）を実行
+	_applier(_value);
 };
 
 /**
