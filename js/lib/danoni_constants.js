@@ -5273,6 +5273,27 @@ const g_skinJsObj = {
     result: [],
 };
 
+const g_root = {
+    get g_diffObj() { return g_diffObj; },
+    get g_posObj() { return g_posObj; },
+    get g_headerObj() { return g_headerObj; },
+    get g_stateObj() { return g_stateObj; },
+    get g_keycons() { return g_keycons; },
+};
+const getPathVal = _path => _path.split(`.`).reduce((o, k) => o?.[k], g_root);
+const setPathVal = (_path, _value) => {
+    const keys = _path.split(`.`);
+    const last = keys.pop();
+    const target = keys.reduce((o, k) => o?.[k], g_root);
+    if (target == null || !Object.hasOwn(target, last)) {
+        console.warn(`setPathVal: path not found for "${_path}"`);
+        return;
+    }
+    target[last] = _value;
+};
+
+const g_familyObj = { families: [], currentFamily: null, ownership: {}, snapshot: {}, applied: {}, appliedPaths: new Set() };
+
 const g_errorCache = {
     'g_customJsObj.titleEnterFrame': [],
     'g_customJsObj.mainEnterFrame': [],
