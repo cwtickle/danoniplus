@@ -15125,7 +15125,9 @@ const mainInit = () => {
 	let musicStartTime;
 	let musicStartCtxTime;
 	let musicStartFlg = false;
-	let pausedElapsedTime = null; // 一時停止中の再生位置(秒)。null=一時停止していない
+	let isPaused = false; // 一時停止中かどうか(経路によらず共通のフラグ)
+	let pausedElapsedTime = null; // [AudioPlayer/開始後のみ] 一時停止時点の再生位置(秒)
+	let pausedStartAdjustment = null; // [AudioPlayer/開始前のみ] 開始予定までの残り時間(秒)
 	let countdownTimeoutId = null; // 再開前カウントダウンのタイマーID。null=カウントダウン中でない
 	const mySessionId = ++g_timelineSessionId; // このmainInit()実行を識別するID
 
@@ -15423,7 +15425,7 @@ const mainInit = () => {
 		evt.preventDefault();
 		const setCode = transCode(evt);
 
-		if ((evt.repeat && !g_mainRepeatObj.key.includes(setCode)) || pausedElapsedTime !== null) {
+		if ((evt.repeat && !g_mainRepeatObj.key.includes(setCode)) || isPaused) {
 			return blockCode(setCode);
 		}
 		g_inputKeyBuffer[setCode] = true;
@@ -16410,15 +16412,26 @@ const mainInit = () => {
 		// カウントダウン中に再度バックグラウンド化した場合は、カウントダウンのみ中断する
 		// (音源は既に停止済み・gamePausedも付与済みのため、以降の処理は不要)
 		cancelResumeCountdown();
-		if (pausedElapsedTime !== null) {
+		if (isPaused) {
 			return;
 		}
+		isPaused = true;
+		pausedElapsedTime = null;
+		pausedStartAdjustment = null;
+
 		if (g_audio instanceof AudioPlayer) {
-			pausedElapsedTime = g_audio.elapsedTime - g_scheduleLead;
+			if (g_audio.contextTime < g_audio.scheduledTime) {
+				// 音源開始前は、再生位置ではなく開始予定時刻までの残り時間を保持する。
+				// g_audio.play() は g_scheduleLead を加算するため、その分を除く。
+				pausedStartAdjustment = g_audio.scheduledTime
+					- g_audio.contextTime - g_scheduleLead;
+			} else {
+				// 音源開始後: 再生位置を保存する。
+				pausedElapsedTime = g_audio.elapsedTime - g_scheduleLead;
+			}
 		} else {
 			// `paused` が false の場合だけ、再開時に play() を呼ぶ
 			nativeAudioWasPlaying = !g_audio.paused;
-			pausedElapsedTime = 0; // 一時停止状態を示す値
 		}
 		clearTimeout(g_timeoutEvtId);
 		g_audio.pause();
@@ -16432,7 +16445,7 @@ const mainInit = () => {
 	};
 
 	const resumeTimeline = () => {
-		if (pausedElapsedTime === null || countdownTimeoutId !== null) {
+		if (!isPaused || countdownTimeoutId !== null) {
 			return;
 		}
 		const countdownLabel = createDivCss2Label(`lblResumeCountdown`, ``, {
@@ -16456,12 +16469,21 @@ const mainInit = () => {
 				// バックグラウンド中にsuspendされていた場合に備え、先に明示的にresumeを試みる
 				getSharedAudioContext();
 
-				g_audio.currentTime = Math.max(0, pausedElapsedTime);
-				g_audio.play();
+				if (pausedStartAdjustment !== null) {
+					// 開始前: 音源と譜面の残り開始時間を両方維持する。
+					g_audio.play(pausedStartAdjustment);
+					musicStartCtxTime = g_audio.scheduledTime
+						+ (g_audioLatencyCompensation ? g_audio.outputLatency : 0);
+					// musicStartFrame は変更しない。
+				} else {
+					// 開始後: 再生位置から再開し、現在フレームを基準に再アンカーする。
+					g_audio.currentTime = pausedElapsedTime;
+					g_audio.play();
+					musicStartCtxTime = g_audio.scheduledTime
+						+ (g_audioLatencyCompensation ? g_audio.outputLatency : 0);
+					musicStartFrame = g_scoreObj.frameNum;
+				}
 
-				// 一時停止していた地点を新たな基準点として再アンカー
-				musicStartCtxTime = g_audio.scheduledTime;
-				musicStartFrame = g_scoreObj.frameNum;
 			} else {
 				if (nativeAudioWasPlaying) {
 					g_audio.play();
@@ -16473,7 +16495,9 @@ const mainInit = () => {
 			}
 
 			divRoot.classList.remove(`gamePaused`);
+			isPaused = false;
 			pausedElapsedTime = null;
+			pausedStartAdjustment = null;
 			g_timeoutEvtId = setTimeout(flowTimeline, 1000 / g_fps);
 		};
 
@@ -16507,7 +16531,11 @@ const mainInit = () => {
 			+ (g_audioLatencyCompensation ? g_audio.outputLatency : 0);
 	}
 
-	g_timeoutEvtId = setTimeout(flowTimeline, 1000 / g_fps);
+	if (document.hidden) {
+		pauseTimeline();
+	} else {
+		g_timeoutEvtId = setTimeout(flowTimeline, 1000 / g_fps);
+	}
 };
 
 /**
