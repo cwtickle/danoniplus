@@ -4,7 +4,7 @@
   本体cssファイル
 
   Created : 2018/10/08
-  Revised : 2026/05/17 (v48.0.0)
+  Revised : 2026/08/29 (v50.1.0)
 
   https://github.com/cwtickle/danoniplus
 ------------------------------------------ */
@@ -22,6 +22,11 @@
 	position: absolute;
 	left: 0;
 	overflow: hidden;
+}
+
+/* タブのバックグラウンド化に伴う一時停止(danoni_main.js側でdivRootにgamePausedクラスを付け外し) */
+#divRoot.gamePaused * {
+	animation-play-state: paused !important;
 }
 
 input[type="range"] {
