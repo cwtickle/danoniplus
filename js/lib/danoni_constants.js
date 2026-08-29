@@ -186,6 +186,7 @@ const g_lblPosObj = {};
 const getScMsg = {
     TitleBack: () => g_lblNameObj.kcShortcutDesc1.split(`{0}`).join(g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack]),
     Retry: () => g_lblNameObj.kcShortcutDesc2.split(`{1}`).join(g_kCd[g_headerObj.keyRetry]),
+    Pause: () => g_lblNameObj.kcShortcutDesc3.split(`{2}`).join(g_kCd[g_headerObj.keyPause]),
 };
 
 /**
@@ -676,11 +677,15 @@ const updateWindowSiz = () => {
         },
         scTitleBack: {
             x: g_btnX(1 / 4) + 20, y: g_sHeight - 50, align: C_ALIGN_LEFT,
-            w: g_btnWidth(5 / 12) - 40, h: C_KYC_REPHEIGHT, siz: getFontSize2(getScMsg.TitleBack(), g_btnWidth(5 / 12) - 40, { maxSiz: 13 }),
+            w: g_btnWidth(1 / 4) - 40, h: C_KYC_REPHEIGHT, siz: getFontSize2(getScMsg.TitleBack(), g_btnWidth(1 / 4) - 40, { maxSiz: 13 }),
         },
         scRetry: {
-            x: g_btnX(5 / 8) + 20, y: g_sHeight - 50, align: C_ALIGN_LEFT,
-            w: g_btnWidth(5 / 12) - 40, h: C_KYC_REPHEIGHT, siz: getFontSize2(getScMsg.Retry(), g_btnWidth(5 / 12) - 40, getBasicFont(), { maxSiz: 13 }),
+            x: g_btnX(1 / 2) + 20, y: g_sHeight - 50, align: C_ALIGN_LEFT,
+            w: g_btnWidth(1 / 4) - 40, h: C_KYC_REPHEIGHT, siz: getFontSize2(getScMsg.Retry(), g_btnWidth(1 / 4) - 40, { maxSiz: 13 }),
+        },
+        scPause: {
+            x: g_btnX(3 / 4) + 20, y: g_sHeight - 50, align: C_ALIGN_LEFT,
+            w: g_btnWidth(1 / 4) - 40, h: C_KYC_REPHEIGHT, siz: getFontSize2(getScMsg.Pause(), g_btnWidth(1 / 4) - 40, { maxSiz: 13 }),
         },
 
         /** メイン画面 */
@@ -738,6 +743,10 @@ const updateWindowSiz = () => {
         },
         lblMainScKey: {
             x: g_sWidth + g_headerObj.scAreaWidth - 85, w: 80, h: 20, siz: 12, align: C_ALIGN_RIGHT,
+        },
+        lblPauseMark: {
+            y: g_headerObj.playingY + (g_headerObj.playingHeight + g_posObj.stepYR) / 2 - 75,
+            w: g_sWidth, h: 50, siz: 40, background: `#000000cc`, align: C_ALIGN_CENTER,
         },
 
         /** 結果画面 */
@@ -1126,6 +1135,7 @@ const C_FRM_FRZATTEMPT = 5;
 /** ショートカットキー */
 const C_KEY_RETRY = 8;
 const C_KEY_TITLEBACK = 46;
+const C_KEY_PAUSE = 19;
 
 /** 判定系共通オブジェクト */
 const g_judgObj = {
@@ -4841,6 +4851,7 @@ const g_lang_lblNameObj = {
         kcShortcutDesc: `プレイ中ショートカット：`,
         kcShortcutDesc1: `タイトルバック: {0}`,
         kcShortcutDesc2: `リトライ: {1}`,
+        kcShortcutDesc3: `ポーズ: {2}`,
         transKeyDesc: `別キーモードではキーコンフィグ、ColorType等は保存されません`,
         colorTypeDesc: `現在のColorTypeの設定では、色変化(Display:Color)は自動的にOFFになります`,
         sdShortcutDesc: `Hid+/Sud+時ショートカット：「pageUp」カバーを上へ / 「pageDown」下へ`,
@@ -4888,6 +4899,7 @@ const g_lang_lblNameObj = {
 
         l_retry: `リトライ`,
         l_titleBack: `タイトルバック`,
+        l_pause: `ポーズ`,
 
         helpUrl: `https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`,
         securityUrl: `https://github.com/cwtickle/danoniplus/security/policy`,
@@ -4905,6 +4917,7 @@ const g_lang_lblNameObj = {
         kcShortcutDesc: `Shortcut during play:`,
         kcShortcutDesc1: `Return to title: {0}`,
         kcShortcutDesc2: `Retry the game: {1}`,
+        kcShortcutDesc3: `Pause: {2}`,
         transKeyDesc: `Key config, Color type, etc. are not saved for alternate keymode`,
         colorTypeDesc: `With the current ColorType setting, color change (Display:Color) will be automatically turned OFF.`,
         sdShortcutDesc: `When "Hidden+" or "Sudden+" select, "pageUp" cover up / "pageDown" cover down`,
@@ -4952,6 +4965,7 @@ const g_lang_lblNameObj = {
 
         l_retry: `Retry`,
         l_titleBack: `Go to title`,
+        l_pause: `Pause`,
 
         helpUrl: `https://github.com/cwtickle/danoniplus-docs/wiki/AboutGameSystem`,
         securityUrl: `https://github.com/cwtickle/danoniplus-docs/wiki/SecurityPolicy`,

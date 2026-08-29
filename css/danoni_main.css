@@ -24,6 +24,11 @@
 	overflow: hidden;
 }
 
+/* タブのバックグラウンド化に伴う一時停止(danoni_main.js側でdivRootにgamePausedクラスを付け外し) */
+#divRoot.gamePaused * {
+	animation-play-state: paused !important;
+}
+
 input[type="range"] {
 	appearance: none;
 	background: transparent;
