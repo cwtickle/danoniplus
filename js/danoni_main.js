@@ -123,6 +123,12 @@ const waitUntilLoaded = () => {
 	await loadScript2(`${g_rootPath}../js/lib/danoni_constants.js?${g_versionForUrl}`);
 	await loadScript2(`${g_rootPath}../js/lib/legacy_functions.js?${g_versionForUrl.split(`.`)[0]}`, false);
 	initialControl();
+
+	// プレイ画面(g_currentPage === `main`)でのみ有効化される、タブ非表示検知(常時1個だけ登録)
+	g_handler.addListener(document, `visibilitychange`, () => {
+		if (g_currentPage !== `main`) return;
+		document.hidden ? g_timelineHooks.pause() : g_timelineHooks.resume();
+	});
 })();
 
 /*-----------------------------------------------------------*/
@@ -269,6 +275,11 @@ let g_audioForMS = null;
 let g_timeoutEvtId = 0;
 let g_timeoutEvtTitleId = 0;
 let g_timeoutEvtResultId = 0;
+
+// タブのバックグラウンド化に伴う一時停止/再開のフック
+let g_timelineHooks = { pause: () => { }, resume: () => { } };
+let g_timelineSessionId = 0; // mainInit()呼び出しごとに採番。古いセッションのfinishResume無効化に使用
+
 let g_inputKeyBuffer = {};
 
 // 音楽ファイル エンコードフラグ
@@ -2640,7 +2651,7 @@ class AudioPlayer {
 	}
 
 	get elapsedTime() {
-		return this._context.currentTime - this._startTime + this._fadeinPosition;
+		return (this._context.currentTime - this._scheduledTime) * this.playbackRate + g_scheduleLead + this._fadeinPosition;
 	}
 
 	/** AudioContextの現在時刻(秒) */
@@ -15104,7 +15115,7 @@ const mainInit = () => {
 
 	// 開始位置、楽曲再生位置の設定
 	const firstFrame = g_scoreObj.frameNum;
-	const musicStartFrame = firstFrame + g_headerObj.blankFrame;
+	let musicStartFrame = firstFrame + g_headerObj.blankFrame;
 	const fadeFlgs = { fadein: [`In`, `Out`], fadeout: [`Out`, `In`] };
 	g_audio.volume = (firstFrame === 0 ? g_stateObj.volume / 100 : 0);
 
@@ -15114,6 +15125,9 @@ const mainInit = () => {
 	let musicStartTime;
 	let musicStartCtxTime;
 	let musicStartFlg = false;
+	let pausedElapsedTime = null; // 一時停止中の再生位置(秒)。null=一時停止していない
+	let countdownTimeoutId = null; // 再開前カウントダウンのタイマーID。null=カウントダウン中でない
+	const mySessionId = ++g_timelineSessionId; // このmainInit()実行を識別するID
 
 	g_inputKeyBuffer = {};
 
@@ -16374,6 +16388,92 @@ const mainInit = () => {
 				Math.min(Math.max(1000 / g_fps - buffTime, 0), g_maxFrameWait));
 		}
 	};
+
+	/*
+	 * タブのバックグラウンド化に伴う一時停止/再開
+	 * - 【既知の制限】movLock/initManual設定(movArrowYがCSS animation任せになるケース)では、
+	 *   矢印移動そのものがCSS animation駆動になるため、この一時停止機能はバックグラウンド中の
+	 *   一時停止を保証できない(演出効果と異なり判定位置に直結するため実プレイには不適)。
+	 *   対処は行わず、既知の制限として明記するに留める。
+	 */
+	const cancelResumeCountdown = () => {
+		if (countdownTimeoutId !== null) {
+			clearTimeout(countdownTimeoutId);
+			countdownTimeoutId = null;
+		}
+		document.getElementById(`lblResumeCountdown`)?.remove();
+	};
+
+	const pauseTimeline = () => {
+		if (!(g_audio instanceof AudioPlayer)) {
+			return;
+		}
+		// カウントダウン中に再度バックグラウンド化した場合は、カウントダウンのみ中断する
+		// (音源は既に停止済み・gamePausedも付与済みのため、以降の処理は不要)
+		cancelResumeCountdown();
+		if (pausedElapsedTime !== null) {
+			return;
+		}
+		pausedElapsedTime = g_audio.elapsedTime - g_scheduleLead;
+		clearTimeout(g_timeoutEvtId);
+		g_audio.pause();
+		// フォーカスを失うとkeyupが届かなくなり、押しっぱなし判定・表示が残り得るため、
+		// ここで強制的に全キー「離した」状態に戻す
+		g_inputKeyBuffer = {};
+		g_workObj.keyHitFlg.forEach(lane => lane.fill(false));
+		mainKeyUpActFunc[g_stateObj.autoAll]();
+		divRoot.classList.add(`gamePaused`);
+	};
+
+	const resumeTimeline = () => {
+		if (pausedElapsedTime === null || countdownTimeoutId !== null) {
+			return;
+		}
+		const countdownLabel = createDivCss2Label(`lblResumeCountdown`, ``, {
+			x: g_workObj.playingX + (g_headerObj.playingWidth - g_sWidth) / 2,
+			y: g_headerObj.playingY + (g_headerObj.playingHeight + g_posObj.stepYR) / 2 - 75,
+			w: g_sWidth, h: 50, siz: 60,
+		});
+		divRoot.appendChild(countdownLabel);
+
+		const finishResume = () => {
+			countdownTimeoutId = null;
+			countdownLabel.remove();
+
+			// カウントダウン中に曲中リトライ等でmainInit()が再実行されていた場合、
+			// 古いセッションのfinishResumeが後から発火して二重再生・二重ループを起こすのを防ぐ
+			if (mySessionId !== g_timelineSessionId) {
+				return;
+			}
+
+			// バックグラウンド中にsuspendされていた場合に備え、先に明示的にresumeを試みる
+			getSharedAudioContext();
+
+			g_audio.currentTime = pausedElapsedTime;
+			g_audio.play();
+
+			// 一時停止していた地点を新たな基準点として再アンカー
+			musicStartCtxTime = g_audio.scheduledTime;
+			musicStartFrame = g_scoreObj.frameNum;
+
+			divRoot.classList.remove(`gamePaused`);
+			pausedElapsedTime = null;
+			g_timeoutEvtId = setTimeout(flowTimeline, 1000 / g_fps);
+		};
+
+		const tick = _remaining => {
+			if (_remaining <= 0) {
+				finishResume();
+				return;
+			}
+			countdownLabel.innerHTML = String(_remaining);
+			countdownTimeoutId = setTimeout(() => tick(_remaining - 1), 1000);
+		};
+		tick(3);
+	};
+
+	g_timelineHooks.pause = pauseTimeline;
+	g_timelineHooks.resume = resumeTimeline;
 	safeExecuteCustomHooks(`g_skinJsObj.main`, g_skinJsObj.main);
 
 	g_audio.currentTime = firstFrame / g_fps * g_headerObj.playbackRate;
