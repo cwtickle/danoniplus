@@ -15453,12 +15453,14 @@ const mainInit = () => {
 		evt.preventDefault();
 		const setCode = transCode(evt);
 
+		if (evt.repeat && !g_mainRepeatObj.key.includes(setCode)) {
+			return blockCode(setCode);
+		}
 		if (setCode === g_kCdN[g_headerObj.keyPause]) {
 			isPaused ? resumeTimeline(true) : pauseTimeline(true);
 			return blockCode(setCode);
 		}
-
-		if ((evt.repeat && !g_mainRepeatObj.key.includes(setCode)) || isPaused) {
+		if (isPaused) {
 			return blockCode(setCode);
 		}
 		g_inputKeyBuffer[setCode] = true;
