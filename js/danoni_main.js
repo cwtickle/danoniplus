@@ -15423,7 +15423,7 @@ const mainInit = () => {
 		evt.preventDefault();
 		const setCode = transCode(evt);
 
-		if (evt.repeat && !g_mainRepeatObj.key.includes(setCode)) {
+		if ((evt.repeat && !g_mainRepeatObj.key.includes(setCode)) || pausedElapsedTime !== null) {
 			return blockCode(setCode);
 		}
 		g_inputKeyBuffer[setCode] = true;
@@ -16404,19 +16404,25 @@ const mainInit = () => {
 		document.getElementById(`lblResumeCountdown`)?.remove();
 	};
 
+	let nativeAudioWasPlaying = false;
+
 	const pauseTimeline = () => {
-		if (!(g_audio instanceof AudioPlayer)) {
-			return;
-		}
 		// カウントダウン中に再度バックグラウンド化した場合は、カウントダウンのみ中断する
 		// (音源は既に停止済み・gamePausedも付与済みのため、以降の処理は不要)
 		cancelResumeCountdown();
 		if (pausedElapsedTime !== null) {
 			return;
 		}
-		pausedElapsedTime = g_audio.elapsedTime - g_scheduleLead;
+		if (g_audio instanceof AudioPlayer) {
+			pausedElapsedTime = g_audio.elapsedTime - g_scheduleLead;
+		} else {
+			// `paused` が false の場合だけ、再開時に play() を呼ぶ
+			nativeAudioWasPlaying = !g_audio.paused;
+			pausedElapsedTime = 0; // 一時停止状態を示す値
+		}
 		clearTimeout(g_timeoutEvtId);
 		g_audio.pause();
+
 		// フォーカスを失うとkeyupが届かなくなり、押しっぱなし判定・表示が残り得るため、
 		// ここで強制的に全キー「離した」状態に戻す
 		g_inputKeyBuffer = {};
@@ -16440,21 +16446,31 @@ const mainInit = () => {
 			countdownTimeoutId = null;
 			countdownLabel.remove();
 
-			// カウントダウン中に曲中リトライ等でmainInit()が再実行されていた場合、
+			// カウントダウン中に曲中リトライ等でmainInit()が再実行されたりプレイ画面外に移動した場合、
 			// 古いセッションのfinishResumeが後から発火して二重再生・二重ループを起こすのを防ぐ
-			if (mySessionId !== g_timelineSessionId) {
+			if (mySessionId !== g_timelineSessionId || g_currentPage !== `main`) {
 				return;
 			}
 
-			// バックグラウンド中にsuspendされていた場合に備え、先に明示的にresumeを試みる
-			getSharedAudioContext();
+			if (g_audio instanceof AudioPlayer) {
+				// バックグラウンド中にsuspendされていた場合に備え、先に明示的にresumeを試みる
+				getSharedAudioContext();
 
-			g_audio.currentTime = pausedElapsedTime;
-			g_audio.play();
+				g_audio.currentTime = Math.max(0, pausedElapsedTime);
+				g_audio.play();
 
-			// 一時停止していた地点を新たな基準点として再アンカー
-			musicStartCtxTime = g_audio.scheduledTime;
-			musicStartFrame = g_scoreObj.frameNum;
+				// 一時停止していた地点を新たな基準点として再アンカー
+				musicStartCtxTime = g_audio.scheduledTime;
+				musicStartFrame = g_scoreObj.frameNum;
+			} else {
+				if (nativeAudioWasPlaying) {
+					g_audio.play();
+				}
+
+				// バックグラウンド経過時間をフレーム計算から除外する
+				musicStartTime = performance.now()
+					- (g_scoreObj.frameNum - musicStartFrame) * 1000 / g_fps;
+			}
 
 			divRoot.classList.remove(`gamePaused`);
 			pausedElapsedTime = null;
