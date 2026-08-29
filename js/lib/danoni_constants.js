@@ -681,11 +681,11 @@ const updateWindowSiz = () => {
         },
         scRetry: {
             x: g_btnX(1 / 2) + 20, y: g_sHeight - 50, align: C_ALIGN_LEFT,
-            w: g_btnWidth(1 / 4) - 40, h: C_KYC_REPHEIGHT, siz: getFontSize2(getScMsg.Retry(), g_btnWidth(1 / 4) - 40, getBasicFont(), { maxSiz: 13 }),
+            w: g_btnWidth(1 / 4) - 40, h: C_KYC_REPHEIGHT, siz: getFontSize2(getScMsg.Retry(), g_btnWidth(1 / 4) - 40, { maxSiz: 13 }),
         },
         scPause: {
             x: g_btnX(3 / 4) + 20, y: g_sHeight - 50, align: C_ALIGN_LEFT,
-            w: g_btnWidth(1 / 4) - 40, h: C_KYC_REPHEIGHT, siz: getFontSize2(getScMsg.Pause(), g_btnWidth(1 / 4) - 40, getBasicFont(), { maxSiz: 13 }),
+            w: g_btnWidth(1 / 4) - 40, h: C_KYC_REPHEIGHT, siz: getFontSize2(getScMsg.Pause(), g_btnWidth(1 / 4) - 40, { maxSiz: 13 }),
         },
 
         /** メイン画面 */
