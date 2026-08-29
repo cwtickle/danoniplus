@@ -617,9 +617,9 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 					// scrollDirXのスクロール方向表示処理
 					return _value === 1 ? `1|<span style="color:#ff9999">↑</span>` : `-1|<span style="color:#66ff66">↓</span>`;
 
-				} else if (listMatching(_rootKey, [`keyCtrl`, `keyRetry`, `keyTitleBack`], { prefix: `^` })
+				} else if (listMatching(_rootKey, [`keyCtrl`, `keyRetry`, `keyTitleBack`, `keyPause`], { prefix: `^` })
 					&& !_rootKey.startsWith(`keyCtrlPtn`)) {
-					// keyCtrlX, keyRetryX, keyTitleBackX の対応キー表示処理
+					// keyCtrlX, keyRetryX, keyTitleBackX, keyPauseX の対応キー表示処理
 					return (g_kCd[_value] && _value !== 0) ? `${_value}|<span style="color:#ffff66">${g_kCd[_value]}</span>` : `----`;
 				}
 			} else if (isObj(_value)) {
@@ -4243,6 +4243,9 @@ const headerConvert = _dosObj => {
 	obj.keyTitleBack = setIntVal(getKeyCtrlVal(_dosObj.keyTitleBack), C_KEY_TITLEBACK);
 	obj.keyTitleBackDef = obj.keyTitleBack;
 	obj.keyTitleBackDef2 = obj.keyTitleBack;
+	obj.keyPause = setIntVal(getKeyCtrlVal(_dosObj.keyPause), C_KEY_PAUSE);
+	obj.keyPauseDef = obj.keyPause;
+	obj.keyPauseDef2 = obj.keyPause;
 
 	// フリーズアローの許容フレーム数設定
 	obj.frzAttempt = setIntVal(_dosObj.frzAttempt, C_FRM_FRZATTEMPT);
@@ -5713,6 +5716,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 			// プレイ中ショートカット：タイトルバック (keyTitleBackX_Y)
 			newKeySingleParam(newKey, `keyTitleBack`, C_TYP_STRING, C_KEY_TITLEBACK);
 
+			// プレイ中ショートカット：タイトルバック (keyPauseX_Y)
+			newKeySingleParam(newKey, `keyPause`, C_TYP_STRING, C_KEY_PAUSE);
+
 			// 別キーフラグ (transKeyX_Y)
 			newKeySingleParam(newKey, `transKey`, C_TYP_STRING, ``);
 
@@ -5751,8 +5757,9 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 			// カスタムキーで定義されたtransKeyPtnを補完
 			completeTransKeyPtn([newKey]);
 
-			// keyRetry, keyTitleBackのキー名をキーコードに変換
-			const keyTypePatterns = Object.keys(g_keyObj).filter(val => val.startsWith(`keyRetry${newKey}`) || val.startsWith(`keyTitleBack${newKey}`));
+			// keyRetry, keyTitleBack, keyPauseのキー名をキーコードに変換
+			const keyTypePatterns = Object.keys(g_keyObj).filter(val =>
+				val.startsWith(`keyRetry${newKey}`) || val.startsWith(`keyTitleBack${newKey}`) || val.startsWith(`keyPause${newKey}`));
 			keyTypePatterns.forEach(name => g_keyObj[name] = getKeyCtrlVal(g_keyObj[name]));
 		} catch (e) {
 			g_headerObj.undefinedKeyListFinal.push(newKey);
@@ -9869,7 +9876,7 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	// ============================================================
 	const scGroup = createEmptySprite(_frame, `previewScGroup`, {
 		x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
-		y: _playH - 65 + g_diffObj.shortcutY, w: 80, h: 65, pointerEvents: C_DIS_AUTO,
+		y: _playH - 100 + g_diffObj.shortcutY, w: 80, h: 100, pointerEvents: C_DIS_AUTO,
 	});
 	multiAppend(scGroup,
 		createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, { ...g_lblPosObj.lblMainScHeader, x: 0, y: 0 }),
@@ -9878,15 +9885,18 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, { ...g_lblPosObj.lblMainScHeader, x: 0, y: 35 }),
 		createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack],
 			{ ...g_lblPosObj.lblMainScKey, x: 0, y: 50, fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold` }),
+		createDivCss2Label(`lblPause`, `[${g_lblNameObj.l_pause}]`, { ...g_lblPosObj.lblMainScHeader, x: 0, y: 70 }),
+		createDivCss2Label(`lblPauseSc`, g_kCd[g_headerObj.keyPause],
+			{ ...g_lblPosObj.lblMainScKey, x: 0, y: 85, fontWeight: g_headerObj.keyPause === C_KEY_PAUSE ? `normal` : `bold` }),
 	);
 	const scConfig = {
 		toastTitle: g_lblNameObj.shortcutUpdate,
 		getStdPos: () => ({
 			x: g_sWidth + g_headerObj.scAreaWidth - 85,
-			y: _playH - 65
+			y: _playH - 100
 		}),
 	};
-	makeElementDraggable(scGroup, `shortcut`, _playW, _playH, { w: 80, h: 65 }, scConfig);
+	makeElementDraggable(scGroup, `shortcut`, _playW, _playH, { w: 80, h: 100 }, scConfig);
 
 	// ユーザカスタムイベント(プレビュー表示用)
 	safeExecuteCustomHooks(`g_customJsObj.displayPreview`, g_customJsObj.displayPreview, _frame, _playW, _playH);
@@ -10911,11 +10921,20 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 
 		// リトライのショートカットキー変更
 		createCss2Button(`scRetry`, getScMsg.Retry(), () => {
-			cursor.style.left = wUnit(g_btnX(5 / 8) + kcSubX);
+			cursor.style.left = wUnit(g_btnX(1 / 2) + kcSubX);
 			cursor.style.top = wUnit(g_sHeight - 160 + kcSubY);
 			selectedKc = `Retry`;
 		}, g_lblPosObj.scRetry, g_cssObj.button_Default_NoColor,
 			g_headerObj.keyRetry === g_headerObj.keyRetryDef2 ?
+				g_cssObj.title_base : g_cssObj.keyconfig_Changekey),
+
+		// ポーズのショートカットキー変更
+		createCss2Button(`scPause`, getScMsg.Pause(), () => {
+			cursor.style.left = wUnit(g_btnX(3 / 4) + kcSubX);
+			cursor.style.top = wUnit(g_sHeight - 160 + kcSubY);
+			selectedKc = `Pause`;
+		}, g_lblPosObj.scPause, g_cssObj.button_Default_NoColor,
+			g_headerObj.keyPause === g_headerObj.keyPauseDef2 ?
 				g_cssObj.title_base : g_cssObj.keyconfig_Changekey),
 
 		// 別キーモード警告メッセージ
@@ -11425,8 +11444,8 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		} else if ((keyIsDown(g_kCdNameObj.metaLKey) || keyIsDown(g_kCdNameObj.metaRKey)) && keyIsShift()) {
 			return;
 		}
-		if (selectedKc === `TitleBack` || selectedKc === `Retry`) {
-			// タイトルバックキー、リトライキーはプレイ中の操作キーと重複しないようにする（簡易的）
+		if (selectedKc === `TitleBack` || selectedKc === `Retry` || selectedKc === `Pause`) {
+			// タイトルバックキー、リトライキー、ポーズキーはプレイ中の操作キーと重複しないようにする（簡易的）
 			if (g_keyObj[`keyCtrl${keyCtrlPtn}`].flat().includes(setKey)) {
 				makeInfoWindow(g_msgInfoObj.I_0002, `fadeOut0`);
 				return;
@@ -11439,7 +11458,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 				wUnit(getFontSize2(getScMsg[selectedKc](), g_btnWidth(5 / 12) - 40, { maxSiz: g_limitObj.mainSiz }));
 			if (g_isMac) {
 				scTitleBack.textContent = getScMsg.TitleBack();
-				scTitleBack.style.fontSize = wUnit(getFontSize2(getScMsg.TitleBack(), g_btnWidth(5 / 12) - 40, { maxSiz: g_limitObj.mainSiz }));
+				scTitleBack.style.fontSize = wUnit(getFontSize2(getScMsg.TitleBack(), g_btnWidth(1 / 4) - 40, { maxSiz: g_limitObj.mainSiz }));
 			}
 			changeConfigColor(document.getElementById(`sc${selectedKc}`),
 				g_headerObj[`key${selectedKc}`] === g_headerObj[`key${selectedKc}Def2`] ?
@@ -12170,9 +12189,9 @@ const keyconfigKeyboardPreview = (() => {
 		_state.mappedSet = new Set(ctrl.map(arr => toCodeStr(arr[0])).filter(v => v !== ``));
 		_state.altSet = new Set(ctrl.flatMap(arr => arr.slice(1)).map(toCodeStr).filter(v => v !== ``));
 
-		// プレイ中ショートカット: keyRetry / keyTitleBack は g_headerObj から取得、PgDn(34) / PgUp(33) は固定
+		// プレイ中ショートカット: keyRetry / keyTitleBack / keyPause は g_headerObj から取得、PgDn(34) / PgUp(33) は固定
 		_state.shortcutSet = new Set(
-			[g_headerObj.keyRetry, g_headerObj.keyTitleBack, 34, 33].map(toCodeStr).filter(v => v !== ``)
+			[g_headerObj.keyRetry, g_headerObj.keyTitleBack, g_headerObj.keyPause, 34, 33].map(toCodeStr).filter(v => v !== ``)
 		);
 
 		if (_state.visible) drawMap();
@@ -12253,6 +12272,9 @@ const setPlayingShortcut = () => {
 	}
 	if (g_headerObj.keyTitleBackDef === C_KEY_TITLEBACK) {
 		g_headerObj.keyTitleBack = setIntVal(getKeyCtrlVal(g_keyObj[`keyTitleBack${keyCtrlPtn}`]), g_headerObj.keyTitleBackDef);
+	}
+	if (g_headerObj.keyPauseDef === C_KEY_PAUSE) {
+		g_headerObj.keyPause = setIntVal(getKeyCtrlVal(g_keyObj[`keyPause${keyCtrlPtn}`]), g_headerObj.keyPauseDef);
 	}
 };
 
@@ -14767,8 +14789,12 @@ const getArrowSettings = () => {
 	g_workObj.arrowReturnVal = 0;
 	g_gameOverFlg = false;
 	g_finishFlg = true;
-	g_workObj.nonDefaultSc = g_headerObj.keyRetry !== C_KEY_RETRY || g_headerObj.keyTitleBack !== C_KEY_TITLEBACK;
-	if (g_headerObj.scAreaWidth === 0 && (g_headerObj.keyRetry !== g_headerObj.keyRetryDef2 || g_headerObj.keyTitleBack !== g_headerObj.keyTitleBackDef2)) {
+	g_workObj.nonDefaultSc = g_headerObj.keyRetry !== C_KEY_RETRY || g_headerObj.keyTitleBack !== C_KEY_TITLEBACK || g_headerObj.keyPause !== C_KEY_PAUSE;
+	if (g_headerObj.scAreaWidth === 0 && (
+		g_headerObj.keyRetry !== g_headerObj.keyRetryDef2 ||
+		g_headerObj.keyTitleBack !== g_headerObj.keyTitleBackDef2 ||
+		g_headerObj.keyPause !== g_headerObj.keyPauseDef2
+	)) {
 		g_workObj.nonDefaultSc = false;
 	}
 	if (g_diffObj.shortcutX !== 0 || g_diffObj.shortcutY !== 0) {
@@ -15126,6 +15152,7 @@ const mainInit = () => {
 	let musicStartCtxTime;
 	let musicStartFlg = false;
 	let isPaused = false; // 一時停止中かどうか(経路によらず共通のフラグ)
+	let manualPauseFlg = false; // 手動ポーズによる一時停止かどうか(true時はvisibilitychangeでの自動再開をスキップ)
 	let pausedElapsedTime = null; // [AudioPlayer/開始後のみ] 一時停止時点の再生位置(秒)
 	let pausedStartAdjustment = null; // [AudioPlayer/開始前のみ] 開始予定までの残り時間(秒)
 	let countdownTimeoutId = null; // 再開前カウントダウンのタイマーID。null=カウントダウン中でない
@@ -15251,28 +15278,29 @@ const mainInit = () => {
 	}
 
 	if (g_workObj.nonDefaultSc) {
+		const diffX = g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX;
+		const diffY = g_headerObj.playingHeight + g_diffObj.shortcutY;
 		multiAppend(infoSprite,
 			createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, {
-				...g_lblPosObj.lblMainScHeader,
-				x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
-				y: g_headerObj.playingHeight - 65 + g_diffObj.shortcutY,
+				...g_lblPosObj.lblMainScHeader, x: diffX, y: diffY - 95,
 			}),
 			createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry], {
-				...g_lblPosObj.lblMainScKey,
-				x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
-				y: g_headerObj.playingHeight - 50 + g_diffObj.shortcutY,
+				...g_lblPosObj.lblMainScKey, x: diffX, y: diffY - 80,
 				fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold`,
 			}),
 			createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, {
-				...g_lblPosObj.lblMainScHeader,
-				x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
-				y: g_headerObj.playingHeight - 35 + g_diffObj.shortcutY,
+				...g_lblPosObj.lblMainScHeader, x: diffX, y: diffY - 65,
 			}),
 			createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack], {
-				...g_lblPosObj.lblMainScKey,
-				x: g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX,
-				y: g_headerObj.playingHeight - 20 + g_diffObj.shortcutY,
+				...g_lblPosObj.lblMainScKey, x: diffX, y: diffY - 50,
 				fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold`,
+			}),
+			createDivCss2Label(`lblPause`, `[${g_lblNameObj.l_pause}]`, {
+				...g_lblPosObj.lblMainScHeader, x: diffX, y: diffY - 35,
+			}),
+			createDivCss2Label(`lblPauseSc`, g_kCd[g_headerObj.keyPause], {
+				...g_lblPosObj.lblMainScKey, x: diffX, y: diffY - 20,
+				fontWeight: g_headerObj.keyPause === C_KEY_PAUSE ? `normal` : `bold`,
 			}),
 		);
 	}
@@ -15424,6 +15452,11 @@ const mainInit = () => {
 	document.onkeydown = async evt => {
 		evt.preventDefault();
 		const setCode = transCode(evt);
+
+		if (setCode === g_kCdN[g_headerObj.keyPause]) {
+			isPaused ? resumeTimeline(true) : pauseTimeline(true);
+			return blockCode(setCode);
+		}
 
 		if ((evt.repeat && !g_mainRepeatObj.key.includes(setCode)) || isPaused) {
 			return blockCode(setCode);
@@ -16408,16 +16441,25 @@ const mainInit = () => {
 
 	let nativeAudioWasPlaying = false;
 
-	const pauseTimeline = () => {
+	const pauseTimeline = (_manual = false) => {
 		// カウントダウン中に再度バックグラウンド化した場合は、カウントダウンのみ中断する
 		// (音源は既に停止済み・gamePausedも付与済みのため、以降の処理は不要)
 		cancelResumeCountdown();
 		if (isPaused) {
+			if (_manual) {
+				// カウントダウン中に手動ポーズキーが押された場合、手動扱いに切り替える
+				manualPauseFlg = true;
+			}
 			return;
 		}
 		isPaused = true;
+		manualPauseFlg = _manual;
 		pausedElapsedTime = null;
 		pausedStartAdjustment = null;
+		const countdownLabel = createDivCss2Label(`lblPauseMark`, `Pause`, {
+			...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
+		});
+		divRoot.appendChild(countdownLabel);
 
 		if (g_audio instanceof AudioPlayer) {
 			if (g_audio.contextTime < g_audio.scheduledTime) {
@@ -16444,14 +16486,17 @@ const mainInit = () => {
 		divRoot.classList.add(`gamePaused`);
 	};
 
-	const resumeTimeline = () => {
+	const resumeTimeline = (_manual = false) => {
 		if (!isPaused || countdownTimeoutId !== null) {
 			return;
 		}
+		if (!_manual && manualPauseFlg) {
+			// 手動ポーズ中は、タブ復帰による自動再開をスキップする
+			return;
+		}
+		deleteDiv(divRoot, `lblPauseMark`);
 		const countdownLabel = createDivCss2Label(`lblResumeCountdown`, ``, {
-			x: g_workObj.playingX + (g_headerObj.playingWidth - g_sWidth) / 2,
-			y: g_headerObj.playingY + (g_headerObj.playingHeight + g_posObj.stepYR) / 2 - 75,
-			w: g_sWidth, h: 50, siz: 60,
+			...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
 		});
 		divRoot.appendChild(countdownLabel);
 
@@ -16488,14 +16533,13 @@ const mainInit = () => {
 				if (nativeAudioWasPlaying) {
 					g_audio.play();
 				}
-
-				// バックグラウンド経過時間をフレーム計算から除外する
-				musicStartTime = performance.now()
-					- (g_scoreObj.frameNum - musicStartFrame) * 1000 / g_fps;
 			}
+			// バックグラウンド経過時間をフレーム計算から除外する
+			musicStartTime = performance.now() - (g_scoreObj.frameNum - musicStartFrame) * 1000 / g_fps;
 
 			divRoot.classList.remove(`gamePaused`);
 			isPaused = false;
+			manualPauseFlg = false;
 			pausedElapsedTime = null;
 			pausedStartAdjustment = null;
 			g_timeoutEvtId = setTimeout(flowTimeline, 1000 / g_fps);
