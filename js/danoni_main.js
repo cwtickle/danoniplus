@@ -11455,7 +11455,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 			g_headerObj[`key${selectedKc}Def`] = setKey;
 			document.getElementById(`sc${selectedKc}`).textContent = getScMsg[selectedKc]();
 			document.getElementById(`sc${selectedKc}`).style.fontSize =
-				wUnit(getFontSize2(getScMsg[selectedKc](), g_btnWidth(5 / 12) - 40, { maxSiz: g_limitObj.mainSiz }));
+				wUnit(getFontSize2(getScMsg[selectedKc](), g_btnWidth(1 / 4) - 40, { maxSiz: g_limitObj.mainSiz }));
 			if (g_isMac) {
 				scTitleBack.textContent = getScMsg.TitleBack();
 				scTitleBack.style.fontSize = wUnit(getFontSize2(getScMsg.TitleBack(), g_btnWidth(1 / 4) - 40, { maxSiz: g_limitObj.mainSiz }));
@@ -16494,6 +16494,10 @@ const mainInit = () => {
 		}
 		if (!_manual && manualPauseFlg) {
 			// 手動ポーズ中は、タブ復帰による自動再開をスキップする
+			const countdownLabel = createDivCss2Label(`lblPauseMark`, `Pause`, {
+				...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
+			});
+			divRoot.appendChild(countdownLabel);
 			return;
 		}
 		deleteDiv(divRoot, `lblPauseMark`);
