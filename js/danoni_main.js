@@ -16458,10 +16458,12 @@ const mainInit = () => {
 		manualPauseFlg = _manual;
 		pausedElapsedTime = null;
 		pausedStartAdjustment = null;
-		const countdownLabel = createDivCss2Label(`lblPauseMark`, `Pause`, {
-			...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
-		});
-		divRoot.appendChild(countdownLabel);
+		if (document.getElementById(`lblPauseMark`) == null) {
+			const countdownLabel = createDivCss2Label(`lblPauseMark`, `Pause`, {
+				...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
+			});
+			divRoot.appendChild(countdownLabel);
+		}
 
 		if (g_audio instanceof AudioPlayer) {
 			if (g_audio.contextTime < g_audio.scheduledTime) {
@@ -16494,10 +16496,12 @@ const mainInit = () => {
 		}
 		if (!_manual && manualPauseFlg) {
 			// 手動ポーズ中は、タブ復帰による自動再開をスキップする
-			const countdownLabel = createDivCss2Label(`lblPauseMark`, `Pause`, {
-				...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
-			});
-			divRoot.appendChild(countdownLabel);
+			if (document.getElementById(`lblPauseMark`) == null) {
+				const countdownLabel = createDivCss2Label(`lblPauseMark`, `Pause`, {
+					...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
+				});
+				divRoot.appendChild(countdownLabel);
+			}
 			return;
 		}
 		deleteDiv(divRoot, `lblPauseMark`);
