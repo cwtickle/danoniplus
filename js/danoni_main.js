@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/08/29
+ * Revised : 2026/08/30
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 50.1.0`;
-const g_revisedDate = `2026/08/29`;
+const g_version = `Ver 50.1.1`;
+const g_revisedDate = `2026/08/30`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -16479,6 +16479,11 @@ const mainInit = () => {
 			// `paused` が false の場合だけ、再開時に play() を呼ぶ
 			nativeAudioWasPlaying = !g_audio.paused;
 		}
+		if (g_workObj.frzReturnTimerId) {
+			// FrzReturn演出はflowTimelineと独立したタイマーで動いているため、
+			// 一時停止時点で早期終了させる(位置復元はせず、通常終了時と同じ後片付けを行う)
+			resetFrzReturn();
+		}
 		clearTimeout(g_timeoutEvtId);
 		g_audio.pause();
 
@@ -16866,6 +16871,27 @@ const startFrzReturn = () => {
 };
 
 /**
+ * FrzReturnの停止・後片付け(通常終了時／一時停止による中断時で共通)
+ */
+const resetFrzReturn = () => {
+	if (g_workObj.frzReturnTimerId) {
+		clearTimeout(g_workObj.frzReturnTimerId);
+	}
+	g_workObj.frzReturnTimerId = null;
+	g_workObj.frzReturnFlg = false;
+	delTransform(`mainSprite`, `frzReturn`);
+	const mainSprite = document.getElementById(`mainSprite`);
+	if (mainSprite) {
+		mainSprite.style.opacity = 1;
+	}
+	const frzReturnGauge = document.getElementById(`lifeBarFrz`);
+	if (frzReturnGauge) {
+		frzReturnGauge.classList.remove(g_cssObj.life_frzNormal, g_cssObj.life_frzActive);
+		frzReturnGauge.classList.add(g_cssObj.life_frzNormal);
+	}
+};
+
+/**
  * FrzReturnの実行
  * @param {number[]} _seq FrzReturnの移動配列
  * @param {number} _idx FrzReturnの移動配列のインディクス（transformの決定に利用）
@@ -16883,12 +16909,7 @@ const executeFrzReturn = (_seq, _idx, _axis) => {
 
 	if (!_seq || _idx >= _seq.length) {
 		// 移動終了時
-		delTransform(`mainSprite`, `frzReturn`);
-		g_workObj.frzReturnFlg = false;
-		g_workObj.frzReturnTimerId = null;
-		const frzReturnGauge = document.getElementById(`lifeBarFrz`);
-		frzReturnGauge.classList.remove(g_cssObj.life_frzNormal, g_cssObj.life_frzActive);
-		frzReturnGauge.classList.add(g_cssObj.life_frzNormal);
+		resetFrzReturn();
 		return;
 	}
 
