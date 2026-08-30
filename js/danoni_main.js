@@ -16479,6 +16479,23 @@ const mainInit = () => {
 			// `paused` が false の場合だけ、再開時に play() を呼ぶ
 			nativeAudioWasPlaying = !g_audio.paused;
 		}
+		if (g_workObj.frzReturnTimerId) {
+			// FrzReturn演出はflowTimelineと独立したタイマーで動いているため、
+			// 一時停止時点で早期終了させる(位置復元はせず、通常終了時と同じ後片付けを行う)
+			clearTimeout(g_workObj.frzReturnTimerId);
+			g_workObj.frzReturnTimerId = null;
+			g_workObj.frzReturnFlg = false;
+			delTransform(`mainSprite`, `frzReturn`);
+			const mainSprite = document.getElementById(`mainSprite`);
+			if (mainSprite) {
+				mainSprite.style.opacity = 1;
+			}
+			const frzReturnGauge = document.getElementById(`lifeBarFrz`);
+			if (frzReturnGauge) {
+				frzReturnGauge.classList.remove(g_cssObj.life_frzNormal, g_cssObj.life_frzActive);
+				frzReturnGauge.classList.add(g_cssObj.life_frzNormal);
+			}
+		}
 		clearTimeout(g_timeoutEvtId);
 		g_audio.pause();
 
