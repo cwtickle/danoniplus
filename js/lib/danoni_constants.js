@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/08/29 (v50.1.0)
+ * Revised : 2026/08/31 (v50.1.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -5293,6 +5293,10 @@ const g_root = {
     get g_headerObj() { return g_headerObj; },
     get g_stateObj() { return g_stateObj; },
     get g_keycons() { return g_keycons; },
+    get g_settings() { return g_settings; },
+    get g_imgObj() { return g_imgObj },
+    get g_judgObj() { return g_judgObj },
+    get g_judgRanges() { return g_judgRanges },
 };
 const getPathVal = _path => _path.split(`.`).reduce((o, k) => o?.[k], g_root);
 const setPathVal = (_path, _value) => {
@@ -5306,7 +5310,7 @@ const setPathVal = (_path, _value) => {
     target[last] = _value;
 };
 
-const g_familyObj = { families: [], currentFamily: null, ownership: {}, snapshot: {}, applied: {}, appliedPaths: new Set() };
+const g_familyObj = { families: [], currentFamily: null, ownership: {}, snapshot: {} };
 
 const g_errorCache = {
     'g_customJsObj.titleEnterFrame': [],

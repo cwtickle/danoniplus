@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/08/30
+ * Revised : 2026/08/31
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 50.1.1`;
-const g_revisedDate = `2026/08/30`;
+const g_version = `Ver 50.1.2`;
+const g_revisedDate = `2026/08/31`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -8492,7 +8492,8 @@ const setDifficulty = (_initFlg) => {
 /**
  * keyLabelの系統ごとに、選択時に強制したい設定値・選択/離脱時の個別処理を登録する
  * @param {string} _name 系統名
- * @param {(key: string) => boolean} _match この系統に属するkeyLabelかどうか
+ * @param {(key: string, context: { scoreId: number, ptn: string, prevKey: string }) => boolean} _match
+ *   この系統に属するkeyLabelかどうかの判定関数。第二引数のcontextは任意で利用可能
  * @param {object} [_fields] path -> 値 or 値を返す関数（単純代入で済むもの）
  * @param {object} [_hooks] { onAcquire, onRelease } 選択/離脱の瞬間に1回だけ呼ばれる（複合処理用）
  * @param {object} [_appliers] path -> 個別の適用関数（単純代入で済まないfields用）
@@ -8506,8 +8507,15 @@ const registerKeyFamily = (_name, _match, _fields = {}, _hooks = {}, _appliers =
  * 各パラメータの値・スナップショット・フックを管理・適用する
  */
 const resolveKeyFamily = () => {
+	// match() へ渡す追加情報。第一引数(keyLabel)だけで判定できる場合は無視してよい
+	const context = {
+		scoreId: g_stateObj.scoreId,
+		ptn: g_keyObj.currentPtn,
+		prevKey: g_keyObj.prevKey,
+	};
+
 	// 1. 現在のキーに一致するファミリーを検索（見つからなければ null ＝ 標準状態）
-	const newFamily = g_familyObj.families.find(f => f.match(g_keyObj.currentKey)) ?? null;
+	const newFamily = g_familyObj.families.find(f => f.match(g_keyObj.currentKey, context)) ?? null;
 
 	// 2. ファミリーが切り替わった瞬間（入場・離脱）にフック（固有の副作用）を実行
 	if (newFamily !== g_familyObj.currentFamily) {
@@ -8543,18 +8551,17 @@ const resolveKeyFamily = () => {
 };
 
 /**
- * 値に変更がある場合のみ、代入またはカスタム処理を実行してキャッシュを更新する
+ * 値に変更がある場合のみ、代入またはカスタム処理を実行する
+ * - 「エンジンが前回適用した値」ではなく「実際に今その場所にある値」と比較することで、
+ *   ユーザーの手動操作など、本エンジンを介さずに値が変更されたケースでも
+ *   正しく差分を検知できるようにしている
  * @param {string} _path 設定のパス
  * @param {string|number} _value 適用する値
  * @param {Function} _applier 実際の適用処理を行う関数
  */
 const applyIfChanged = (_path, _value, _applier) => {
-	// すでに同じ値が適用済みの場合は、無駄な再描画や再代入を防ぐためスキップ
-	if (g_familyObj.appliedPaths.has(_path) && g_familyObj.applied[_path] === _value) return;
-
-	// 適用値をキャッシュに保存
-	g_familyObj.applied[_path] = _value;
-	g_familyObj.appliedPaths.add(_path);
+	// 実際の現在値と適用したい値が一致していれば、無駄な再描画や再代入を防ぐためスキップ
+	if (getPathVal(_path) === _value) return;
 
 	// 実際の反映処理（値の代入、または画像再描画などの副作用）を実行
 	_applier(_value);
