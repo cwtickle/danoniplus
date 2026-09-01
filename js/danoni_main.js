@@ -17241,6 +17241,7 @@ const judgeArrow = _j => {
 			// 空押し判定（有効かつ早押し時のみ）
 			displayDiff(_difFrame);
 			stepHitTargetArrow(`Excessive`);
+			safeExecuteCustomHooks(`g_customJsObj.judg_excessive`, g_customJsObj.judg_excessive, _difFrame, _j);
 			return true;
 
 		} else if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.shobon]) {

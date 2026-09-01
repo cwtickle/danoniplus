@@ -5259,6 +5259,7 @@ const g_customJsObj = {
     judg_uwan: [],
     judg_kita: [],
     judg_iknai: [],
+    judg_excessive: [],
 
     judg_frzHit: [],
     judg_dummyFrzHit: [],
