@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/08/31
+ * Revised : 2026/09/01
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 50.1.2`;
-const g_revisedDate = `2026/08/31`;
+const g_version = `Ver 50.2.0`;
+const g_revisedDate = `2026/09/01`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -8528,25 +8528,26 @@ const resolveKeyFamily = () => {
 	const allPaths = new Set(g_familyObj.families.flatMap(f => Object.keys(f.fields)));
 	allPaths.forEach(path => {
 		const spec = newFamily?.fields[path];
-		// 該当プロパティのカスタム処理があれば優先し、なければ通常のプロパティ代入を使用
-		const applier = g_familyObj.families.map(f => f.appliers[path]).find(Boolean) ?? (v => setPathVal(path, v));
 
 		if (spec !== undefined) {
 			// 【変更値の適用】現在のファミリーにそのプロパティの設定がある場合
 			// 初めて書き換えるプロパティの場合のみ、元の値をスナップショット（初期値）として退避
 			if (!g_familyObj.ownership[path]) {
 				g_familyObj.snapshot[path] = getPathVal(path);
-				g_familyObj.ownership[path] = true;
 			}
 			// 関数なら評価し、値ならそのまま適用値とする
+			g_familyObj.ownership[path] = newFamily;
+			const applier = newFamily.appliers[path] ?? (v => setPathVal(path, v));
 			applyIfChanged(path, typeof spec === `function` ? spec() : spec, applier);
+
 		} else if (g_familyObj.ownership[path]) {
 			// 【標準への復元】別のファミリーに移行し、かつ元々自分が書き換えていたプロパティの場合
 			// スナップショットから元の値（初期値）を復元し、オーナーシップを解放
+			const applier = g_familyObj.ownership[path].appliers[path] ?? (v => setPathVal(path, v));
 			applyIfChanged(path, g_familyObj.snapshot[path], applier);
-			g_familyObj.ownership[path] = false;
+			g_familyObj.ownership[path] = null;
 		}
-		// ownership[path]がfalseのままなら、標準同士の切り替えでも一切触らない
+		// ownership[path]がnullのままなら、標準同士の切り替えでも一切触らない
 	});
 };
 
@@ -17240,6 +17241,7 @@ const judgeArrow = _j => {
 			// 空押し判定（有効かつ早押し時のみ）
 			displayDiff(_difFrame);
 			stepHitTargetArrow(`Excessive`);
+			safeExecuteCustomHooks(`g_customJsObj.judg_excessive`, g_customJsObj.judg_excessive, _difFrame, _j);
 			return true;
 
 		} else if (_difCnt <= g_judgObj.arrowJ[g_judgPosObj.shobon]) {

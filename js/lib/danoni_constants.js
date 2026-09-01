@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/08/31 (v50.1.2)
+ * Revised : 2026/09/01 (v50.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -5259,6 +5259,7 @@ const g_customJsObj = {
     judg_uwan: [],
     judg_kita: [],
     judg_iknai: [],
+    judg_excessive: [],
 
     judg_frzHit: [],
     judg_dummyFrzHit: [],

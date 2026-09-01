@@ -26,9 +26,9 @@ jobs:
       DRY_RUN: ${{ inputs.dry_run }}
       GITLAB_NAMESPACE: "cwtickle"
       # リポジトリごとの常時除外(basename一致)
-      DEFAULT_EXCLUDES_GH_MAIN: "Changelog-latest.md,_sidebar.md,AboutReleaseInfo.md,AccessMap.md,HowToUpdate.md,MigrationGuide.md,UpdateInfo.md,Release-Procedures.md,Release-Templates.md,Release-Templates-Claude.md"
-      DEFAULT_EXCLUDES_GH_DOCS: "Changelog-latest.md,kirizma-Changelog-latest.md,kirizma-Changelog-v1.md,kirizma-Changelog-v2.md,_sidebar.md,AboutReleaseInfo.md,AccessMap.md,HowToUpdate.md,MigrationGuide.md,SecurityPolicy.md,UpdateInfo.md"
-      DEFAULT_EXCLUDES_GITLAB: "Changelog-latest.md,AboutReleaseInfo.md,AccessMap.md,HowToUpdate.md,MigrationGuide.md,Security-Policy.md,UpdateInfo.md,Release-Procedures.md,Release-Templates.md,Release-Templates-Claude.md"
+      DEFAULT_EXCLUDES_GH_MAIN: "Changelog-latest.md,_sidebar.md,AboutReleaseInfo.md,AccessMap.md,HowToUpdate.md,MigrationGuide.md,Release-*.md"
+      DEFAULT_EXCLUDES_GH_DOCS: "Changelog-latest.md,kirizma-Changelog-*.md,_sidebar.md,AboutReleaseInfo.md,AccessMap.md,HowToUpdate.md,MigrationGuide.md,SecurityPolicy.md"
+      DEFAULT_EXCLUDES_GITLAB: "Changelog-latest.md,AboutReleaseInfo.md,AccessMap.md,HowToUpdate.md,MigrationGuide.md,Security-Policy.md,Release-*.md"
 
     steps:
       - name: Set up git identity
@@ -67,7 +67,12 @@ jobs:
             for EX in "${EXCL_ARR[@]}"; do
               EX_TRIM=$(echo "$EX" | xargs)
               EX_TRIM_LC=$(echo "$EX_TRIM" | tr '[:upper:]' '[:lower:]')
-              [ "$BASENAME_LC" = "$EX_TRIM_LC" ] && { SKIP=true; break; }
+              
+              # Bash のパターンマッチ構文を利用してワイルドカードに対応
+              if [[ "$BASENAME_LC" == $EX_TRIM_LC ]]; then
+                SKIP=true
+                break
+              fi
             done
             if [ "$SKIP" = true ]; then
               echo "スキップ(除外): $FILE"
