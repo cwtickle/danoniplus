@@ -15898,6 +15898,10 @@ const mainInit = () => {
 		// 矢印色の設定
 		// - 枠/塗りつぶし色: g_attrObj[arrowName].Arrow / ArrowShadow
 		g_typeLists.arrowColor.forEach(val => g_attrObj[arrowName][`Arrow${val}`] = g_workObj[`${_name}${val}Colors`][_j]);
+
+		// g_attrObj定義後のカスタムイベント
+		safeExecuteCustomHooks(`g_customJsObj.preMakeArrow`, g_customJsObj.preMakeArrow, _attrs, arrowName, _name, _arrowCnt);
+
 		arrowSprite[g_workObj.dividePos[_j]].appendChild(arrowRoot);
 		const arrowSubRoot = createEmptySprite(arrowRoot, `sub${arrowName}`, { x: 0, y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH });
 
@@ -16038,6 +16042,10 @@ const mainInit = () => {
 				g_attrObj[frzName][`${val}All`] = g_workObj[`${_name}${val}ColorsAll`][_j];
 			}
 		});
+
+		// g_attrObj定義後のカスタムイベント
+		safeExecuteCustomHooks(`g_customJsObj.preMakeFrzArrow`, g_customJsObj.preMakeFrzArrow, _attrs, frzName, _name, _arrowCnt);
+
 		arrowSprite[g_workObj.dividePos[_j]].appendChild(frzRoot);
 		let shadowColor = _shadowColor === `Default` ? _normalColor : _shadowColor;
 		const frzSubRoot = createEmptySprite(frzRoot, `sub${frzName}`, { x: 0, y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH + firstBarLength });
@@ -16375,6 +16383,9 @@ const mainInit = () => {
 				}
 			}
 		});
+
+		// ユーザカスタムイベント(フレーム毎、タイマー直前)
+		safeExecuteCustomHooks(`g_customJsObj.mainBeforeFrameTimer`, g_customJsObj.mainBeforeFrameTimer);
 
 		// 曲終了判定
 		if (currentFrame >= fullFrame) {
