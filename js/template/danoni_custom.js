@@ -289,8 +289,12 @@ g_customJsObj.mainEnterFrame.push(() => {
 /**
  * メイン画面(フレーム毎表示、タイマー直前)
  * - 矢印生成、移動後に処理を行いたいときに記述
+ * @param {number[]} arrowCnts 矢印カウント情報
+ * @param {number[]} frzCnts フリーズアローカウント情報
+ * @param {number[]} dummyArrowCnts ダミー矢印カウント情報
+ * @param {number[]} dummyFrzCnts ダミーフリーズアローカウント情報
  */
-g_customJsObj.mainBeforeFrameTimer.push(() => {
+g_customJsObj.mainBeforeFrameTimer.push(({ arrowCnts, frzCnts, dummyArrowCnts, dummyFrzCnts }) => {
 
 });
 

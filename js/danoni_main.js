@@ -16385,7 +16385,9 @@ const mainInit = () => {
 		});
 
 		// ユーザカスタムイベント(フレーム毎、タイマー直前)
-		safeExecuteCustomHooks(`g_customJsObj.mainBeforeFrameTimer`, g_customJsObj.mainBeforeFrameTimer);
+		safeExecuteCustomHooks(`g_customJsObj.mainBeforeFrameTimer`, g_customJsObj.mainBeforeFrameTimer, {
+			arrowCnts, frzCnts, dummyArrowCnts, dummyFrzCnts,
+		});
 
 		// 曲終了判定
 		if (currentFrame >= fullFrame) {
