@@ -5244,6 +5244,8 @@ const g_customJsObj = {
     progress: [],
     main: [],
 
+    preMakeArrow: [],
+    preMakeFrzArrow: [],
     makeArrow: [],
     makeFrzArrow: [],
 
@@ -5265,6 +5267,7 @@ const g_customJsObj = {
     judg_dummyFrzHit: [],
 
     mainEnterFrame: [],
+    mainBeforeFrameTimer: [],
     result: [],
     resultEnterFrame: [],
 };
