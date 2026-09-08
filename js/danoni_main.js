@@ -1757,7 +1757,7 @@ const createColorPicker = (_parentObj, _id, _func, { x = 0, y = 0 } = {}) => {
 	picker.style.top = wUnit(y);
 	picker.style.position = `absolute`;
 	picker.style.pointerEvents = C_DIS_AUTO;
-	picker.addEventListener(`change`, _func);
+	g_handler.addListener(picker, `change`, _func);
 	_parentObj.appendChild(picker);
 	return picker;
 };
@@ -1871,16 +1871,16 @@ const g_handler = (() => {
 		 * @param {EventTarget} _target 
 		 * @param {string} _type 
 		 * @param {EventListenerOrEventListenerObject} _listener 
-		 * @param {boolean} [_capture=false] 
+		 * @param {boolean|AddEventListenerOptions} [_options=false] 
 		 * @returns {number}
 		 */
-		addListener: (_target, _type, _listener, _capture = false) => {
-			_target.addEventListener(_type, _listener, _capture);
+		addListener: (_target, _type, _listener, _options = false) => {
+			_target.addEventListener(_type, _listener, _options);
 			events[key] = {
 				target: _target,
 				type: _type,
 				listener: _listener,
-				capture: _capture
+				options: _options // boolean/objectどちらでもそのまま保持
 			};
 			return key++;
 		},
@@ -1891,7 +1891,7 @@ const g_handler = (() => {
 		removeListener: key => {
 			if (key in events) {
 				const e = events[key];
-				e.target.removeEventListener(e.type, e.listener, e.capture);
+				e.target.removeEventListener(e.type, e.listener, e.options);
 				delete events[key];
 			}
 		},
@@ -1900,9 +1900,21 @@ const g_handler = (() => {
 		 */
 		removeAll: () => {
 			Object.values(events).forEach(e => {
-				e.target.removeEventListener(e.type, e.listener, e.capture);
+				e.target.removeEventListener(e.type, e.listener, e.options);
 			});
-			Object.keys(events).forEach(key => delete events[key]);
+			for (const k in events) delete events[k];
+		},
+		/**
+		 * 指定した要素配下（自身含む）のイベントリスナーをまとめて削除
+		 * @param {HTMLDivElement} _container 
+		 */
+		removeByContainer: _container => {
+			Object.entries(events).forEach(([k, e]) => {
+				if (_container.contains(e.target)) {
+					e.target.removeEventListener(e.type, e.listener, e.options);
+					delete events[k];
+				}
+			});
 		}
 	};
 })();
@@ -1988,10 +2000,8 @@ const g_rafHandler = (() => {
 const deleteChildspriteAll = _parentObjName => {
 
 	const parentsprite = document.getElementById(_parentObjName);
+	g_handler.removeByContainer(parentsprite);
 	while (parentsprite.hasChildNodes()) {
-		g_handler.removeListener(parentsprite.firstChild.getAttribute(`lsnrkey`));
-		g_handler.removeListener(parentsprite.firstChild.getAttribute(`lsnrkeyTS`));
-		g_handler.removeListener(parentsprite.firstChild.getAttribute(`lsnrkeyTE`));
 		parentsprite.removeChild(parentsprite.firstChild);
 	}
 };
@@ -2003,6 +2013,7 @@ const deleteChildspriteAll = _parentObjName => {
  */
 const deleteDiv = (_parentId, _idName) => {
 	if (document.getElementById(_idName) !== null) {
+		g_handler.removeByContainer(document.getElementById(_idName));
 		_parentId.removeChild(document.getElementById(_idName));
 	}
 };
@@ -2058,7 +2069,7 @@ const createCss2Button = (_id, _text, _func = () => true, {
 	}
 
 	// ボタンを押したときの動作
-	const lsnrkey = g_handler.addListener(div, `click`, evt => {
+	g_handler.addListener(div, `click`, evt => {
 		if (!setBoolVal(g_btnDeleteFlg[_id])) {
 			_func(evt);
 		}
@@ -2088,9 +2099,6 @@ const createCss2Button = (_id, _text, _func = () => true, {
 		}
 		return false;
 	};
-
-	// イベントリスナー用のキーをセット
-	div.setAttribute(`lsnrkey`, lsnrkey);
 
 	return div;
 };
@@ -8974,7 +8982,7 @@ const createOptionWindow = _sprite => {
 	);
 
 	const fadeinSlider = document.getElementById(`fadeinSlider`);
-	fadeinSlider.addEventListener(`input`, () => {
+	g_handler.addListener(fadeinSlider, `input`, () => {
 		g_stateObj.fadein = inputSlider(fadeinSlider, lnkFadein, `fadein`);
 		updateSettingSummary();
 		drawMinimap(g_stateObj.scoreId, { _fadeinFlg: true });
@@ -9599,23 +9607,11 @@ const settingsDisplayInit = () => {
 /** プレビューウィンドウのルートdiv */
 let g_previewRoot = null;
 
-/** プレビューで登録した一時リスナー群 */
-let g_previewLsnrKeys = new Set();
-
 /** プレビュー内の各UIオブジェクトの現在座標 */
 const g_previewPos = {
 	arrowJdg: { x: null, y: null },   // 通常判定キャラクタ・コンボ
 	frzJdg: { x: null, y: null },     // フリーズ判定キャラクタ・コンボ
 	shortcut: { x: null, y: null },
-};
-
-/**
- * プレビュー用リスナー登録（キーをレジストリへ格納）
- */
-const addPreviewListener = (target, type, listener, capture = false) => {
-	const key = g_handler.addListener(target, type, listener, capture);
-	g_previewLsnrKeys.add(key);
-	return key;
 };
 
 /**
@@ -9704,11 +9700,6 @@ const closeDisplayPreview = () => {
 	if (overlay) {
 		deleteChildspriteAll(`displayPreviewOverlay`);
 		overlay.remove();
-	}
-	// プレビュー専用に登録した残りのハンドラを明示解除
-	if (g_previewLsnrKeys?.size) {
-		g_previewLsnrKeys.forEach(k => g_handler.removeListener(k));
-		g_previewLsnrKeys.clear();
 	}
 	g_previewRoot = null;
 };
@@ -10058,7 +10049,7 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 		background: `rgba(${bgColor},0.04)`,
 	});
 
-	const keyDown = addPreviewListener(_target, `pointerdown`, _evt => {
+	g_handler.addListener(_target, `pointerdown`, _evt => {
 		dragging = true;
 		dragStartX = _evt.clientX;
 		dragStartY = _evt.clientY;
@@ -10069,7 +10060,7 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 		_evt.stopPropagation();
 	});
 
-	const keyMove = addPreviewListener(_target, `pointermove`, _evt => {
+	g_handler.addListener(_target, `pointermove`, _evt => {
 		if (!dragging) return;
 
 		// 1. マウスの実際の移動量を計算
@@ -10090,7 +10081,7 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 		_evt.stopPropagation();
 	});
 
-	const keyUp = addPreviewListener(_target, `pointerup`, _evt => {
+	g_handler.addListener(_target, `pointerup`, _evt => {
 		if (!dragging) return;
 		dragging = false;
 		_target.style.cursor = `grab`;
@@ -10108,15 +10099,10 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 		_evt.stopPropagation();
 	});
 
-	addPreviewListener(_target, `pointercancel`, _evt => {
+	g_handler.addListener(_target, `pointercancel`, _evt => {
 		dragging = false;
 		_target.style.cursor = `grab`;
 	});
-
-	// 既存の管理用属性（必要に応じて）
-	_target.setAttribute(`lsnrkey`, keyMove);
-	_target.setAttribute(`lsnrkeyTS`, keyDown);
-	_target.setAttribute(`lsnrkeyTE`, keyUp);
 };
 
 /**
@@ -10295,7 +10281,7 @@ const createSettingsDisplayWindow = _sprite => {
 	};
 
 	const appearanceSlider = document.getElementById(`appearanceSlider`);
-	appearanceSlider.addEventListener(`input`, () => {
+	g_handler.addListener(appearanceSlider, `input`, () => {
 		g_hidSudObj.filterPos = inputSlider(appearanceSlider, lblAppearancePos, `appearance`);
 		updateSettingSummary();
 	}, false);
