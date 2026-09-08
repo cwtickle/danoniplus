@@ -1894,6 +1894,89 @@ const g_handler = (() => {
 				e.target.removeEventListener(e.type, e.listener, e.capture);
 				delete events[key];
 			}
+		},
+		/**
+		 * すべてのイベントリスナーを削除
+		 */
+		removeAll: () => {
+			Object.values(events).forEach(e => {
+				e.target.removeEventListener(e.type, e.listener, e.capture);
+			});
+			Object.keys(events).forEach(key => delete events[key]);
+		}
+	};
+})();
+
+// setInterval/setTimeout版
+const g_timerHandler = (() => {
+	const timers = {}; // key -> { id, type: 'interval' | 'timeout' }
+	let key = 0;
+
+	const clearByType = entry => {
+		if (entry.type === 'interval') {
+			clearInterval(entry.id);
+		} else {
+			clearTimeout(entry.id);
+		}
+	};
+
+	const clear = key => {
+		if (key in timers) {
+			clearByType(timers[key]);
+			delete timers[key];
+		}
+	};
+
+	return {
+		setInterval: (_callback, _ms) => {
+			const id = setInterval(_callback, _ms);
+			timers[key] = { id, type: 'interval' };
+			return key++;
+		},
+		setTimeout: (_callback, _ms, ..._args) => {
+			const id = setTimeout(() => {
+				_callback(..._args);
+				delete timers[myKey]; // 発火し終わったら自動で登録簿から消す
+			}, _ms);
+			const myKey = key;
+			timers[key] = { id, type: 'timeout' };
+			return key++;
+		},
+		clear,
+		clearInterval: clear,
+		clearTimeout: clear,
+		clearAll: () => {
+			Object.values(timers).forEach(clearByType);
+			for (const k in timers) delete timers[k];
+		}
+	};
+})();
+
+// requestAnimationFrame版
+const g_rafHandler = (() => {
+	const loops = {};
+	let key = 0;
+
+	return {
+		start: _callback => {
+			const myKey = key++;
+			function loop() {
+				if (!(myKey in loops)) return; // clearAll済みなら自然停止
+				_callback();
+				loops[myKey] = requestAnimationFrame(loop);
+			}
+			loops[myKey] = requestAnimationFrame(loop);
+			return myKey;
+		},
+		stop: key => {
+			if (key in loops) {
+				cancelAnimationFrame(loops[key]);
+				delete loops[key];
+			}
+		},
+		stopAll: () => {
+			Object.values(loops).forEach(id => cancelAnimationFrame(id));
+			for (const k in loops) delete loops[k];
 		}
 	};
 })();
@@ -1969,7 +2052,7 @@ const createCss2Button = (_id, _text, _func = () => true, {
 			(g_initialFlg && g_btnWaitFrame[groupName].initial)) {
 		} else {
 			style.pointerEvents = C_DIS_NONE;
-			setTimeout(() => style.pointerEvents = rest.pointerEvents ?? C_DIS_AUTO,
+			g_timerHandler.setTimeout(() => style.pointerEvents = rest.pointerEvents ?? C_DIS_AUTO,
 				g_btnWaitFrame[groupName].b_frame * 1000 / g_fps);
 		}
 	}
@@ -2788,7 +2871,7 @@ const warmUpAudioContext = async () => {
 	const baseTime = ctx.currentTime;
 	const limitTime = performance.now() + 500;
 	while (ctx.currentTime === baseTime && performance.now() < limitTime) {
-		await new Promise(resolve => setTimeout(resolve, 10));
+		await new Promise(resolve => g_timerHandler.setTimeout(resolve, 10));
 	}
 };
 
@@ -5905,7 +5988,7 @@ const titleInit = (_initFlg = false) => {
 			createDivCss2Label(`lblMusicSelectDetail`, ``, g_lblPosObj.lblMusicSelectDetail),
 			createCss2Button(`btnStart`,
 				`>`, () => {
-					clearTimeout(g_timeoutEvtTitleId);
+					g_timerHandler.clearTimeout(g_timeoutEvtTitleId);
 					g_handler.removeListener(wheelHandler);
 					g_keyObj.prevKey = `Dummy${g_settings.musicIdxNum}`;
 					g_langStorage.bgmVolume = g_stateObj.bgmVolume;
@@ -5992,14 +6075,14 @@ const titleInit = (_initFlg = false) => {
 
 			let spriteOpacity = 1;
 			let fadeOpacity = null;
-			const fadeStartOpacity = setTimeout(() => {
-				clearTimeout(fadeStartOpacity);
+			const fadeStartOpacity = g_timerHandler.setTimeout(() => {
+				g_timerHandler.clearTimeout(fadeStartOpacity);
 				setOpacity(spriteOpacity);
 			}, 2000);
 
 			const setOpacity = (_opacity) => {
 				if (_opacity <= 0) {
-					clearTimeout(fadeOpacity);
+					g_timerHandler.clearTimeout(fadeOpacity);
 					mSelectTitleSprite.style.display = C_DIS_NONE;
 					if (!g_stateObj.bgmMuteFlg && g_audioForMS) {
 						g_audioForMS.muted = false;
@@ -6012,7 +6095,7 @@ const titleInit = (_initFlg = false) => {
 					}
 				} else {
 					mSelectTitleSprite.style.opacity = _opacity;
-					fadeOpacity = setTimeout(() => {
+					fadeOpacity = g_timerHandler.setTimeout(() => {
 						spriteOpacity -= 0.25;
 						setOpacity(spriteOpacity);
 					}, 50);
@@ -6074,7 +6157,7 @@ const titleInit = (_initFlg = false) => {
 
 			// Click Here
 			createCss2Button(`btnStart`, g_lblNameObj.clickHere, () => {
-				clearTimeout(g_timeoutEvtTitleId);
+				g_timerHandler.clearTimeout(g_timeoutEvtTitleId);
 				g_keyObj.prevKey = `Dummy${g_settings.musicIdxNum}`;
 			}, {
 				x: g_btnX(), w: g_btnWidth(), siz: g_limitObj.titleSiz, resetFunc: () => optionInit(),
@@ -6093,7 +6176,7 @@ const titleInit = (_initFlg = false) => {
 
 		// Reset
 		createCss2Button(`btnReset`, g_lblNameObj.dataReset, () => {
-			clearTimeout(g_timeoutEvtTitleId);
+			g_timerHandler.clearTimeout(g_timeoutEvtTitleId);
 			g_handler.removeListener(wheelHandler);
 			dataMgtInit();
 		}, g_lblPosObj.btnReset, g_cssObj.button_Reset),
@@ -6173,10 +6256,10 @@ const titleInit = (_initFlg = false) => {
 
 		g_scoreObj.titleFrameNum++;
 		g_animationData.forEach(sprite => g_scoreObj[`${sprite}TitleFrameNum`]++);
-		g_timeoutEvtTitleId = setTimeout(flowTitleTimeline, 1000 / g_fps - buffTime);
+		g_timeoutEvtTitleId = g_timerHandler.setTimeout(flowTitleTimeline, 1000 / g_fps - buffTime);
 	};
 
-	g_timeoutEvtTitleId = setTimeout(flowTitleTimeline, 1000 / g_fps);
+	g_timeoutEvtTitleId = g_timerHandler.setTimeout(flowTitleTimeline, 1000 / g_fps);
 
 	// キー操作イベント（デフォルト）
 	setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
@@ -6315,7 +6398,7 @@ const pauseBGM = () => {
 	}
 	[`bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
 		if (g_stateObj[id]) {
-			clearTimeout(g_stateObj[id]);
+			g_timerHandler.clearTimeout(g_stateObj[id]);
 			g_stateObj[id] = null;
 		}
 	});
@@ -6383,10 +6466,10 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 			g_audioForMS.volume = Math.min(Math.max(volume, 0), 1);
 
 			// 次のステップへ
-			setTimeout(stepFunc, FADE_INTERVAL_MS);
+			g_timerHandler.setTimeout(stepFunc, FADE_INTERVAL_MS);
 		};
 
-		return setTimeout(stepFunc, FADE_INTERVAL_MS);
+		return g_timerHandler.setTimeout(stepFunc, FADE_INTERVAL_MS);
 	};
 
 	/**
@@ -6411,10 +6494,10 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 			}
 
 			// 次のチェックへ
-			setTimeout(step, FADE_INTERVAL_MS);
+			g_timerHandler.setTimeout(step, FADE_INTERVAL_MS);
 		};
 
-		return setTimeout(step, FADE_INTERVAL_MS);
+		return g_timerHandler.setTimeout(step, FADE_INTERVAL_MS);
 	};
 
 	/**
@@ -6438,7 +6521,7 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 				g_audioForMS.currentTime = musicStart;
 
 				if (isTitle()) {
-					setTimeout(() => {
+					g_timerHandler.setTimeout(() => {
 						fadeIn();
 						if (encodeFlg) repeatBGM();
 					}, FADE_DELAY_MS);
@@ -6700,7 +6783,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 		if (_initFlg) {
 			playBGM(_num);
 		} else {
-			setTimeout(() => {
+			g_timerHandler.setTimeout(() => {
 				if (currentLoopNum === g_settings.musicLoopNum) {
 					playBGM(_num, currentLoopNum);
 				}
@@ -10087,8 +10170,8 @@ const showToast = _msg => {
 		opacity: `1`,
 	});
 	divRoot.appendChild(toast);
-	setTimeout(() => { toast.style.opacity = `0`; }, 2200);
-	setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2700);
+	g_timerHandler.setTimeout(() => { toast.style.opacity = `0`; }, 2200);
+	g_timerHandler.setTimeout(() => { if (toast.parentNode) toast.remove(); }, 2700);
 };
 
 /**
@@ -12501,8 +12584,8 @@ const fetchMusicBlobUrl = (_url, _lblLoading) => new Promise((resolve, reject) =
 
 	// 停滞タイマーをリセット
 	const resetStallTimer = () => {
-		clearTimeout(stallTimer);
-		stallTimer = setTimeout(() => {
+		g_timerHandler.clearTimeout(stallTimer);
+		stallTimer = g_timerHandler.setTimeout(() => {
 			request.abort();
 			makeWarningWindow(g_msgInfoObj.E_0033, { backBtnUse: true });
 			reject(new Error(`stalled`));
@@ -12511,7 +12594,7 @@ const fetchMusicBlobUrl = (_url, _lblLoading) => new Promise((resolve, reject) =
 
 	// 読み込み完了時
 	request.addEventListener(`load`, () => {
-		clearTimeout(stallTimer);
+		g_timerHandler.clearTimeout(stallTimer);
 		if (request.status >= 200 && request.status < 300) {
 			const blobUrl = URL.createObjectURL(request.response);
 			createEmptySprite(divRoot, `loader`, g_windowObj.loader);
@@ -12541,7 +12624,7 @@ const fetchMusicBlobUrl = (_url, _lblLoading) => new Promise((resolve, reject) =
 	});
 
 	request.addEventListener(`error`, () => {
-		clearTimeout(stallTimer);
+		g_timerHandler.clearTimeout(stallTimer);
 		makeWarningWindow(g_msgInfoObj.E_0034, { backBtnUse: true });
 		reject(new Error(`network error`));
 	});
@@ -14816,7 +14899,7 @@ const getArrowSettings = () => {
 	g_workObj.frzReturnFlg = false;
 	g_workObj.frzReturnSeq = g_frzReturnSeqFunc.get(g_stateObj.frzReturnType)();
 	if (g_workObj.frzReturnTimerId) {
-		clearTimeout(g_workObj.frzReturnTimerId);
+		g_timerHandler.clearTimeout(g_workObj.frzReturnTimerId);
 		g_workObj.frzReturnTimerId = null;
 	}
 
@@ -15480,7 +15563,7 @@ const mainInit = () => {
 			if (g_isMac && keyIsShift()) {
 				// Mac OS、IPad OSはDeleteキーが無いためShift+BSで代用
 				g_audio.pause();
-				clearTimeout(g_timeoutEvtId);
+				g_timerHandler.clearTimeout(g_timeoutEvtId);
 				titleInit();
 
 			} else {
@@ -15490,7 +15573,7 @@ const mainInit = () => {
 
 		} else if (setCode === g_kCdN[g_headerObj.keyTitleBack]) {
 			g_audio.pause();
-			clearTimeout(g_timeoutEvtId);
+			g_timerHandler.clearTimeout(g_timeoutEvtId);
 			if (keyIsShift()) {
 				if (g_currentArrows !== g_fullArrows || g_stateObj.lifeMode === C_LFE_BORDER && g_workObj.lifeVal < g_workObj.lifeBorder) {
 					g_gameOverFlg = true;
@@ -16395,7 +16478,7 @@ const mainInit = () => {
 				g_gameOverFlg = true;
 			}
 			resetKeyControl();
-			clearTimeout(g_timeoutEvtId);
+			g_timerHandler.clearTimeout(g_timeoutEvtId);
 			g_workObj.mainEndTime = thisTime;
 			resultInit();
 
@@ -16403,7 +16486,7 @@ const mainInit = () => {
 
 			// ライフ制＆ライフ０の場合は途中終了
 			g_audio.pause();
-			clearTimeout(g_timeoutEvtId);
+			g_timerHandler.clearTimeout(g_timeoutEvtId);
 			g_gameOverFlg = true;
 			g_finishFlg = false;
 			resultInit();
@@ -16442,7 +16525,7 @@ const mainInit = () => {
 				g_scoreObj.frameNum++;
 				g_scoreObj.baseFrame++;
 			}
-			g_timeoutEvtId = setTimeout(flowTimeline, holdFrame ? g_maxFrameWait :
+			g_timeoutEvtId = g_timerHandler.setTimeout(flowTimeline, holdFrame ? g_maxFrameWait :
 				Math.min(Math.max(1000 / g_fps - buffTime, 0), g_maxFrameWait));
 		}
 	};
@@ -16456,7 +16539,7 @@ const mainInit = () => {
 	 */
 	const cancelResumeCountdown = () => {
 		if (countdownTimeoutId !== null) {
-			clearTimeout(countdownTimeoutId);
+			g_timerHandler.clearTimeout(countdownTimeoutId);
 			countdownTimeoutId = null;
 		}
 		document.getElementById(`lblResumeCountdown`)?.remove();
@@ -16505,7 +16588,7 @@ const mainInit = () => {
 			// 一時停止時点で早期終了させる(位置復元はせず、通常終了時と同じ後片付けを行う)
 			resetFrzReturn();
 		}
-		clearTimeout(g_timeoutEvtId);
+		g_timerHandler.clearTimeout(g_timeoutEvtId);
 		g_audio.pause();
 
 		// フォーカスを失うとkeyupが届かなくなり、押しっぱなし判定・表示が残り得るため、
@@ -16578,7 +16661,7 @@ const mainInit = () => {
 			manualPauseFlg = false;
 			pausedElapsedTime = null;
 			pausedStartAdjustment = null;
-			g_timeoutEvtId = setTimeout(flowTimeline, 1000 / g_fps);
+			g_timeoutEvtId = g_timerHandler.setTimeout(flowTimeline, 1000 / g_fps);
 		};
 
 		const tick = _remaining => {
@@ -16587,7 +16670,7 @@ const mainInit = () => {
 				return;
 			}
 			countdownLabel.innerHTML = String(_remaining);
-			countdownTimeoutId = setTimeout(() => tick(_remaining - 1), 1000);
+			countdownTimeoutId = g_timerHandler.setTimeout(() => tick(_remaining - 1), 1000);
 		};
 		tick(3);
 	};
@@ -16614,7 +16697,7 @@ const mainInit = () => {
 	if (document.hidden) {
 		pauseTimeline();
 	} else {
-		g_timeoutEvtId = setTimeout(flowTimeline, 1000 / g_fps);
+		g_timeoutEvtId = g_timerHandler.setTimeout(flowTimeline, 1000 / g_fps);
 	}
 };
 
@@ -16878,7 +16961,7 @@ const appearKeyTypes = (_j, _targets, _alphas = fillArray(_targets.length, 1)) =
 const startFrzReturn = () => {
 	if (!g_workObj.frzReturnFlg) {
 		if (g_workObj.frzReturnTimerId) {
-			clearTimeout(g_workObj.frzReturnTimerId);
+			g_timerHandler.clearTimeout(g_workObj.frzReturnTimerId);
 			g_workObj.frzReturnTimerId = null;
 		}
 		lifeBarFrz.classList.remove(g_cssObj.life_frzNormal, g_cssObj.life_frzActive);
@@ -16896,7 +16979,7 @@ const startFrzReturn = () => {
  */
 const resetFrzReturn = () => {
 	if (g_workObj.frzReturnTimerId) {
-		clearTimeout(g_workObj.frzReturnTimerId);
+		g_timerHandler.clearTimeout(g_workObj.frzReturnTimerId);
 	}
 	g_workObj.frzReturnTimerId = null;
 	g_workObj.frzReturnFlg = false;
@@ -16968,7 +17051,7 @@ const executeFrzReturn = (_seq, _idx, _axis) => {
 
 	addTransform(`mainSprite`, `frzReturn`, _transform, g_transPriority.frzReturn);
 
-	g_workObj.frzReturnTimerId = setTimeout(() => executeFrzReturn(_seq, _idx + 1, _axis), 20);
+	g_workObj.frzReturnTimerId = g_timerHandler.setTimeout(() => executeFrzReturn(_seq, _idx + 1, _axis), 20);
 };
 
 /**
@@ -16984,7 +17067,7 @@ const executeRetry = async (_logLabel = `Retry`) => {
 	g_retryInProgress = true;
 	try {
 		g_audio.pause();
-		clearTimeout(g_timeoutEvtId);
+		g_timerHandler.clearTimeout(g_timeoutEvtId);
 		clearWindow(`Main`);
 		await musicAfterLoaded();
 		await loadChartFile();
@@ -17007,7 +17090,7 @@ const quickRetry = (_retryCondition) => {
 		return;
 	}
 	if (g_settings.autoRetryNum >= retryNum && !g_retryInProgress) {
-		setTimeout(async () => {
+		g_timerHandler.setTimeout(async () => {
 			await executeRetry(`AutoRetry`);
 		}, 16);
 	}
@@ -18303,8 +18386,8 @@ const resultInit = () => {
 			if (g_finishFlg) {
 				g_audio.pause();
 			}
-			clearTimeout(g_timeoutEvtId);
-			clearTimeout(g_timeoutEvtResultId);
+			g_timerHandler.clearTimeout(g_timeoutEvtId);
+			g_timerHandler.clearTimeout(g_timeoutEvtResultId);
 		}, { ..._posObj, resetFunc: () => _func() }, _cssClass);
 
 	/**
@@ -18373,14 +18456,14 @@ const resultInit = () => {
 		// リザルト画面移行後のフェードアウト処理
 		if (g_scoreObj.fadeOutFrame >= g_scoreObj.frameNum) {
 			if (g_scoreObj.frameNum >= g_scoreObj.fullFrame) {
-				clearTimeout(g_timeoutEvtId);
+				g_timerHandler.clearTimeout(g_timeoutEvtId);
 			}
 			g_scoreObj.frameNum++;
 		} else {
 			const tmpVolume = (g_audio.volume - (3 * g_stateObj.volume / 100 * C_FRM_AFTERFADE / g_scoreObj.fadeOutTerm) / 1000);
 			if (tmpVolume < 0) {
 				g_audio.volume = 0;
-				clearTimeout(g_timeoutEvtId);
+				g_timerHandler.clearTimeout(g_timeoutEvtId);
 			} else {
 				g_audio.volume = tmpVolume;
 			}
@@ -18391,7 +18474,7 @@ const resultInit = () => {
 
 		g_scoreObj.resultFrameNum++;
 		g_animationData.forEach(sprite => g_scoreObj[`${sprite}ResultFrameNum`]++);
-		g_timeoutEvtResultId = setTimeout(flowResultTimeline, 1000 / g_fps - buffTime);
+		g_timeoutEvtResultId = g_timerHandler.setTimeout(flowResultTimeline, 1000 / g_fps - buffTime);
 	};
 	flowResultTimeline();
 
