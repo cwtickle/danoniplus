@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/09/01 (v50.2.0)
+ * Revised : 2026/09/08 (v50.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -5244,6 +5244,8 @@ const g_customJsObj = {
     progress: [],
     main: [],
 
+    preMakeArrow: [],
+    preMakeFrzArrow: [],
     makeArrow: [],
     makeFrzArrow: [],
 
@@ -5265,6 +5267,7 @@ const g_customJsObj = {
     judg_dummyFrzHit: [],
 
     mainEnterFrame: [],
+    mainBeforeFrameTimer: [],
     result: [],
     resultEnterFrame: [],
 };
