@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/09/08
+ * Revised : 2026/09/10
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 50.3.0`;
-const g_revisedDate = `2026/09/08`;
+const g_version = `Ver 50.3.1`;
+const g_revisedDate = `2026/09/10`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -15537,10 +15537,11 @@ const mainInit = () => {
 			isPaused ? resumeTimeline(true) : pauseTimeline(true);
 			return blockCode(setCode);
 		}
+		// ポーズ中でも押下状態バッファ自体は常に最新化しておく
+		g_inputKeyBuffer[setCode] = true;
 		if (isPaused) {
 			return blockCode(setCode);
 		}
-		g_inputKeyBuffer[setCode] = true;
 		mainKeyDownActFunc[g_stateObj.autoAll](setCode);
 
 		// 曲中リトライ、タイトルバック
@@ -16577,12 +16578,12 @@ const mainInit = () => {
 		g_timerHandler.clearTimeout(g_timeoutEvtId);
 		g_audio.pause();
 
-		// フォーカスを失うとkeyupが届かなくなり、押しっぱなし判定・表示が残り得るため、
-		// ここで強制的に全キー「離した」状態に戻す
-		g_inputKeyBuffer = {};
-		g_workObj.keyHitFlg.forEach(lane => lane.fill(false));
-		mainKeyUpActFunc[g_stateObj.autoAll]();
-		divRoot.classList.add(`gamePaused`);
+		// 自動ポーズ(タブ非表示等)の場合のみ強制的に全キー「離した」状態に戻す
+		if (!_manual) {
+			g_inputKeyBuffer = {};
+			g_workObj.keyHitFlg.forEach(lane => lane.fill(false));
+			mainKeyUpActFunc[g_stateObj.autoAll]();
+		}
 	};
 
 	const resumeTimeline = (_manual = false) => {
