@@ -13893,15 +13893,6 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 	[``, `Dummy`].forEach(header =>
 		g_typeLists.dataList.forEach(name => g_workObj[`mk${header}${name}`] = []));
 
-	/** 矢印の移動距離 */
-	g_workObj.initY = [];
-	/** 矢印の移動距離 (Motion加算分) */
-	g_workObj.initBoostY = [];
-	/** 矢印がステップゾーンに到達するまでのフレーム数 */
-	g_workObj.arrivalFrame = [];
-	/** Motionの適用フレーム数 */
-	g_workObj.motionFrame = [];
-
 	const boostData = [];
 	if (hasArrayList(_dataObj.boostData, 2)) {
 		const _data = _dataObj.boostData.concat();
@@ -13976,7 +13967,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 			return;
 		}
 
-		const calcInitBoostY = _frm => sumData(g_workObj.motionOnFrames.filter((val, j) => j <= g_workObj.motionFrame[_frm]));
+		const calcInitBoostY = _arrivalFrame => sumData(g_workObj.motionOnFrames.filter((val, j) => j <= _arrivalFrame));
 		const camelHeader = toCapitalize(_header);
 		const setcnt = (_frzFlg ? 2 : 1);
 		if (_frzFlg && _data.length % 2 !== 0) {
@@ -13994,18 +13985,14 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 		let tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame);
 
 		startPoint[lastk] = tmpObj.frm;
-		let frmPrev = tmpObj.frm;
-		g_workObj.initY[frmPrev] = tmpObj.startY;
-		g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-		g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-		g_workObj.initBoostY[frmPrev] = calcInitBoostY(frmPrev);
+		let arrivalFrm = tmpObj.arrivalFrm;
 		let minNotesFrame = startPoint[lastk];
 
 		if (_frzFlg) {
 			g_workObj[`mk${camelHeader}Length`][_j] = [];
 		}
 		setNotes(_j, lastk, _data, startPoint[lastk], camelHeader, _frzFlg, {
-			initY: tmpObj.startY, initBoostY: g_workObj.initBoostY[frmPrev],
+			initY: tmpObj.startY, initBoostY: calcInitBoostY(tmpObj.motionFrm),
 			arrivalFrame: tmpObj.arrivalFrm, motionFrame: tmpObj.motionFrm, boostSpd: getSpdByFrame(arrowArrivalFrm)
 		});
 
@@ -14021,16 +14008,11 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 				}
 				break;
 
-			} else if ((arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev] > spdPrev)
+			} else if ((arrowArrivalFrm - arrivalFrm > spdPrev)
 				&& arrowArrivalFrm < spdNext) {
 
 				// 最初から最後まで同じスピードのときは前回のデータを流用
-				const tmpFrame = arrowArrivalFrm - g_workObj.arrivalFrame[frmPrev];
-				startPoint[k] = tmpFrame;
-				g_workObj.initY[tmpFrame] = g_workObj.initY[frmPrev];
-				g_workObj.arrivalFrame[tmpFrame] = g_workObj.arrivalFrame[frmPrev];
-				g_workObj.motionFrame[tmpFrame] = g_workObj.motionFrame[frmPrev];
-				g_workObj.initBoostY[tmpFrame] = calcInitBoostY(tmpFrame);
+				startPoint[k] = arrowArrivalFrm - arrivalFrm;
 
 			} else {
 
@@ -14041,13 +14023,8 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 					spdPrev = _dataObj.speedData[spdk];
 				}
 				tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame);
-
 				startPoint[k] = tmpObj.frm;
-				frmPrev = tmpObj.frm;
-				g_workObj.initY[frmPrev] = tmpObj.startY;
-				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-				g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-				g_workObj.initBoostY[frmPrev] = calcInitBoostY(frmPrev);
+				arrivalFrm = tmpObj.arrivalFrm;
 			}
 
 			// --- 逆転検知ロジック ---
@@ -14058,36 +14035,17 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 			// 配列の順序と出現時間の順序が入れ替わっている（逆転）とみなす。
 			// 逆転している場合は、最小生成フレームまでさらに遡って、出現フレームを再計算する。
 			if (minNotesFrame < startPoint[k]) {
-
-				const getAdjArrowStartFrame = (_obj, _speedOnFrame, _targetFrame) => {
-					while (_obj.frm > _targetFrame) {
-						_obj.startY += _speedOnFrame[_obj.frm - 1];
-
-						if (_speedOnFrame[_obj.frm - 1] !== 0) {
-							_obj.motionFrm++;
-						}
-						_obj.frm--;
-						_obj.arrivalFrm++;
-					}
-					return _obj;
-				};
 				tmpObj = getAdjArrowStartFrame(tmpObj, _speedOnFrame, minNotesFrame);
 				startPoint[k] = tmpObj.frm;
-				frmPrev = tmpObj.frm;
-				g_workObj.initY[frmPrev] = tmpObj.startY;
-				g_workObj.arrivalFrame[frmPrev] = tmpObj.arrivalFrm;
-				g_workObj.motionFrame[frmPrev] = tmpObj.motionFrm;
-				g_workObj.initBoostY[frmPrev] = calcInitBoostY(frmPrev);
+				arrivalFrm = tmpObj.arrivalFrm;
 			}
 
 			// 最小値を更新
-			if (startPoint[k] < minNotesFrame) {
-				minNotesFrame = startPoint[k];
-			}
+			minNotesFrame = Math.min(minNotesFrame, startPoint[k]);
 
 			// 出現タイミングを保存
 			setNotes(_j, k, _data, startPoint[k], camelHeader, _frzFlg, {
-				initY: tmpObj.startY, initBoostY: g_workObj.initBoostY[frmPrev],
+				initY: tmpObj.startY, initBoostY: calcInitBoostY(tmpObj.motionFrm),
 				arrivalFrame: tmpObj.arrivalFrm, motionFrame: tmpObj.motionFrm, boostSpd: getSpdByFrame(arrowArrivalFrm)
 			});
 		}
@@ -14125,6 +14083,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 			return;
 		}
 		const frontData = [];
+		let minDataFrame = Infinity;
 		for (let k = baseData.length - _term; k >= 0; k -= _term) {
 			const calcFrameFlg = (_colorFlg && !baseData[k + 3]) || _calcFrameFlg;
 
@@ -14135,13 +14094,19 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 				}
 			} else {
 				if (calcFrameFlg) {
-					const tmpObj = getArrowStartFrame(baseData[k], _speedOnFrame);
+					let tmpObj = getArrowStartFrame(baseData[k], _speedOnFrame);
+
+					// 到達フレームがより早い(=baseData[k]がより小さい)要素なのに、
+					// より遅い要素より後ろで出現してしまう場合は矢印と同様に補正する
+					if (minDataFrame < tmpObj.frm) {
+						tmpObj = getAdjArrowStartFrame(tmpObj, _speedOnFrame, minDataFrame);
+					}
 					if (tmpObj.frm < g_scoreObj.frameNum) {
 						const diff = g_scoreObj.frameNum - tmpObj.frm;
 						tmpObj.frm = g_scoreObj.frameNum;
 						tmpObj.arrivalFrm -= diff;
 					}
-					g_workObj.arrivalFrame[tmpObj.frm] = tmpObj.arrivalFrm;
+					minDataFrame = Math.min(minDataFrame, tmpObj.frm);
 					baseData[k] = tmpObj.frm;
 				}
 				_setFunc(toCapitalize(_header), ...baseData.slice(k, k + _term));
@@ -14244,6 +14209,26 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 			g_workObj.speedData.push(_speedOnFrame[_dataObj.speedData[k]]);
 		}
 	}
+};
+
+/**
+ * 出現フレームを指定フレームまで強制的に遡って再計算する（逆転補正用）
+ * @param {object} _obj getArrowStartFrameの戻り値
+ * @param {object} _speedOnFrame 
+ * @param {number} _targetFrame 
+ * @returns {{ frm: number, startY: number, arrivalFrm: number, motionFrm: number }}
+ */
+const getAdjArrowStartFrame = (_obj, _speedOnFrame, _targetFrame) => {
+	while (_obj.frm > _targetFrame) {
+		_obj.startY += _speedOnFrame[_obj.frm - 1];
+
+		if (_speedOnFrame[_obj.frm - 1] !== 0) {
+			_obj.motionFrm++;
+		}
+		_obj.frm--;
+		_obj.arrivalFrm++;
+	}
+	return _obj;
 };
 
 /**
@@ -14578,11 +14563,6 @@ const getArrowSettings = () => {
 
 	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
 	g_headerObj.tuning = g_headerObj.creatorNames[g_stateObj.scoreId];
-
-	delete g_workObj.initY;
-	delete g_workObj.initBoostY;
-	delete g_workObj.arrivalFrame;
-	delete g_workObj.motionFrame;
 
 	// 各種初期化
 	// g_workObj.frzArrowInitRtnはフリーズアロー(初期表示)としての利用に限定
