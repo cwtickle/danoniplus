@@ -13974,7 +13974,6 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 			_data.pop();
 		}
 
-		const startPoint = [];
 		let spdNext = Infinity;
 		let spdk = (_dataObj.speedData?.length ?? 0) - 2;
 		let spdPrev = _dataObj.speedData?.[spdk] ?? 0;
@@ -13984,14 +13983,14 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 		let arrowArrivalFrm = _data[lastk];
 		let tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame);
 
-		startPoint[lastk] = tmpObj.frm;
+		let startPoint = tmpObj.frm;
 		let arrivalFrm = tmpObj.arrivalFrm;
-		let minNotesFrame = startPoint[lastk];
+		let minNotesFrame = startPoint;
 
 		if (_frzFlg) {
 			g_workObj[`mk${camelHeader}Length`][_j] = [];
 		}
-		setNotes(_j, lastk, _data, startPoint[lastk], camelHeader, _frzFlg, {
+		setNotes(_j, lastk, _data, startPoint, camelHeader, _frzFlg, {
 			initY: tmpObj.startY, initBoostY: calcInitBoostY(tmpObj.motionFrm),
 			arrivalFrame: tmpObj.arrivalFrm, motionFrame: tmpObj.motionFrm, boostSpd: getSpdByFrame(arrowArrivalFrm)
 		});
@@ -14011,8 +14010,8 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 			} else if ((arrowArrivalFrm - arrivalFrm > spdPrev)
 				&& arrowArrivalFrm < spdNext) {
 
-				// 最初から最後まで同じスピードのときは前回のデータを流用
-				startPoint[k] = arrowArrivalFrm - arrivalFrm;
+				// 最初から最後まで同じスピードのときは前回のデータを流用（ステップゾーン到達フレーム - 移動フレーム）
+				startPoint = arrowArrivalFrm - arrivalFrm;
 
 			} else {
 
@@ -14023,28 +14022,28 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 					spdPrev = _dataObj.speedData[spdk];
 				}
 				tmpObj = getArrowStartFrame(arrowArrivalFrm, _speedOnFrame);
-				startPoint[k] = tmpObj.frm;
+				startPoint = tmpObj.frm;
 				arrivalFrm = tmpObj.arrivalFrm;
+
+				// --- 逆転検知ロジック ---
+				// 後ろからループしているため、minNotesFrameには「自分より譜面上後ろにあるノーツ」の
+				// 最小生成フレーム（最も早く出現するもの）が入っている。
+
+				// 「自分より後ろのノーツ」の方が、「自分」よりも早く出現する場合、
+				// 配列の順序と出現時間の順序が入れ替わっている（逆転）とみなす。
+				// 逆転している場合は、最小生成フレームまでさらに遡って、出現フレームを再計算する。
+				if (minNotesFrame < startPoint) {
+					tmpObj = getAdjArrowStartFrame({ ...tmpObj, frm: startPoint }, _speedOnFrame, minNotesFrame);
+					startPoint = tmpObj.frm;
+					arrivalFrm = tmpObj.arrivalFrm;
+				}
+
+				// 最小値を更新
+				minNotesFrame = Math.min(minNotesFrame, startPoint);
 			}
-
-			// --- 逆転検知ロジック ---
-			// 後ろからループしているため、minNotesFrameには「自分より譜面上後ろにあるノーツ」の
-			// 最小生成フレーム（最も早く出現するもの）が入っている。
-
-			// 「自分より後ろのノーツ」の方が、「自分」よりも早く出現する場合、
-			// 配列の順序と出現時間の順序が入れ替わっている（逆転）とみなす。
-			// 逆転している場合は、最小生成フレームまでさらに遡って、出現フレームを再計算する。
-			if (minNotesFrame < startPoint[k]) {
-				tmpObj = getAdjArrowStartFrame({ ...tmpObj, frm: startPoint[k] }, _speedOnFrame, minNotesFrame);
-				startPoint[k] = tmpObj.frm;
-				arrivalFrm = tmpObj.arrivalFrm;
-			}
-
-			// 最小値を更新
-			minNotesFrame = Math.min(minNotesFrame, startPoint[k]);
 
 			// 出現タイミングを保存
-			setNotes(_j, k, _data, startPoint[k], camelHeader, _frzFlg, {
+			setNotes(_j, k, _data, startPoint, camelHeader, _frzFlg, {
 				initY: tmpObj.startY, initBoostY: calcInitBoostY(tmpObj.motionFrm),
 				arrivalFrame: tmpObj.arrivalFrm, motionFrame: tmpObj.motionFrm, boostSpd: getSpdByFrame(arrowArrivalFrm)
 			});
