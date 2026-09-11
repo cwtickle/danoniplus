@@ -14035,7 +14035,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 			// 配列の順序と出現時間の順序が入れ替わっている（逆転）とみなす。
 			// 逆転している場合は、最小生成フレームまでさらに遡って、出現フレームを再計算する。
 			if (minNotesFrame < startPoint[k]) {
-				tmpObj = getAdjArrowStartFrame(tmpObj, _speedOnFrame, minNotesFrame);
+				tmpObj = getAdjArrowStartFrame({ ...tmpObj, frm: startPoint[k] }, _speedOnFrame, minNotesFrame);
 				startPoint[k] = tmpObj.frm;
 				arrivalFrm = tmpObj.arrivalFrm;
 			}
