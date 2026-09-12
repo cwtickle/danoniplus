@@ -14037,10 +14037,9 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 					startPoint = tmpObj.frm;
 					arrivalFrm = tmpObj.arrivalFrm;
 				}
-
-				// 最小値を更新
-				minNotesFrame = Math.min(minNotesFrame, startPoint);
 			}
+			// 最小値を更新
+			minNotesFrame = Math.min(minNotesFrame, startPoint);
 
 			// 出現タイミングを保存
 			setNotes(_j, k, _data, startPoint, camelHeader, _frzFlg, {
