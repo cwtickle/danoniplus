@@ -2628,26 +2628,6 @@ const setKeyCtrl = (_localStorage, _keyNum, _keyCtrlPtn) => {
 	return keyCtrl;
 };
 
-/**
- * キー数基礎情報の取得
- * @returns {{ 
- * 	keyCtrlPtn: string, keyNum: number, posMax: number,
- * 	divideCnt: number, keyGroupMaps: string[], keyGroupList: string[] 
- * }}
- */
-const getKeyInfo = () => {
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length;
-	const posMax = g_keyObj[`divMax${keyCtrlPtn}`] ?? Math.max(...g_keyObj[`pos${keyCtrlPtn}`]) + 1;
-	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
-	const keyGroupMaps = setVal(g_keyObj[`keyGroup${keyCtrlPtn}`], fillArray(keyNum, [`0`]), C_TYP_STRING);
-	const keyGroupList = makeDedupliArray(keyGroupMaps.flat()).sort((a, b) => parseInt(a) - parseInt(b));
-
-	return {
-		keyCtrlPtn, keyNum, posMax, divideCnt, keyGroupMaps, keyGroupList,
-	};
-};
-
 /*-----------------------------------------------------------*/
 /* その他の共通設定                                           */
 /*-----------------------------------------------------------*/

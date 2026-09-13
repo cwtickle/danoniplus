@@ -1087,6 +1087,164 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 };
 
 /**
+ * 譜面ミニマップ：キー名を表示するヘッダーキャンバスを作成する
+ * @param {object} _config ミニマップの基本設定
+ * @param {number} _config.timeMargin 時間軸のマージン
+ * @param {number} _config.laneWidth レーンの幅
+ * @param {number} _config.logicalWidth キャンバスの論理幅
+ * @param {string} _keyCtrlPtn キーコントロールパターン
+ * @param {number} _keyNum キー数
+ * @return {HTMLCanvasElement} ヘッダー用のキャンバス要素
+ */
+const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
+	const { timeMargin, laneWidth, logicalWidth } = _config;
+	const headerHeight = 15; // ヘッダーの固定高
+
+	const canvas = document.createElement('canvas');
+	const ctx = canvas.getContext('2d');
+
+	// 解像度と表示サイズの設定
+	canvas.width = logicalWidth * g_dpr;
+	canvas.height = headerHeight * g_dpr;
+	canvas.style.width = wUnit(logicalWidth);
+	canvas.style.height = wUnit(headerHeight);
+	canvas.style.display = 'block';
+
+	ctx.scale(g_dpr, g_dpr);
+
+	// テキストのスタイル設定
+	ctx.fillStyle = '#999';
+	ctx.font = `10px ${getBasicFont()}`;
+	ctx.textAlign = 'center';
+	ctx.textBaseline = 'middle';
+
+	// 各レーンのキー名を描画
+	for (let j = 0; j < _keyNum; j++) {
+		// config.laneWidth を使って中央座標を計算
+		const x = timeMargin + j * laneWidth + laneWidth / 2;
+		const keyText = g_kCd[g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][0]].split(` `).join(``);
+
+		ctx.fillText(keyText, x, headerHeight / 2 + 2); // 視覚的な中央調整で +2px
+	}
+
+	return canvas;
+};
+
+/**
+ * 譜面ミニマップ：譜面ミニマップ本体生成
+ * @param {object} _params ミニマップ生成のためのパラメータオブジェクト
+ * @param {object} _params._scoreObj 譜面データオブジェクト
+ * @param {number} _params._keyNum キー数
+ * @param {number} _params._playingFrame 演奏時間（フレーム数）
+ * @param {number} _params._firstArrowFrame 最初の矢印のフレーム位置
+ * @param {string} _params._keyCtrlPtn キーコントロールパターン
+ * @param {object} _params.config ミニマップの基本設定
+ * @param {number} _params.config.scale ミニマップの時間軸のスケール
+ * @param {number} _params.config.timeMargin 時間軸のマージン
+ * @param {number} _params.config.laneWidth レーンの幅
+ * @param {number} _params.config.logicalWidth キャンバスの論理幅
+ * @param {number} _params.config.mmMarginY ミニマップの上下マージン
+ * @param {boolean} _isReverse ミニマップのリバース表示フラグ
+ * @returns {HTMLCanvasElement[]} ミニマップ用のキャンバス要素の配列
+ */
+const generateMinimapData = (_params, _isReverse) => {
+	const { _scoreObj, _keyNum, _playingFrame, _firstArrowFrame, _keyCtrlPtn, config } = _params;
+	const { scale, timeMargin, laneWidth, logicalWidth, mmMarginY } = config;
+
+	const mmHeightTotal = _playingFrame * scale + mmMarginY * 2;
+	const canvases = createSplitCanvases(logicalWidth, mmHeightTotal);
+
+	const getY = (frame) => {
+		const relativeFrame = frame - _firstArrowFrame;
+		const rawY = relativeFrame * scale;
+		// mmHeightTotalから引くのではなく、中身の演奏時間部分(_playingFrame * scale)を基準にリバース
+		return _isReverse
+			? (_playingFrame * scale - rawY + mmMarginY)
+			: (rawY + mmMarginY);
+	};
+
+	// 1. 時間軸描画
+	const interval = g_fps;
+	for (let f = Math.ceil(_firstArrowFrame / interval) * interval; f <= _firstArrowFrame + _playingFrame; f += interval) {
+		const y = getY(f);
+		distributeDrawing(canvases, y - 5, 10, g_dpr, (ctx) => {
+			ctx.strokeStyle = '#444';
+			ctx.fillStyle = '#999';
+			ctx.font = `10px ${getBasicFont()}`;
+			ctx.textAlign = 'right';
+			ctx.textBaseline = 'middle';
+			ctx.beginPath(); ctx.moveTo(timeMargin, y); ctx.lineTo(timeMargin + laneWidth * _keyNum, y); ctx.stroke();
+			const [m, s] = transFrameToTimer(f).split(':');
+			ctx.fillText(`${m.padStart(2, '0')}:${s}`, timeMargin, y);
+		});
+	}
+
+	// 2. フリーズノート
+	for (let j = 0; j < _keyNum; j++) {
+		const frz = _scoreObj.frzData[j];
+		for (let k = 0; k < frz.length; k += 2) {
+			const start = frz[k];
+			const end = frz[k + 1];
+
+			// 終了地点がない、またはどちらかが数値でない場合はスキップ
+			if (end === undefined || isNaN(start) || isNaN(end)) {
+				console.warn(`Minimap: Incomplete freeze note pair at lane ${j}, index ${k}`);
+				continue;
+			}
+			const y1 = getY(start);
+			const y2 = getY(end);
+			const top = Math.min(y1, y2);
+			const h = Math.abs(y2 - y1);
+			const x = timeMargin + j * laneWidth;
+			distributeDrawing(canvases, top, h, g_dpr, (ctx) => {
+				ctx.fillStyle = 'rgba(0, 200, 255, 0.4)';
+				ctx.fillRect(x + 2, top, laneWidth - 3, h);
+				ctx.strokeStyle = 'rgba(0, 200, 255, 0.8)';
+				ctx.strokeRect(x + 2, top, laneWidth - 3, h);
+			});
+		}
+	}
+
+	// 3. 通常ノート
+	for (let j = 0; j < _keyNum; j++) {
+		const color = g_dfColorObj.setColorType2[g_keyObj[`color${_keyCtrlPtn}_0`][j]] || '#ffffff';
+		_scoreObj.arrowData[j].forEach(note => {
+			const y = getY(parseFloat(note));
+			distributeDrawing(canvases, y - 1.5, 3, g_dpr, (ctx) => {
+				ctx.fillStyle = color;
+				ctx.fillRect(timeMargin + j * laneWidth + 1, y - 1.5, laneWidth - 1, 3);
+			});
+		});
+	}
+
+	return canvases.map(item => item.canvas);
+};
+
+/**
+ * 描画対象のCanvasを判定して描画を実行する
+ * @param {object[]} _canvases
+ * @param {HTMLCanvasElement} _canvases[].canvas 分割されたCanvas要素
+ * @param {CanvasRenderingContext2D} _canvases[].ctx Canvasの描画コンテキスト
+ * @param {number} _canvases[].offsetTop Canvasの論理上のオフセット位置
+ * @param {number} _canvases[].logicalHeight Canvasの論理上の高さ
+ * @param {number} _y
+ * @param {number} _h
+ * @param {number} _dpr
+ * @param {Function} _drawFunc
+ */
+const distributeDrawing = (_canvases, _y, _h, _dpr, _drawFunc) => {
+	_canvases.forEach(item => {
+		const canvasHeight = item.logicalHeight;
+		if (_y + _h >= item.offsetTop && _y <= item.offsetTop + canvasHeight) {
+			item.ctx.save();
+			item.ctx.translate(0, -item.offsetTop);
+			_drawFunc(item.ctx);
+			item.ctx.restore();
+		}
+	});
+};
+
+/**
  * 指定したキー名のキー別ストレージオブジェクトを取得
  * @param {string} _keyName
  * @returns {[Object, string]} [storageObj, addKey]

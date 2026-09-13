@@ -1660,6 +1660,78 @@ const createDiv = (_id, _x, _y, _width, _height, _classes = []) => {
 };
 
 /**
+ * 空スプライト(ムービークリップ相当)の作成
+ * - 作成済みの場合はすでに作成済のスプライトを返却する
+ * @param {HTMLDivElement} _parentObj 親スプライト
+ * @param {string} _newObjId 作成する子スプライト名
+ * @param {number} [object.x=0]
+ * @param {number} [object.y=0]
+ * @param {number} [object.w=g_sWidth]
+ * @param {number} [object.h=g_sHeight]
+ * @param {string} [object.title]
+ * @param {...any} [object.rest]
+ * @param  {...any} _classes
+ * @returns {HTMLDivElement}
+ */
+const createEmptySprite = (_parentObj, _newObjId, { x = 0, y = 0, w = g_sWidth, h = g_sHeight, title = ``, ...rest } = {}, ..._classes) => {
+	if (document.getElementById(_newObjId) !== null) {
+		changeStyle(_newObjId, { x, y, w, h, title, ...rest });
+		return document.getElementById(_newObjId);
+	}
+	const div = createDiv(_newObjId, x, y, w, h, _classes);
+	div.title = title;
+
+	const style = div.style;
+	style.pointerEvents = (title !== `` || rest?.overflow === C_DIS_AUTO)
+		? C_DIS_AUTO : C_DIS_NONE;
+	Object.keys(rest).forEach(property => style[property] = rest[property]);
+	_parentObj.appendChild(div);
+
+	return div;
+};
+
+/**
+ * 階層スプライト（全体）の作成
+ * @param {string} _baseName 
+ * @param {number} _num 階層数
+ * @param {number} [object.x=0]
+ * @returns {HTMLDivElement}
+ */
+const createMultipleSprite = (_baseName, _num, { x = 0, priority = g_transPriority.layer } = {}) => {
+	const sprite = createEmptySprite(divRoot, _baseName);
+	for (let j = 0; j <= _num; j++) {
+		createEmptySprite(sprite, `${_baseName}${j}`);
+	}
+	addTransform(_baseName, `root`, `translateX(${wUnit(x)})`, priority);
+	return sprite;
+};
+
+/**
+ * 親スプライト配下の子スプライトを全削除
+ * @param {object} _parentObjName 親スプライト名
+ */
+const deleteChildspriteAll = _parentObjName => {
+
+	const parentsprite = document.getElementById(_parentObjName);
+	g_handler.removeByContainer(parentsprite);
+	while (parentsprite.hasChildNodes()) {
+		parentsprite.removeChild(parentsprite.firstChild);
+	}
+};
+
+/**
+ * div要素の削除
+ * @param {object} _parentId 
+ * @param {string} _idName 
+ */
+const deleteDiv = (_parentId, _idName) => {
+	if (document.getElementById(_idName) !== null) {
+		g_handler.removeByContainer(document.getElementById(_idName));
+		_parentId.removeChild(document.getElementById(_idName));
+	}
+};
+
+/**
  * user-select属性の値変更
  * @param {object} _style 
  * @param {string} _value 
@@ -1731,45 +1803,6 @@ const dragDiv = (_divName, { minX = 0, minY = 0, maxX = g_sWidth, maxY = g_sHeig
 };
 
 /**
- * 画像表示
- * @param {string} _id 
- * @param {string} _imgPath 
- * @param {number} _x 
- * @param {number} _y 
- * @param {number} _width 
- * @param {number} _height 
- * @returns {HTMLDivElement}
- */
-const createImg = (_id, _imgPath, _x, _y, _width, _height) => {
-	const div = createDiv(_id, _x, _y, _width, _height);
-	div.innerHTML = `<img id="${_id}img" src="${_imgPath}" style="width:${wUnit(_width)};height:${wUnit(_height)}"${g_isFile ? `` : ` crossOrigin="anonimous"`}>`;
-
-	return div;
-};
-
-/**
- * ColorPickerの作成
- * @param {string} _parentObj
- * @param {string} _id
- * @param {Function} _func 
- * @param {number} [object.x=0]
- * @param {number} [object.y=0]
- * @returns {HTMLInputElement}
- */
-const createColorPicker = (_parentObj, _id, _func, { x = 0, y = 0 } = {}) => {
-	const picker = document.createElement(`input`);
-	picker.setAttribute(`type`, `color`);
-	picker.id = _id;
-	picker.style.left = wUnit(x);
-	picker.style.top = wUnit(y);
-	picker.style.position = `absolute`;
-	picker.style.pointerEvents = C_DIS_AUTO;
-	g_handler.addListener(picker, `change`, _func);
-	_parentObj.appendChild(picker);
-	return picker;
-};
-
-/**
  * 色付きオブジェクトの作成 (拡張属性対応)
  * @param {string} _id 
  * @param {number} [object.x=0]
@@ -1815,50 +1848,219 @@ const createColorObject2 = (_id,
 };
 
 /**
- * 空スプライト(ムービークリップ相当)の作成
- * - 作成済みの場合はすでに作成済のスプライトを返却する
- * @param {HTMLDivElement} _parentObj 親スプライト
- * @param {string} _newObjId 作成する子スプライト名
- * @param {number} [object.x=0]
- * @param {number} [object.y=0]
- * @param {number} [object.w=g_sWidth]
- * @param {number} [object.h=g_sHeight]
- * @param {string} [object.title]
+ * ボタンの作成 (CSS版・拡張属性対応)
+ * @param {string} _id 
+ * @param {string} _text
+ * @param {Function} _func
+ * @param {number} [object.x]
+ * @param {number} [object.y]
+ * @param {number} [object.w=g_btnWidth() / 3]
+ * @param {number} [object.h=g_limitObj.btnHeight]
+ * @param {number} [object.siz=g_limitObj.btnSiz]
+ * @param {string} [object.align='center']
+ * @param {string} [object.title] ボタンオンマウス時のコメント
+ * @param {string} [object.groupName] 画面名 (g_btnWaitFrameで定義しているプロパティ名を指定)
+ * @param {boolean} [object.initDisabledFlg=true] ボタン有効化までの時間を設けるかどうか
+ * @param {Function} [object.resetFunc] カスタム処理後に実行する処理
+ * @param {Function} [object.cxtFunc] 右クリック時に実行する処理
  * @param {...any} [object.rest]
- * @param  {...any} _classes
- * @returns {HTMLDivElement}
+ * @param {...any} _classes 
  */
-const createEmptySprite = (_parentObj, _newObjId, { x = 0, y = 0, w = g_sWidth, h = g_sHeight, title = ``, ...rest } = {}, ..._classes) => {
-	if (document.getElementById(_newObjId) !== null) {
-		changeStyle(_newObjId, { x, y, w, h, title, ...rest });
-		return document.getElementById(_newObjId);
-	}
-	const div = createDiv(_newObjId, x, y, w, h, _classes);
+const createCss2Button = (_id, _text, _func = () => true, {
+	x = 0, y = g_sHeight - 100, w = g_btnWidth() / 3, h = g_limitObj.btnHeight,
+	siz = g_limitObj.btnSiz, align = C_ALIGN_CENTER, title = ``, groupName = g_currentPage, initDisabledFlg = true,
+	resetFunc = () => true, cxtFunc = () => true, ...rest } = {}, ..._classes) => {
+
+	const div = createDiv(_id, x, y, w, h, [`button_common`, ..._classes]);
+	div.innerHTML = _text;
 	div.title = title;
 
 	const style = div.style;
-	style.pointerEvents = (title !== `` || rest?.overflow === C_DIS_AUTO)
-		? C_DIS_AUTO : C_DIS_NONE;
+	style.textAlign = align;
+	style.fontSize = wUnit(siz);
+	style.fontFamily = getBasicFont();
+	style.pointerEvents = C_DIS_AUTO;
+	if (rest.animationName !== undefined) {
+		style.animationDuration = `1s`;
+	}
 	Object.keys(rest).forEach(property => style[property] = rest[property]);
-	_parentObj.appendChild(div);
+
+	// ボタン有効化操作
+	if (initDisabledFlg) {
+		if (!g_btnWaitFrame[groupName] ||
+			g_btnWaitFrame[groupName].b_frame === 0 ||
+			(g_initialFlg && g_btnWaitFrame[groupName].initial)) {
+		} else {
+			style.pointerEvents = C_DIS_NONE;
+			g_timerHandler.setTimeout(() => style.pointerEvents = rest.pointerEvents ?? C_DIS_AUTO,
+				g_btnWaitFrame[groupName].b_frame * 1000 / g_fps);
+		}
+	}
+
+	// ボタンを押したときの動作
+	g_handler.addListener(div, `click`, evt => {
+		if (!setBoolVal(g_btnDeleteFlg[_id])) {
+			_func(evt);
+		}
+		if (typeof g_btnAddFunc[_id] === C_TYP_FUNCTION) {
+			g_btnAddFunc[_id](evt, _func, resetFunc);
+		}
+		if (!setBoolVal(g_btnDeleteFlg[_id])) {
+			resetFunc(evt);
+		}
+	});
+	g_btnFunc.base[_id] = _func;
+	g_btnFunc.reset[_id] = resetFunc;
+
+	// 右クリック時の処理
+	div.oncontextmenu = evt => {
+		if (typeof cxtFunc === C_TYP_FUNCTION) {
+			if (!setBoolVal(g_cxtDeleteFlg[_id])) {
+				cxtFunc(evt);
+			}
+			if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
+				g_cxtAddFunc[_id](evt, cxtFunc);
+			}
+			g_btnFunc.cxt[_id] = cxtFunc;
+
+		} else if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
+			g_cxtAddFunc[_id](evt);
+		}
+		return false;
+	};
 
 	return div;
 };
 
 /**
- * 階層スプライト（全体）の作成
- * @param {string} _baseName 
- * @param {number} _num 階層数
- * @param {number} [object.x=0]
+ * オブジェクトのスタイル一括変更
+ * @param {string} _id 
+ * @param {number} [object.x]
+ * @param {number} [object.y]
+ * @param {number} [object.w]
+ * @param {number} [object.h]
+ * @param {string} [object.align]
+ * @param {string} [object.title]
+ * @param {...any} [object.rest]
+ */
+const changeStyle = (_id, { x, y, w, h, siz, align, title, ...rest } = {}) => {
+	const div = document.getElementById(_id);
+	const style = div.style;
+
+	const obj = {
+		left: x,
+		top: y,
+		width: w,
+		height: h,
+		fontSize: siz,
+	};
+	Object.keys(obj).filter(property => setVal(obj[property], ``, C_TYP_FLOAT) !== ``)
+		.forEach(property => style[property] = wUnit(obj[property]));
+
+	if (align !== undefined) {
+		style.textAlign = `${align}`;
+	}
+	if (title !== undefined) {
+		div.title = title;
+	}
+	Object.keys(rest).forEach(property => style[property] = rest[property]);
+};
+
+/**
+ * タイトル文字描画
+ * @param {string} _id 
+ * @param {string} _titlename 
+ * @param {number} _x 
+ * @param {number} _y 
+ * @param {...any} [_classes]
+ */
+const getTitleDivLabel = (_id, _titlename, _x, _y, ..._classes) =>
+	createDivCss2Label(_id, _titlename, { x: _x, y: _y, w: g_sWidth, h: 50, siz: g_limitObj.btnSiz }, ..._classes);
+
+/**
+ * 指定された高さに基づいて分割されたCanvasリストを生成する
+ * @param {number} _width
+ * @param {number} _totalHeight
+ * @return {object[]} 分割されたCanvasとそのコンテキスト、オフセット情報を含むリスト
+ */
+const createSplitCanvases = (_width, _totalHeight) => {
+	// バックバッファ（実際のピクセル数）の最大値を 8000 に設定（iOS Safari 8192px 対策）
+	const BACKING_STORE_LIMIT = 8000;
+
+	// 論理上の最大高さ（CSSピクセル）を計算
+	// g_dpr=2なら4000px、g_dpr=3なら2666px が1枚の限界になる
+	const maxLogicalHeight = Math.max(1, Math.floor(BACKING_STORE_LIMIT / g_dpr));
+	if (_totalHeight <= 0) return [];
+
+	const count = Math.ceil(_totalHeight / maxLogicalHeight);
+	const list = [];
+
+	for (let i = 0; i < count; i++) {
+		const cvs = document.createElement('canvas');
+		// 残りの高さを計算
+		const logicalH = (i === count - 1)
+			? _totalHeight - (maxLogicalHeight * i)
+			: maxLogicalHeight;
+
+		// 実際の描画解像度をセット
+		cvs.width = _width * g_dpr;
+		cvs.height = logicalH * g_dpr;
+
+		// ブラウザ上の表示サイズをセット
+		cvs.style.width = wUnit(_width);
+		cvs.style.height = wUnit(logicalH);
+		cvs.style.display = 'block';
+
+		const ctx = cvs.getContext('2d');
+		ctx.scale(g_dpr, g_dpr);
+
+		list.push({
+			canvas: cvs,
+			ctx: ctx,
+			offsetTop: i * maxLogicalHeight,
+			logicalHeight: logicalH
+		});
+	}
+	return list;
+};
+
+/**
+ * 画像表示
+ * @param {string} _id 
+ * @param {string} _imgPath 
+ * @param {number} _x 
+ * @param {number} _y 
+ * @param {number} _width 
+ * @param {number} _height 
  * @returns {HTMLDivElement}
  */
-const createMultipleSprite = (_baseName, _num, { x = 0, priority = g_transPriority.layer } = {}) => {
-	const sprite = createEmptySprite(divRoot, _baseName);
-	for (let j = 0; j <= _num; j++) {
-		createEmptySprite(sprite, `${_baseName}${j}`);
-	}
-	addTransform(_baseName, `root`, `translateX(${wUnit(x)})`, priority);
-	return sprite;
+const createImg = (_id, _imgPath, _x, _y, _width, _height) => {
+	const div = createDiv(_id, _x, _y, _width, _height);
+	div.innerHTML = `<img id="${_id}img" src="${_imgPath}" style="width:${wUnit(_width)};height:${wUnit(_height)}"${g_isFile ? `` : ` crossOrigin="anonimous"`}>`;
+
+	return div;
+};
+
+/**
+ * ColorPickerの作成
+ * @param {string} _parentObj
+ * @param {string} _id
+ * @param {Function} _func 
+ * @param {number} [object.x=0]
+ * @param {number} [object.y=0]
+ * @returns {HTMLInputElement}
+ */
+const createColorPicker = (_parentObj, _id, _func, { x = 0, y = 0 } = {}) => {
+	const picker = document.createElement(`input`);
+	picker.setAttribute(`type`, `color`);
+	picker.id = _id;
+	picker.style.left = wUnit(x);
+	picker.style.top = wUnit(y);
+	picker.style.position = `absolute`;
+	picker.style.pointerEvents = C_DIS_AUTO;
+	g_handler.addListener(picker, `change`, _func);
+	_parentObj.appendChild(picker);
+	return picker;
 };
 
 /**
@@ -1999,161 +2201,6 @@ const g_rafHandler = (() => {
 		}
 	};
 })();
-
-/**
- * 親スプライト配下の子スプライトを全削除
- * @param {object} _parentObjName 親スプライト名
- */
-const deleteChildspriteAll = _parentObjName => {
-
-	const parentsprite = document.getElementById(_parentObjName);
-	g_handler.removeByContainer(parentsprite);
-	while (parentsprite.hasChildNodes()) {
-		parentsprite.removeChild(parentsprite.firstChild);
-	}
-};
-
-/**
- * div要素の削除
- * @param {object} _parentId 
- * @param {string} _idName 
- */
-const deleteDiv = (_parentId, _idName) => {
-	if (document.getElementById(_idName) !== null) {
-		g_handler.removeByContainer(document.getElementById(_idName));
-		_parentId.removeChild(document.getElementById(_idName));
-	}
-};
-
-/**
- * ボタンの作成 (CSS版・拡張属性対応)
- * @param {string} _id 
- * @param {string} _text
- * @param {Function} _func
- * @param {number} [object.x]
- * @param {number} [object.y]
- * @param {number} [object.w=g_btnWidth() / 3]
- * @param {number} [object.h=g_limitObj.btnHeight]
- * @param {number} [object.siz=g_limitObj.btnSiz]
- * @param {string} [object.align='center']
- * @param {string} [object.title] ボタンオンマウス時のコメント
- * @param {string} [object.groupName] 画面名 (g_btnWaitFrameで定義しているプロパティ名を指定)
- * @param {boolean} [object.initDisabledFlg=true] ボタン有効化までの時間を設けるかどうか
- * @param {Function} [object.resetFunc] カスタム処理後に実行する処理
- * @param {Function} [object.cxtFunc] 右クリック時に実行する処理
- * @param {...any} [object.rest]
- * @param {...any} _classes 
- */
-const createCss2Button = (_id, _text, _func = () => true, {
-	x = 0, y = g_sHeight - 100, w = g_btnWidth() / 3, h = g_limitObj.btnHeight,
-	siz = g_limitObj.btnSiz, align = C_ALIGN_CENTER, title = ``, groupName = g_currentPage, initDisabledFlg = true,
-	resetFunc = () => true, cxtFunc = () => true, ...rest } = {}, ..._classes) => {
-
-	const div = createDiv(_id, x, y, w, h, [`button_common`, ..._classes]);
-	div.innerHTML = _text;
-	div.title = title;
-
-	const style = div.style;
-	style.textAlign = align;
-	style.fontSize = wUnit(siz);
-	style.fontFamily = getBasicFont();
-	style.pointerEvents = C_DIS_AUTO;
-	if (rest.animationName !== undefined) {
-		style.animationDuration = `1s`;
-	}
-	Object.keys(rest).forEach(property => style[property] = rest[property]);
-
-	// ボタン有効化操作
-	if (initDisabledFlg) {
-		if (!g_btnWaitFrame[groupName] ||
-			g_btnWaitFrame[groupName].b_frame === 0 ||
-			(g_initialFlg && g_btnWaitFrame[groupName].initial)) {
-		} else {
-			style.pointerEvents = C_DIS_NONE;
-			g_timerHandler.setTimeout(() => style.pointerEvents = rest.pointerEvents ?? C_DIS_AUTO,
-				g_btnWaitFrame[groupName].b_frame * 1000 / g_fps);
-		}
-	}
-
-	// ボタンを押したときの動作
-	g_handler.addListener(div, `click`, evt => {
-		if (!setBoolVal(g_btnDeleteFlg[_id])) {
-			_func(evt);
-		}
-		if (typeof g_btnAddFunc[_id] === C_TYP_FUNCTION) {
-			g_btnAddFunc[_id](evt, _func, resetFunc);
-		}
-		if (!setBoolVal(g_btnDeleteFlg[_id])) {
-			resetFunc(evt);
-		}
-	});
-	g_btnFunc.base[_id] = _func;
-	g_btnFunc.reset[_id] = resetFunc;
-
-	// 右クリック時の処理
-	div.oncontextmenu = evt => {
-		if (typeof cxtFunc === C_TYP_FUNCTION) {
-			if (!setBoolVal(g_cxtDeleteFlg[_id])) {
-				cxtFunc(evt);
-			}
-			if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
-				g_cxtAddFunc[_id](evt, cxtFunc);
-			}
-			g_btnFunc.cxt[_id] = cxtFunc;
-
-		} else if (typeof g_cxtAddFunc[_id] === C_TYP_FUNCTION) {
-			g_cxtAddFunc[_id](evt);
-		}
-		return false;
-	};
-
-	return div;
-};
-
-/**
- * オブジェクトのスタイル一括変更
- * @param {string} _id 
- * @param {number} [object.x]
- * @param {number} [object.y]
- * @param {number} [object.w]
- * @param {number} [object.h]
- * @param {string} [object.align]
- * @param {string} [object.title]
- * @param {...any} [object.rest]
- */
-const changeStyle = (_id, { x, y, w, h, siz, align, title, ...rest } = {}) => {
-	const div = document.getElementById(_id);
-	const style = div.style;
-
-	const obj = {
-		left: x,
-		top: y,
-		width: w,
-		height: h,
-		fontSize: siz,
-	};
-	Object.keys(obj).filter(property => setVal(obj[property], ``, C_TYP_FLOAT) !== ``)
-		.forEach(property => style[property] = wUnit(obj[property]));
-
-	if (align !== undefined) {
-		style.textAlign = `${align}`;
-	}
-	if (title !== undefined) {
-		div.title = title;
-	}
-	Object.keys(rest).forEach(property => style[property] = rest[property]);
-};
-
-/**
- * タイトル文字描画
- * @param {string} _id 
- * @param {string} _titlename 
- * @param {number} _x 
- * @param {number} _y 
- * @param {...any} [_classes]
- */
-const getTitleDivLabel = (_id, _titlename, _x, _y, ..._classes) =>
-	createDivCss2Label(_id, _titlename, { x: _x, y: _y, w: g_sWidth, h: 50, siz: g_limitObj.btnSiz }, ..._classes);
 
 /**
  * キーコントロールの初期化
@@ -2463,6 +2510,26 @@ const setWindowStyle = (_text, _bkColor, _textColor, _align = C_ALIGN_LEFT, { _x
 	divRoot.removeChild(tmplbl);
 
 	return lbl;
+};
+
+/**
+ * キー数基礎情報の取得
+ * @returns {{ 
+ * 	keyCtrlPtn: string, keyNum: number, posMax: number,
+ * 	divideCnt: number, keyGroupMaps: string[], keyGroupList: string[] 
+ * }}
+ */
+const getKeyInfo = () => {
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length;
+	const posMax = g_keyObj[`divMax${keyCtrlPtn}`] ?? Math.max(...g_keyObj[`pos${keyCtrlPtn}`]) + 1;
+	const divideCnt = g_keyObj[`div${keyCtrlPtn}`] - 1;
+	const keyGroupMaps = setVal(g_keyObj[`keyGroup${keyCtrlPtn}`], fillArray(keyNum, [`0`]), C_TYP_STRING);
+	const keyGroupList = makeDedupliArray(keyGroupMaps.flat()).sort((a, b) => parseInt(a) - parseInt(b));
+
+	return {
+		keyCtrlPtn, keyNum, posMax, divideCnt, keyGroupMaps, keyGroupList,
+	};
 };
 
 // ライセンス原文、以下は削除しないでください
