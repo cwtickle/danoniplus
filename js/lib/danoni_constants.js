@@ -1231,6 +1231,7 @@ const g_stateObj = {
     bgmLooped: null,
     bgmFadeIn: null,
     bgmFadeOut: null,
+    bgmRestart: null,
     bgmTimeupdateEvtId: null,
     bgmMuteFlg: false,
 
