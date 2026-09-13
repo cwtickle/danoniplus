@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/08/19
+ * Revised : 2026/09/13
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 48.5.8`;
-const g_revisedDate = `2026/08/19`;
+const g_version = `Ver 48.5.9`;
+const g_revisedDate = `2026/09/13`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -6186,7 +6186,7 @@ const pauseBGM = () => {
 			g_audioForMS.load();
 		}
 	}
-	[`bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
+	[`bgmLooped`, `bgmFadeIn`, `bgmFadeOut`, `bgmRestart`].forEach(id => {
 		if (g_stateObj[id]) {
 			clearTimeout(g_stateObj[id]);
 			g_stateObj[id] = null;
@@ -6311,7 +6311,8 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 				g_audioForMS.currentTime = musicStart;
 
 				if (isTitle()) {
-					setTimeout(() => {
+					g_stateObj.bgmRestart = setTimeout(() => {
+						g_stateObj.bgmRestart = null;
 						fadeIn();
 						if (encodeFlg) repeatBGM();
 					}, FADE_DELAY_MS);
@@ -6620,8 +6621,8 @@ const makeWarningWindow = (_text = ``, { resetFlg = false, backBtnUse = false } 
  * @param {string} [object._textColor='#000066']
  * @param {string} [object._pointerEvents=C_DIS_NONE]
  */
-const makeInfoWindow = (_text, _animationName = ``, { _backColor = `#ccccff`, _textColor = `#000066`, _pointerEvents = C_DIS_NONE } = {}) => {
-	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, _textColor, C_ALIGN_CENTER);
+const makeInfoWindow = (_text, _animationName = ``, { _backColor = `#ccccff`, _textColor = `#000066`, _pointerEvents = C_DIS_NONE, _x = g_btnX(), _y = 0 } = {}) => {
+	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, _textColor, C_ALIGN_CENTER, { _x, _y });
 	lblWarning.style.pointerEvents = _pointerEvents;
 
 	if (_animationName !== ``) {
@@ -10780,7 +10781,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		kcMsg2.style.fontSize = wUnit(getFontSize2(kcMsg2.textContent, g_btnWidth()));
 		if (_reloadFlg) {
 			colorPickSprite.style.display = isDefault ? C_DIS_NONE : C_DIS_INHERIT;
-			g_keycons.colorCursorNum = g_keycons.colorCursorNum % Math.ceil(g_headerObj.setColor.length / g_limitObj.kcColorPickerNum);
+			g_keycons.colorCursorNum = g_keycons.colorCursorNum % Math.ceil(g_dfColorObj.setColorInit.length / g_limitObj.kcColorPickerNum);
 			changeColorPickers();
 		}
 	};
@@ -10808,14 +10809,14 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 
 		// ColorPickerの切替
 		createCss2Button(`lnkColorR`, `[${g_keycons.colorCursorNum + 1} /`, () => {
-			g_keycons.colorCursorNum = (g_keycons.colorCursorNum + 1) % Math.ceil(g_headerObj.setColor.length / g_limitObj.kcColorPickerNum);
+			g_keycons.colorCursorNum = (g_keycons.colorCursorNum + 1) % Math.ceil(g_dfColorObj.setColorInit.length / g_limitObj.kcColorPickerNum);
 			changeColorPickers();
 		}, g_lblPosObj.lnkColorR, g_cssObj.button_Start),
 
 		// 矢印の配色をフリーズアローへ反映
 		createCss2Button(`lnkColorCopy`, `↓]`, () => {
 			if (window.confirm(g_msgObj.colorCopyConfirm)) {
-				for (let j = 0; j < g_headerObj.setColor.length; j++) {
+				for (let j = 0; j < g_dfColorObj.setColorInit.length; j++) {
 					g_headerObj.frzColor[j] = g_headerObj[`frzColor${g_colorType}`][j] =
 						fillArray(g_headerObj[`frzColor${g_colorType}`][j].length, g_headerObj[`setColor${g_colorType}`][j]);
 				}
@@ -10986,7 +10987,10 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 			g_currentk = 0;
 			g_prevKey = 0;
 		}, {
-			...g_lblPosObj.btnKcBack, resetFunc: () => g_moveSettingWindow(false),
+			...g_lblPosObj.btnKcBack, resetFunc: () => {
+				keyconfigKeyboardPreview.dispose();
+				g_moveSettingWindow(false);
+			},
 		}, g_cssObj.button_Back),
 
 		createDivCss2Label(`lblPattern`, `${g_lblNameObj.KeyPattern}: ${g_keyObj.currentPtn === -1 ?
@@ -17445,15 +17449,20 @@ const resultInit = () => {
 			} else {
 				// Canvas の内容を PNG 画像として取得
 				canvas.toBlob(async blob => {
-					await navigator.clipboard.write([
-						new ClipboardItem({
-							'image/png': blob
-						})
-					]);
+					try {
+						if (blob === null) {
+							throw new Error(`Failed to create result image blob.`);
+						}
+						await navigator.clipboard.write([
+							new ClipboardItem({ 'image/png': blob })
+						]);
+						tmpDiv.removeChild(canvas);
+						divRoot.removeChild(tmpDiv);
+						makeInfoWindow(_msg, `leftToRightFade`);
+					} catch {
+						viewResultImage();
+					}
 				});
-				tmpDiv.removeChild(canvas);
-				divRoot.removeChild(tmpDiv);
-				makeInfoWindow(_msg, `leftToRightFade`);
 			}
 
 		} catch (err) {
