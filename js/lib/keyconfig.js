@@ -724,7 +724,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		kcMsg2.style.fontSize = wUnit(getFontSize2(kcMsg2.textContent, g_btnWidth()));
 		if (_reloadFlg) {
 			colorPickSprite.style.display = isDefault ? C_DIS_NONE : C_DIS_INHERIT;
-			g_keycons.colorCursorNum = g_keycons.colorCursorNum % Math.ceil(g_headerObj.setColor.length / g_limitObj.kcColorPickerNum);
+			g_keycons.colorCursorNum = g_keycons.colorCursorNum % Math.ceil(g_dfColorObj.setColorInit.length / g_limitObj.kcColorPickerNum);
 			changeColorPickers();
 		}
 	};
@@ -752,14 +752,14 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 
 		// ColorPickerの切替
 		createCss2Button(`lnkColorR`, `[${g_keycons.colorCursorNum + 1} /`, () => {
-			g_keycons.colorCursorNum = (g_keycons.colorCursorNum + 1) % Math.ceil(g_headerObj.setColor.length / g_limitObj.kcColorPickerNum);
+			g_keycons.colorCursorNum = (g_keycons.colorCursorNum + 1) % Math.ceil(g_dfColorObj.setColorInit.length / g_limitObj.kcColorPickerNum);
 			changeColorPickers();
 		}, g_lblPosObj.lnkColorR, g_cssObj.button_Start),
 
 		// 矢印の配色をフリーズアローへ反映
 		createCss2Button(`lnkColorCopy`, `↓]`, () => {
 			if (window.confirm(g_msgObj.colorCopyConfirm)) {
-				for (let j = 0; j < g_headerObj.setColor.length; j++) {
+				for (let j = 0; j < g_dfColorObj.setColorInit.length; j++) {
 					g_headerObj.frzColor[j] = g_headerObj[`frzColor${g_colorType}`][j] =
 						fillArray(g_headerObj[`frzColor${g_colorType}`][j].length, g_headerObj[`setColor${g_colorType}`][j]);
 				}

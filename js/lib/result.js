@@ -681,15 +681,20 @@ const resultInit = () => {
 			} else {
 				// Canvas の内容を PNG 画像として取得
 				canvas.toBlob(async blob => {
-					await navigator.clipboard.write([
-						new ClipboardItem({
-							'image/png': blob
-						})
-					]);
+					try {
+						if (blob === null) {
+							throw new Error(`Failed to create result image blob.`);
+						}
+						await navigator.clipboard.write([
+							new ClipboardItem({ 'image/png': blob })
+						]);
+						tmpDiv.removeChild(canvas);
+						divRoot.removeChild(tmpDiv);
+						makeInfoWindow(_msg, `leftToRightFade`);
+					} catch {
+						viewResultImage();
+					}
 				});
-				tmpDiv.removeChild(canvas);
-				divRoot.removeChild(tmpDiv);
-				makeInfoWindow(_msg, `leftToRightFade`);
 			}
 
 		} catch (err) {

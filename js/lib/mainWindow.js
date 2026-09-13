@@ -1537,6 +1537,7 @@ const mainInit = () => {
 			g_workObj.keyHitFlg.forEach(lane => lane.fill(false));
 			mainKeyUpActFunc[g_stateObj.autoAll]();
 		}
+		divRoot.classList.add(`gamePaused`);
 	};
 
 	const resumeTimeline = (_manual = false) => {
