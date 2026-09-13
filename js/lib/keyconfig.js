@@ -930,7 +930,10 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 			g_currentk = 0;
 			g_prevKey = 0;
 		}, {
-			...g_lblPosObj.btnKcBack, resetFunc: () => g_moveSettingWindow(false),
+			...g_lblPosObj.btnKcBack, resetFunc: () => {
+				keyconfigKeyboardPreview.dispose();
+				g_moveSettingWindow(false);
+			}
 		}, g_cssObj.button_Back),
 
 		createDivCss2Label(`lblPattern`, `${g_lblNameObj.KeyPattern}: ${g_keyObj.currentPtn === -1 ?

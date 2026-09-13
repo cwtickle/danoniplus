@@ -535,7 +535,7 @@ const pauseBGM = () => {
 			g_audioForMS.load();
 		}
 	}
-	[`bgmLooped`, `bgmFadeIn`, `bgmFadeOut`].forEach(id => {
+	[`bgmLooped`, `bgmFadeIn`, `bgmFadeOut`, `bgmRestart`].forEach(id => {
 		if (g_stateObj[id]) {
 			g_timerHandler.clearTimeout(g_stateObj[id]);
 			g_stateObj[id] = null;
@@ -660,7 +660,8 @@ const playBGM = async (_num, _currentLoopNum = g_settings.musicLoopNum) => {
 				g_audioForMS.currentTime = musicStart;
 
 				if (isTitle()) {
-					g_timerHandler.setTimeout(() => {
+					g_stateObj.bgmRestart = g_timerHandler.setTimeout(() => {
+						g_stateObj.bgmRestart = null;
 						fadeIn();
 						if (encodeFlg) repeatBGM();
 					}, FADE_DELAY_MS);
