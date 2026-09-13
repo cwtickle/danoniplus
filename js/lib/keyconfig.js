@@ -4,7 +4,7 @@
  * - ページ: keyConfig
  *
  * Source by tickle
- * Created : 
+ * Created : 2026/09/13
  * Revised : 
  *
  * https://github.com/cwtickle/danoniplus
