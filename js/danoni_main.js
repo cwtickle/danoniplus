@@ -1978,6 +1978,15 @@ const getTitleDivLabel = (_id, _titlename, _x, _y, ..._classes) =>
 	createDivCss2Label(_id, _titlename, { x: _x, y: _y, w: g_sWidth, h: 50, siz: g_limitObj.btnSiz }, ..._classes);
 
 /**
+ * ローディング文字用ラベルの作成
+ * @returns {HTMLDivElement}
+ */
+const getLoadingLabel = () => createDivCss2Label(`lblLoading`, g_lblNameObj.nowLoading, {
+	x: 0, y: g_sHeight - 40, w: g_sWidth, h: g_limitObj.setLblHeight,
+	siz: g_limitObj.setLblSiz, align: C_ALIGN_RIGHT,
+});
+
+/**
  * 指定された高さに基づいて分割されたCanvasリストを生成する
  * @param {number} _width
  * @param {number} _totalHeight

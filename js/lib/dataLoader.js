@@ -55,15 +55,6 @@ const loadMusic = async () => {
 };
 
 /**
- * ローディング文字用ラベルの作成
- * @returns {HTMLDivElement}
- */
-const getLoadingLabel = () => createDivCss2Label(`lblLoading`, g_lblNameObj.nowLoading, {
-	x: 0, y: g_sHeight - 40, w: g_sWidth, h: g_limitObj.setLblHeight,
-	siz: g_limitObj.setLblSiz, align: C_ALIGN_RIGHT,
-});
-
-/**
  * 音源の取得とセットアップ
  * - エンコード形式(base64)か通常の音声ファイルかを判定し、それぞれの準備処理に振り分ける
  * - iOSの場合はユーザー操作(ジェスチャー)を待ってから再生準備を行う(readyToStart経由)
