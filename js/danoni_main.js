@@ -2465,9 +2465,10 @@ const makeWarningWindow = (_text = ``, { resetFlg = false, backBtnUse = false } 
  * @param {string} [object._pointerEvents=C_DIS_NONE]
  * @param {number} [object._x=0]
  * @param {number} [object._y=0]
+ * @param {number} [object._w=g_btnWidth()]
  */
-const makeInfoWindow = (_text, _animationName = ``, { _backColor = `#ccccff`, _textColor = `#000066`, _pointerEvents = C_DIS_NONE, _x = 0, _y = 0 } = {}) => {
-	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, _textColor, C_ALIGN_CENTER, { _x, _y });
+const makeInfoWindow = (_text, _animationName = ``, { _backColor = `#ccccff`, _textColor = `#000066`, _pointerEvents = C_DIS_NONE, _x = g_btnX(), _y = 0, _w = g_btnWidth() } = {}) => {
+	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, _textColor, C_ALIGN_CENTER, { _x, _y, _w });
 	lblWarning.style.pointerEvents = _pointerEvents;
 
 	if (_animationName !== ``) {
