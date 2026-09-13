@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/08/01 (v44.5.21)
+ * Revised : 2026/09/13 (v44.5.24)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1109,6 +1109,7 @@ const g_stateObj = {
     bgmLooped: null,
     bgmFadeIn: null,
     bgmFadeOut: null,
+    bgmRestart: null,
     bgmTimeupdateEvtId: null,
     bgmMuteFlg: false,
 
