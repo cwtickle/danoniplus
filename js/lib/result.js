@@ -263,20 +263,12 @@ const resultInit = () => {
 	// ゲージ推移グラフの描画
 	const gaugeTransitionWindow = createEmptySprite(divRoot, `gaugeTransitionWindow`, g_windowObj.gaugeTransition, g_cssObj.result_PlayDataWindow);
 	for (let j = 0; j < 2; j++) {
-		const canvas = document.createElement(`canvas`);
-		canvas.id = `graphGaugeTransition${j > 0 ? j + 1 : ``}`;
-		canvas.width = g_limitObj.gaugeTransitionWidth * g_dpr;
-		canvas.height = g_limitObj.gaugeTransitionHeight * g_dpr;
-		canvas.style.width = wUnit(g_limitObj.gaugeTransitionWidth);
-		canvas.style.height = wUnit(g_limitObj.gaugeTransitionHeight);
-		canvas.getContext(`2d`).scale(g_dpr, g_dpr);
-		canvas.style.left = wUnit(0);
-		canvas.style.top = wUnit(0);
-		canvas.style.position = `absolute`;
-		if (j > 0) {
-			canvas.style.pointerEvents = C_DIS_NONE;
-		}
-		gaugeTransitionWindow.appendChild(canvas);
+		gaugeTransitionWindow.appendChild(
+			createCanvas(`graphGaugeTransition${j > 0 ? j + 1 : ``}`, {
+				w: g_limitObj.gaugeTransitionWidth, h: g_limitObj.gaugeTransitionHeight,
+				pointerEvents: j > 0 ? C_DIS_NONE : C_DIS_AUTO,
+			})
+		);
 	}
 
 	multiAppend(divRoot,
@@ -578,28 +570,18 @@ const resultInit = () => {
 	const copyResultImageData = _msg => {
 		const tmpDiv = createEmptySprite(divRoot, `tmpDiv`, { x: 0, y: 0, w: g_sWidth, h: g_sHeight, pointerEvents: C_DIS_AUTO });
 		tmpDiv.style.background = `#000000cc`;
-		const canvas = document.createElement(`canvas`);
+
 		const artistName = g_headerObj.artistNames[g_headerObj.musicNos[g_stateObj.scoreId]] || g_headerObj.artistName;
 		const logicalWidth = 400;
 		const logicalHeight = g_sHeight - 90;
 		const flapWidth = 370;
 
-		canvas.id = `resultImage`;
-		canvas.width = logicalWidth * g_dpr;
-		canvas.height = logicalHeight * g_dpr;
-		canvas.style.width = wUnit(logicalWidth);
-		canvas.style.height = wUnit(logicalHeight);
-		canvas.style.left = wUnit((g_sWidth - parseFloat(canvas.style.width)) / 2);
-		canvas.style.top = wUnit(20);
-		canvas.style.position = `absolute`;
-
+		const canvas = createCanvas(`resultImage`, {
+			x: (g_sWidth - logicalWidth) / 2, y: 20, w: logicalWidth, h: logicalHeight
+		});
 		const context = canvas.getContext(`2d`);
-		context.scale(g_dpr, g_dpr);
 		const drawText = (_text, { x = 30, dy = 0, hy, siz = 15, color = `#cccccc`, align = C_ALIGN_LEFT, font } = {}) => {
-			context.font = `${wUnit(siz)} ${getBasicFont(font)}`;
-			context.fillStyle = color;
-			context.textAlign = align;
-			context.fillText(_text, x, 35 + hy * 18 + dy);
+			fillCanvasText(context, _text, x, 35 + hy * 18 + dy, { siz, font, color, align });
 		};
 		makeBgCanvas(context, { w: logicalWidth, h: logicalHeight });
 

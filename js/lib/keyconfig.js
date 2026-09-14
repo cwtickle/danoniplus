@@ -1479,14 +1479,7 @@ const keyconfigKeyboardPreview = (() => {
 	const setupCanvasContext = (canvas) => {
 		if (!canvas) return null;
 		canvas.style.top = wUnit(40);
-		canvas.width = _state.cvsW * g_dpr;
-		canvas.height = _state.cvsH * g_dpr;
-		canvas.style.width = wUnit(_state.cvsW);
-		canvas.style.height = wUnit(_state.cvsH);
-
-		const ctx = canvas.getContext(`2d`);
-		ctx.scale(g_dpr, g_dpr);
-		return ctx;
+		return applyCanvasSize(canvas, _state.cvsW, _state.cvsH);
 	};
 
 	/**
