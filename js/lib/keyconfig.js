@@ -1505,6 +1505,19 @@ const keyconfigKeyboardPreview = (() => {
 		ctx.closePath();
 	};
 
+	// fill/strokeスタイルを設定して塗り・線を描く共通処理（roundRectなどと組み合わせて使う）
+	const fillStrokeShape = (_ctx, { fill, stroke, lineWidth = 1 } = {}) => {
+		if (fill !== undefined) {
+			setCtxProp(_ctx, `fillStyle`, fill);
+			_ctx.fill();
+		}
+		if (stroke !== undefined) {
+			setCtxProp(_ctx, `strokeStyle`, stroke);
+			setCtxProp(_ctx, `lineWidth`, lineWidth);
+			_ctx.stroke();
+		}
+	};
+
 	/**
 	 * 単一キーを描画する（枠の描画と内部テキストの書き込みを一括化）
 	 * @param {CanvasRenderingContext2D} ctx
@@ -1517,11 +1530,7 @@ const keyconfigKeyboardPreview = (() => {
 
 		// 1. キーの枠線・背景を描画
 		roundRect(ctx, x + 0.5, y + 0.5, keyW - 1, keyH - 1, kr());
-		ctx.fillStyle = style.fill;
-		ctx.strokeStyle = style.stroke;
-		ctx.lineWidth = lw;
-		ctx.fill();
-		ctx.stroke();
+		fillStrokeShape(ctx, { fill: style.fill, stroke: style.stroke, lineWidth: lw });
 
 		// 2. キー内部のテキスト（メイン・サブ）を描画
 		const [primary, sub] = getKeyLabels(code, label);
@@ -1532,28 +1541,27 @@ const keyconfigKeyboardPreview = (() => {
 
 		// サブラベル（Shift面などの表記）がある場合
 		if (sub) {
-			ctx.fillStyle = style.subText || style.text;
-			ctx.font = `bold ${Math.max(6, Math.floor(9 * _state.scale))}px monospace`;
-			ctx.textAlign = `right`;
-			ctx.textBaseline = `top`;
-			ctx.fillText(sub, x + keyW - 2, y + 2);
+			fillCanvasTextRaw(ctx, sub, x + keyW - 2, y + 2, {
+				font: `bold ${Math.max(6, Math.floor(9 * _state.scale))}px monospace`,
+				color: style.subText || style.text,
+				align: `right`, baseline: `top`,
+			});
 		}
 
 		// メインラベルの描画（改行表記に対応）
 		const [primary1, primary2] = primary.split(`\n`);
-		ctx.fillStyle = style.text;
-		ctx.textAlign = `center`;
-		ctx.textBaseline = `middle`;
 		const subDiff = sub ? 2 : 0;
 
 		if (primary2) {
 			const siz = fs(Math.max(primary1.length, primary2.length));
-			ctx.font = `bold ${siz}px monospace`;
-			ctx.fillText(primary1, x + keyW / 2, y + keyH / 2 - siz / 2 + subDiff);
-			ctx.fillText(primary2, x + keyW / 2, y + keyH / 2 + siz / 2 + subDiff);
+			const opt = { font: `bold ${siz}px monospace`, color: style.text, align: `center`, baseline: `middle` };
+			fillCanvasTextRaw(ctx, primary1, x + keyW / 2, y + keyH / 2 - siz / 2 + subDiff, opt);
+			fillCanvasTextRaw(ctx, primary2, x + keyW / 2, y + keyH / 2 + siz / 2 + subDiff, opt);
 		} else {
-			ctx.font = `bold ${fs(primary.length)}px monospace`;
-			ctx.fillText(primary, x + keyW / 2, y + keyH / 2 + subDiff);
+			fillCanvasTextRaw(ctx, primary, x + keyW / 2, y + keyH / 2 + subDiff, {
+				font: `bold ${fs(primary.length)}px monospace`,
+				color: style.text, align: `center`, baseline: `middle`,
+			});
 		}
 	};
 
@@ -1612,7 +1620,7 @@ const keyconfigKeyboardPreview = (() => {
 		if (!ctx) return;
 
 		ctx.clearRect(0, 0, _state.cvsW, _state.cvsH);
-		ctx.fillStyle = C_COLOR.bgFill;
+		setCtxProp(ctx, `fillStyle`, C_COLOR.bgFill);
 		ctx.fillRect(0, 0, _state.cvsW, _state.cvsH);
 
 		_state.keyDataList = [];
@@ -1637,9 +1645,7 @@ const keyconfigKeyboardPreview = (() => {
 
 		// 凡例
 		const ly = _state.cvsH - 10;
-		ctx.font = `${Math.max(9, Math.floor(12 * _state.scale))}px ${getBasicFont()}`;
-		ctx.textAlign = `left`;
-		ctx.textBaseline = `middle`;
+		const legendFont = `${Math.max(9, Math.floor(12 * _state.scale))}px ${getBasicFont()}`;
 
 		const legends = [
 			{ style: C_COLOR.normal, label: g_lblNameObj.unallocated },
@@ -1651,10 +1657,11 @@ const keyconfigKeyboardPreview = (() => {
 		let lx = 8;
 		legends.forEach(item => {
 			roundRect(ctx, lx, ly - 5, 10, 10, 2);
-			ctx.fillStyle = item.style.fill; ctx.fill();
-			ctx.strokeStyle = item.style.stroke; ctx.lineWidth = 1; ctx.stroke();
-			ctx.fillStyle = C_COLOR.legendText;
-			ctx.fillText(item.label, lx + 14, ly);
+			fillStrokeShape(ctx, { fill: item.style.fill, stroke: item.style.stroke, lineWidth: 1 });
+
+			fillCanvasTextRaw(ctx, item.label, lx + 14, ly, {
+				font: legendFont, color: C_COLOR.legendText, align: `left`, baseline: `middle`,
+			});
 			lx += ctx.measureText(item.label).width + 28;
 		});
 	};

@@ -682,9 +682,7 @@ const drawLine = (_context, _y, _lineType, { _fixed, _mark, _a, _b } = {}) => {
 		const textBaseObj = document.getElementById(`lnkDifficulty`);
 		const textColor = window.getComputedStyle(textBaseObj, ``).color;
 		_context.strokeStyle = textColor;
-		fillCanvasText(_context, _y.toFixed(_fixed) + _mark, 2, lineY + 4, {
-			siz: 12, color: textColor,
-		});
+		fillCanvasText(_context, _y.toFixed(_fixed) + _mark, 2, lineY + 4, { siz: 12, color: textColor });
 	} else {
 		_context.strokeStyle = `#646464`;
 	}
@@ -1215,6 +1213,8 @@ const generateMinimapData = (_params, _isReverse) => {
  * @param {number} _h
  * @param {number} _dpr
  * @param {Function} _drawFunc
+ *   - 描画関数。前後に ctx.save() / ctx.restore() が自動で呼ばれるためctxキャッシュを使った関数
+ *     (setCtxProp, fillCanvasText, fillCanvasRect など) は使用できない
  */
 const distributeDrawing = (_canvases, _y, _h, _dpr, _drawFunc) => {
 	_canvases.forEach(item => {

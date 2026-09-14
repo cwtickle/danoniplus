@@ -2069,8 +2069,16 @@ const createSplitCanvases = (_width, _totalHeight) => {
 	return list;
 };
 
-// ctxの任意プロパティをキャッシュ付きで設定（同一キーなら代入をスキップ）
+// ctxの任意プロパティのキャッシュ
 const g_ctxPropCache = {};
+
+/**
+ * ctxの任意プロパティをキャッシュ付きで設定（同一キーなら代入をスキップ）
+ * @param {CanvasRenderingContext2D} _ctx 
+ * @param {string} _prop 
+ * @param {any} _key 
+ * @param {Function} _computeValue 
+ */
 const setCtxProp = (_ctx, _prop, _key, _computeValue = () => _key) => {
 	const cache = (g_ctxPropCache[_prop] ??= new WeakMap());
 	if (cache.get(_ctx) !== _key) {
@@ -2079,13 +2087,44 @@ const setCtxProp = (_ctx, _prop, _key, _computeValue = () => _key) => {
 	}
 };
 
-const fillCanvasText = (_ctx, _text, _x, _y, { siz = 15, font, color, align = C_ALIGN_LEFT, baseline, fontWeight = `normal` } = {}) => {
-	setCtxProp(_ctx, `font`, `${siz}_${font}_${fontWeight}`, () => `${fontWeight} ${wUnit(siz)} ${getBasicFont(font)}`);
+/**
+ * 指定スタイルでテキストを描画する共通関数（font文字列は呼び出し側で完成させて渡す）
+ * @param {CanvasRenderingContext2D} _ctx
+ * @param {string} _text
+ * @param {number} _x
+ * @param {number} _y
+ * @param {object} [object]
+ * @param {string} [object.font]
+ * @param {string} [object.color]
+ * @param {string} [object.align=C_ALIGN_LEFT]
+ * @param {string} [object.baseline]
+ */
+const fillCanvasTextRaw = (_ctx, _text, _x, _y, { font, color, align = C_ALIGN_LEFT, baseline } = {}) => {
+	if (font !== undefined) setCtxProp(_ctx, `font`, font);
 	if (color !== undefined) setCtxProp(_ctx, `fillStyle`, color);
 	setCtxProp(_ctx, `textAlign`, align);
 	setCtxProp(_ctx, `textBaseline`, baseline);
 	_ctx.fillText(_text, _x, _y);
 };
+
+/**
+ * wUnit/getBasicFont前提のテキスト描画（既存呼び出し元向け）
+ * @param {CanvasRenderingContext2D} _ctx
+ * @param {string} _text
+ * @param {number} _x
+ * @param {number} _y
+ * @param {object} [object]
+ * @param {number} [object.siz=15]
+ * @param {string} [object.font]
+ * @param {string} [object.color]
+ * @param {string} [object.align=C_ALIGN_LEFT]
+ * @param {string} [object.baseline]
+ */
+const fillCanvasText = (_ctx, _text, _x, _y, { siz = 15, font, color, align = C_ALIGN_LEFT, baseline } = {}) =>
+	fillCanvasTextRaw(_ctx, _text, _x, _y, {
+		font: `${wUnit(siz)} ${getBasicFont(font)}`,
+		color, align, baseline,
+	});
 
 /**
  * 画像表示
