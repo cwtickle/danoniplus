@@ -1987,24 +1987,6 @@ const getLoadingLabel = () => createDivCss2Label(`lblLoading`, g_lblNameObj.nowL
 });
 
 /**
- * Canvasの実ピクセルサイズ・表示サイズを設定し、scale済みのcontextを返す
- * @param {HTMLCanvasElement} cvs
- * @param {number} w
- * @param {number} h
- * @returns {CanvasRenderingContext2D}
- */
-const applyCanvasSize = (cvs, w, h) => {
-	cvs.width = w * g_dpr;
-	cvs.height = h * g_dpr;
-	cvs.style.width = wUnit(w);
-	cvs.style.height = wUnit(h);
-
-	const ctx = cvs.getContext(`2d`);
-	ctx.scale(g_dpr, g_dpr);
-	return ctx;
-};
-
-/**
  * Canvasの作成 (拡張属性対応)
  * @param {string} _id 
  * @param {number} [object.x=0]
@@ -2085,6 +2067,26 @@ const setCtxProp = (_ctx, _prop, _key, _computeValue = () => _key) => {
 		_ctx[_prop] = _computeValue();
 		cache.set(_ctx, _key);
 	}
+};
+
+/**
+ * Canvasの実ピクセルサイズ・表示サイズを設定し、scale済みのcontextを返す
+ * @param {HTMLCanvasElement} cvs
+ * @param {number} w
+ * @param {number} h
+ * @returns {CanvasRenderingContext2D}
+ */
+const applyCanvasSize = (cvs, w, h) => {
+	cvs.width = w * g_dpr;
+	cvs.height = h * g_dpr;
+	cvs.style.width = wUnit(w);
+	cvs.style.height = wUnit(h);
+
+	const ctx = cvs.getContext(`2d`);
+	// width/height代入によりctx状態がリセットされるため、setCtxPropのキャッシュも同期して破棄
+	Object.values(g_ctxPropCache).forEach(cache => cache.delete(ctx));
+	ctx.scale(g_dpr, g_dpr);
+	return ctx;
 };
 
 /**
