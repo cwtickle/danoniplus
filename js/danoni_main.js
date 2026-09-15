@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/09/13
+ * Revised : 2026/09/15
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 50.5.0`;
-const g_revisedDate = `2026/09/13`;
+const g_version = `Ver 50.5.1`;
+const g_revisedDate = `2026/09/15`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -1987,6 +1987,34 @@ const getLoadingLabel = () => createDivCss2Label(`lblLoading`, g_lblNameObj.nowL
 });
 
 /**
+ * Canvasの作成 (拡張属性対応)
+ * @param {string} _id 
+ * @param {number} [object.x=0]
+ * @param {number} [object.y=0]
+ * @param {number} [object.w]
+ * @param {number} [object.h]
+ * @param {string} [object.position='absolute']
+ * @param {...any} [object.rest]
+ * @returns {HTMLCanvasElement}
+ */
+const createCanvas = (_id, { x = 0, y = 0, w, h, position = `absolute`, ...rest } = {}) => {
+	const cvs = document.createElement(`canvas`);
+	if (_id) cvs.id = _id;
+	cvs.style.display = `block`;
+
+	if (position) {
+		cvs.style.position = position;
+		cvs.style.left = wUnit(x);
+		cvs.style.top = wUnit(y);
+	}
+
+	applyCanvasSize(cvs, w, h);
+	Object.keys(rest).forEach(property => cvs.style[property] = rest[property]);
+
+	return cvs;
+};
+
+/**
  * 指定された高さに基づいて分割されたCanvasリストを生成する
  * @param {number} _width
  * @param {number} _totalHeight
@@ -2002,36 +2030,103 @@ const createSplitCanvases = (_width, _totalHeight) => {
 	if (_totalHeight <= 0) return [];
 
 	const count = Math.ceil(_totalHeight / maxLogicalHeight);
+	const id = Math.random().toString(36).substring(2, 10); // ランダムなIDを生成
 	const list = [];
 
 	for (let i = 0; i < count; i++) {
-		const cvs = document.createElement('canvas');
 		// 残りの高さを計算
 		const logicalH = (i === count - 1)
 			? _totalHeight - (maxLogicalHeight * i)
 			: maxLogicalHeight;
 
-		// 実際の描画解像度をセット
-		cvs.width = _width * g_dpr;
-		cvs.height = logicalH * g_dpr;
-
-		// ブラウザ上の表示サイズをセット
-		cvs.style.width = wUnit(_width);
-		cvs.style.height = wUnit(logicalH);
-		cvs.style.display = 'block';
-
-		const ctx = cvs.getContext('2d');
-		ctx.scale(g_dpr, g_dpr);
+		const cvs = createCanvas(`${id}_${i}`, { w: _width, h: logicalH, position: null });
 
 		list.push({
 			canvas: cvs,
-			ctx: ctx,
+			ctx: cvs.getContext(`2d`),
 			offsetTop: i * maxLogicalHeight,
 			logicalHeight: logicalH
 		});
 	}
 	return list;
 };
+
+// ctxの任意プロパティのキャッシュ
+const g_ctxPropCache = {};
+
+/**
+ * ctxの任意プロパティをキャッシュ付きで設定（同一キーなら代入をスキップ）
+ * @param {CanvasRenderingContext2D} _ctx 
+ * @param {string} _prop 
+ * @param {any} _key 
+ * @param {Function} _computeValue 
+ */
+const setCtxProp = (_ctx, _prop, _key, _computeValue = () => _key) => {
+	const cache = (g_ctxPropCache[_prop] ??= new WeakMap());
+	if (cache.get(_ctx) !== _key) {
+		_ctx[_prop] = _computeValue();
+		cache.set(_ctx, _key);
+	}
+};
+
+/**
+ * Canvasの実ピクセルサイズ・表示サイズを設定し、scale済みのcontextを返す
+ * @param {HTMLCanvasElement} cvs
+ * @param {number} w
+ * @param {number} h
+ * @returns {CanvasRenderingContext2D}
+ */
+const applyCanvasSize = (cvs, w, h) => {
+	cvs.width = w * g_dpr;
+	cvs.height = h * g_dpr;
+	cvs.style.width = wUnit(w);
+	cvs.style.height = wUnit(h);
+
+	const ctx = cvs.getContext(`2d`);
+	// width/height代入によりctx状態がリセットされるため、setCtxPropのキャッシュも同期して破棄
+	Object.values(g_ctxPropCache).forEach(cache => cache.delete(ctx));
+	ctx.scale(g_dpr, g_dpr);
+	return ctx;
+};
+
+/**
+ * 指定スタイルでテキストを描画する共通関数（font文字列は呼び出し側で完成させて渡す）
+ * @param {CanvasRenderingContext2D} _ctx
+ * @param {string} _text
+ * @param {number} _x
+ * @param {number} _y
+ * @param {object} [object]
+ * @param {string} [object.font]
+ * @param {string} [object.color]
+ * @param {string} [object.align=C_ALIGN_LEFT]
+ * @param {string} [object.baseline]
+ */
+const fillCanvasTextRaw = (_ctx, _text, _x, _y, { font, color, align = C_ALIGN_LEFT, baseline } = {}) => {
+	if (font !== undefined) setCtxProp(_ctx, `font`, font);
+	if (color !== undefined) setCtxProp(_ctx, `fillStyle`, color);
+	setCtxProp(_ctx, `textAlign`, align);
+	setCtxProp(_ctx, `textBaseline`, baseline);
+	_ctx.fillText(_text, _x, _y);
+};
+
+/**
+ * wUnit/getBasicFont前提のテキスト描画（既存呼び出し元向け）
+ * @param {CanvasRenderingContext2D} _ctx
+ * @param {string} _text
+ * @param {number} _x
+ * @param {number} _y
+ * @param {object} [object]
+ * @param {number} [object.siz=15]
+ * @param {string} [object.font]
+ * @param {string} [object.color]
+ * @param {string} [object.align=C_ALIGN_LEFT]
+ * @param {string} [object.baseline]
+ */
+const fillCanvasText = (_ctx, _text, _x, _y, { siz = 15, font, color, align = C_ALIGN_LEFT, baseline } = {}) =>
+	fillCanvasTextRaw(_ctx, _text, _x, _y, {
+		font: `${wUnit(siz)} ${getBasicFont(font)}`,
+		color, align, baseline,
+	});
 
 /**
  * 画像表示

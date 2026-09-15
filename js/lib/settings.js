@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 
+ * Revised : 2026/09/15 (v50.5.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -478,14 +478,14 @@ const drawSpeedGraph = _scoreId => {
 		context.moveTo(lineX[j], lineY);
 		context.lineTo(lineX[j] + 25, lineY);
 		context.stroke();
-		context.font = `${wUnit(g_limitObj.mainSiz)} ${getBasicFont()}`;
-		context.fillText(g_lblNameObj[`s_${speedType}`], lineX[j] + 30, lineY + 3);
+		fillCanvasText(context, g_lblNameObj[`s_${speedType}`], lineX[j] + 30, lineY + 3, { siz: g_limitObj.mainSiz });
 
 		const maxSpeed = Math.max(...speed);
 		const minSpeed = Math.min(...speed);
-		context.font = `${wUnit(g_limitObj.graphMiniSiz)} ${getBasicFont()}`;
-		context.fillText(`(${minSpeed.toFixed(2)}x` + (minSpeed === maxSpeed ? `` : ` -- ${Math.max(...speed).toFixed(2)}x`) + `)`, lineX[j] + 30, lineY + 16);
-		context.fillText(`Avg. ` + (avgX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`), lineX[j] + 30, lineY + 29);
+		const speedText = `(${minSpeed.toFixed(2)}x` + (minSpeed === maxSpeed ? `` : ` -- ${Math.max(...speed).toFixed(2)}x`) + `)`;
+		const avgText = `Avg. ` + (avgX[j] === 1 ? `----` : `${(avgSubX[j]).toFixed(2)}x`);
+		fillCanvasText(context, speedText, lineX[j] + 30, lineY + 16, { siz: g_limitObj.graphMiniSiz });
+		fillCanvasText(context, avgText, lineX[j] + 30, lineY + 29, { siz: g_limitObj.graphMiniSiz });
 		updateScoreDetailLabel(`Speed`, `${speedType}S`, speedObj[speedType].cnt, j, g_lblNameObj[`s_${speedType}`]);
 	});
 	updateScoreDetailLabel(`Speed`, `avgS`, `${(avgX[0] * avgX[1]).toFixed(2)}x`, 2, g_lblNameObj.s_avg);
@@ -599,13 +599,11 @@ const drawDensityGraph = _scoreId => {
 
 		context.beginPath();
 		context.lineWidth = 3;
-		context.fillStyle = g_rankObj.rankColorAllPerfect;
 		context.strokeStyle = g_graphColorObj[val];
 		context.moveTo(lineX, 215);
 		context.lineTo(lineX + 20, 215);
 		context.stroke();
-		context.font = `${wUnit(g_limitObj.difSelectorSiz)} ${getBasicFont()}`;
-		context.fillText(lineNames[j], lineX + 20, 218);
+		fillCanvasText(context, lineNames[j], lineX + 20, 218, { siz: g_limitObj.difSelectorSiz, color: g_rankObj.rankColorAllPerfect });
 	});
 
 	const obj = getScoreBaseData(_scoreId);
@@ -684,9 +682,7 @@ const drawLine = (_context, _y, _lineType, { _fixed, _mark, _a, _b } = {}) => {
 		const textBaseObj = document.getElementById(`lnkDifficulty`);
 		const textColor = window.getComputedStyle(textBaseObj, ``).color;
 		_context.strokeStyle = textColor;
-		_context.font = `${wUnit(12)} ${getBasicFont()}`;
-		_context.fillStyle = textColor;
-		_context.fillText(_y.toFixed(_fixed) + _mark, 2, lineY + 4);
+		fillCanvasText(_context, _y.toFixed(_fixed) + _mark, 2, lineY + 4, { siz: 12, color: textColor });
 	} else {
 		_context.strokeStyle = `#646464`;
 	}
@@ -1100,23 +1096,8 @@ const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
 	const { timeMargin, laneWidth, logicalWidth } = _config;
 	const headerHeight = 15; // ヘッダーの固定高
 
-	const canvas = document.createElement('canvas');
+	const canvas = createCanvas(null, { w: logicalWidth, h: headerHeight, position: null });
 	const ctx = canvas.getContext('2d');
-
-	// 解像度と表示サイズの設定
-	canvas.width = logicalWidth * g_dpr;
-	canvas.height = headerHeight * g_dpr;
-	canvas.style.width = wUnit(logicalWidth);
-	canvas.style.height = wUnit(headerHeight);
-	canvas.style.display = 'block';
-
-	ctx.scale(g_dpr, g_dpr);
-
-	// テキストのスタイル設定
-	ctx.fillStyle = '#999';
-	ctx.font = `10px ${getBasicFont()}`;
-	ctx.textAlign = 'center';
-	ctx.textBaseline = 'middle';
 
 	// 各レーンのキー名を描画
 	for (let j = 0; j < _keyNum; j++) {
@@ -1124,7 +1105,8 @@ const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
 		const x = timeMargin + j * laneWidth + laneWidth / 2;
 		const keyText = g_kCd[g_keyObj[`keyCtrl${_keyCtrlPtn}`][j][0]].split(` `).join(``);
 
-		ctx.fillText(keyText, x, headerHeight / 2 + 2); // 視覚的な中央調整で +2px
+		// 視覚的な中央調整で +2px
+		fillCanvasText(ctx, keyText, x, headerHeight / 2 + 2, { siz: 10, color: '#999', align: C_ALIGN_CENTER, baseline: `middle` });
 	}
 
 	return canvas;
@@ -1231,6 +1213,8 @@ const generateMinimapData = (_params, _isReverse) => {
  * @param {number} _h
  * @param {number} _dpr
  * @param {Function} _drawFunc
+ *   - 描画関数。前後に ctx.save() / ctx.restore() が自動で呼ばれるためctxキャッシュを使った関数
+ *     (setCtxProp, fillCanvasText, fillCanvasRect など) は使用できない
  */
 const distributeDrawing = (_canvases, _y, _h, _dpr, _drawFunc) => {
 	_canvases.forEach(item => {
@@ -1666,23 +1650,14 @@ const createOptionWindow = _sprite => {
 
 		if (_graphUseFlg) {
 			for (let j = 0; j < _graphNum; j++) {
-				const graphObj = document.createElement(`canvas`);
 				const textBaseObj = document.getElementById(`lnkDifficulty`);
 				const bkColor = window.getComputedStyle(textBaseObj, ``).backgroundColor;
-
-				graphObj.id = `graph${_name}${j > 0 ? j + 1 : ``}`;
-				graphObj.width = g_limitObj.graphWidth * g_dpr;
-				graphObj.height = g_limitObj.graphHeight * g_dpr;
-				graphObj.style.width = wUnit(g_limitObj.graphWidth);
-				graphObj.style.height = wUnit(g_limitObj.graphHeight);
-				graphObj.style.left = wUnit(125);
-				graphObj.style.top = wUnit(0);
-				graphObj.style.position = `absolute`;
-				graphObj.style.background = j === 0 ? bkColor : `#ffffff00`;
-				const ctx = graphObj.getContext(`2d`);
-				ctx.scale(g_dpr, g_dpr);
-
-				detailObj.appendChild(graphObj);
+				detailObj.appendChild(
+					createCanvas(`graph${_name}${j > 0 ? j + 1 : ``}`, {
+						x: 125, y: 0, w: g_limitObj.graphWidth, h: g_limitObj.graphHeight,
+						background: j === 0 ? bkColor : `#ffffff00`,
+					})
+				);
 			}
 		}
 
