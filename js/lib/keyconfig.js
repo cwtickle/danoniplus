@@ -1714,7 +1714,7 @@ const keyconfigKeyboardPreview = (() => {
 		 * @param {string} _stateKey `_state`に格納するキー名（canvasBase/canvasMap）
 		 */
 		const addPreviewCanvas = (_id, _stateKey) => {
-			const cvs = createCanvas(_id, { y: 40, w: _state.cvsW, h: _state.cvsH, position: null });
+			const cvs = createCanvas(_id, { y: 40, w: _state.cvsW, h: _state.cvsH });
 			areaDiv.appendChild(cvs);
 			_state[_stateKey] = cvs;
 		};
