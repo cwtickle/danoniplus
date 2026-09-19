@@ -1472,17 +1472,6 @@ const keyconfigKeyboardPreview = (() => {
 	const kr = () => Math.max(2, Math.round(4 * _state.scale));
 
 	/**
-	 * Canvasの共通初期化処理
-	 * @param {HTMLCanvasElement} canvas
-	 * @returns {CanvasRenderingContext2D|null}
-	 */
-	const setupCanvasContext = (canvas) => {
-		if (!canvas) return null;
-		canvas.style.top = wUnit(40);
-		return applyCanvasSize(canvas, _state.cvsW, _state.cvsH);
-	};
-
-	/**
 	 * 円角矩形を描画する
 	 * @param {CanvasRenderingContext2D} ctx 
 	 * @param {number} x 
@@ -1616,8 +1605,7 @@ const keyconfigKeyboardPreview = (() => {
 	 * init 時に呼ぶ。
 	 */
 	const drawBase = () => {
-		const ctx = setupCanvasContext(_state.canvasBase);
-		if (!ctx) return;
+		const ctx = _state.canvasBase.getContext(`2d`);
 
 		ctx.clearRect(0, 0, _state.cvsW, _state.cvsH);
 		setCtxProp(ctx, `fillStyle`, C_COLOR.bgFill);
@@ -1672,8 +1660,7 @@ const keyconfigKeyboardPreview = (() => {
 	 * 同一キーにメインと代替が重なる場合はメインを優先する。
 	 */
 	const drawMap = () => {
-		const ctx = setupCanvasContext(_state.canvasMap);
-		if (!ctx) return;
+		const ctx = _state.canvasMap.getContext(`2d`);
 
 		ctx.clearRect(0, 0, _state.cvsW, _state.cvsH);
 
@@ -1721,15 +1708,18 @@ const keyconfigKeyboardPreview = (() => {
 			pointerEvents: C_DIS_AUTO, background: `#00000080`, display: C_DIS_NONE, overflow: `hidden`,
 		});
 
-		const canvasBase = document.createElement(`canvas`);
-		canvasBase.id = C_CANVAS_BASE_ID;
-		areaDiv.appendChild(canvasBase);
-		_state.canvasBase = canvasBase;
-
-		const canvasMap = document.createElement(`canvas`);
-		canvasMap.id = C_CANVAS_MAP_ID;
-		areaDiv.appendChild(canvasMap);
-		_state.canvasMap = canvasMap;
+		/**
+		 * プレビュー用canvasを生成しareaDivに追加、_stateに登録する
+		 * @param {string} _id
+		 * @param {string} _stateKey `_state`に格納するキー名（canvasBase/canvasMap）
+		 */
+		const addPreviewCanvas = (_id, _stateKey) => {
+			const cvs = createCanvas(_id, { y: 40, w: _state.cvsW, h: _state.cvsH });
+			areaDiv.appendChild(cvs);
+			_state[_stateKey] = cvs;
+		};
+		addPreviewCanvas(C_CANVAS_BASE_ID, `canvasBase`);
+		addPreviewCanvas(C_CANVAS_MAP_ID, `canvasMap`);
 
 		drawBase();
 	};
