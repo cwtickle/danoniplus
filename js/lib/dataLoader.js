@@ -171,7 +171,8 @@ const fetchMusicBlobUrl = (_url, _lblLoading) => new Promise((resolve, reject) =
 			_lblLoading.textContent = g_lblNameObj.pleaseWait;
 			resolve(blobUrl);
 		} else {
-			makeWarningWindow(`${g_msgInfoObj.E_0041.split('{0}').join(getFullPath(_url))}<br>(${request.status} ${request.statusText})`, { backBtnUse: true });
+			makeWarningWindow(`${g_msgInfoObj.E_0041.split('{0}').join(getFullPath(_url))}<br>(${request.status} ${request.statusText})`,
+				{ backBtnUse: true });
 			reject(new Error(`HTTP ${request.status}`));
 		}
 	});
@@ -663,11 +664,14 @@ const applySRandom = (_keyNum, _shuffleGroup, _arrowHeader, _frzHeader) => {
 			const getFreeSpaces = ({ scatterFrame = 0, frzFlg = false, prevFlg = false } = {}) =>
 				_group.filter(_key =>
 					// 通常矢印と重ならない
-					tmpArrowData[_key].find(_other => _arrow >= _other - scatterFrame && _arrow <= _other + scatterFrame) === undefined
+					tmpArrowData[_key].find(_other =>
+						_arrow >= _other - scatterFrame && _arrow <= _other + scatterFrame) === undefined
 					// フリーズと重ならない
-					&& (!frzFlg || tmpFrzData[_key].find(_freeze => _arrow >= _freeze.begin - scatterFrame && _arrow <= _freeze.end + scatterFrame) === undefined)
+					&& (!frzFlg || tmpFrzData[_key].find(_freeze =>
+						_arrow >= _freeze.begin - scatterFrame && _arrow <= _freeze.end + scatterFrame) === undefined)
 					// 直前の矢印と重ならない
-					&& (!prevFlg || tmpArrowData[_key].find(_other => prev2Num === _other) === undefined)
+					&& (!prevFlg || tmpArrowData[_key].find(_other =>
+						prev2Num === _other) === undefined)
 				);
 
 			// 置ける場所を検索
@@ -2266,7 +2270,9 @@ const getArrowSettings = () => {
 
 		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
 		const baseLayer = g_keyObj[`layerGroup${keyCtrlPtn}`]?.[j] || 0;
-		g_workObj.dividePos[j] = baseLayer * 2 + ((posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2;
+		g_workObj.dividePos[j] = baseLayer * 2 + (
+			(posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)
+		) % 2;
 		g_workObj.scrollDir[j] = (posj <= divideCnt ? 1 : -1) * scrollDirOptions[j] * (g_stateObj.reverse === C_FLG_OFF ? 1 : -1);
 
 		// 個別色設定
@@ -2428,7 +2434,9 @@ const getArrowSettings = () => {
 	g_workObj.arrowReturnVal = 0;
 	g_gameOverFlg = false;
 	g_finishFlg = true;
-	g_workObj.nonDefaultSc = g_headerObj.keyRetry !== C_KEY_RETRY || g_headerObj.keyTitleBack !== C_KEY_TITLEBACK || g_headerObj.keyPause !== C_KEY_PAUSE;
+	g_workObj.nonDefaultSc = g_headerObj.keyRetry !== C_KEY_RETRY ||
+		g_headerObj.keyTitleBack !== C_KEY_TITLEBACK ||
+		g_headerObj.keyPause !== C_KEY_PAUSE;
 	if (g_headerObj.scAreaWidth === 0 && (
 		g_headerObj.keyRetry !== g_headerObj.keyRetryDef2 ||
 		g_headerObj.keyTitleBack !== g_headerObj.keyTitleBackDef2 ||
