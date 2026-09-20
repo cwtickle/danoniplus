@@ -784,7 +784,7 @@ const makeDifInfo = _scoreId => {
 	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`)
 		.join(`${makeDedupliArray(g_detailObj.toolDif[_scoreId].push3).length} /cnt:${g_detailObj.toolDif[_scoreId].push3cnt}`);
 	dataArrowInfo.innerHTML =
-		`${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1)}` +
+		`${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1)} ` +
 		`<span style="font-size:${wUnit(g_limitObj.difSelectorSiz)};">` +
 		`(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''})` +
 		`</span>`;
