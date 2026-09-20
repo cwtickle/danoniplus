@@ -295,8 +295,10 @@ const initialControl = async () => {
 			g_editorTmp[keyN].id = orgKeyNum * 100 + baseX + j;
 			g_editorTmp[keyN].num = keyNum;
 			g_editorTmp[keyN].chars = keyCtrlList.map(val => g_kCd[val[0]]);
-			g_editorTmp[keyN].keys = keyCtrlList.map(val => g_kCdN[val[0]]).map(val => replaceStr(val, g_escapeStr.editorKey));
-			g_editorTmp[keyN].alternativeKeys = keyCtrlList.map(val => val[1] === 0 ? `` : g_kCdN[val[1]]).map(val => replaceStr(val, g_escapeStr.editorKey));
+			g_editorTmp[keyN].keys = keyCtrlList.map(val => g_kCdN[val[0]])
+				.map(val => replaceStr(val, g_escapeStr.editorKey));
+			g_editorTmp[keyN].alternativeKeys = keyCtrlList.map(val => val[1] === 0 ? `` : g_kCdN[val[1]])
+				.map(val => replaceStr(val, g_escapeStr.editorKey));
 			g_editorTmp[keyN].noteNames = charaList.map(val => `${val}_data`);
 			g_editorTmp[keyN].freezeNames = charaList.map(val => {
 				let frzName = replaceStr(val, g_escapeStr.frzName);
@@ -496,7 +498,6 @@ const dosConvert = (_dos = ``) => {
 const loadChartFile = async (_scoreId = g_stateObj.scoreId) => {
 
 	const dosInput = document.getElementById(`dos`);
-	const divRoot = document.getElementById(`divRoot`);
 	const queryDos = getQueryParamVal(`dos`) !== null ?
 		`dos/${getQueryParamVal('dos')}.txt` : encodeURI(document.getElementById(`externalDos`)?.value ?? ``);
 
@@ -571,7 +572,8 @@ const resetColorSetting = _scoreId => {
 const resetGaugeSetting = _scoreId => {
 	// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
 	Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId }));
-	Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn => getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
+	Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn =>
+		getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
 };
 
 /**
@@ -2692,7 +2694,8 @@ const keysConvert = (_dosObj, { keyExtraList = _dosObj.keyExtraList?.split(`,`) 
 				_dosObj[`layerTrans${newKey}`] = _dosObj[`layerTrans${newKey}`]?.replaceAll(`,`, `___`);
 				newKeyMultiParam(newKey, `layerTrans`, toSplitArrayStr, {
 					loopFunc: (k, keyheader) => {
-						g_keyObj[`${keyheader}_${k + dfPtnNum}`][0] = g_keyObj[`${keyheader}_${k + dfPtnNum}`]?.[0]?.map(val => val.replaceAll(`___`, `,`));
+						g_keyObj[`${keyheader}_${k + dfPtnNum}`][0] =
+							g_keyObj[`${keyheader}_${k + dfPtnNum}`]?.[0]?.map(val => val.replaceAll(`___`, `,`));
 					},
 				});
 			}

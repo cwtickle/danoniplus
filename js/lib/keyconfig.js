@@ -884,9 +884,10 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 
 		// キーパターンの変更
 		g_keyObj.currentPtn = searchPattern(g_keyObj.currentPtn, _sign, g_headerObj.transKeyUse, _skipFlg);
+		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 
 		// カラーグループ、シャッフルグループの再設定
-		g_keycons.groups.forEach(type => resetGroupList(type, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`));
+		g_keycons.groups.forEach(type => resetGroupList(type, keyCtrlPtn));
 
 		// 曲中ショートカットキーの切り替え
 		setPlayingShortcut();
@@ -897,7 +898,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		// シャッフルグループのデフォルト値からの差異表示（色付け）
 		// 再描画後で無いと色付けできないため、keyConfigInit() 実行後に処理
 		if (g_headerObj.shuffleUse) {
-			changeShuffleConfigColor(`${g_keyObj.currentKey}_${g_keyObj.currentPtn}`, g_keyObj[`shuffle${g_keyObj.currentKey}_${g_keyObj.currentPtn}_${g_keycons.shuffleGroupNum}`]);
+			changeShuffleConfigColor(keyCtrlPtn, g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`]);
 		}
 	};
 
@@ -936,8 +937,8 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 			}
 		}, g_cssObj.button_Back),
 
-		createDivCss2Label(`lblPattern`, `${g_lblNameObj.KeyPattern}: ${g_keyObj.currentPtn === -1 ?
-			'Self' : g_keyObj.currentPtn + 1}${lblTransKey}`, g_lblPosObj.lblPattern),
+		createDivCss2Label(`lblPattern`, `${g_lblNameObj.KeyPattern}: ${g_keyObj.currentPtn === -1
+			? 'Self' : g_keyObj.currentPtn + 1}${lblTransKey}`, g_lblPosObj.lblPattern),
 
 		// パターン変更ボタン描画(右回り)
 		createCss2Button(`btnPtnChangeR`, `>`, () => true, {
@@ -1337,11 +1338,16 @@ const keyconfigKeyboardPreview = (() => {
 	// MAIN_ROWS と行インデックスを揃えて配置する。空行はスキップされる。
 	const NAV_ROWS = [
 		{ keys: [{ code: `PrintScreen`, label: `Print\nScreen` }, { code: `ScrollLock`, label: `Scroll\nLock` }, { code: `Pause` }] },
-		{ keys: [{ code: `Insert` }, { code: `Home` }, { code: `PageUp`, label: `Page\nUp` }] },    // Insert Home PgUp
-		{ keys: [{ code: `Delete` }, { code: `End` }, { code: `PageDown`, label: `Page\nDown` }] },  // Delete End  PgDn
-		{ keys: [] },                                                                               // ASDF行：空
-		{ keys: [{ code: `` }, { code: `ArrowUp` }, { code: `` }] },                                // ↑
-		{ keys: [{ code: `ArrowLeft` }, { code: `ArrowDown` }, { code: `ArrowRight` }] },           // ← ↓ →
+		// Insert Home PgUp
+		{ keys: [{ code: `Insert` }, { code: `Home` }, { code: `PageUp`, label: `Page\nUp` }] },
+		// Delete End  PgDn
+		{ keys: [{ code: `Delete` }, { code: `End` }, { code: `PageDown`, label: `Page\nDown` }] },
+		// ASDF行：空
+		{ keys: [] },
+		// ↑                                                                               
+		{ keys: [{ code: `` }, { code: `ArrowUp` }, { code: `` }] },
+		// ← ↓ →     
+		{ keys: [{ code: `ArrowLeft` }, { code: `ArrowDown` }, { code: `ArrowRight` }] },
 	];
 
 	// テンキー（MAIN_ROWS と行インデックスを揃えて配置。1行目は空行で Fn行に揃える）
@@ -1353,11 +1359,16 @@ const keyconfigKeyboardPreview = (() => {
 	//   [  T0  ][T.] [TEnter]  ← T0 は横2u、TEnter は縦2u
 	const NUM_ROWS = [
 		{ keys: [] },
-		{ keys: [{ code: `NumLock`, label: `Num\nLock` }, { code: `NumpadDivide` }, { code: `NumpadMultiply` }, { code: `NumpadSubtract` }] }, // NumLk T/ T* T-
-		{ keys: [{ code: `Numpad7` }, { code: `Numpad8` }, { code: `Numpad9` }, { code: `NumpadAdd`, h: 2 }] },                               // T7 T8 T9 T+(縦2u)
-		{ keys: [{ code: `Numpad4` }, { code: `Numpad5` }, { code: `Numpad6` }] },                                                             // T4 T5 T6
-		{ keys: [{ code: `Numpad1` }, { code: `Numpad2` }, { code: `Numpad3` }, { code: `NumpadEnter`, h: 2 }] },                             // T1 T2 T3 TEnter(縦2u)
-		{ keys: [{ code: `Numpad0`, w: 2 }, { code: `NumpadDecimal` }] },                                                                     // T0(横2u) T.
+		// NumLk T/ T* T-
+		{ keys: [{ code: `NumLock`, label: `Num\nLock` }, { code: `NumpadDivide` }, { code: `NumpadMultiply` }, { code: `NumpadSubtract` }] },
+		// T7 T8 T9 T+(縦2u)
+		{ keys: [{ code: `Numpad7` }, { code: `Numpad8` }, { code: `Numpad9` }, { code: `NumpadAdd`, h: 2 }] },
+		// T4 T5 T6
+		{ keys: [{ code: `Numpad4` }, { code: `Numpad5` }, { code: `Numpad6` }] },
+		// T1 T2 T3 TEnter(縦2u)
+		{ keys: [{ code: `Numpad1` }, { code: `Numpad2` }, { code: `Numpad3` }, { code: `NumpadEnter`, h: 2 }] },
+		// T0(横2u) T.
+		{ keys: [{ code: `Numpad0`, w: 2 }, { code: `NumpadDecimal` }] },
 	];
 
 	// -------------------------------------------------------------------------
