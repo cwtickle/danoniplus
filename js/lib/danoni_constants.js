@@ -1322,32 +1322,45 @@ const C_LFE_CUSTOM = `Custom`;
 const C_LFE_MAXLIFE = `maxLife`;
 
 /**
- * ゲージ初期設定
+ * 汎用ゲージの定義（g_presetObj.gauge/gaugeCustomと同じBorder/Recovery/Damage/Initに
+ * Variable（回復・ダメージ量が矢印数等で変動:ON／固定:OFF）を加えた5項目のみ）
+ * headerOverridable: 譜面ヘッダー(difData)による上書き対象（Step3）かどうか
+ * deriveRecoveryFrom: difDataしか参照値が無い場合のみ、参照元ゲージの回復量を2倍にして使う
  */
+const g_gaugeDefObj = {
+    Original: { Border: `x`, Recovery: 6, Damage: 40, Init: 25, Variable: C_FLG_OFF, headerOverridable: true },
+    Heavy: { Border: `x`, Recovery: 2, Damage: 50, Init: 50, Variable: C_FLG_OFF },
+    NoRecovery: { Border: `x`, Recovery: 0, Damage: 50, Init: 100, Variable: C_FLG_OFF },
+    SuddenDeath: { Border: `x`, Recovery: 0, Damage: C_LFE_MAXLIFE, Init: 100, Variable: C_FLG_OFF },
+    Practice: { Border: `x`, Recovery: 0, Damage: 0, Init: 50, Variable: C_FLG_OFF },
+    Light: { Border: `x`, Recovery: 12, Damage: 40, Init: 25, Variable: C_FLG_OFF, headerOverridable: true, deriveRecoveryFrom: `Original` },
+
+    Normal: { Border: 70, Recovery: 2, Damage: 7, Init: 25, Variable: C_FLG_ON, headerOverridable: true },
+    Hard: { Border: 0, Recovery: 1, Damage: 50, Init: 100, Variable: C_FLG_ON },
+    Easy: { Border: 70, Recovery: 4, Damage: 7, Init: 25, Variable: C_FLG_ON, headerOverridable: true, deriveRecoveryFrom: `Normal` },
+};
+
+/**
+ * カスタムゲージの選択状態
+ * g_gaugeSelObj[scoreId] = { 名前: 上書きプロパティのみ(例:{Variable}), ... }
+ * キーの並び順がそのままカーソル移動の順序。基本値はg_gaugeDefObjとマージして使う
+ * 'default'キー: g_presetObj.gaugeList由来の全譜面共通デフォルト
+ */
+const g_gaugeSelObj = {};
+
+/** g_presetObj.gaugeCustomをg_gaugeDefObjへ反映。Variable/headerOverridable/deriveRecoveryFromは
+ *  gaugeCustom側に存在しないプロパティなので、Object.assignで自動的に既存値が保持される */
+const applyGaugePresetOverrides = () => {
+    if (g_presetObj.gaugeCustom === undefined) return;
+    Object.entries(g_presetObj.gaugeCustom).forEach(([name, def]) =>
+        Object.assign(g_gaugeDefObj[name] ??= { Variable: C_FLG_OFF }, def));
+};
+
+/** どの名前をどの順で選択肢に出すかだけを持つ。詳細値はg_gaugeDefObjやg_gaugeSelObjを参照 */
 const g_gaugeOptionObj = {
     survival: [`Original`, `Heavy`, `NoRecovery`, `SuddenDeath`, `Practice`, `Light`],
     border: [`Normal`, `Hard`, `SuddenDeath`, `Easy`],
-    custom: [],
-    customDefault: [],
     customFulls: {},
-
-    initSurvival: [25, 50, 100, 100, 50, 25],
-    rcvSurvival: [6, 2, 0, 0, 0, 12],
-    dmgSurvival: [40, 50, 50, C_LFE_MAXLIFE, 0, 40],
-    typeSurvival: [C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
-    varSurvival: [C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
-    clearSurvival: [0, 0, 0, 0, 0, 0],
-
-    initBorder: [25, 100, 100, 25],
-    rcvBorder: [2, 1, 0, 4],
-    dmgBorder: [7, 50, C_LFE_MAXLIFE, 7],
-    typeBorder: [C_LFE_BORDER, C_LFE_BORDER, C_LFE_SURVIVAL, C_LFE_BORDER],
-    varBorder: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_ON],
-    clearBorder: [70, 0, 0, 70],
-
-    varCustom: [],
-    varCustomDefault: [],
-    defaultList: [`survival`, `border`],
     defaultPlusList: [`survival`, `border`, `customDefault`],
 };
 let g_gaugeType;

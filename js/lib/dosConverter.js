@@ -571,7 +571,7 @@ const resetColorSetting = _scoreId => {
  */
 const resetGaugeSetting = _scoreId => {
 	// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
-	Object.assign(g_gaugeOptionObj, resetCustomGauge(g_rootObj, { scoreId: _scoreId }));
+	resetCustomGauge(g_rootObj, { scoreId: _scoreId });
 	Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn =>
 		getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
 };
@@ -1250,14 +1250,14 @@ const headerConvert = _dosObj => {
 
 		difs.forEach(dif => {
 			const difDetails = dif.split(`,`);
-			const lifeData = (_type, _default) =>
-				difDetails[difpos[_type]] || g_presetObj.gauge?.[_type] || _default;
+			const lifeData = (_type) =>
+				difDetails[difpos[_type]] || g_presetObj.gauge?.[_type] || g_gaugeDefObj.Original[_type];
 
 			// ライフ：ノルマ、回復量、ダメージ量、初期値の設定
-			obj.lifeBorders.push(lifeData(`Border`, `x`));
-			obj.lifeRecoverys.push(lifeData(`Recovery`, 6));
-			obj.lifeDamages.push(lifeData(`Damage`, 40));
-			obj.lifeInits.push(lifeData(`Init`, 25));
+			obj.lifeBorders.push(lifeData(`Border`));
+			obj.lifeRecoverys.push(lifeData(`Recovery`));
+			obj.lifeDamages.push(lifeData(`Damage`));
+			obj.lifeInits.push(lifeData(`Init`));
 
 			// キー数
 			const keyLabel = difDetails[difpos.Key] || g_keyObj.initKeyLabel;
@@ -1388,10 +1388,9 @@ const headerConvert = _dosObj => {
 	}
 
 	// ゲージ初期設定（最大ライフ反映）
-	g_gaugeOptionObj.defaultList.forEach(type => {
-		const pos = g_gaugeOptionObj[`dmg${toCapitalize(type)}`].findIndex(val => val === C_LFE_MAXLIFE);
-		g_gaugeOptionObj[`dmg${toCapitalize(type)}`][pos] = obj.maxLifeVal;
-	});
+	Object.values(g_gaugeDefObj)
+		.filter(def => def.Damage === C_LFE_MAXLIFE)
+		.forEach(def => def.Damage = obj.maxLifeVal);
 
 	// フリーズアローのデフォルト色セットの利用有無 (true: 使用, false: 矢印色を優先してセット)
 	obj.defaultFrzColorUse = setBoolVal(_dosObj.defaultFrzColorUse ?? g_presetObj.frzColors, true);
@@ -1430,19 +1429,16 @@ const headerConvert = _dosObj => {
 	addGaugeFulls(g_gaugeOptionObj.border);
 
 	if (g_presetObj.gaugeList !== undefined) {
-		Object.keys(g_presetObj.gaugeList).forEach(key => {
-			g_gaugeOptionObj.customDefault.push(key);
-			g_gaugeOptionObj.varCustomDefault.push(boolToSwitch(g_presetObj.gaugeList[key] === `V`));
-		});
-		g_gaugeOptionObj.custom = g_gaugeOptionObj.customDefault.concat();
-		g_gaugeOptionObj.varCustom = g_gaugeOptionObj.varCustomDefault.concat();
-		addGaugeFulls(g_gaugeOptionObj.customDefault);
+		g_gaugeSelObj.default = {};
+		Object.keys(g_presetObj.gaugeList).forEach(name =>
+			g_gaugeSelObj.default[name] = { Variable: boolToSwitch(g_presetObj.gaugeList[name] === `V`) });
+		addGaugeFulls(Object.keys(g_gaugeSelObj.default));
 	}
 
 	// カスタムゲージ設定、初期色設定（譜面ヘッダー）の譜面別設定
 	Object.assign(obj, resetBaseColorList(obj, _dosObj));
 	for (let j = 0; j < obj.difLabels.length; j++) {
-		Object.assign(g_gaugeOptionObj, resetCustomGauge(_dosObj, { scoreId: j }));
+		resetCustomGauge(_dosObj, { scoreId: j });
 		Object.assign(obj, resetBaseColorList(obj, _dosObj, { scoreId: j }));
 	}
 
@@ -2090,45 +2086,36 @@ const setColorList = (_data, _colorInit, _colorInitLength,
 /**
  * 複合カスタムゲージの定義設定
  * |customGauge=_Original::F::Original,_Normal::V::Normal,Escape::V|
+ * 
+ * g_gaugeSelObj[scoreId]に「名前→上書きプロパティ」を書き込む。
+ * g_gaugeDefObj（全譜面共有の基本定義）は変更しない
  * @param {object} _dosObj 
  * @param {string} [object.scoreId=0]
  * @returns {object} ※Object.assign(obj, resetCustomGauge(...))の形で呼び出しが必要
  */
 const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
 
-	const obj = {};
 	const scoreIdHeader = setScoreIdHeader(scoreId, g_stateObj.scoreLockFlg, false);
 	const dosCustomGauge = _dosObj[`customGauge${scoreIdHeader}`];
-	if (hasVal(dosCustomGauge)) {
-		if (g_gaugeOptionObj.defaultPlusList.includes(dosCustomGauge)) {
-			obj[`custom${scoreId}`] = g_gaugeOptionObj[dosCustomGauge].concat();
-			obj[`varCustom${scoreId}`] = g_gaugeOptionObj[`var${toCapitalize(dosCustomGauge)}`].concat();
-			if (g_gaugeOptionObj.defaultList.includes(dosCustomGauge)) {
-				obj[`defaultGauge${scoreId}`] = dosCustomGauge;
-				obj[`typeCustom${scoreId}`] = g_gaugeOptionObj[`type${toCapitalize(dosCustomGauge)}`].concat();
-			}
-		} else {
-			const customGauges = dosCustomGauge.split(`,`);
+	if (!hasVal(dosCustomGauge)) return;
 
-			obj[`custom${scoreId}`] = [];
-			obj[`varCustom${scoreId}`] = [];
-
-			for (let j = 0; j < customGauges.length; j++) {
-				const customGaugeSets = customGauges[j].split(`::`);
-				obj[`custom${scoreId}`][j] = customGaugeSets[0];
-				obj[`varCustom${scoreId}`][j] = boolToSwitch(customGaugeSets[1] === `V`);
-				if (hasVal(customGaugeSets[2])) {
-					g_lblNameObj[`u_${customGaugeSets[0]}`] = customGaugeSets[2];
-				}
+	if (g_gaugeOptionObj.defaultPlusList.includes(dosCustomGauge)) {
+		// survival/border（名前のみ）／customDefault（g_gaugeSelObj.default、上書き情報あり）
+		// のどちらでも { 名前: 上書き情報 } の形に揃える
+		g_gaugeSelObj[scoreId] = (dosCustomGauge === `customDefault`
+			? { ...g_gaugeSelObj.default }
+			: Object.fromEntries(g_gaugeOptionObj[dosCustomGauge].map(name => [name, {}])));
+	} else {
+		g_gaugeSelObj[scoreId] = {};
+		dosCustomGauge.split(`,`).forEach(gaugeSet => {
+			const [name, variableFlag, dispName] = gaugeSet.split(`::`);
+			g_gaugeSelObj[scoreId][name] = { Variable: boolToSwitch(variableFlag === `V`) };
+			if (hasVal(dispName)) {
+				g_lblNameObj[`u_${name}`] = dispName;
 			}
-			if (scoreId === 0) {
-				obj.custom = obj.custom0.concat();
-				obj.varCustom = obj.varCustom0.concat();
-			}
-			addGaugeFulls(obj[`custom${scoreId}`]);
-		}
+		});
+		addGaugeFulls(Object.keys(g_gaugeSelObj[scoreId]));
 	}
-	return obj;
 };
 
 /**
