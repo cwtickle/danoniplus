@@ -2199,10 +2199,16 @@ const setGauge = (() => {
 
 	let currentGaugeSel = null;
 
-	/** 基本定義(g_gaugeDefObj)と今回の譜面別上書き(currentGaugeSel)をマージして返す */
-	const getGaugeDef = (_name) => (hasVal(g_gaugeDefObj[_name]) ?
-		{ ...g_gaugeDefObj[_name], ...currentGaugeSel?.[_name] } : undefined);
-
+	/**
+	 * 基本定義(g_gaugeDefObj)と譜面別上書き(currentGaugeSel)をマージして返す。
+	 * どちらか一方にしか存在しない名前（基本定義の無い純カスタム名、上書きの無い既存名）も拾えるよう、
+	 * 「どちらかが存在すれば」マージ結果を返す（存在しないプロパティはundefinedのまま）
+	 */
+	const getGaugeDef = (_name) => {
+		const base = g_gaugeDefObj[_name];
+		const override = currentGaugeSel?.[_name];
+		return (hasVal(base) || hasVal(override)) ? { ...base, ...override } : undefined;
+	};
 	const resolveCustomGaugeSel = () => {
 		currentGaugeSel = g_gaugeSelObj[g_stateObj.scoreId] || g_gaugeSelObj[0] || g_gaugeSelObj.default;
 	};
@@ -2219,14 +2225,15 @@ const setGauge = (() => {
 		g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
 
 		setSetting(_scrollNum, `gauge`);
-		g_stateObj.lifeVariable = getGaugeDef(g_stateObj.gauge)?.Variable ?? C_FLG_OFF;
+		g_stateObj.lifeVariable = getGaugeVariable(g_stateObj.gauge);
 	};
 
 	/** 【Step2：基本設定】g_gaugeDefObjのカーソル位置に対応する初期設定を適用 */
 	const applyBaseGaugeSettings = () => {
 		if (g_settings.gaugeNum === 0) return;
 		const def = getGaugeDef(g_stateObj.gauge);
-		if (!hasVal(def)) return;
+		// Borderが無ければ「基本設定としての値」自体が存在しない（Variableのみの上書きなど）
+		if (!hasVal(def?.Border)) return;
 		g_stateObj.lifeMode = (def.Border === `x` ? C_LFE_SURVIVAL : C_LFE_BORDER);
 		g_stateObj.lifeBorder = (def.Border === `x` ? 0 : def.Border);
 		g_stateObj.lifeInit = def.Init;
