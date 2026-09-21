@@ -1429,10 +1429,12 @@ const headerConvert = _dosObj => {
 	addGaugeFulls(g_gaugeOptionObj.border);
 
 	if (g_presetObj.gaugeList !== undefined) {
-		g_gaugeSelObj.default = {};
-		Object.keys(g_presetObj.gaugeList).forEach(name =>
-			g_gaugeSelObj.default[name] = { Variable: boolToSwitch(g_presetObj.gaugeList[name] === `V`) });
-		addGaugeFulls(Object.keys(g_gaugeSelObj.default));
+		g_gaugeSelObj.default = { __order: [] };
+		Object.keys(g_presetObj.gaugeList).forEach(name => {
+			g_gaugeSelObj.default.__order.push(name);
+			g_gaugeSelObj.default[name] = { Variable: boolToSwitch(g_presetObj.gaugeList[name] === `V`) };
+		});
+		addGaugeFulls(g_gaugeSelObj.default.__order);
 	}
 
 	// カスタムゲージ設定、初期色設定（譜面ヘッダー）の譜面別設定
@@ -2088,7 +2090,7 @@ const setColorList = (_data, _colorInit, _colorInitLength,
  * |customGauge=_Original::F::Original,_Normal::V::Normal,Escape::V|
  * 
  * g_gaugeSelObj[scoreId]に「名前→上書きプロパティ」を書き込む。
- * g_gaugeDefObj（全譜面共有の基本定義）は変更しない
+ * g_gaugeSelObj[scoreId].__order（選択順）と、名前ごとの上書き(Variable)を書き込む
  * @param {object} _dosObj 
  * @param {string} [object.scoreId=0]
  * @returns {object} ※Object.assign(obj, resetCustomGauge(...))の形で呼び出しが必要
@@ -2099,23 +2101,27 @@ const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
 	const dosCustomGauge = _dosObj[`customGauge${scoreIdHeader}`];
 	if (!hasVal(dosCustomGauge)) return;
 
-	if (g_gaugeOptionObj.defaultPlusList.includes(dosCustomGauge)) {
-		// survival/border（名前のみ）／customDefault（g_gaugeSelObj.default、上書き情報あり）
-		// のどちらでも { 名前: 上書き情報 } の形に揃える
-		g_gaugeSelObj[scoreId] = (dosCustomGauge === `customDefault`
-			? { ...g_gaugeSelObj.default }
-			: Object.fromEntries(g_gaugeOptionObj[dosCustomGauge].map(name => [name, {}])));
-	} else {
-		g_gaugeSelObj[scoreId] = {};
-		dosCustomGauge.split(`,`).forEach(gaugeSet => {
-			const [name, variableFlag, dispName] = gaugeSet.split(`::`);
-			g_gaugeSelObj[scoreId][name] = { Variable: boolToSwitch(variableFlag === `V`) };
-			if (hasVal(dispName)) {
-				g_lblNameObj[`u_${name}`] = dispName;
-			}
-		});
-		addGaugeFulls(Object.keys(g_gaugeSelObj[scoreId]));
+	if (dosCustomGauge === `customDefault`) {
+		// g_presetObj.gaugeList由来の選択順・上書きをまるごと引き継ぐ
+		g_gaugeSelObj[scoreId] = structuredClone(g_gaugeSelObj.default ?? { __order: [] });
+		return;
 	}
+	if (g_gaugeOptionObj.defaultPlusList.includes(dosCustomGauge)) {
+		// survival/border: 選択順(名前)のみを引き継ぐ。値の上書きは無い
+		g_gaugeSelObj[scoreId] = { __order: g_gaugeOptionObj[dosCustomGauge].concat() };
+		return;
+	}
+	// インライン指定（例: customGauge=Escape::V::にげろ,Normal::F）
+	g_gaugeSelObj[scoreId] = { __order: [] };
+	dosCustomGauge.split(`,`).forEach(gaugeSet => {
+		const [name, variableFlag, dispName] = gaugeSet.split(`::`);
+		g_gaugeSelObj[scoreId].__order.push(name);
+		g_gaugeSelObj[scoreId][name] = { Variable: boolToSwitch(variableFlag === `V`) };
+		if (hasVal(dispName)) {
+			g_lblNameObj[`u_${name}`] = dispName;
+		}
+	});
+	addGaugeFulls(g_gaugeSelObj[scoreId].__order);
 };
 
 /**
@@ -2126,88 +2132,23 @@ const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
  * @param {string} [object.scoreId=0]
  */
 const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
-
-	const obj = {
-		lifeBorders: [],
-		lifeRecoverys: [],
-		lifeDamages: [],
-		lifeInits: []
-	};
-	/** ゲージ設定再作成フラグ */
-	let gaugeCreateFlg = false;
+	if (!hasVal(_dosObj[`gauge${_name}`])) return;
 
 	/** ゲージ設定上書きフラグ */
 	const gaugeUpdateFlg = g_stateObj.scoreLockFlg && scoreId > 0;
+	const gauges = splitLF2(_dosObj[`gauge${_name}`]);
 
-	/**
-	 * ゲージ別個別配列への値格納
-	 * この時点では各種ゲージ設定は文字列のまま。setGauge関数にて数式に変換される
-	 * @param {number} _scoreId 
-	 * @param {string[]} _gaugeDetails
-	 * @returns {boolean}
-	 */
-	const setGaugeDetails = (_scoreId, _gaugeDetails) => {
-
-		obj.lifeBorders[_scoreId] = _gaugeDetails[0] === `x` ? `x` : _gaugeDetails[0];
-		obj.lifeRecoverys[_scoreId] = _gaugeDetails[1];
-		obj.lifeDamages[_scoreId] = _gaugeDetails[2];
-		obj.lifeInits[_scoreId] = _gaugeDetails[3];
-
-		if (gaugeUpdateFlg && hasVal(g_gaugeOptionObj[`gauge${_name}s`])) {
-			// ゲージ上書き時は_gaugeDetails(obj)の値を優先し、デフォルト値で穴埋めする
-			Object.keys(obj).forEach(key => g_gaugeOptionObj[`gauge${_name}s`][key] =
-				fillMissingArrayElem(g_gaugeOptionObj[`gauge${_name}s`][key] || [], obj[key]));
-			return false;
-		}
-		return true;
+	const registerGaugeDetails = (_scoreId, [border, recovery, damage, init]) => {
+		g_gaugeSelObj[_scoreId] ??= {};
+		g_gaugeSelObj[_scoreId][_name] = { ...g_gaugeSelObj[_scoreId][_name], Border: border, Recovery: recovery, Damage: damage, Init: init };
 	};
 
-	/**
-	 * gaugeNormal2, gaugeEasy2などの個別設定があった場合にその値から配列を作成
-	 * @param {number} _scoreId 
-	 * @param {number[]} _defaultGaugeList
-	 * @returns {number[]}
-	 */
-	const getGaugeDetailList = (_scoreId, _defaultGaugeList) => {
-		if (_scoreId > 0) {
-			const idHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, false);
-			const dosId = (idHeader || 0) - 1;
-			const headerName = `gauge${_name}${idHeader}`;
-			if (hasVal(_dosObj[headerName])) {
-				const gauges = splitLF2(_dosObj[headerName]);
-				return (gauges[dosId] || gauges[0])?.split(`,`);
-			}
+	if (gaugeUpdateFlg) {
+		registerGaugeDetails(scoreId, (gauges[scoreId] || gauges[0])?.split(`,`));
+	} else {
+		for (let j = 0; j < _difLength; j++) {
+			registerGaugeDetails(j, getGaugeDetailList(j, (gauges[j] || gauges[0]).split(`,`)));
 		}
-		return _defaultGaugeList;
-	};
-
-	if (hasVal(_dosObj[`gauge${_name}`])) {
-
-		const gauges = splitLF2(_dosObj[`gauge${_name}`]);
-		if (gaugeUpdateFlg) {
-			gaugeCreateFlg = setGaugeDetails(scoreId, (gauges[scoreId] || gauges[0])?.split(`,`));
-		} else {
-			for (let j = 0; j < _difLength; j++) {
-				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, (gauges[j] || gauges[0]).split(`,`)));
-			}
-		}
-
-	} else if (g_presetObj.gaugeCustom?.[_name] !== undefined) {
-
-		const gaugeDetails = [
-			g_presetObj.gaugeCustom[_name].Border, g_presetObj.gaugeCustom[_name].Recovery,
-			g_presetObj.gaugeCustom[_name].Damage, g_presetObj.gaugeCustom[_name].Init,
-		];
-		if (gaugeUpdateFlg) {
-			gaugeCreateFlg = setGaugeDetails(scoreId, gaugeDetails);
-		} else {
-			for (let j = 0; j < _difLength; j++) {
-				gaugeCreateFlg = setGaugeDetails(j, getGaugeDetailList(j, gaugeDetails));
-			}
-		}
-	}
-	if (gaugeCreateFlg) {
-		g_gaugeOptionObj[`gauge${_name}s`] = obj;
 	}
 };
 

@@ -2186,40 +2186,32 @@ const setGauge = (() => {
 		g_stateObj.lifeRcv = getGaugeCalc(_baseObj.lifeRecoverys[g_stateObj.scoreId], g_stateObj.lifeRcv) * _magRcv;
 		g_stateObj.lifeDmg = getGaugeCalc(_baseObj.lifeDamages[g_stateObj.scoreId], g_stateObj.lifeDmg) * _magDmg;
 	};
-	/** 譜面ヘッダー／gaugeXXX個別設定（スコアごとの配列）からのライフ制／ノルマ制切替 */
-	const applyLifeModeSwitch = (_baseObj) => {
-		if (_baseObj.lifeBorders[g_stateObj.scoreId] === `x`) {
-			g_stateObj.lifeBorder = 0;
-			g_stateObj.lifeMode = C_LFE_SURVIVAL;
-		} else {
-			g_stateObj.lifeBorder = getGaugeCalc(_baseObj.lifeBorders[g_stateObj.scoreId], g_stateObj.lifeBorder);
-			g_stateObj.lifeMode = C_LFE_BORDER;
-		}
-	};
 
 	let currentGaugeSel = null;
 
-	/**
-	 * 基本定義(g_gaugeDefObj)と譜面別上書き(currentGaugeSel)をマージして返す。
-	 * どちらか一方にしか存在しない名前（基本定義の無い純カスタム名、上書きの無い既存名）も拾えるよう、
-	 * 「どちらかが存在すれば」マージ結果を返す（存在しないプロパティはundefinedのまま）
-	 */
-	const getGaugeDef = (_name) => {
-		const base = g_gaugeDefObj[_name];
-		const override = currentGaugeSel?.[_name];
-		return (hasVal(base) || hasVal(override)) ? { ...base, ...override } : undefined;
-	};
+	/** 【Step2用】基本定義(g_gaugeDefObj)のみを見る。個別設定(Step4)は別途unconditionalに適用するため混ぜない */
+	const getGaugeDef = (_name) => g_gaugeDefObj[_name];
+
+	/** 【Step1用】Variableは「customGaugeインライン指定」→「基本定義」の優先で取得 */
+	const getGaugeVariable = (_name) => currentGaugeSel?.[_name]?.Variable ?? g_gaugeDefObj[_name]?.Variable ?? C_FLG_OFF;
+
 	const resolveCustomGaugeSel = () => {
 		currentGaugeSel = g_gaugeSelObj[g_stateObj.scoreId] || g_gaugeSelObj[0] || g_gaugeSelObj.default;
 	};
 
 	/** 【Step1】ゲージ種別(g_gaugeType)を確定し、ゲージ配列とカーソル位置を入れ替える */
 	const resolveGaugeType = (_scrollNum) => {
-		applyLifeModeSwitch(g_headerObj);
-		g_gaugeType = (hasVal(currentGaugeSel) ? C_LFE_CUSTOM : g_stateObj.lifeMode);
+		if (g_headerObj.lifeBorders[g_stateObj.scoreId] === `x`) {
+			g_stateObj.lifeBorder = 0;
+			g_stateObj.lifeMode = C_LFE_SURVIVAL;
+		} else {
+			g_stateObj.lifeBorder = getGaugeCalc(g_headerObj.lifeBorders[g_stateObj.scoreId], g_stateObj.lifeBorder);
+			g_stateObj.lifeMode = C_LFE_BORDER;
+		}
+		g_gaugeType = (currentGaugeSel?.__order?.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
 
 		g_settings.gauges = structuredClone(g_gaugeType === C_LFE_CUSTOM
-			? Object.keys(currentGaugeSel)
+			? currentGaugeSel.__order
 			: g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
 		g_settings.gaugeNum = getCurrentNo(g_settings.gauges, g_stateObj.gauge);
 		g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
@@ -2232,8 +2224,7 @@ const setGauge = (() => {
 	const applyBaseGaugeSettings = () => {
 		if (g_settings.gaugeNum === 0) return;
 		const def = getGaugeDef(g_stateObj.gauge);
-		// Borderが無ければ「基本設定としての値」自体が存在しない（Variableのみの上書きなど）
-		if (!hasVal(def?.Border)) return;
+		if (!hasVal(def)) return;
 		g_stateObj.lifeMode = (def.Border === `x` ? C_LFE_SURVIVAL : C_LFE_BORDER);
 		g_stateObj.lifeBorder = (def.Border === `x` ? 0 : def.Border);
 		g_stateObj.lifeInit = def.Init;
@@ -2248,14 +2239,19 @@ const setGauge = (() => {
 		applyLifeCategory(g_headerObj, { _magRcv: hasVal(def.deriveRecoveryFrom) ? 2 : 1 });
 	};
 
-	/** 【Step4：ゲージ個別設定（最優先）】gaugeXXXで明示的に設定された値があれば上書き */
+	/**
+	 * 【Step4：ゲージ個別設定（最優先）】gaugeXXXで明示的に設定された値があれば上書き。
+	 * g_gaugeSelObj[scoreId][name]は既に単一譜面分の値なので、g_headerObj用の
+	 * applyLifeModeSwitch/applyLifeCategory（配列アクセス版）は使わず直接適用する
+	 */
 	const applyIndividualGaugeSettings = () => {
-		const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
-		if (!hasVal(tmpGaugeObj)) return;
-		if (hasVal(tmpGaugeObj.lifeBorders[g_stateObj.scoreId])) {
-			applyLifeModeSwitch(tmpGaugeObj);
-		}
-		applyLifeCategory(tmpGaugeObj);
+		const override = currentGaugeSel?.[g_stateObj.gauge];
+		if (!hasVal(override?.Border)) return;
+		g_stateObj.lifeMode = (override.Border === `x` ? C_LFE_SURVIVAL : C_LFE_BORDER);
+		g_stateObj.lifeBorder = (override.Border === `x` ? 0 : getGaugeCalc(override.Border, g_stateObj.lifeBorder));
+		g_stateObj.lifeInit = getGaugeCalc(override.Init, g_stateObj.lifeInit);
+		g_stateObj.lifeRcv = getGaugeCalc(override.Recovery, g_stateObj.lifeRcv);
+		g_stateObj.lifeDmg = getGaugeCalc(override.Damage, g_stateObj.lifeDmg);
 	};
 
 	return (_scrollNum) => {
