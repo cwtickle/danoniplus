@@ -2187,6 +2187,17 @@ const setGauge = (() => {
 		g_stateObj.lifeDmg = getGaugeCalc(_baseObj.lifeDamages[g_stateObj.scoreId], g_stateObj.lifeDmg) * _magDmg;
 	};
 
+	/** Border値からライフ制／ノルマ制を切り替える */
+	const applyLifeModeSwitch = (_border) => {
+		if (_border === `x`) {
+			g_stateObj.lifeBorder = 0;
+			g_stateObj.lifeMode = C_LFE_SURVIVAL;
+		} else {
+			g_stateObj.lifeBorder = getGaugeCalc(_border, g_stateObj.lifeBorder);
+			g_stateObj.lifeMode = C_LFE_BORDER;
+		}
+	};
+
 	let currentGaugeSel = null;
 
 	/** 【Step2用】基本定義(g_gaugeDefObj)のみを見る。個別設定(Step4)は別途unconditionalに適用するため混ぜない */
@@ -2201,13 +2212,7 @@ const setGauge = (() => {
 
 	/** 【Step1】ゲージ種別(g_gaugeType)を確定し、ゲージ配列とカーソル位置を入れ替える */
 	const resolveGaugeType = (_scrollNum) => {
-		if (g_headerObj.lifeBorders[g_stateObj.scoreId] === `x`) {
-			g_stateObj.lifeBorder = 0;
-			g_stateObj.lifeMode = C_LFE_SURVIVAL;
-		} else {
-			g_stateObj.lifeBorder = getGaugeCalc(g_headerObj.lifeBorders[g_stateObj.scoreId], g_stateObj.lifeBorder);
-			g_stateObj.lifeMode = C_LFE_BORDER;
-		}
+		applyLifeModeSwitch(g_headerObj.lifeBorders[g_stateObj.scoreId]);
 		g_gaugeType = (currentGaugeSel?.__order?.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
 
 		g_settings.gauges = structuredClone(g_gaugeType === C_LFE_CUSTOM
@@ -2246,9 +2251,10 @@ const setGauge = (() => {
 	 */
 	const applyIndividualGaugeSettings = () => {
 		const override = currentGaugeSel?.[g_stateObj.gauge];
-		if (!hasVal(override?.Border)) return;
-		g_stateObj.lifeMode = (override.Border === `x` ? C_LFE_SURVIVAL : C_LFE_BORDER);
-		g_stateObj.lifeBorder = (override.Border === `x` ? 0 : getGaugeCalc(override.Border, g_stateObj.lifeBorder));
+		if (override?.Recovery === undefined) return; // gaugeXXXヘッダー由来の上書きが無い（overrideが無い/Variableのみの場合を含む）
+		if (hasVal(override.Border)) {
+			applyLifeModeSwitch(override.Border);
+		}
 		g_stateObj.lifeInit = getGaugeCalc(override.Init, g_stateObj.lifeInit);
 		g_stateObj.lifeRcv = getGaugeCalc(override.Recovery, g_stateObj.lifeRcv);
 		g_stateObj.lifeDmg = getGaugeCalc(override.Damage, g_stateObj.lifeDmg);

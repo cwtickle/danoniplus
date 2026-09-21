@@ -2139,7 +2139,7 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 	const gauges = splitLF2(_dosObj[`gauge${_name}`]);
 
 	const registerGaugeDetails = (_scoreId, [border, recovery, damage, init]) => {
-		g_gaugeSelObj[_scoreId] ??= {};
+		g_gaugeSelObj[_scoreId] ??= structuredClone(g_gaugeSelObj.default ?? { __order: [] });
 		g_gaugeSelObj[_scoreId][_name] = { ...g_gaugeSelObj[_scoreId][_name], Border: border, Recovery: recovery, Damage: damage, Init: init };
 	};
 
