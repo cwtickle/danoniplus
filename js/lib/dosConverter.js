@@ -2133,13 +2133,15 @@ const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
  * @param {string} [object.scoreId=0]
  */
 const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
-	if (!hasVal(_dosObj[`gauge${_name}`])) return;
 
 	/** ゲージ設定上書きフラグ */
 	const gaugeUpdateFlg = g_stateObj.scoreLockFlg && scoreId > 0;
-	const gauges = splitLF2(_dosObj[`gauge${_name}`]);
+	const gauges = hasVal(_dosObj[`gauge${_name}`]) ? splitLF2(_dosObj[`gauge${_name}`]) : [];
 
-	const registerGaugeDetails = (_scoreId, [border, recovery, damage, init]) => {
+	const registerGaugeDetails = (_scoreId) => {
+		const gaugeDetails = getGaugeDetailList(_scoreId);
+		if (!hasVal(gaugeDetails)) return; // baseも譜面別ヘッダーもどちらも無ければ何もしない
+		const [border, recovery, damage, init] = gaugeDetails;
 		g_gaugeSelObj[_scoreId] ??= structuredClone(g_gaugeSelObj.default ?? { __order: [] });
 		g_gaugeSelObj[_scoreId][_name] = { ...g_gaugeSelObj[_scoreId][_name], Border: border, Recovery: recovery, Damage: damage, Init: init };
 	};
@@ -2164,10 +2166,10 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 	};
 
 	if (gaugeUpdateFlg) {
-		registerGaugeDetails(scoreId, (gauges[scoreId] || gauges[0])?.split(`,`));
+		registerGaugeDetails(scoreId);
 	} else {
 		for (let j = 0; j < _difLength; j++) {
-			registerGaugeDetails(j, getGaugeDetailList(j, (gauges[j] || gauges[0]).split(`,`)));
+			registerGaugeDetails(j);
 		}
 	}
 };
