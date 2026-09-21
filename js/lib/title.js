@@ -1235,11 +1235,11 @@ const preconditionInit = () => {
 		const w = g_btnWidth(1 / (numOfPrecs / 2 + 1));
 		const target = g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j];
 		const siz = getFontSize2(target, w, { maxSiz: 12 });
-		divRoot.appendChild(createCss2Button(`btnPrecond${j}`, g_settings.preconditions[j], evt => {
+		divRoot.appendChild(createCss2Button(`btnPrecond${j}`, target || ``, evt => {
 			for (let k = 0; k < Math.min(g_settings.preconditions.length, numOfPrecs); k++) {
 				document.getElementById(`btnPrecond${k}`).classList.replace(g_cssObj.button_Reset, g_cssObj.button_Default);
 			}
-			lblPrecondView.innerHTML = viewKeyStorage(target);
+			lblPrecondView.innerHTML = viewKeyStorage(g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j]);
 			lblPrecondView.scrollTop = 0;
 			g_settings.preconditionNumSub = j;
 			evt.target.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
