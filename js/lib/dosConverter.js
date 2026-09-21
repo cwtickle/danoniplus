@@ -2097,7 +2097,8 @@ const setColorList = (_data, _colorInit, _colorInitLength,
  */
 const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
 
-	const scoreIdHeader = setScoreIdHeader(scoreId, g_stateObj.scoreLockFlg, false);
+	const scoreIdHeader = (scoreId === 0 && hasVal(_dosObj[`customGauge1`]))
+		? 1 : setScoreIdHeader(scoreId, g_stateObj.scoreLockFlg, false);
 	const dosCustomGauge = _dosObj[`customGauge${scoreIdHeader}`];
 	if (!hasVal(dosCustomGauge)) return;
 
@@ -2111,7 +2112,7 @@ const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
 		g_gaugeSelObj[scoreId] = { __order: g_gaugeOptionObj[dosCustomGauge].concat() };
 		return;
 	}
-	// インライン指定（例: customGauge=Escape::V::にげろ,Normal::F）
+	// インライン指定（例: customGauge=Escape::V::エスケープ,Normal::F）
 	g_gaugeSelObj[scoreId] = { __order: [] };
 	dosCustomGauge.split(`,`).forEach(gaugeSet => {
 		const [name, variableFlag, dispName] = gaugeSet.split(`::`);
@@ -2149,17 +2150,17 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 	 * @param {number[]} _defaultGaugeList
 	 * @returns {number[]}
 	 */
-	const getGaugeDetailList = (_scoreId, _defaultGaugeList) => {
-		if (_scoreId > 0) {
-			const idHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, false);
+	const getGaugeDetailList = (_scoreId) => {
+		const idHeader = (_scoreId === 0) ? 1 : setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, false);
+		if (hasVal(idHeader)) {
 			const dosId = (idHeader || 0) - 1;
 			const headerName = `gauge${_name}${idHeader}`;
 			if (hasVal(_dosObj[headerName])) {
-				const gauges = splitLF2(_dosObj[headerName]);
-				return (gauges[dosId] || gauges[0])?.split(`,`);
+				const detailGauges = splitLF2(_dosObj[headerName]);
+				return (detailGauges[dosId] || detailGauges[0])?.split(`,`);
 			}
 		}
-		return _defaultGaugeList;
+		return (gauges[_scoreId] || gauges[0])?.split(`,`);
 	};
 
 	if (gaugeUpdateFlg) {
