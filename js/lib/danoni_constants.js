@@ -1341,10 +1341,30 @@ const g_gaugeDefObj = {
 };
 
 /**
- * カスタムゲージの選択状態
- * g_gaugeSelObj[scoreId] = { 名前: 上書きプロパティのみ(例:{Variable}), ... }
- * キーの並び順がそのままカーソル移動の順序。基本値はg_gaugeDefObjとマージして使う
- * 'default'キー: g_presetObj.gaugeList由来の全譜面共通デフォルト
+ * カスタムゲージの選択状態・個別上書き値
+ * - g_gaugeSelObj[scoreId] = {
+ *   __order: [名前, ...],         // customGauge指定時のみ存在。並び順がそのままカーソル移動の順序
+ *   名前: { 上書きプロパティ },    // customGaugeのインライン指定なら{Variable}のみ、
+ *                                  // gaugeXXXヘッダー由来なら{Border,Recovery,Damage,Init}を含む
+ * }
+ * - 'default'キー：g_presetObj.gaugeList由来の、譜面指定が無い場合の共通デフォルト（同じ形）
+ *   上書きプロパティは常にg_gaugeDefObj[名前]とマージして使う（Border等が無ければg_gaugeDefObjの値を使う）
+ *
+ * - 例：
+ * g_gaugeSelObj = {
+ *   default: { 
+ *     __order: [`Original`, `Normal`],
+ *     Original: { Variable: C_FLG_OFF },
+ *   },
+ *   0: {
+ *     __order: [],  // カスタムゲージ未定義 (difDataの定義もしくはデフォルト値を使用)
+ *   },
+ *   1: {
+ *     __order: [`Escape`, `Normal`],
+ *     Escape: { Variable: C_FLG_ON,  Border: 0,  Recovery: 1, Damage: 100, Init: 100 }, // |customGauge2=Escape::V|gaugeEscape2=0,1,100,100|
+ *     Normal: { Variable: C_FLG_OFF, Border: 75, Recovery: 3, Damage: 7, Init: 25 },    // |customGauge2=Normal::F|gaugeNormal2=75,3,7,25|
+ *   },
+ * };
  */
 const g_gaugeSelObj = {};
 
@@ -1519,7 +1539,7 @@ const g_settings = {
     settingWindowNum: 0,
 
     preconditions: [`g_rootObj`, `g_headerObj`, `g_keyObj`, `g_scoreObj`, `g_workObj`,
-        `g_detailObj`, `g_stateObj`, `g_attrObj`, `g_editorTmp`, `g_editorTmp2`],
+        `g_detailObj`, `g_stateObj`, `g_attrObj`, `g_gaugeDefObj`, `g_gaugeSelObj`, `g_editorTmp`, `g_editorTmp2`],
     preconditionNum: 0,
     preconditionNumSub: 0,
 };
@@ -5315,6 +5335,8 @@ const g_root = {
     get g_imgObj() { return g_imgObj },
     get g_judgObj() { return g_judgObj },
     get g_judgRanges() { return g_judgRanges },
+    get g_gaugeDefObj() { return g_gaugeDefObj },
+    get g_gaugeSelObj() { return g_gaugeSelObj },
 };
 const getPathVal = _path => _path.split(`.`).reduce((o, k) => o?.[k], g_root);
 const setPathVal = (_path, _value) => {

@@ -1219,11 +1219,12 @@ const preconditionInit = () => {
 		g_settings.preconditionNum = nextPos(g_settings.preconditionNum, 1, Math.round(g_settings.preconditions.length / numOfPrecs) + 1);
 		for (let j = 0; j < Math.min(g_settings.preconditions.length, numOfPrecs); j++) {
 			if (g_settings.preconditionNum * numOfPrecs + j < g_settings.preconditions.length) {
-				document.getElementById(`btnPrecond${j}`).innerHTML =
-					g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j];
-				document.getElementById(`btnPrecond${j}`).style.visibility = `visible`;
+				const objName = g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j];
+				document.getElementById(`btnPrecond${j}`).innerHTML = objName;
+				$id(`btnPrecond${j}`).visibility = `visible`;
+				$id(`btnPrecond${j}`).fontSize = wUnit(getFontSize2(objName, parseFloat($id(`btnPrecond${j}`).width), { maxSiz: 12 }));
 			} else {
-				document.getElementById(`btnPrecond${j}`).style.visibility = `hidden`;
+				$id(`btnPrecond${j}`).visibility = `hidden`;
 			}
 		}
 		btnPrecond0.click();
@@ -1231,17 +1232,20 @@ const preconditionInit = () => {
 
 	// オブジェクト表示ボタンの作成
 	for (let j = 0; j < Math.min(g_settings.preconditions.length, numOfPrecs); j++) {
+		const w = g_btnWidth(1 / (numOfPrecs / 2 + 1));
+		const target = g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j];
+		const siz = getFontSize2(target, w, { maxSiz: 12 });
 		divRoot.appendChild(createCss2Button(`btnPrecond${j}`, g_settings.preconditions[j], evt => {
 			for (let k = 0; k < Math.min(g_settings.preconditions.length, numOfPrecs); k++) {
 				document.getElementById(`btnPrecond${k}`).classList.replace(g_cssObj.button_Reset, g_cssObj.button_Default);
 			}
-			lblPrecondView.innerHTML = viewKeyStorage(g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j]);
+			lblPrecondView.innerHTML = viewKeyStorage(target);
 			lblPrecondView.scrollTop = 0;
 			g_settings.preconditionNumSub = j;
 			evt.target.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
 		}, {
 			x: g_btnX() + g_btnWidth((j % (numOfPrecs / 2)) / (numOfPrecs / 2 + 1)),
-			y: 70 + Number(j >= numOfPrecs / 2) * 20, w: g_btnWidth(1 / (numOfPrecs / 2 + 1)), h: 20, siz: 12,
+			y: 70 + Number(j >= numOfPrecs / 2) * 20, w, h: 20, siz,
 		}, g_cssObj.button_Default));
 	}
 	btnPrecond0.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);

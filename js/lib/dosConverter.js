@@ -2093,7 +2093,7 @@ const setColorList = (_data, _colorInit, _colorInitLength,
  * g_gaugeSelObj[scoreId].__order（選択順）と、名前ごとの上書き(Variable)を書き込む
  * @param {object} _dosObj 
  * @param {string} [object.scoreId=0]
- * @returns {object} ※Object.assign(obj, resetCustomGauge(...))の形で呼び出しが必要
+ * @returns {void} g_gaugeSelObj[scoreId]を直接更新する
  */
 const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
 
