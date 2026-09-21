@@ -2143,6 +2143,25 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 		g_gaugeSelObj[_scoreId][_name] = { ...g_gaugeSelObj[_scoreId][_name], Border: border, Recovery: recovery, Damage: damage, Init: init };
 	};
 
+	/**
+	 * gaugeNormal2, gaugeEasy2などの個別設定があった場合にその値から配列を作成
+	 * @param {number} _scoreId 
+	 * @param {number[]} _defaultGaugeList
+	 * @returns {number[]}
+	 */
+	const getGaugeDetailList = (_scoreId, _defaultGaugeList) => {
+		if (_scoreId > 0) {
+			const idHeader = setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, false);
+			const dosId = (idHeader || 0) - 1;
+			const headerName = `gauge${_name}${idHeader}`;
+			if (hasVal(_dosObj[headerName])) {
+				const gauges = splitLF2(_dosObj[headerName]);
+				return (gauges[dosId] || gauges[0])?.split(`,`);
+			}
+		}
+		return _defaultGaugeList;
+	};
+
 	if (gaugeUpdateFlg) {
 		registerGaugeDetails(scoreId, (gauges[scoreId] || gauges[0])?.split(`,`));
 	} else {
