@@ -1248,7 +1248,7 @@ const preconditionInit = () => {
 			y: 70 + Number(j >= numOfPrecs / 2) * 20, w, h: 20, siz,
 		}, g_cssObj.button_Default));
 	}
-	btnPrecond0.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
+	btnPrecond0.click();
 
 	// 次のオブジェクト表示群の表示
 	divRoot.appendChild(createCss2Button(`btnPrecondNext`, `>`, () => switchPreconditions(), {

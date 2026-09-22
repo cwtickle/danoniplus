@@ -2204,13 +2204,13 @@ const restoreLegacyGaugeReference = () => {
 const applyLegacyGaugeOverride = (_name) => {
 	const legacyObj = g_gaugeOptionObj[`gauge${_name}s`];
 	if (!hasVal(legacyObj)) return;
-	legacyObj.lifeBorders.forEach((border, scoreId) => {
-		if (!hasVal(border)) return;
+	legacyObj.lifeRecoverys.forEach((recovery, scoreId) => {
+		if (!hasVal(recovery)) return;
 		g_gaugeSelObj[scoreId] ??= structuredClone(g_gaugeSelObj.default ?? { __order: [] });
 		g_gaugeSelObj[scoreId][_name] = {
 			...g_gaugeSelObj[scoreId][_name],
-			Border: border,
-			Recovery: legacyObj.lifeRecoverys[scoreId],
+			Border: legacyObj.lifeBorders[scoreId],
+			Recovery: recovery,
 			Damage: legacyObj.lifeDamages[scoreId],
 			Init: legacyObj.lifeInits[scoreId],
 		};
