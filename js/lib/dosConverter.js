@@ -2120,6 +2120,7 @@ const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
 		if (dosCustomGauge !== `customDefault`) {
 			g_gaugeSelObj[scoreId].__order = g_gaugeOptionObj[dosCustomGauge].concat();
 		}
+		return;
 	}
 	// インライン指定（例: customGauge=Escape::V::エスケープ,Normal::F）
 	g_gaugeSelObj[scoreId].__order = [];
