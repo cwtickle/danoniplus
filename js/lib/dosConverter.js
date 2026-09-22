@@ -228,7 +228,7 @@ const initialControl = async () => {
 		// 初期色設定（譜面ヘッダー）の初期設定
 		Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj));
 
-		// 非分割時は resetGaugeSetting が全難易度を一括構築するため、初回のみで十分
+		// 非分割時は getGaugeSetting が全難易度を一括構築するため、初回のみで十分
 		const loopCount = g_stateObj.dosDivideFlg ? g_headerObj.keyLabels.length : 1;
 
 		for (let j = 0; j < g_headerObj.difLabels.length; j++) {
@@ -588,40 +588,6 @@ const loadChartFile = async (_scoreId = g_stateObj.scoreId) => {
 };
 
 /**
- * 譜面をファイルで分割している場合に初期色を追加取得
- * @param {string} _scoreId 
- */
-const resetColorSetting = _scoreId => {
-	// 初期矢印・フリーズアロー色の再定義
-	if (g_stateObj.scoreLockFlg) {
-		Object.assign(g_rootObj, copySetColor(g_rootObj, _scoreId));
-
-		// 分割先のファイルで初期色が未定義の場合はデフォルト値を適用
-		[``, `Shadow`].forEach(pattern =>
-			[`set`, `frz`].forEach(arrow => {
-				// frzShadowColorStrのみ、空で構成された初期配列があるためその条件を追加して除外条件とする
-				if (!hasVal(g_rootObj[`${arrow}${pattern}Color${_scoreId + 1}`])
-					&& g_headerObj[`${arrow}${pattern}ColorStr`]?.flat()?.some(val => hasVal(val))) {
-					g_rootObj[`${arrow}${pattern}Color`] = g_headerObj[`${arrow}${pattern}ColorStr`].join(`,`);
-				}
-			})
-		);
-	}
-	Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: _scoreId, scoreLockFlg: false }));
-};
-
-/**
- * 譜面をファイルで分割している場合にゲージ情報を追加取得
- * @param {string} _scoreId 
- */
-const resetGaugeSetting = _scoreId => {
-	// ライフ設定のカスタム部分再取得（譜面ヘッダー加味）
-	resetCustomGauge(g_rootObj, { scoreId: _scoreId });
-	Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn =>
-		getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: _scoreId }));
-};
-
-/**
  * 譜面番号固定かつ譜面ファイル分割時に初期色情報を他譜面へコピー
  * @param {object} _baseObj 
  * @param {number} _scoreId
@@ -670,15 +636,6 @@ const getFullMusicUrl = (_musicUrl = ``) => {
 	}
 	const [musicFile, musicPath] = getFilePath(baseMusicUrl, baseDir);
 	return `${musicPath}${musicFile}`;
-};
-
-/**
- * 譜面ファイル読込後処理（譜面詳細情報取得用）
- * @param {number} _scoreId 
- */
-const getScoreDetailData = _scoreId => {
-	const keyCtrlPtn = `${g_headerObj.keyLabels[_scoreId]}_0`;
-	storeBaseData(_scoreId, scoreConvert(g_rootObj, _scoreId, 0, ``, keyCtrlPtn, true), keyCtrlPtn);
 };
 
 /**

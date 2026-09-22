@@ -2227,7 +2227,6 @@ const setGauge = (() => {
 
 	/** 【Step2：基本設定】g_gaugeDefObjのカーソル位置に対応する初期設定を適用 */
 	const applyBaseGaugeSettings = () => {
-		if (g_settings.gaugeNum === 0) return;
 		const def = g_gaugeDefObj[g_stateObj.gauge];
 		if (!hasVal(def)) return;
 		g_stateObj.lifeMode = (def.Border === `x` ? C_LFE_SURVIVAL : C_LFE_BORDER);
