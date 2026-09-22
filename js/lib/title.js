@@ -1214,41 +1214,50 @@ const preconditionInit = () => {
 	// 1ページあたりに表示するオブジェクト数
 	const numOfPrecs = Math.round((g_btnWidth(1) / 500) / 2 * 10) * 2;
 
-	// ボタン名切り替え
-	const switchPreconditions = () => {
-		g_settings.preconditionNum = nextPos(g_settings.preconditionNum, 1, Math.round(g_settings.preconditions.length / numOfPrecs) + 1);
-		for (let j = 0; j < Math.min(g_settings.preconditions.length, numOfPrecs); j++) {
-			if (g_settings.preconditionNum * numOfPrecs + j < g_settings.preconditions.length) {
-				const objName = g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j];
-				document.getElementById(`btnPrecond${j}`).innerHTML = objName;
-				$id(`btnPrecond${j}`).visibility = `visible`;
-				$id(`btnPrecond${j}`).fontSize = wUnit(getFontSize2(objName, parseFloat($id(`btnPrecond${j}`).width), { maxSiz: 12 }));
-			} else {
-				$id(`btnPrecond${j}`).visibility = `hidden`;
-			}
+	// 現在のページのオブジェクト表示ボタンを描画
+	const renderPreconditions = () => {
+		const start = g_settings.preconditionNum * numOfPrecs;
+		const targets = g_settings.preconditions.slice(start, start + numOfPrecs);
+		const w = g_btnWidth(1 / (numOfPrecs / 2 + 1));
+
+		for (let j = 0; j < numOfPrecs; j++) {
+			document.getElementById(`btnPrecond${j}`)?.remove();
 		}
-		btnPrecond0.click();
+
+		targets.forEach((target, j) => {
+			const siz = getFontSize2(target, w, { maxSiz: 12 });
+			divRoot.appendChild(createCss2Button(`btnPrecond${j}`, target, evt => {
+				for (let k = 0; k < targets.length; k++) {
+					document.getElementById(`btnPrecond${k}`).classList.replace(
+						g_cssObj.button_Reset, g_cssObj.button_Default,
+					);
+				}
+				lblPrecondView.innerHTML = viewKeyStorage(target);
+				lblPrecondView.scrollTop = 0;
+				g_settings.preconditionNumSub = j;
+				evt.target.classList.replace(
+					g_cssObj.button_Default, g_cssObj.button_Reset,
+				);
+			}, {
+				x: g_btnX() + g_btnWidth((j % (numOfPrecs / 2)) / (numOfPrecs / 2 + 1)),
+				y: 70 + Number(j >= numOfPrecs / 2) * 20, w, h: 20, siz,
+			}, g_cssObj.button_Default));
+		});
+
+		if (targets.length > 0) {
+			btnPrecond0.click();
+		}
+	};
+
+	// 次のページへ移動
+	const switchPreconditions = () => {
+		const numOfPages = Math.max(1, Math.ceil(g_settings.preconditions.length / numOfPrecs));
+		g_settings.preconditionNum = nextPos(g_settings.preconditionNum, 1, numOfPages);
+		renderPreconditions();
 	};
 
 	// オブジェクト表示ボタンの作成
-	for (let j = 0; j < Math.min(g_settings.preconditions.length, numOfPrecs); j++) {
-		const w = g_btnWidth(1 / (numOfPrecs / 2 + 1));
-		const target = g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j];
-		const siz = getFontSize2(target, w, { maxSiz: 12 });
-		divRoot.appendChild(createCss2Button(`btnPrecond${j}`, target || ``, evt => {
-			for (let k = 0; k < Math.min(g_settings.preconditions.length, numOfPrecs); k++) {
-				document.getElementById(`btnPrecond${k}`).classList.replace(g_cssObj.button_Reset, g_cssObj.button_Default);
-			}
-			lblPrecondView.innerHTML = viewKeyStorage(g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j]);
-			lblPrecondView.scrollTop = 0;
-			g_settings.preconditionNumSub = j;
-			evt.target.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
-		}, {
-			x: g_btnX() + g_btnWidth((j % (numOfPrecs / 2)) / (numOfPrecs / 2 + 1)),
-			y: 70 + Number(j >= numOfPrecs / 2) * 20, w, h: 20, siz,
-		}, g_cssObj.button_Default));
-	}
-	btnPrecond0.click();
+	renderPreconditions();
 
 	// 次のオブジェクト表示群の表示
 	divRoot.appendChild(createCss2Button(`btnPrecondNext`, `>`, () => switchPreconditions(), {
