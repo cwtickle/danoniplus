@@ -1329,9 +1329,9 @@ const applyTransKeySelfPattern = () => {
  * - [キーコン]->[初期化]->[名称設定]の順に配置する。
  *   初期化処理にてキー数関連の設定を行っているため、この順序で無いとデータが正しく格納されない
  * 
- * @param {boolean} _initFlg
+ * @param {boolean} _chartChangeFlg
  */
-const setDifficulty = (_initFlg) => {
+const setDifficulty = (_chartChangeFlg) => {
 	const scoreId = g_stateObj.scoreId;
 
 	// ---------------------------------------------------
@@ -1351,7 +1351,7 @@ const setDifficulty = (_initFlg) => {
 	// 保存した設定の再読込条件（設定画面切り替え時はスキップ）
 	// ローカルストレージで保存した設定を呼び出し
 	let keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	if ((g_canLoadDifInfoFlg && (isNotSameKey && g_stateObj.dataSaveFlg)) || _initFlg) {
+	if ((g_canLoadDifInfoFlg && (isNotSameKey && g_stateObj.dataSaveFlg)) || _chartChangeFlg) {
 
 		if (isNotSameKey && g_keyObj.prevKey !== `Dummy`) {
 			// キーパターン初期化
@@ -1422,10 +1422,10 @@ const setDifficulty = (_initFlg) => {
 	);
 
 	// ゲージ設定及びカーソル位置調整
-	setGauge(0, true);
+	setGauge(0, !_chartChangeFlg);
 
 	// 速度、スクロール、アシスト設定のカーソル位置調整
-	if (_initFlg) {
+	if (_chartChangeFlg) {
 		g_stateObj.speed = g_headerObj.initSpeeds[scoreId];
 		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
 	}
@@ -1527,7 +1527,7 @@ const setDifficulty = (_initFlg) => {
 	lblMusicInfo.style.fontSize = wUnit(getFontSize2(lblMusicInfo.textContent, g_btnWidth(3 / 4), { maxSiz: 12 }));
 
 	// ユーザカスタムイベント(初期)
-	safeExecuteCustomHooks(`g_customJsObj.difficulty`, g_customJsObj.difficulty, _initFlg, g_canLoadDifInfoFlg);
+	safeExecuteCustomHooks(`g_customJsObj.difficulty`, g_customJsObj.difficulty, _chartChangeFlg, g_canLoadDifInfoFlg);
 	resolveKeyFamily();
 
 	// 設定サマリー表示の更新
@@ -2204,15 +2204,19 @@ const setGauge = (() => {
 		currentGaugeSel = g_gaugeSelObj[g_stateObj.scoreId] || g_gaugeSelObj[0] || g_gaugeSelObj.default;
 	};
 
-	/** 【Step1】ゲージ種別(g_gaugeType)を確定し、ゲージ配列とカーソル位置を入れ替える */
-	const resolveGaugeType = (_scrollNum) => {
+	/**
+	 * 【Step1】ゲージ種別(g_gaugeType)を確定し、ゲージ配列とカーソル位置を入れ替える
+	 * @param {number} _scrollNum
+	 * @param {boolean} _gaugeInitFlg true時は前回選択していたゲージ名を引き継がず、配列の先頭を強制的に使う
+	 */
+	const resolveGaugeType = (_scrollNum, _gaugeInitFlg) => {
 		applyLifeModeSwitch(g_headerObj.lifeBorders[g_stateObj.scoreId]);
 		g_gaugeType = (currentGaugeSel?.__order?.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
 
 		g_settings.gauges = structuredClone(g_gaugeType === C_LFE_CUSTOM
 			? currentGaugeSel.__order
 			: g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
-		g_settings.gaugeNum = getCurrentNo(g_settings.gauges, g_stateObj.gauge);
+		g_settings.gaugeNum = (_gaugeInitFlg ? 0 : getCurrentNo(g_settings.gauges, g_stateObj.gauge));
 		g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
 
 		setSetting(_scrollNum, `gauge`);
@@ -2266,9 +2270,9 @@ const setGauge = (() => {
 		g_stateObj.lifeDmg = getGaugeCalc(override.Damage, g_stateObj.lifeDmg);
 	};
 
-	return (_scrollNum) => {
+	return (_scrollNum, _gaugeInitFlg = false) => {
 		resolveCustomGaugeSel();
-		resolveGaugeType(_scrollNum);
+		resolveGaugeType(_scrollNum, _gaugeInitFlg);
 		applyBaseGaugeSettings();
 		applyHeaderGaugeSettings();
 		applyIndividualGaugeSettings();
