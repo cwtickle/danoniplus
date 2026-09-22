@@ -206,20 +206,65 @@ const initialControl = async () => {
 		g_stateObj.dosDivideFlg = setBoolVal(document.getElementById(`externalDosDivide`)?.value ?? getQueryParamVal(`dosDivide`));
 		g_stateObj.scoreLockFlg = setBoolVal(document.getElementById(`externalDosLock`)?.value ?? getQueryParamVal(`dosLock`));
 
+		// カスタムゲージ設定（共通設定ファイル）
+		addGaugeFulls(g_gaugeOptionObj.survival);
+		addGaugeFulls(g_gaugeOptionObj.border);
+
+		if (g_presetObj.gaugeCustom !== undefined) {
+			g_gaugeSelObj.default ??= { __order: [] };
+			Object.entries(g_presetObj.gaugeCustom).forEach(([name, def]) =>
+				g_gaugeSelObj.default[name] = { ...g_gaugeSelObj.default[name], ...def });
+		}
+		if (g_presetObj.gaugeList !== undefined) {
+			g_gaugeSelObj.default ??= { __order: [] };
+			g_gaugeSelObj.default.__order ??= [];
+			Object.keys(g_presetObj.gaugeList).forEach(name => {
+				g_gaugeSelObj.default.__order.push(name);
+				g_gaugeSelObj.default[name] = { ...g_gaugeSelObj.default[name], Variable: boolToSwitch(g_presetObj.gaugeList[name] === `V`) };
+			});
+			addGaugeFulls(g_gaugeSelObj.default.__order);
+		}
+
+		// 初期色設定（譜面ヘッダー）の初期設定
+		Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj));
+
 		// 非分割時は resetGaugeSetting が全難易度を一括構築するため、初回のみで十分
 		const loopCount = g_stateObj.dosDivideFlg ? g_headerObj.keyLabels.length : 1;
 
-		for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
+		for (let j = 0; j < g_headerObj.difLabels.length; j++) {
 
 			// 譜面ファイルが分割されている場合、譜面詳細情報取得のために譜面をロード
 			if (g_stateObj.dosDivideFlg) {
 				await loadChartFile(j);
-				resetColorSetting(j);
+
+				if (g_stateObj.scoreLockFlg) {
+					Object.assign(g_rootObj, copySetColor(g_rootObj, j));
+
+					// 分割先のファイルで初期色が未定義の場合はデフォルト値を適用
+					[``, `Shadow`].forEach(pattern =>
+						[`set`, `frz`].forEach(arrow => {
+							// frzShadowColorStrのみ、空で構成された初期配列があるためその条件を追加して除外条件とする
+							if (!hasVal(g_rootObj[`${arrow}${pattern}Color${j + 1}`])
+								&& g_headerObj[`${arrow}${pattern}ColorStr`]?.flat()?.some(val => hasVal(val))) {
+								g_rootObj[`${arrow}${pattern}Color`] = g_headerObj[`${arrow}${pattern}ColorStr`].join(`,`);
+							}
+						})
+					);
+				}
 			}
-			getScoreDetailData(j);
+			// 初期色設定（譜面ヘッダー）の譜面別設定
+			Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj, { scoreId: j, scoreLockFlg: false }));
+
+			// 譜面詳細データの格納
+			const keyCtrlPtnDef = `${g_headerObj.keyLabels[j]}_0`;
+			storeBaseData(j, scoreConvert(g_rootObj, j, 0, ``, keyCtrlPtnDef, true), keyCtrlPtnDef);
+
+			// カスタムゲージの設定（譜面ヘッダー側）
+			resetCustomGauge(g_rootObj, { scoreId: j });
 			if (j < loopCount) {
-				// 分割時は各譜面ごとに上書き・補完、非分割時は初回のみ実行
-				resetGaugeSetting(j);
+				// ゲージ設定：分割時は各譜面ごとに上書き・補完、非分割時は初回のみ実行
+				Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn =>
+					getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: j }));
 			}
 		}
 	}
@@ -1424,28 +1469,6 @@ const headerConvert = _dosObj => {
 		'Type0': [!obj.defaultColorgrd[0], obj.defaultColorgrd[1]],
 	};
 
-	// カスタムゲージ設定（共通設定ファイル）
-	addGaugeFulls(g_gaugeOptionObj.survival);
-	addGaugeFulls(g_gaugeOptionObj.border);
-	applyGaugePresetOverrides();
-
-	if (g_presetObj.gaugeList !== undefined) {
-		g_gaugeSelObj.default ??= { __order: [] };
-		g_gaugeSelObj.default.__order ??= [];
-		Object.keys(g_presetObj.gaugeList).forEach(name => {
-			g_gaugeSelObj.default.__order.push(name);
-			g_gaugeSelObj.default[name] = { ...g_gaugeSelObj.default[name], Variable: boolToSwitch(g_presetObj.gaugeList[name] === `V`) };
-		});
-		addGaugeFulls(g_gaugeSelObj.default.__order);
-	}
-
-	// カスタムゲージ設定、初期色設定（譜面ヘッダー）の譜面別設定
-	Object.assign(obj, resetBaseColorList(obj, _dosObj));
-	for (let j = 0; j < obj.difLabels.length; j++) {
-		resetCustomGauge(_dosObj, { scoreId: j });
-		Object.assign(obj, resetBaseColorList(obj, _dosObj, { scoreId: j }));
-	}
-
 	// ダミー譜面の設定
 	if (hasVal(_dosObj.dummyId)) {
 		obj.dummyScoreNos = _dosObj.dummyId.split(`$`);
@@ -1838,15 +1861,6 @@ const headerConvert = _dosObj => {
 		.forEach(type => g_stockForceDelList[type] = makeDedupliArray(g_stockForceDelList[type], _dosObj[`${type}StockForceDel`].split(`,`)));
 
 	return obj;
-};
-
-/** g_presetObj.gaugeCustomをg_gaugeDefObjへ反映。Variable/headerOverridable/deriveRecoveryFromは
- *  gaugeCustom側に存在しないプロパティなので、Object.assignで自動的に既存値が保持される */
-const applyGaugePresetOverrides = () => {
-	if (g_presetObj.gaugeCustom === undefined) return;
-	g_gaugeSelObj.default ??= { __order: [] };
-	Object.entries(g_presetObj.gaugeCustom).forEach(([name, def]) =>
-		g_gaugeSelObj.default[name] = { ...g_gaugeSelObj.default[name], ...def });
 };
 
 /**
