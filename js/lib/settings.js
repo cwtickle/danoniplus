@@ -2200,12 +2200,6 @@ const setGauge = (() => {
 
 	let currentGaugeSel = null;
 
-	/** 【Step2用】基本定義(g_gaugeDefObj)のみを見る。個別設定(Step4)は別途unconditionalに適用するため混ぜない */
-	const getGaugeDef = (_name) => g_gaugeDefObj[_name];
-
-	/** 【Step1用】Variableは「customGaugeインライン指定」→「基本定義」の優先で取得 */
-	const getGaugeVariable = (_name) => currentGaugeSel?.[_name]?.Variable ?? g_gaugeDefObj[_name]?.Variable ?? C_FLG_OFF;
-
 	const resolveCustomGaugeSel = () => {
 		currentGaugeSel = g_gaugeSelObj[g_stateObj.scoreId] || g_gaugeSelObj[0] || g_gaugeSelObj.default;
 	};
@@ -2222,13 +2216,15 @@ const setGauge = (() => {
 		g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
 
 		setSetting(_scrollNum, `gauge`);
-		g_stateObj.lifeVariable = getGaugeVariable(g_stateObj.gauge);
+		g_stateObj.lifeVariable = currentGaugeSel?.[g_stateObj.gauge]?.Variable
+			?? g_gaugeDefObj[g_stateObj.gauge]?.Variable
+			?? C_FLG_OFF;
 	};
 
 	/** 【Step2：基本設定】g_gaugeDefObjのカーソル位置に対応する初期設定を適用 */
 	const applyBaseGaugeSettings = () => {
 		if (g_settings.gaugeNum === 0) return;
-		const def = getGaugeDef(g_stateObj.gauge);
+		const def = g_gaugeDefObj[g_stateObj.gauge];
 		if (!hasVal(def)) return;
 		g_stateObj.lifeMode = (def.Border === `x` ? C_LFE_SURVIVAL : C_LFE_BORDER);
 		g_stateObj.lifeBorder = (def.Border === `x` ? 0 : def.Border);
@@ -2241,6 +2237,16 @@ const setGauge = (() => {
 	const applyHeaderGaugeSettings = () => {
 		const def = g_gaugeDefObj[g_stateObj.gauge];
 		if (!def?.headerOverridable) return;
+		if (g_gaugeType === C_LFE_CUSTOM) {
+			// カスタム選択でOriginal/Normal等headerOverridable対象が複数混在する場合、
+			// difDataは1つしか値を持たないため、選択順で最初に出てきた「系統」だけに適用する。
+			// Light/EasyはOriginal/Normalの系統として扱う（deriveRecoveryFromで判定）
+			const getGaugeRoot = _name => g_gaugeDefObj[_name]?.deriveRecoveryFrom ?? _name;
+			const firstOverridableRoot = getGaugeRoot(
+				g_settings.gauges.find(name => g_gaugeDefObj[name]?.headerOverridable)
+			);
+			if (getGaugeRoot(g_stateObj.gauge) !== firstOverridableRoot) return;
+		}
 		applyLifeCategory(g_headerObj, { _magRcv: hasVal(def.deriveRecoveryFrom) ? 2 : 1 });
 	};
 

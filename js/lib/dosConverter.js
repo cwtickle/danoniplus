@@ -2175,6 +2175,50 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 };
 
 /**
+ * 【参照用】g_gaugeOptionObjの旧プロパティを参照できるようにする関数
+ * （initXXX/rcvXXX/dmgXXX/clearXXX、typeXXX/varXXXも参考として）に展開する。
+ * - カスタムスクリプト側で既存ゲージの既定値を参照するための補助関数。本体からの呼び出しはない。
+ */
+const restoreLegacyGaugeReference = () => {
+	[`survival`, `border`].forEach(type => {
+		const cap = toCapitalize(type);
+		const names = g_gaugeOptionObj[type];
+		g_gaugeOptionObj[`init${cap}`] = names.map(name => g_gaugeDefObj[name]?.Init);
+		g_gaugeOptionObj[`rcv${cap}`] = names.map(name => g_gaugeDefObj[name]?.Recovery);
+		g_gaugeOptionObj[`dmg${cap}`] = names.map(name => g_gaugeDefObj[name]?.Damage);
+		g_gaugeOptionObj[`clear${cap}`] = names.map(name =>
+			(g_gaugeDefObj[name]?.Border === `x` ? 0 : g_gaugeDefObj[name]?.Border));
+		g_gaugeOptionObj[`var${cap}`] = names.map(name => g_gaugeDefObj[name]?.Variable);
+		g_gaugeOptionObj[`type${cap}`] = names.map(name =>
+			(g_gaugeDefObj[name]?.Border === `x` ? C_LFE_SURVIVAL : C_LFE_BORDER));
+	});
+};
+
+/**
+ * 【反映用】カスタムスクリプトが旧形式で作った個別ゲージ設定
+ * - g_gaugeOptionObj[`gauge${_name}s`] = { lifeBorders, lifeRecoverys, lifeDamages, lifeInits }
+ * （それぞれscoreId順の配列）を、新プロパティ g_gaugeSelObj[scoreId][_name] へ変換して反映する
+ * - 本体からの呼び出しは無いため、カスタムスクリプト側で呼び出しする想定
+ * @param {string} _name ゲージ名
+ */
+const applyLegacyGaugeOverride = (_name) => {
+	const legacyObj = g_gaugeOptionObj[`gauge${_name}s`];
+	if (!hasVal(legacyObj)) return;
+	legacyObj.lifeBorders.forEach((border, scoreId) => {
+		if (!hasVal(border)) return;
+		g_gaugeSelObj[scoreId] ??= structuredClone(g_gaugeSelObj.default ?? { __order: [] });
+		g_gaugeSelObj[scoreId][_name] = {
+			...g_gaugeSelObj[scoreId][_name],
+			Border: border,
+			Recovery: legacyObj.lifeRecoverys[scoreId],
+			Damage: legacyObj.lifeDamages[scoreId],
+			Init: legacyObj.lifeInits[scoreId],
+		};
+	});
+	delete g_gaugeOptionObj[`gauge${_name}s`]; // 反映済みの旧データは残さない
+};
+
+/**
  * キー名の取得
  * @param {string} _key
  * @returns {string} キー名
