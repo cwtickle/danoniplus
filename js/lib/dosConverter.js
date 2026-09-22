@@ -1427,12 +1427,14 @@ const headerConvert = _dosObj => {
 	// カスタムゲージ設定（共通設定ファイル）
 	addGaugeFulls(g_gaugeOptionObj.survival);
 	addGaugeFulls(g_gaugeOptionObj.border);
+	applyGaugePresetOverrides();
 
 	if (g_presetObj.gaugeList !== undefined) {
-		g_gaugeSelObj.default = { __order: [] };
+		g_gaugeSelObj.default ??= { __order: [] };
+		g_gaugeSelObj.default.__order ??= [];
 		Object.keys(g_presetObj.gaugeList).forEach(name => {
 			g_gaugeSelObj.default.__order.push(name);
-			g_gaugeSelObj.default[name] = { Variable: boolToSwitch(g_presetObj.gaugeList[name] === `V`) };
+			g_gaugeSelObj.default[name] = { ...g_gaugeSelObj.default[name], Variable: boolToSwitch(g_presetObj.gaugeList[name] === `V`) };
 		});
 		addGaugeFulls(g_gaugeSelObj.default.__order);
 	}
@@ -1838,6 +1840,15 @@ const headerConvert = _dosObj => {
 	return obj;
 };
 
+/** g_presetObj.gaugeCustomをg_gaugeDefObjへ反映。Variable/headerOverridable/deriveRecoveryFromは
+ *  gaugeCustom側に存在しないプロパティなので、Object.assignで自動的に既存値が保持される */
+const applyGaugePresetOverrides = () => {
+	if (g_presetObj.gaugeCustom === undefined) return;
+	g_gaugeSelObj.default ??= { __order: [] };
+	Object.entries(g_presetObj.gaugeCustom).forEach(([name, def]) =>
+		g_gaugeSelObj.default[name] = { ...g_gaugeSelObj.default[name], ...def });
+};
+
 /**
  * 譜面リスト作成有無の状態を取得
  * @param {boolean} _headerFlg 
@@ -2102,22 +2113,20 @@ const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
 	const dosCustomGauge = _dosObj[`customGauge${scoreIdHeader}`];
 	if (!hasVal(dosCustomGauge)) return;
 
-	if (dosCustomGauge === `customDefault`) {
-		// g_presetObj.gaugeList由来の選択順・上書きをまるごと引き継ぐ
-		g_gaugeSelObj[scoreId] = structuredClone(g_gaugeSelObj.default ?? { __order: [] });
-		return;
-	}
+	g_gaugeSelObj[scoreId] = structuredClone(g_gaugeSelObj.default ?? { __order: [] });
 	if (g_gaugeOptionObj.defaultPlusList.includes(dosCustomGauge)) {
-		// survival/border: 選択順(名前)のみを引き継ぐ。値の上書きは無い
-		g_gaugeSelObj[scoreId] = { __order: g_gaugeOptionObj[dosCustomGauge].concat() };
-		return;
+		// customDefault: cloneした時点でdefaultの並び・上書きがそのまま入っているので何もしない
+		// survival/border: 選択順(名前)だけをsurvival/border配列に差し替える（値上書きはdefault由来のまま）
+		if (dosCustomGauge !== `customDefault`) {
+			g_gaugeSelObj[scoreId].__order = g_gaugeOptionObj[dosCustomGauge].concat();
+		}
 	}
 	// インライン指定（例: customGauge=Escape::V::エスケープ,Normal::F）
-	g_gaugeSelObj[scoreId] = { __order: [] };
+	g_gaugeSelObj[scoreId].__order = [];
 	dosCustomGauge.split(`,`).forEach(gaugeSet => {
 		const [name, variableFlag, dispName] = gaugeSet.split(`::`);
 		g_gaugeSelObj[scoreId].__order.push(name);
-		g_gaugeSelObj[scoreId][name] = { Variable: boolToSwitch(variableFlag === `V`) };
+		g_gaugeSelObj[scoreId][name] = { ...g_gaugeSelObj[scoreId][name], Variable: boolToSwitch(variableFlag === `V`) };
 		if (hasVal(dispName)) {
 			g_lblNameObj[`u_${name}`] = dispName;
 		}

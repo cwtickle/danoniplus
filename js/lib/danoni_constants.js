@@ -1368,14 +1368,6 @@ const g_gaugeDefObj = {
  */
 const g_gaugeSelObj = {};
 
-/** g_presetObj.gaugeCustomをg_gaugeDefObjへ反映。Variable/headerOverridable/deriveRecoveryFromは
- *  gaugeCustom側に存在しないプロパティなので、Object.assignで自動的に既存値が保持される */
-const applyGaugePresetOverrides = () => {
-    if (g_presetObj.gaugeCustom === undefined) return;
-    Object.entries(g_presetObj.gaugeCustom).forEach(([name, def]) =>
-        Object.assign(g_gaugeDefObj[name] ??= { Variable: C_FLG_OFF }, def));
-};
-
 /** どの名前をどの順で選択肢に出すかだけを持つ。詳細値はg_gaugeDefObjやg_gaugeSelObjを参照 */
 const g_gaugeOptionObj = {
     survival: [`Original`, `Heavy`, `NoRecovery`, `SuddenDeath`, `Practice`, `Light`],
