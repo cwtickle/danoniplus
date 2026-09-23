@@ -1422,7 +1422,7 @@ const setDifficulty = (_chartChangeFlg) => {
 	);
 
 	// ゲージ設定及びカーソル位置調整
-	setGauge(0, !_chartChangeFlg);
+	setGauge(0, !g_canLoadDifInfoFlg);
 
 	// 速度、スクロール、アシスト設定のカーソル位置調整
 	if (_chartChangeFlg) {
