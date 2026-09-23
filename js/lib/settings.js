@@ -1329,9 +1329,9 @@ const applyTransKeySelfPattern = () => {
  * - [キーコン]->[初期化]->[名称設定]の順に配置する。
  *   初期化処理にてキー数関連の設定を行っているため、この順序で無いとデータが正しく格納されない
  * 
- * @param {boolean} _initFlg
+ * @param {boolean} _chartChangeFlg
  */
-const setDifficulty = (_initFlg) => {
+const setDifficulty = (_chartChangeFlg) => {
 	const scoreId = g_stateObj.scoreId;
 
 	// ---------------------------------------------------
@@ -1351,7 +1351,7 @@ const setDifficulty = (_initFlg) => {
 	// 保存した設定の再読込条件（設定画面切り替え時はスキップ）
 	// ローカルストレージで保存した設定を呼び出し
 	let keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	if ((g_canLoadDifInfoFlg && (isNotSameKey && g_stateObj.dataSaveFlg)) || _initFlg) {
+	if ((g_canLoadDifInfoFlg && (isNotSameKey && g_stateObj.dataSaveFlg)) || _chartChangeFlg) {
 
 		if (isNotSameKey && g_keyObj.prevKey !== `Dummy`) {
 			// キーパターン初期化
@@ -1422,10 +1422,10 @@ const setDifficulty = (_initFlg) => {
 	);
 
 	// ゲージ設定及びカーソル位置調整
-	setGauge(0, true);
+	setGauge(0, !_chartChangeFlg);
 
 	// 速度、スクロール、アシスト設定のカーソル位置調整
-	if (_initFlg) {
+	if (_chartChangeFlg) {
 		g_stateObj.speed = g_headerObj.initSpeeds[scoreId];
 		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
 	}
@@ -1527,7 +1527,7 @@ const setDifficulty = (_initFlg) => {
 	lblMusicInfo.style.fontSize = wUnit(getFontSize2(lblMusicInfo.textContent, g_btnWidth(3 / 4), { maxSiz: 12 }));
 
 	// ユーザカスタムイベント(初期)
-	safeExecuteCustomHooks(`g_customJsObj.difficulty`, g_customJsObj.difficulty, _initFlg, g_canLoadDifInfoFlg);
+	safeExecuteCustomHooks(`g_customJsObj.difficulty`, g_customJsObj.difficulty, _chartChangeFlg, g_canLoadDifInfoFlg);
 	resolveKeyFamily();
 
 	// 設定サマリー表示の更新
@@ -2164,111 +2164,119 @@ const setReverseView = _btn => {
 	}
 };
 
+// ============================================================
+// ゲージ設定の適用パイプライン（wiki: ゲージ設定適用順仕様）
+// 優先度は「低→高」= 基本設定(g_gaugeDefObj) → 譜面ヘッダー(初期ゲージのみ) → ゲージ個別設定。
+// 下記のapply*/resolve*はsetGaugeから“この順番のまま”呼ばれ、後段が前段を上書きすることで
+// 優先度を表現する。順序の変更は仕様変更を意味する。
+// ============================================================
+
 /**
  * ゲージ設定メイン
- * @param {number} _scrollNum 
- * @param {boolean} _gaugeInitFlg
+ * @param {number} _scrollNum
  */
-const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
+const setGauge = (() => {
 
-	/**
-	 * 数式からゲージ値に変換
-	 * arrow[] -> 矢印数, frz[] -> フリーズアロー数, all[] -> 矢印＋フリーズアロー数に置換する
-	 * @param {string} _val 
-	 * @param {string} _defaultVal
-	 * @returns {number}
-	 */
-	const getGaugeCalc = (_val, _defaultVal) => {
-		return setVal(convertStrToVal(
-			replaceStr(_val, g_escapeStr.gaugeParamName)?.split(`{0}`).join(g_stateObj.scoreId)
-		), _defaultVal, C_TYP_CALC);
-	};
-	/**
-	 * ゲージ詳細一括変更
-	 * @param {object} _baseObj 
-	 * @param {number} object.magInit
-	 * @param {number} object.magRcv
-	 * @param {number} object.magDmg
-	 */
-	const setLifeCategory = (_baseObj, { _magInit = 1, _magRcv = 1, _magDmg = 1 } = {}) => {
-		g_stateObj.lifeInit = getGaugeCalc(_baseObj.lifeInits[g_stateObj.scoreId], g_stateObj.lifeInit) * _magInit;
-		g_stateObj.lifeRcv = getGaugeCalc(_baseObj.lifeRecoverys[g_stateObj.scoreId], g_stateObj.lifeRcv) * _magRcv;
-		g_stateObj.lifeDmg = getGaugeCalc(_baseObj.lifeDamages[g_stateObj.scoreId], g_stateObj.lifeDmg) * _magDmg;
-	};
+	const getGaugeCalc = (_val, _defaultVal) => setVal(convertStrToVal(
+		replaceStr(_val, g_escapeStr.gaugeParamName)?.split(`{0}`).join(g_stateObj.scoreId)
+	), _defaultVal, C_TYP_CALC);
 
-	/**
-	 * ライフモード切替
-	 * @param {object} _baseObj 
-	 */
-	const changeLifeMode = (_baseObj) => {
-		if (_baseObj.lifeBorders[g_stateObj.scoreId] === `x`) {
+	/** Border値からライフ制／ノルマ制を切り替える */
+	const applyLifeModeSwitch = (_border) => {
+		if (_border === `x`) {
 			g_stateObj.lifeBorder = 0;
 			g_stateObj.lifeMode = C_LFE_SURVIVAL;
 		} else {
-			g_stateObj.lifeBorder = getGaugeCalc(_baseObj.lifeBorders[g_stateObj.scoreId], g_stateObj.lifeBorder);
+			g_stateObj.lifeBorder = getGaugeCalc(_border, g_stateObj.lifeBorder);
 			g_stateObj.lifeMode = C_LFE_BORDER;
 		}
 	};
 
-	// ゲージ初期化
+	let currentGaugeSel = null;
 
-	// カスタムゲージの設定取得
-	const defaultCustomGauge = g_gaugeOptionObj.custom0 || g_gaugeOptionObj.customDefault;
-	if (hasVal(defaultCustomGauge)) {
-		g_gaugeOptionObj.custom = (
-			g_gaugeOptionObj[`custom${g_stateObj.scoreId}`] || defaultCustomGauge
-		).concat();
-		g_gaugeOptionObj.varCustom = (
-			g_gaugeOptionObj[`varCustom${g_stateObj.scoreId}`] || g_gaugeOptionObj.varCustom0 || g_gaugeOptionObj.varCustomDefault
-		).concat();
-	}
+	const resolveCustomGaugeSel = () => {
+		currentGaugeSel = g_gaugeSelObj[g_stateObj.scoreId] || g_gaugeSelObj[0] || g_gaugeSelObj.default;
+	};
 
-	// ゲージタイプの設定
-	changeLifeMode(g_headerObj);
-	g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
+	/**
+	 * 【Step1】ゲージ種別(g_gaugeType)を確定し、ゲージ配列とカーソル位置を入れ替える
+	 * @param {number} _scrollNum
+	 * @param {boolean} _gaugeInitFlg true時は前回選択していたゲージ名を引き継がず、配列の先頭を強制的に使う
+	 */
+	const resolveGaugeType = (_scrollNum, _gaugeInitFlg) => {
+		applyLifeModeSwitch(g_headerObj.lifeBorders[g_stateObj.scoreId]);
+		g_gaugeType = (currentGaugeSel?.__order?.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
 
-	// ゲージ配列を入れ替え
-	g_settings.gauges = structuredClone(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
-	g_settings.gaugeNum = getCurrentNo(g_settings.gauges, g_stateObj.gauge);
-	g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
+		g_settings.gauges = structuredClone(g_gaugeType === C_LFE_CUSTOM
+			? currentGaugeSel.__order
+			: g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
+		g_settings.gaugeNum = (_gaugeInitFlg ? 0 : getCurrentNo(g_settings.gauges, g_stateObj.gauge));
+		g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
 
-	setSetting(_scrollNum, `gauge`);
-	g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][g_settings.gaugeNum];
+		setSetting(_scrollNum, `gauge`);
+		g_stateObj.lifeVariable = currentGaugeSel?.[g_stateObj.gauge]?.Variable
+			?? g_gaugeDefObj[g_stateObj.gauge]?.Variable
+			?? C_FLG_OFF;
+	};
 
-	// デフォルトゲージの設定を適用（g_gaugeOptionObjから取得）
-	if (g_settings.gaugeNum !== 0 &&
-		(g_gaugeOptionObj.custom.length === 0 ||
-			g_gaugeOptionObj.defaultList.includes(g_gaugeOptionObj[`defaultGauge${g_stateObj.scoreId}`]))) {
+	/** 【Step2：基本設定】g_gaugeDefObjのカーソル位置に対応する初期設定を適用 */
+	const applyBaseGaugeSettings = () => {
+		const def = g_gaugeDefObj[g_stateObj.gauge];
+		if (!hasVal(def)) return;
+		g_stateObj.lifeMode = (def.Border === `x` ? C_LFE_SURVIVAL : C_LFE_BORDER);
+		g_stateObj.lifeBorder = (def.Border === `x` ? 0 : def.Border);
+		g_stateObj.lifeInit = def.Init;
+		g_stateObj.lifeRcv = def.Recovery;
+		g_stateObj.lifeDmg = def.Damage;
+	};
 
-		const gType = (g_gaugeType === C_LFE_CUSTOM ?
-			toCapitalize(g_gaugeOptionObj[`defaultGauge${g_stateObj.scoreId}`]) : g_gaugeType);
-		const getGaugeVal = _type => g_gaugeOptionObj[`${_type}${gType}`][g_settings.gaugeNum];
-		g_stateObj.lifeMode = getGaugeVal(`type`);
-		g_stateObj.lifeBorder = getGaugeVal(`clear`);
-		g_stateObj.lifeInit = getGaugeVal(`init`);
-		g_stateObj.lifeRcv = getGaugeVal(`rcv`);
-		g_stateObj.lifeDmg = getGaugeVal(`dmg`);
-	}
-
-	// デフォルトゲージの初期設定（Light, Easyでは回復量を2倍にする）
-	if ([`Original`, `Light`, `Normal`, `Easy`].includes(g_stateObj.gauge)) {
-		setLifeCategory(g_headerObj, { _magRcv: [`Light`, `Easy`].includes(g_stateObj.gauge) ? 2 : 1 });
-	}
-
-	// ゲージ設定別に個別設定した場合はここで設定を上書き
-	// 譜面ヘッダー：gaugeXXX で設定した値がここで適用される
-	if (hasVal(g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`])) {
-		const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
-		if (hasVal(tmpGaugeObj.lifeBorders[g_stateObj.scoreId])) {
-			changeLifeMode(tmpGaugeObj);
+	/** 【Step3：譜面ヘッダー】headerOverridable指定ゲージのみ、difData由来の値で上書き */
+	const applyHeaderGaugeSettings = () => {
+		const def = g_gaugeDefObj[g_stateObj.gauge];
+		if (!def?.headerOverridable) return;
+		if (g_gaugeType === C_LFE_CUSTOM) {
+			// カスタム選択でOriginal/Normal等headerOverridable対象が複数混在する場合、
+			// difDataは1つしか値を持たないため、選択順で最初に出てきた「系統」だけに適用する。
+			// Light/EasyはOriginal/Normalの系統として扱う（deriveRecoveryFromで判定）
+			const getGaugeRoot = _name => g_gaugeDefObj[_name]?.deriveRecoveryFrom ?? _name;
+			const firstOverridableRoot = getGaugeRoot(
+				g_settings.gauges.find(name => g_gaugeDefObj[name]?.headerOverridable)
+			);
+			if (getGaugeRoot(g_stateObj.gauge) !== firstOverridableRoot) return;
 		}
-		setLifeCategory(tmpGaugeObj);
-	}
+		g_stateObj.lifeInit = getGaugeCalc(g_headerObj.lifeInits[g_stateObj.scoreId], g_stateObj.lifeInit);
+		g_stateObj.lifeRcv = getGaugeCalc(g_headerObj.lifeRecoverys[g_stateObj.scoreId], g_stateObj.lifeRcv)
+			* (hasVal(def.deriveRecoveryFrom) ? 2 : 1);
+		g_stateObj.lifeDmg = getGaugeCalc(g_headerObj.lifeDamages[g_stateObj.scoreId], g_stateObj.lifeDmg);
+	};
 
-	// ゲージ詳細情報を表示
-	lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
-		g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
-};
+	/**
+	 * 【Step4：ゲージ個別設定（最優先）】gaugeXXXで明示的に設定された値があれば上書き。
+	 * g_gaugeSelObj[scoreId][name]は既に単一譜面分の値なので、g_headerObj用の
+	 * applyLifeModeSwitch/applyLifeCategory（配列アクセス版）は使わず直接適用する
+	 */
+	const applyIndividualGaugeSettings = () => {
+		const override = currentGaugeSel?.[g_stateObj.gauge];
+		if (override?.Recovery === undefined) return; // gaugeXXXヘッダー由来の上書きが無い（overrideが無い/Variableのみの場合を含む）
+		if (hasVal(override.Border)) {
+			applyLifeModeSwitch(override.Border);
+		}
+		g_stateObj.lifeInit = getGaugeCalc(override.Init, g_stateObj.lifeInit);
+		g_stateObj.lifeRcv = getGaugeCalc(override.Recovery, g_stateObj.lifeRcv);
+		g_stateObj.lifeDmg = getGaugeCalc(override.Damage, g_stateObj.lifeDmg);
+	};
+
+	return (_scrollNum, _gaugeInitFlg = false) => {
+		resolveCustomGaugeSel();
+		resolveGaugeType(_scrollNum, _gaugeInitFlg);
+		applyBaseGaugeSettings();
+		applyHeaderGaugeSettings();
+		applyIndividualGaugeSettings();
+
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
+			g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
+	};
+})();
 
 /**
  * ゲージ設定の詳細表示を整形
