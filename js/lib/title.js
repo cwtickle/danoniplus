@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 
+ * Revised : 2026/09/23 (v51.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -307,7 +307,8 @@ const titleInit = (_initFlg = false) => {
 				g_headerObj.musicSelectUse ? creatorUrl : g_headerObj.creatorUrl),
 
 			// アーティスト表示
-			createCreditBtn(`lnkArtist`, `${g_lblNameObj.artist}: ${g_headerObj.artistNames[g_settings.musicIdxNum]}`, g_headerObj.artistUrls[g_settings.musicIdxNum]),
+			createCreditBtn(`lnkArtist`, `${g_lblNameObj.artist}: ${g_headerObj.artistNames[g_settings.musicIdxNum]}`,
+				g_headerObj.artistUrls[g_settings.musicIdxNum]),
 		);
 	}
 
@@ -415,8 +416,9 @@ const titleInit = (_initFlg = false) => {
 const externalWebTitle = () => {
 	if (document.getElementById(`webMusicTitle`) !== null) {
 		webMusicTitle.innerHTML =
-			`<span style="font-size:${wUnit(32)}">${g_headerObj.musicTitlesForView[g_settings.musicIdxNum].join(`<br>`)}</span><br>
-			<span style="font-size:${wUnit(16)}">(Artist: <a href="${g_headerObj.artistUrls[g_settings.musicIdxNum]}" target="_blank">${g_headerObj.artistNames[g_settings.musicIdxNum]}</a>)</span>`;
+			`<span style="font-size:${wUnit(32)}">${g_headerObj.musicTitlesForView[g_settings.musicIdxNum].join(`<br>`)}</span><br>` +
+			`<span style="font-size:${wUnit(16)}">(Artist: <a href="${g_headerObj.artistUrls[g_settings.musicIdxNum]}" target="_blank">` +
+			`${g_headerObj.artistNames[g_settings.musicIdxNum]}</a>)</span>`;
 	}
 };
 
@@ -445,8 +447,9 @@ const drawTitle = (_titleName = g_headerObj.musicTitleForView, _scoreId = ``) =>
 
 	// グラデーションの指定がない場合、
 	// 矢印色の1番目と3番目を使ってタイトルをグラデーション
-	const titlegrd1 = g_headerObj.titlegrds[0] || (g_headerObj[`setColor${_scoreId}Org`] ?
-		`${g_headerObj[`setColor${_scoreId}Org`][0]}:${g_headerObj[`setColor${_scoreId}Org`][2]}` : `${g_headerObj.setColorOrg[0]}:${g_headerObj.setColorOrg[2]}`);
+	const titlegrd1 = g_headerObj.titlegrds[0] || (g_headerObj[`setColor${_scoreId}Org`]
+		? `${g_headerObj[`setColor${_scoreId}Org`][0]}:${g_headerObj[`setColor${_scoreId}Org`][2]}`
+		: `${g_headerObj.setColorOrg[0]}:${g_headerObj.setColorOrg[2]}`);
 	const titlegrd2 = g_headerObj.titlegrds[1] || titlegrd1;
 
 	const titlegrds = [];
@@ -821,7 +824,9 @@ const changeMSelect = (_num, _initFlg = false) => {
 
 	// 選択方向に合わせて楽曲リスト情報を再取得
 	for (let j = -g_settings.mSelectableTerms; j <= g_settings.mSelectableTerms; j++) {
-		const idx = g_headerObj.musicIdxList[(j + _num + g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 10) % g_headerObj.musicIdxList.length];
+		const idx = g_headerObj.musicIdxList[
+			(j + _num + g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 10) % g_headerObj.musicIdxList.length
+		];
 		if (j === 0) {
 		} else {
 			document.getElementById(`btnMusicSelect${j}`).style.fontSize =
@@ -841,7 +846,9 @@ const changeMSelect = (_num, _initFlg = false) => {
 	// 選択した楽曲に対応する譜面番号、製作者情報、曲長を取得
 	g_headerObj.viewLists = [];
 	const keyList = [], creatorList = [], playingFrameList = [], bpmList = [], difNameList = [], diffiList = [], notesList = [];
-	const targetIdx = g_headerObj.musicIdxList[(g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 20) % g_headerObj.musicIdxList.length];
+	const targetIdx = g_headerObj.musicIdxList[
+		(g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 20) % g_headerObj.musicIdxList.length
+	];
 	g_headerObj.musicNos.forEach((val, j) => {
 		if ((g_headerObj.musicGroups?.[val] ?? val) === targetIdx) {
 			g_headerObj.viewLists.push(j);
@@ -863,7 +870,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 	// 選択した楽曲の情報表示
 	const idx = g_headerObj.musicIdxList[g_settings.musicIdxNum];
 	document.getElementById(`lblMusicSelect`).innerHTML =
-		`<span style="font-size:${getFontSize2(g_headerObj.musicTitlesForView[idx].join(`<br>`), g_btnWidth(1 / 2), { maxSiz: 18 })}px;` +
+		`<span style="font-size:${wUnit(getFontSize2(g_headerObj.musicTitlesForView[idx].join(`<br>`), g_btnWidth(1 / 2), { maxSiz: 18 }))};` +
 		`font-weight:bold">${g_headerObj.musicTitlesForView[idx].join(`<br>`)}</span>`;
 	document.getElementById(`lblMusicSelectDetail`).innerHTML =
 		`Maker: ${creatorLink} / Artist: <a href="${g_headerObj.artistUrls[idx]}" target="_blank">` +
@@ -1207,37 +1214,50 @@ const preconditionInit = () => {
 	// 1ページあたりに表示するオブジェクト数
 	const numOfPrecs = Math.round((g_btnWidth(1) / 500) / 2 * 10) * 2;
 
-	// ボタン名切り替え
-	const switchPreconditions = () => {
-		g_settings.preconditionNum = nextPos(g_settings.preconditionNum, 1, Math.round(g_settings.preconditions.length / numOfPrecs) + 1);
-		for (let j = 0; j < Math.min(g_settings.preconditions.length, numOfPrecs); j++) {
-			if (g_settings.preconditionNum * numOfPrecs + j < g_settings.preconditions.length) {
-				document.getElementById(`btnPrecond${j}`).innerHTML =
-					g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j];
-				document.getElementById(`btnPrecond${j}`).style.visibility = `visible`;
-			} else {
-				document.getElementById(`btnPrecond${j}`).style.visibility = `hidden`;
-			}
+	// 現在のページのオブジェクト表示ボタンを描画
+	const renderPreconditions = () => {
+		const start = g_settings.preconditionNum * numOfPrecs;
+		const targets = g_settings.preconditions.slice(start, start + numOfPrecs);
+		const w = g_btnWidth(1 / (numOfPrecs / 2 + 1));
+
+		for (let j = 0; j < numOfPrecs; j++) {
+			document.getElementById(`btnPrecond${j}`)?.remove();
 		}
-		btnPrecond0.click();
+
+		targets.forEach((target, j) => {
+			const siz = getFontSize2(target, w, { maxSiz: 12 });
+			divRoot.appendChild(createCss2Button(`btnPrecond${j}`, target, evt => {
+				for (let k = 0; k < targets.length; k++) {
+					document.getElementById(`btnPrecond${k}`).classList.replace(
+						g_cssObj.button_Reset, g_cssObj.button_Default,
+					);
+				}
+				lblPrecondView.innerHTML = viewKeyStorage(target);
+				lblPrecondView.scrollTop = 0;
+				g_settings.preconditionNumSub = j;
+				evt.target.classList.replace(
+					g_cssObj.button_Default, g_cssObj.button_Reset,
+				);
+			}, {
+				x: g_btnX() + g_btnWidth((j % (numOfPrecs / 2)) / (numOfPrecs / 2 + 1)),
+				y: 70 + Number(j >= numOfPrecs / 2) * 20, w, h: 20, siz,
+			}, g_cssObj.button_Default));
+		});
+
+		if (targets.length > 0) {
+			btnPrecond0.click();
+		}
+	};
+
+	// 次のページへ移動
+	const switchPreconditions = () => {
+		const numOfPages = Math.max(1, Math.ceil(g_settings.preconditions.length / numOfPrecs));
+		g_settings.preconditionNum = nextPos(g_settings.preconditionNum, 1, numOfPages);
+		renderPreconditions();
 	};
 
 	// オブジェクト表示ボタンの作成
-	for (let j = 0; j < Math.min(g_settings.preconditions.length, numOfPrecs); j++) {
-		divRoot.appendChild(createCss2Button(`btnPrecond${j}`, g_settings.preconditions[j], evt => {
-			for (let k = 0; k < Math.min(g_settings.preconditions.length, numOfPrecs); k++) {
-				document.getElementById(`btnPrecond${k}`).classList.replace(g_cssObj.button_Reset, g_cssObj.button_Default);
-			}
-			lblPrecondView.innerHTML = viewKeyStorage(g_settings.preconditions[g_settings.preconditionNum * numOfPrecs + j]);
-			lblPrecondView.scrollTop = 0;
-			g_settings.preconditionNumSub = j;
-			evt.target.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
-		}, {
-			x: g_btnX() + g_btnWidth((j % (numOfPrecs / 2)) / (numOfPrecs / 2 + 1)),
-			y: 70 + Number(j >= numOfPrecs / 2) * 20, w: g_btnWidth(1 / (numOfPrecs / 2 + 1)), h: 20, siz: 12,
-		}, g_cssObj.button_Default));
-	}
-	btnPrecond0.classList.replace(g_cssObj.button_Default, g_cssObj.button_Reset);
+	renderPreconditions();
 
 	// 次のオブジェクト表示群の表示
 	divRoot.appendChild(createCss2Button(`btnPrecondNext`, `>`, () => switchPreconditions(), {

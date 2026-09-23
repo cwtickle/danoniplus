@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/09/15 (v50.5.1)
+ * Revised : 2026/09/23 (v51.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -884,9 +884,10 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 
 		// キーパターンの変更
 		g_keyObj.currentPtn = searchPattern(g_keyObj.currentPtn, _sign, g_headerObj.transKeyUse, _skipFlg);
+		const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 
 		// カラーグループ、シャッフルグループの再設定
-		g_keycons.groups.forEach(type => resetGroupList(type, `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`));
+		g_keycons.groups.forEach(type => resetGroupList(type, keyCtrlPtn));
 
 		// 曲中ショートカットキーの切り替え
 		setPlayingShortcut();
@@ -897,7 +898,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		// シャッフルグループのデフォルト値からの差異表示（色付け）
 		// 再描画後で無いと色付けできないため、keyConfigInit() 実行後に処理
 		if (g_headerObj.shuffleUse) {
-			changeShuffleConfigColor(`${g_keyObj.currentKey}_${g_keyObj.currentPtn}`, g_keyObj[`shuffle${g_keyObj.currentKey}_${g_keyObj.currentPtn}_${g_keycons.shuffleGroupNum}`]);
+			changeShuffleConfigColor(keyCtrlPtn, g_keyObj[`shuffle${keyCtrlPtn}_${g_keycons.shuffleGroupNum}`]);
 		}
 	};
 
@@ -936,8 +937,8 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 			}
 		}, g_cssObj.button_Back),
 
-		createDivCss2Label(`lblPattern`, `${g_lblNameObj.KeyPattern}: ${g_keyObj.currentPtn === -1 ?
-			'Self' : g_keyObj.currentPtn + 1}${lblTransKey}`, g_lblPosObj.lblPattern),
+		createDivCss2Label(`lblPattern`, `${g_lblNameObj.KeyPattern}: ${g_keyObj.currentPtn === -1
+			? 'Self' : g_keyObj.currentPtn + 1}${lblTransKey}`, g_lblPosObj.lblPattern),
 
 		// パターン変更ボタン描画(右回り)
 		createCss2Button(`btnPtnChangeR`, `>`, () => true, {
@@ -1337,11 +1338,16 @@ const keyconfigKeyboardPreview = (() => {
 	// MAIN_ROWS と行インデックスを揃えて配置する。空行はスキップされる。
 	const NAV_ROWS = [
 		{ keys: [{ code: `PrintScreen`, label: `Print\nScreen` }, { code: `ScrollLock`, label: `Scroll\nLock` }, { code: `Pause` }] },
-		{ keys: [{ code: `Insert` }, { code: `Home` }, { code: `PageUp`, label: `Page\nUp` }] },    // Insert Home PgUp
-		{ keys: [{ code: `Delete` }, { code: `End` }, { code: `PageDown`, label: `Page\nDown` }] },  // Delete End  PgDn
-		{ keys: [] },                                                                               // ASDF行：空
-		{ keys: [{ code: `` }, { code: `ArrowUp` }, { code: `` }] },                                // ↑
-		{ keys: [{ code: `ArrowLeft` }, { code: `ArrowDown` }, { code: `ArrowRight` }] },           // ← ↓ →
+		// Insert Home PgUp
+		{ keys: [{ code: `Insert` }, { code: `Home` }, { code: `PageUp`, label: `Page\nUp` }] },
+		// Delete End  PgDn
+		{ keys: [{ code: `Delete` }, { code: `End` }, { code: `PageDown`, label: `Page\nDown` }] },
+		// ASDF行：空
+		{ keys: [] },
+		// ↑                                                                               
+		{ keys: [{ code: `` }, { code: `ArrowUp` }, { code: `` }] },
+		// ← ↓ →     
+		{ keys: [{ code: `ArrowLeft` }, { code: `ArrowDown` }, { code: `ArrowRight` }] },
 	];
 
 	// テンキー（MAIN_ROWS と行インデックスを揃えて配置。1行目は空行で Fn行に揃える）
@@ -1353,11 +1359,16 @@ const keyconfigKeyboardPreview = (() => {
 	//   [  T0  ][T.] [TEnter]  ← T0 は横2u、TEnter は縦2u
 	const NUM_ROWS = [
 		{ keys: [] },
-		{ keys: [{ code: `NumLock`, label: `Num\nLock` }, { code: `NumpadDivide` }, { code: `NumpadMultiply` }, { code: `NumpadSubtract` }] }, // NumLk T/ T* T-
-		{ keys: [{ code: `Numpad7` }, { code: `Numpad8` }, { code: `Numpad9` }, { code: `NumpadAdd`, h: 2 }] },                               // T7 T8 T9 T+(縦2u)
-		{ keys: [{ code: `Numpad4` }, { code: `Numpad5` }, { code: `Numpad6` }] },                                                             // T4 T5 T6
-		{ keys: [{ code: `Numpad1` }, { code: `Numpad2` }, { code: `Numpad3` }, { code: `NumpadEnter`, h: 2 }] },                             // T1 T2 T3 TEnter(縦2u)
-		{ keys: [{ code: `Numpad0`, w: 2 }, { code: `NumpadDecimal` }] },                                                                     // T0(横2u) T.
+		// NumLk T/ T* T-
+		{ keys: [{ code: `NumLock`, label: `Num\nLock` }, { code: `NumpadDivide` }, { code: `NumpadMultiply` }, { code: `NumpadSubtract` }] },
+		// T7 T8 T9 T+(縦2u)
+		{ keys: [{ code: `Numpad7` }, { code: `Numpad8` }, { code: `Numpad9` }, { code: `NumpadAdd`, h: 2 }] },
+		// T4 T5 T6
+		{ keys: [{ code: `Numpad4` }, { code: `Numpad5` }, { code: `Numpad6` }] },
+		// T1 T2 T3 TEnter(縦2u)
+		{ keys: [{ code: `Numpad1` }, { code: `Numpad2` }, { code: `Numpad3` }, { code: `NumpadEnter`, h: 2 }] },
+		// T0(横2u) T.
+		{ keys: [{ code: `Numpad0`, w: 2 }, { code: `NumpadDecimal` }] },
 	];
 
 	// -------------------------------------------------------------------------
@@ -1470,17 +1481,6 @@ const keyconfigKeyboardPreview = (() => {
 	const kh = h => Math.floor(h * BASE_KEY_H * _state.scale + (h - 1) * BASE_KEY_GAP * _state.scale);
 	const kg = () => Math.max(1, Math.round(BASE_KEY_GAP * _state.scale));
 	const kr = () => Math.max(2, Math.round(4 * _state.scale));
-
-	/**
-	 * Canvasの共通初期化処理
-	 * @param {HTMLCanvasElement} canvas
-	 * @returns {CanvasRenderingContext2D|null}
-	 */
-	const setupCanvasContext = (canvas) => {
-		if (!canvas) return null;
-		canvas.style.top = wUnit(40);
-		return applyCanvasSize(canvas, _state.cvsW, _state.cvsH);
-	};
 
 	/**
 	 * 円角矩形を描画する
@@ -1616,8 +1616,7 @@ const keyconfigKeyboardPreview = (() => {
 	 * init 時に呼ぶ。
 	 */
 	const drawBase = () => {
-		const ctx = setupCanvasContext(_state.canvasBase);
-		if (!ctx) return;
+		const ctx = _state.canvasBase.getContext(`2d`);
 
 		ctx.clearRect(0, 0, _state.cvsW, _state.cvsH);
 		setCtxProp(ctx, `fillStyle`, C_COLOR.bgFill);
@@ -1672,8 +1671,7 @@ const keyconfigKeyboardPreview = (() => {
 	 * 同一キーにメインと代替が重なる場合はメインを優先する。
 	 */
 	const drawMap = () => {
-		const ctx = setupCanvasContext(_state.canvasMap);
-		if (!ctx) return;
+		const ctx = _state.canvasMap.getContext(`2d`);
 
 		ctx.clearRect(0, 0, _state.cvsW, _state.cvsH);
 
@@ -1721,15 +1719,18 @@ const keyconfigKeyboardPreview = (() => {
 			pointerEvents: C_DIS_AUTO, background: `#00000080`, display: C_DIS_NONE, overflow: `hidden`,
 		});
 
-		const canvasBase = document.createElement(`canvas`);
-		canvasBase.id = C_CANVAS_BASE_ID;
-		areaDiv.appendChild(canvasBase);
-		_state.canvasBase = canvasBase;
-
-		const canvasMap = document.createElement(`canvas`);
-		canvasMap.id = C_CANVAS_MAP_ID;
-		areaDiv.appendChild(canvasMap);
-		_state.canvasMap = canvasMap;
+		/**
+		 * プレビュー用canvasを生成しareaDivに追加、_stateに登録する
+		 * @param {string} _id
+		 * @param {string} _stateKey `_state`に格納するキー名（canvasBase/canvasMap）
+		 */
+		const addPreviewCanvas = (_id, _stateKey) => {
+			const cvs = createCanvas(_id, { y: 40, w: _state.cvsW, h: _state.cvsH });
+			areaDiv.appendChild(cvs);
+			_state[_stateKey] = cvs;
+		};
+		addPreviewCanvas(C_CANVAS_BASE_ID, `canvasBase`);
+		addPreviewCanvas(C_CANVAS_MAP_ID, `canvasMap`);
 
 		drawBase();
 	};

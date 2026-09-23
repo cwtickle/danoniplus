@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 
+ * Revised : 2026/09/23 (v51.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -43,16 +43,20 @@ const mainInit = () => {
 		mainSprite.style.transformOrigin = `center 55%`;
 	}
 
-	addTransform(`mainSprite`, `root`, `scale(${g_workObj.scale})`, g_transPriority.scale);
-	addTransform(`mainSprite`, `main`, `translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_posObj.stepY - C_STEP_Y + g_headerObj.playingY)})`, g_transPriority.base);
+	addTransform(`mainSprite`, `root`,
+		`scale(${g_workObj.scale})`, g_transPriority.scale);
+	addTransform(`mainSprite`, `main`,
+		`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_posObj.stepY - C_STEP_Y + g_headerObj.playingY)})`, g_transPriority.base);
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
 	const infoSprite = createEmptySprite(divRoot, `infoSprite`, mainCommonPos);
-	addTransform(`infoSprite`, `main`, `translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
+	addTransform(`infoSprite`, `main`,
+		`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
 
 	// 判定系スプライトを作成（メインスプライトより上位）
 	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, mainCommonPos);
-	addTransform(`judgeSprite`, `main`, `translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
+	addTransform(`judgeSprite`, `main`,
+		`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
 
@@ -251,7 +255,8 @@ const mainInit = () => {
 	const makerView = g_headerObj.makerView ? ` (${g_headerObj.creatorNames[g_stateObj.scoreId]})` : ``;
 	const transKeyName = getTransKeyName();
 	const autoAll = g_stateObj.autoAll === C_FLG_ON ? ` &gt; AutoPlay` : ``;
-	let difName = `[${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName} / ${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${shuffleName}${makerView}${autoAll}]`;
+	let difName = `[${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName} / ` +
+		`${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}${shuffleName}${makerView}${autoAll}]`;
 	let creditName = `${musicTitle} / ${artistName}`;
 	if (checkMusicSiz(creditName, g_limitObj.musicTitleSiz) < 12) {
 		creditName = `${musicTitle}`;
@@ -402,8 +407,13 @@ const mainInit = () => {
 		MCombo: [`combo`, 5], Kita: [`kita`, 7], Iknai: [`iknai`, 8], FCombo: [`combo`, 9],
 	};
 	Object.keys(jdgMainScoreObj).forEach(jdgScore =>
-		infoSprite.appendChild(makeCounterSymbol(`lbl${jdgScore}`, g_headerObj.playingWidth - 110 + (g_workObj.nonDefaultSc ? g_headerObj.scAreaWidth : 0),
-			g_cssObj[`common_${jdgMainScoreObj[jdgScore][0]}`], jdgMainScoreObj[jdgScore][1] + 1, 0, g_workObj.scoreDisp)));
+		infoSprite.appendChild(
+			makeCounterSymbol(`lbl${jdgScore}`,
+				g_headerObj.playingWidth - 110 + (g_workObj.nonDefaultSc ? g_headerObj.scAreaWidth : 0),
+				g_cssObj[`common_${jdgMainScoreObj[jdgScore][0]}`], jdgMainScoreObj[jdgScore][1] + 1, 0, g_workObj.scoreDisp
+			)
+		)
+	);
 
 	// パーフェクト演出
 	judgeSprite.appendChild(createDivCss2Label(`finishView`, ``, g_lblPosObj.finishView, g_cssObj.common_kita));
@@ -1296,21 +1306,29 @@ const mainInit = () => {
 
 		// ダミー矢印生成（背面に表示するため先に処理）
 		g_workObj.mkDummyArrow?.[currentFrame]?.forEach(data =>
-			makeArrow(data, ++dummyArrowCnts[data.pos], `dummyArrow`, g_workObj.dummyArrowColors[data.pos], g_workObj.dummyArrowShadowColors[data.pos]));
+			makeArrow(data, ++dummyArrowCnts[data.pos], `dummyArrow`,
+				g_workObj.dummyArrowColors[data.pos],
+				g_workObj.dummyArrowShadowColors[data.pos]));
 
 		// 矢印生成
 		g_workObj.mkArrow[currentFrame]?.forEach(data =>
-			makeArrow(data, ++arrowCnts[data.pos], `arrow`, g_workObj.arrowColors[data.pos], g_workObj.arrowShadowColors[data.pos]));
+			makeArrow(data, ++arrowCnts[data.pos], `arrow`,
+				g_workObj.arrowColors[data.pos],
+				g_workObj.arrowShadowColors[data.pos]));
 
 		// ダミーフリーズアロー生成
 		g_workObj.mkDummyFrzArrow?.[currentFrame]?.forEach(data =>
-			makeFrzArrow(data, ++dummyFrzCnts[data.pos], `dummyFrz`, g_workObj.dummyFrzNormalColors[data.pos],
-				g_workObj.dummyFrzNormalBarColors[data.pos], g_workObj.dummyFrzNormalShadowColors[data.pos]));
+			makeFrzArrow(data, ++dummyFrzCnts[data.pos], `dummyFrz`,
+				g_workObj.dummyFrzNormalColors[data.pos],
+				g_workObj.dummyFrzNormalBarColors[data.pos],
+				g_workObj.dummyFrzNormalShadowColors[data.pos]));
 
 		// フリーズアロー生成
 		g_workObj.mkFrzArrow[currentFrame]?.forEach(data =>
-			makeFrzArrow(data, ++frzCnts[data.pos], `frz`, g_workObj.frzNormalColors[data.pos],
-				g_workObj.frzNormalBarColors[data.pos], g_workObj.frzNormalShadowColors[data.pos]));
+			makeFrzArrow(data, ++frzCnts[data.pos], `frz`,
+				g_workObj.frzNormalColors[data.pos],
+				g_workObj.frzNormalBarColors[data.pos],
+				g_workObj.frzNormalShadowColors[data.pos]));
 
 		// 矢印・フリーズアロー移動＆消去
 		for (let j = 0; j < keyNum; j++) {
@@ -1828,20 +1846,25 @@ const changeAppearanceFilter = (_num = 10) => {
 		$id(`arrowSprite${topNum + j}`).clipPath = topShape;
 		$id(`arrowSprite${bottomNum + j}`).clipPath = bottomShape;
 
-		addTransform(`filterBar${topNum + j}`, `appearance`, `translateY(${wUnit(parseFloat($id(`arrowSprite${j}`).top) + topDist)})`, g_transPriority.layer);
-		addTransform(`filterBar${bottomNum + j}`, `appearance`, `translateY(${wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist)})`, g_transPriority.layer);
+		addTransform(`filterBar${topNum + j}`, `appearance`,
+			`translateY(${wUnit(parseFloat($id(`arrowSprite${j}`).top) + topDist)})`, g_transPriority.layer);
+		addTransform(`filterBar${bottomNum + j}`, `appearance`,
+			`translateY(${wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + bottomDist)})`, g_transPriority.layer);
 
 		if (doubleFilterFlg) {
-			addTransform(`filterBar${bottomNum + j}_HS`, `appearance`, `translateY(${wUnit(parseFloat($id(`arrowSprite${j}`).top) + bottomDist)})`, g_transPriority.layer);
-			addTransform(`filterBar${topNum + j}_HS`, `appearance`, `translateY(${wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + topDist)})`, g_transPriority.layer);
+			addTransform(`filterBar${bottomNum + j}_HS`, `appearance`,
+				`translateY(${wUnit(parseFloat($id(`arrowSprite${j}`).top) + bottomDist)})`, g_transPriority.layer);
+			addTransform(`filterBar${topNum + j}_HS`, `appearance`,
+				`translateY(${wUnit(parseFloat($id(`arrowSprite${j + 1}`).top) + topDist)})`, g_transPriority.layer);
 		}
 	}
 
 	// フィルターバーのパーセント表示（フィルターバーが複数表示されるなど複雑なため、最初の階層グループの位置に追従）
 	if (g_appearanceRanges.includes(g_stateObj.appearance)) {
 		const currentBarNum = g_hidSudObj.std[g_stateObj.appearance][g_stateObj.reverse];
-		addTransform(`filterView`, `appearance`, `translateY(${wUnit(parseFloat($id(`arrowSprite${currentBarNum % 2}`).top) +
-			(currentBarNum % 2 === 0 ? bottomDist : topDist))})`, g_transPriority.layer);
+		addTransform(`filterView`, `appearance`,
+			`translateY(${wUnit(parseFloat($id(`arrowSprite${currentBarNum % 2}`).top) +
+				(currentBarNum % 2 === 0 ? bottomDist : topDist))})`, g_transPriority.layer);
 		filterView.textContent = `${_num}%`;
 		g_hidSudObj.filterPos = _num;
 	}
@@ -2267,14 +2290,18 @@ const judgeArrow = _j => {
 		const _difCnt = Math.abs(_difFrame);
 		const stepHitTargetArrow = _resultJdg => {
 			const stepDivHit = document.getElementById(`stepHit${_j}`);
-			stepDivHit.style.top = wUnit(currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15 + g_workObj.hitPosition * g_workObj.scrollDir[_j]);
+			stepDivHit.style.top = wUnit(
+				currentArrow.prevY - parseFloat($id(`stepRoot${_j}`).top) - 15 + g_workObj.hitPosition * g_workObj.scrollDir[_j]
+			);
 			stepDivHit.style.opacity = 0.75;
 			stepDivHit.classList.value = ``;
 			stepDivHit.classList.add(g_cssObj[`main_step${_resultJdg}`]);
 			stepDivHit.setAttribute(`cnt`, C_FRM_HITMOTION);
 		};
 
-		if (g_stateObj.excessive === C_FLG_ON && _difFrame <= g_judgObj.arrowJ[g_judgPosObj.uwan] && _difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+		if (g_stateObj.excessive === C_FLG_ON &&
+			_difFrame <= g_judgObj.arrowJ[g_judgPosObj.uwan] &&
+			_difFrame > g_judgObj.arrowJ[g_judgPosObj.shobon]) {
 			// 空押し判定（有効かつ早押し時のみ）
 			displayDiff(_difFrame);
 			stepHitTargetArrow(`Excessive`);

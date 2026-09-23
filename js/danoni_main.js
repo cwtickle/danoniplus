@@ -4,19 +4,20 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/09/15
+ * Revised : 2026/09/23
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 50.5.1`;
-const g_revisedDate = `2026/09/15`;
+const g_version = `Ver 51.0.0`;
+const g_revisedDate = `2026/09/23`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
 let g_localVersion2 = ``;
 
 // ショートカット用文字列(↓の文字列を検索することで対象箇所へジャンプできます)
-//  共通:water 初期化:peach タイトル:melon データ管理:pear 前提条件表示:mango 設定:lime ディスプレイ:lemon 拡張設定:apple キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
+//  共通:water 初期化:peach タイトル:melon データ管理:pear 前提条件表示:mango 
+//  設定:lime ディスプレイ:lemon 拡張設定:apple キーコンフィグ:orange 譜面読込:strawberry メイン:banana 結果:grape
 //  シーンジャンプ:Scene
 
 /**
@@ -2140,7 +2141,9 @@ const fillCanvasText = (_ctx, _text, _x, _y, { siz = 15, font, color, align = C_
  */
 const createImg = (_id, _imgPath, _x, _y, _width, _height) => {
 	const div = createDiv(_id, _x, _y, _width, _height);
-	div.innerHTML = `<img id="${_id}img" src="${_imgPath}" style="width:${wUnit(_width)};height:${wUnit(_height)}"${g_isFile ? `` : ` crossOrigin="anonimous"`}>`;
+	div.innerHTML =
+		`<img id="${_id}img" src="${_imgPath}" style="width:${wUnit(_width)};height:${wUnit(_height)}"` +
+		`${g_isFile ? `` : ` crossOrigin="anonimous"`}>`;
 
 	return div;
 };
@@ -2562,7 +2565,9 @@ const makeWarningWindow = (_text = ``, { resetFlg = false, backBtnUse = false } 
  * @param {number} [object._y=0]
  * @param {number} [object._w=g_btnWidth()]
  */
-const makeInfoWindow = (_text, _animationName = ``, { _backColor = `#ccccff`, _textColor = `#000066`, _pointerEvents = C_DIS_NONE, _x = g_btnX(), _y = 0, _w = g_btnWidth() } = {}) => {
+const makeInfoWindow = (_text, _animationName = ``, {
+	_backColor = `#ccccff`, _textColor = `#000066`, _pointerEvents = C_DIS_NONE, _x = g_btnX(), _y = 0, _w = g_btnWidth()
+} = {}) => {
 	const lblWarning = setWindowStyle(`<p>${_text}</p>`, _backColor, _textColor, C_ALIGN_CENTER, { _x, _y, _w });
 	lblWarning.style.pointerEvents = _pointerEvents;
 

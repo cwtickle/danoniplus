@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/09/13 (v50.5.0)
+ * Revised : 2026/09/23 (v51.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1322,32 +1322,57 @@ const C_LFE_CUSTOM = `Custom`;
 const C_LFE_MAXLIFE = `maxLife`;
 
 /**
- * ゲージ初期設定
+ * 汎用ゲージの定義（g_presetObj.gauge/gaugeCustomと同じBorder/Recovery/Damage/Initに
+ * Variable（回復・ダメージ量が矢印数等で変動:ON／固定:OFF）を加えた5項目のみ）
+ * headerOverridable: 譜面ヘッダー(difData)による上書き対象（Step3）かどうか
+ * deriveRecoveryFrom: difDataしか参照値が無い場合のみ、参照元ゲージの回復量を2倍にして使う
  */
+const g_gaugeDefObj = {
+    Original: { Border: `x`, Recovery: 6, Damage: 40, Init: 25, Variable: C_FLG_OFF, headerOverridable: true },
+    Heavy: { Border: `x`, Recovery: 2, Damage: 50, Init: 50, Variable: C_FLG_OFF },
+    NoRecovery: { Border: `x`, Recovery: 0, Damage: 50, Init: 100, Variable: C_FLG_OFF },
+    SuddenDeath: { Border: `x`, Recovery: 0, Damage: C_LFE_MAXLIFE, Init: 100, Variable: C_FLG_OFF },
+    Practice: { Border: `x`, Recovery: 0, Damage: 0, Init: 50, Variable: C_FLG_OFF },
+    Light: { Border: `x`, Recovery: 12, Damage: 40, Init: 25, Variable: C_FLG_OFF, headerOverridable: true, deriveRecoveryFrom: `Original` },
+
+    Normal: { Border: 70, Recovery: 2, Damage: 7, Init: 25, Variable: C_FLG_ON, headerOverridable: true },
+    Hard: { Border: 0, Recovery: 1, Damage: 50, Init: 100, Variable: C_FLG_ON },
+    Easy: { Border: 70, Recovery: 4, Damage: 7, Init: 25, Variable: C_FLG_ON, headerOverridable: true, deriveRecoveryFrom: `Normal` },
+};
+
+/**
+ * カスタムゲージの選択状態・個別上書き値
+ * - g_gaugeSelObj[scoreId] = {
+ *   __order: [名前, ...],         // customGauge指定時のみ存在。並び順がそのままカーソル移動の順序
+ *   名前: { 上書きプロパティ },    // customGaugeのインライン指定なら{Variable}のみ、
+ *                                  // gaugeXXXヘッダー由来なら{Border,Recovery,Damage,Init}を含む
+ * }
+ * - 'default'キー：g_presetObj.gaugeList由来の、譜面指定が無い場合の共通デフォルト（同じ形）
+ *   上書きプロパティは常にg_gaugeDefObj[名前]とマージして使う（Border等が無ければg_gaugeDefObjの値を使う）
+ *
+ * - 例：
+ * g_gaugeSelObj = {
+ *   default: { 
+ *     __order: [`Original`, `Normal`],
+ *     Original: { Variable: C_FLG_OFF },
+ *   },
+ *   0: {
+ *     __order: [],  // カスタムゲージ未定義 (difDataの定義もしくはデフォルト値を使用)
+ *   },
+ *   1: {
+ *     __order: [`Escape`, `Normal`],
+ *     Escape: { Variable: C_FLG_ON,  Border: 0,  Recovery: 1, Damage: 100, Init: 100 }, // |customGauge2=Escape::V|gaugeEscape2=0,1,100,100|
+ *     Normal: { Variable: C_FLG_OFF, Border: 75, Recovery: 3, Damage: 7, Init: 25 },    // |customGauge2=Normal::F|gaugeNormal2=75,3,7,25|
+ *   },
+ * };
+ */
+const g_gaugeSelObj = {};
+
+/** どの名前をどの順で選択肢に出すかだけを持つ。詳細値はg_gaugeDefObjやg_gaugeSelObjを参照 */
 const g_gaugeOptionObj = {
     survival: [`Original`, `Heavy`, `NoRecovery`, `SuddenDeath`, `Practice`, `Light`],
     border: [`Normal`, `Hard`, `SuddenDeath`, `Easy`],
-    custom: [],
-    customDefault: [],
     customFulls: {},
-
-    initSurvival: [25, 50, 100, 100, 50, 25],
-    rcvSurvival: [6, 2, 0, 0, 0, 12],
-    dmgSurvival: [40, 50, 50, C_LFE_MAXLIFE, 0, 40],
-    typeSurvival: [C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL, C_LFE_SURVIVAL],
-    varSurvival: [C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF, C_FLG_OFF],
-    clearSurvival: [0, 0, 0, 0, 0, 0],
-
-    initBorder: [25, 100, 100, 25],
-    rcvBorder: [2, 1, 0, 4],
-    dmgBorder: [7, 50, C_LFE_MAXLIFE, 7],
-    typeBorder: [C_LFE_BORDER, C_LFE_BORDER, C_LFE_SURVIVAL, C_LFE_BORDER],
-    varBorder: [C_FLG_ON, C_FLG_ON, C_FLG_OFF, C_FLG_ON],
-    clearBorder: [70, 0, 0, 70],
-
-    varCustom: [],
-    varCustomDefault: [],
-    defaultList: [`survival`, `border`],
     defaultPlusList: [`survival`, `border`, `customDefault`],
 };
 let g_gaugeType;
@@ -1506,7 +1531,7 @@ const g_settings = {
     settingWindowNum: 0,
 
     preconditions: [`g_rootObj`, `g_headerObj`, `g_keyObj`, `g_scoreObj`, `g_workObj`,
-        `g_detailObj`, `g_stateObj`, `g_attrObj`, `g_editorTmp`, `g_editorTmp2`],
+        `g_detailObj`, `g_stateObj`, `g_attrObj`, `g_gaugeDefObj`, `g_gaugeSelObj`, `g_editorTmp`, `g_editorTmp2`],
     preconditionNum: 0,
     preconditionNumSub: 0,
 };
@@ -5302,6 +5327,8 @@ const g_root = {
     get g_imgObj() { return g_imgObj },
     get g_judgObj() { return g_judgObj },
     get g_judgRanges() { return g_judgRanges },
+    get g_gaugeDefObj() { return g_gaugeDefObj },
+    get g_gaugeSelObj() { return g_gaugeSelObj },
 };
 const getPathVal = _path => _path.split(`.`).reduce((o, k) => o?.[k], g_root);
 const setPathVal = (_path, _value) => {

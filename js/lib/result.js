@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/09/15 (v50.5.1)
+ * Revised : 2026/09/23 (v51.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -174,8 +174,10 @@ const resultInit = () => {
 	// キャラクタ、スコア描画
 	Object.keys(jdgScoreObj).forEach(score =>
 		multiAppend(resultWindow,
-			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}`, 0, g_cssObj[`common_${jdgScoreObj[score].color}`], jdgScoreObj[score].pos, jdgScoreObj[score].label),
-			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}S`, 50, g_cssObj.common_score, jdgScoreObj[score].pos, g_resultObj[score], C_ALIGN_RIGHT),
+			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}`, 0,
+				g_cssObj[`common_${jdgScoreObj[score].color}`], jdgScoreObj[score].pos, jdgScoreObj[score].label),
+			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}S`, 50,
+				g_cssObj.common_score, jdgScoreObj[score].pos, g_resultObj[score], C_ALIGN_RIGHT),
 		));
 	if (g_stateObj.autoAll === C_FLG_OFF) {
 		const [lblPosX, dataPosX] = [350, 260];
@@ -249,9 +251,12 @@ const resultInit = () => {
 		// ハイスコア差分描画
 		Object.keys(jdgScoreObj).filter(score => score !== `score`).forEach(score =>
 			multiAppend(resultWindow,
-				makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L1`, C_RLT_BRACKET_L, g_cssObj.result_scoreHiBlanket, jdgScoreObj[score].pos, `(+`),
-				makeCssResultSymbol(`lbl${jdgScoreObj[score].id}LS`, C_RLT_HIDIF_X, g_cssObj.result_scoreHi, jdgScoreObj[score].pos, 0, C_ALIGN_RIGHT),
-				makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L2`, C_RLT_BRACKET_R, g_cssObj.result_scoreHiBlanket, jdgScoreObj[score].pos, `)`),
+				makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L1`, C_RLT_BRACKET_L,
+					g_cssObj.result_scoreHiBlanket, jdgScoreObj[score].pos, `(+`),
+				makeCssResultSymbol(`lbl${jdgScoreObj[score].id}LS`, C_RLT_HIDIF_X,
+					g_cssObj.result_scoreHi, jdgScoreObj[score].pos, 0, C_ALIGN_RIGHT),
+				makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L2`, C_RLT_BRACKET_R,
+					g_cssObj.result_scoreHiBlanket, jdgScoreObj[score].pos, `)`),
 			));
 
 	} else {
@@ -261,7 +266,8 @@ const resultInit = () => {
 	}
 
 	// ゲージ推移グラフの描画
-	const gaugeTransitionWindow = createEmptySprite(divRoot, `gaugeTransitionWindow`, g_windowObj.gaugeTransition, g_cssObj.result_PlayDataWindow);
+	const gaugeTransitionWindow = createEmptySprite(divRoot, `gaugeTransitionWindow`,
+		g_windowObj.gaugeTransition, g_cssObj.result_PlayDataWindow);
 	for (let j = 0; j < 2; j++) {
 		gaugeTransitionWindow.appendChild(
 			createCanvas(`graphGaugeTransition${j > 0 ? j + 1 : ``}`, {
@@ -327,7 +333,8 @@ const resultInit = () => {
 	context.lineWidth = 2;
 
 	let preX, preY;
-	const borderY = (g_limitObj.gaugeTransitionHeight - 2) - g_workObj.lifeBorder * (g_limitObj.gaugeTransitionHeight - 2) / g_headerObj.maxLifeVal + 1;
+	const borderY = (g_limitObj.gaugeTransitionHeight - 2) - g_workObj.lifeBorder *
+		(g_limitObj.gaugeTransitionHeight - 2) / g_headerObj.maxLifeVal + 1;
 
 	for (let i = 0; i < frame.length; i++) {
 		const x = frame[i] * g_limitObj.gaugeTransitionWidth / playingFrame;
@@ -509,11 +516,14 @@ const resultInit = () => {
 			const jdgScore = jdgScoreObj[score];
 			if (score === `score`) {
 				multiAppend(resultWindow,
-					makeCssResultSymbol(`lbl${jdgScore.id}L1`, C_RLT_BRACKET_L, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
+					makeCssResultSymbol(`lbl${jdgScore.id}L1`, C_RLT_BRACKET_L,
+						`${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
 						jdgScore.pos, `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`),
-					makeCssResultSymbol(`lbl${jdgScore.id}LS`, C_RLT_HIDIF_X, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`,
+					makeCssResultSymbol(`lbl${jdgScore.id}LS`, C_RLT_HIDIF_X,
+						`${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`,
 						jdgScore.pos, Math.abs(highscoreDfObj[score]), C_ALIGN_RIGHT),
-					makeCssResultSymbol(`lbl${jdgScore.id}L2`, C_RLT_BRACKET_R, `${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
+					makeCssResultSymbol(`lbl${jdgScore.id}L2`, C_RLT_BRACKET_R,
+						`${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
 						jdgScore.pos, `)`),
 				);
 			} else {
@@ -529,7 +539,8 @@ const resultInit = () => {
 	const hashTag = (hasVal(g_headerObj.hashTag) ? ` ${g_headerObj.hashTag}` : ``);
 	const keyUnitName = getStgDetailName(getKeyUnitName(g_keyObj.currentKey));
 	const keyUnitAbbName = keyUnitName.slice(0, 1) || ``;
-	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName}${getStgDetailName(keyUnitAbbName + '-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
+	let tweetDifData = `${getKeyName(g_headerObj.keyLabels[g_stateObj.scoreId])}${transKeyName}` +
+		`${getStgDetailName(keyUnitAbbName + '-')}${g_headerObj.difLabels[g_stateObj.scoreId]}${assistFlg}`;
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${shuffleName}`;
 	}
@@ -591,7 +602,8 @@ const resultInit = () => {
 			{ x: 280, dy: -15, hy: 0, siz: 20, color: `#999999`, align: C_ALIGN_CENTER });
 		drawText(unEscapeHtml(mTitleForView[0]), { hy: 1 });
 		drawText(unEscapeHtml(mTitleForView[1]), { hy: 2 });
-		drawText(`${getEmojiForCanvas(g_emojiObj.memo)} ${unEscapeHtml(g_headerObj.tuning)} / ${getEmojiForCanvas(g_emojiObj.musical)} ${unEscapeHtml(artistName)}`,
+		drawText(`${getEmojiForCanvas(g_emojiObj.memo)} ${unEscapeHtml(g_headerObj.tuning)} / ` +
+			`${getEmojiForCanvas(g_emojiObj.musical)} ${unEscapeHtml(artistName)}`,
 			{ hy: mTitleForView[1] !== `` ? 3 : 2, siz: 12 });
 		drawText(unEscapeHtml(settingData.difDataForImage), { hy: 4, siz: getFontSize2(settingData.difDataForImage, flapWidth) });
 

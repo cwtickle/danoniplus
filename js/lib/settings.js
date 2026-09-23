@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/09/15 (v50.5.1)
+ * Revised : 2026/09/23 (v51.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -115,11 +115,17 @@ const updateSettingSummary = () => {
 	if (document.getElementById(`settingSumSprite`) === null) return;
 	const orgShuffleFlg = getOrgShuffleFlg();
 	const settingData = getSelectedSettingList(orgShuffleFlg);
-	const estimatedHighscoreCondition = g_stateObj.dataSaveFlg && (g_stateObj.autoPlay !== C_FLG_ALL && g_headerObj.playbackRate === 1 && g_stateObj.fadein < 10 &&
-		(g_stateObj.shuffle === C_FLG_OFF || (g_stateObj.shuffle.endsWith(`Mirror`) && orgShuffleFlg)));
+	const estimatedHighscoreCondition =
+		g_stateObj.dataSaveFlg &&
+		g_stateObj.autoPlay !== C_FLG_ALL &&
+		g_headerObj.playbackRate === 1 &&
+		g_stateObj.fadein < 10 &&
+		(g_stateObj.shuffle === C_FLG_OFF || (g_stateObj.shuffle.endsWith(`Mirror`) && orgShuffleFlg));
 
-	document.getElementById(`lblSummaryDifInfo`).innerHTML = settingData.difData + `${estimatedHighscoreCondition ? '' : ` | <span class="common_auto common_bold">No Records</span>`}`;
-	document.getElementById(`lblSummaryPlaystyleInfo`).textContent = settingData.playStyleData + `${g_stateObj.excessive === C_FLG_ON ? ' | Excessive' : ''}`;
+	document.getElementById(`lblSummaryDifInfo`).innerHTML =
+		settingData.difData + `${estimatedHighscoreCondition ? '' : ` | <span class="common_auto common_bold">No Records</span>`}`;
+	document.getElementById(`lblSummaryPlaystyleInfo`).textContent =
+		settingData.playStyleData + `${g_stateObj.excessive === C_FLG_ON ? ' | Excessive' : ''}`;
 	document.getElementById(`lblSummaryDisplayInfo`).textContent = settingData.displayData;
 	document.getElementById(`lblSummaryDisplay2Info`).textContent = settingData.display2Data;
 	document.getElementById(`lblSummaryEnvironment`).textContent =
@@ -585,8 +591,12 @@ const drawDensityGraph = _scoreId => {
 	for (let j = 0; j < g_limitObj.densityDivision; j++) {
 		context.beginPath();
 		[``, `2Push`, `3Push`].forEach(val => {
-			context.fillStyle = (g_detailObj.maxDensity[_scoreId].includes(j) ? g_graphColorObj[`max${val}`] : g_graphColorObj[`default${val}`]);
-			context.fillRect(16 * j * 16 / g_limitObj.densityDivision + 30, 195 - 9 * g_detailObj[`density${val}Data`][_scoreId][j] / 10,
+			context.fillStyle = (g_detailObj.maxDensity[_scoreId].includes(j)
+				? g_graphColorObj[`max${val}`]
+				: g_graphColorObj[`default${val}`]
+			);
+			context.fillRect(16 * j * 16 / g_limitObj.densityDivision + 30,
+				195 - 9 * g_detailObj[`density${val}Data`][_scoreId][j] / 10,
 				15.5 * 16 / g_limitObj.densityDivision, 9 * g_detailObj[`density${val}Diff`][_scoreId][j] / 10
 			);
 		});
@@ -610,7 +620,8 @@ const drawDensityGraph = _scoreId => {
 	updateScoreDetailLabel(`Density`, `APM`, obj.apm, 0, g_lblNameObj.s_apm);
 	updateScoreDetailLabel(`Density`, `Time`, obj.playingTime, 1, g_lblNameObj.s_time);
 	updateScoreDetailLabel(`Density`, `Arrow`, obj.arrowCnts, 3, g_lblNameObj.s_arrow);
-	updateScoreDetailLabel(`Density`, `Frz`, obj.frzCnts, 4, `${g_lblNameObj.s_frz}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">(2x)</span>' : ''}`);
+	updateScoreDetailLabel(`Density`, `Frz`, obj.frzCnts, 4,
+		`${g_lblNameObj.s_frz}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">(2x)</span>' : ''}`);
 };
 
 /**
@@ -759,7 +770,10 @@ const makeDifInfo = _scoreId => {
 
 	const arrowCnts = sumData(g_detailObj.arrowCnt[_scoreId]);
 	const frzCnts = sumData(g_detailObj.frzCnt[_scoreId].map(val => Math.floor(val)));
-	const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0 ? `None` : `(${g_detailObj.toolDif[_scoreId].push3.join(', ')})`);
+	const push3CntStr = (g_detailObj.toolDif[_scoreId].push3.length === 0
+		? `None`
+		: `(${g_detailObj.toolDif[_scoreId].push3.join(', ')})`
+	);
 
 	if (document.getElementById(`lblTooldif`) === null) {
 		makeDifInfoLabels(_scoreId);
@@ -769,8 +783,11 @@ const makeDifInfo = _scoreId => {
 	dataTate.textContent = g_detailObj.toolDif[_scoreId].tate;
 	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`)
 		.join(`${makeDedupliArray(g_detailObj.toolDif[_scoreId].push3).length} /cnt:${g_detailObj.toolDif[_scoreId].push3cnt}`);
-	dataArrowInfo.innerHTML = `${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1)} 
-	<span style="font-size:${wUnit(g_limitObj.difSelectorSiz)};">(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''})</span>`;
+	dataArrowInfo.innerHTML =
+		`${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1)} ` +
+		`<span style="font-size:${wUnit(g_limitObj.difSelectorSiz)};">` +
+		`(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''})` +
+		`</span>`;
 
 	const makeArrowCntsView = (_cntlist) => {
 		const targetKey = g_headerObj.keyLabels[_scoreId];
@@ -789,8 +806,9 @@ const makeDifInfo = _scoreId => {
 			cntlistStr += `[ `;
 			array.forEach((val, j) => {
 				if (maxVal !== minVal) {
-					array[j] = (val === minVal ? `<span class="settings_minArrowCnts">${val}</span>` :
-						(val === maxVal ? `<span class="settings_maxArrowCnts common_bold">${val}</span>` : val));
+					array[j] = (val === minVal
+						? `<span class="settings_minArrowCnts">${val}</span>`
+						: (val === maxVal ? `<span class="settings_maxArrowCnts common_bold">${val}</span>` : val));
 				}
 				if (val - Math.floor(val) > 0) {
 					array[j] = `<span class="keyconfig_warning">${val}</span>`;
@@ -840,7 +858,9 @@ const makeHighScore = _scoreId => {
 		}
 	}
 
-	const createScoreLabel = (_id, _text, { xPos = 0, yPos = 0, dx = 0, w = 150, h = 17, colorName = _id, align = C_ALIGN_LEFT, overflow = `visible` } = {}) =>
+	const createScoreLabel = (_id, _text, {
+		xPos = 0, yPos = 0, dx = 0, w = 150, h = 17, colorName = _id, align = C_ALIGN_LEFT, overflow = `visible`
+	} = {}) =>
 		createDivCss2Label(`lblH${toCapitalize(_id)}`, _text, {
 			x: xPos * 150 + 130 + dx, y: yPos * 16 + 5, w, h, siz: 14, align, overflow,
 		}, g_cssObj[`common_${colorName}`]);
@@ -898,12 +918,24 @@ const makeHighScore = _scoreId => {
 		createScoreLabel(`lblHMarks`,
 			`${g_localStorage.highscores?.[scoreName]?.fullCombo ?? '' ? '<span class="result_FullCombo">◆</span>' : ''}` +
 			`${g_localStorage.highscores?.[scoreName]?.perfect ?? '' ? '<span class="result_Perfect">◆</span>' : ''}` +
-			`${g_localStorage.highscores?.[scoreName]?.allPerfect ?? '' ? '<span class="result_AllPerfect">◆</span>' : ''}`, { xPos: 1, dx: 20, yPos: 12, w: 100, align: C_ALIGN_CENTER }),
-		createScoreLabel(`lblHClearLamps`, `Cleared: ` + (g_localStorage.highscores?.[scoreName]?.clearLamps?.join(', ') ?? C_FLG_HYPHEN), { yPos: 13, overflow: C_DIS_AUTO, w: g_sWidth / 2 + 40, h: 37 }),
+			`${g_localStorage.highscores?.[scoreName]?.allPerfect ?? '' ? '<span class="result_AllPerfect">◆</span>' : ''}`,
+			{ xPos: 1, dx: 20, yPos: 12, w: 100, align: C_ALIGN_CENTER }),
+		createScoreLabel(`lblHClearLamps`,
+			`Cleared: ` + (g_localStorage.highscores?.[scoreName]?.clearLamps?.join(', ') ?? C_FLG_HYPHEN),
+			{ yPos: 13, overflow: C_DIS_AUTO, w: g_sWidth / 2 + 40, h: 37 }),
 
-		createScoreLabel(`lblHShuffle`, g_stateObj.shuffle.indexOf(`Mirror`) < 0 ? `` : `Shuffle: <span class="common_shuffle">${g_stateObj.shuffle}</span>`, { yPos: 11.5, dx: -130 }),
-		createScoreLabel(`lblHAssist`, g_autoPlaysBase.includes(g_stateObj.autoPlay) ? `` : `Assist: <span class="common_assist">${g_stateObj.autoPlay}</span>`, { yPos: 12.5, dx: -130 }),
-		createScoreLabel(`lblHAnother`, !hasVal(g_keyObj[`transKey${keyCtrlPtn}`]) ? `` : `A.Keymode: <span class="common_another">${g_keyObj[`transKey${keyCtrlPtn}`]}</span>`, { yPos: 13.5, dx: -130 }),
+		createScoreLabel(`lblHShuffle`,
+			g_stateObj.shuffle.indexOf(`Mirror`) < 0
+				? `` : `Shuffle: <span class="common_shuffle">${g_stateObj.shuffle}</span>`,
+			{ yPos: 11.5, dx: -130 }),
+		createScoreLabel(`lblHAssist`,
+			g_autoPlaysBase.includes(g_stateObj.autoPlay)
+				? `` : `Assist: <span class="common_assist">${g_stateObj.autoPlay}</span>`,
+			{ yPos: 12.5, dx: -130 }),
+		createScoreLabel(`lblHAnother`,
+			!hasVal(g_keyObj[`transKey${keyCtrlPtn}`])
+				? `` : `A.Keymode: <span class="common_another">${g_keyObj[`transKey${keyCtrlPtn}`]}</span>`,
+			{ yPos: 13.5, dx: -130 }),
 	);
 
 	// 結果をクリップボードへコピー (ハイスコア保存分)
@@ -1297,17 +1329,18 @@ const applyTransKeySelfPattern = () => {
  * - [キーコン]->[初期化]->[名称設定]の順に配置する。
  *   初期化処理にてキー数関連の設定を行っているため、この順序で無いとデータが正しく格納されない
  * 
- * @param {boolean} _initFlg
+ * @param {boolean} _chartChangeFlg
  */
-const setDifficulty = (_initFlg) => {
+const setDifficulty = (_chartChangeFlg) => {
+	const scoreId = g_stateObj.scoreId;
 
 	// ---------------------------------------------------
 	// 1. キーコンフィグ設定 (KeyConfig)
-	g_keyObj.currentKey = g_headerObj.keyLabels[g_stateObj.scoreId];
+	g_keyObj.currentKey = g_headerObj.keyLabels[scoreId];
 	const isNotSameKey = (g_keyObj.prevKey !== g_keyObj.currentKey);
 
 	if (g_headerObj.dummyScoreNos !== undefined) {
-		g_stateObj.dummyId = setIntVal(g_headerObj.dummyScoreNos[g_stateObj.scoreId], ``);
+		g_stateObj.dummyId = setIntVal(g_headerObj.dummyScoreNos[scoreId], ``);
 	}
 	// 特殊キーフラグ
 	g_stateObj.extraKeyFlg = g_headerObj.keyExtraList.includes(g_keyObj.currentKey);
@@ -1317,13 +1350,15 @@ const setDifficulty = (_initFlg) => {
 
 	// 保存した設定の再読込条件（設定画面切り替え時はスキップ）
 	// ローカルストレージで保存した設定を呼び出し
-	if ((g_canLoadDifInfoFlg && (isNotSameKey && g_stateObj.dataSaveFlg)) || _initFlg) {
+	let keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	if ((g_canLoadDifInfoFlg && (isNotSameKey && g_stateObj.dataSaveFlg)) || _chartChangeFlg) {
 
 		if (isNotSameKey && g_keyObj.prevKey !== `Dummy`) {
 			// キーパターン初期化
 			g_keyObj.currentPtn = 0;
 			g_keycons.keySwitchNum = 0;
 		}
+		keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
 		const [storageObj, addKey] = getKeyStorageObjByName(g_keyObj.currentKey);
 		if (isNotSameKey) {
 			if (!g_stateObj.extraKeyFlg) {
@@ -1353,8 +1388,6 @@ const setDifficulty = (_initFlg) => {
 				g_keycons.colorTypes = g_keycons.colorTypes.filter(val => val !== g_keycons.colorSelf);
 			}
 
-			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-
 			// カラーグループ、シャッフルグループの設定
 			g_keycons.groups.forEach(type => {
 				resetGroupList(type, keyCtrlPtn);
@@ -1376,21 +1409,24 @@ const setDifficulty = (_initFlg) => {
 
 	// スクロール設定用の配列を入れ替え
 	g_settings.scrolls = structuredClone(
-		typeof g_keyObj[`scrollDir${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] === C_TYP_OBJECT ?
-			Object.keys(g_keyObj[`scrollDir${g_keyObj.currentKey}_${g_keyObj.currentPtn}`]) : g_keyObj.scrollName_def
+		typeof g_keyObj[`scrollDir${keyCtrlPtn}`] === C_TYP_OBJECT
+			? Object.keys(g_keyObj[`scrollDir${keyCtrlPtn}`])
+			: g_keyObj.scrollName_def
 	);
 
 	// アシスト設定の配列を入れ替え
-	g_settings.autoPlays = (typeof g_keyObj[`assistPos${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] === C_TYP_OBJECT ?
-		g_autoPlaysBase.concat(Object.keys(g_keyObj[`assistPos${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])) :
-		g_autoPlaysBase.concat());
+	g_settings.autoPlays = (
+		typeof g_keyObj[`assistPos${keyCtrlPtn}`] === C_TYP_OBJECT
+			? g_autoPlaysBase.concat(Object.keys(g_keyObj[`assistPos${keyCtrlPtn}`]))
+			: g_autoPlaysBase.concat()
+	);
 
 	// ゲージ設定及びカーソル位置調整
-	setGauge(0, true);
+	setGauge(0, !g_canLoadDifInfoFlg);
 
 	// 速度、スクロール、アシスト設定のカーソル位置調整
-	if (_initFlg) {
-		g_stateObj.speed = g_headerObj.initSpeeds[g_stateObj.scoreId];
+	if (_chartChangeFlg) {
+		g_stateObj.speed = g_headerObj.initSpeeds[scoreId];
 		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
 	}
 	g_settings.scrollNum = getCurrentNo(g_settings.scrolls, g_stateObj.scroll);
@@ -1398,8 +1434,9 @@ const setDifficulty = (_initFlg) => {
 
 
 	// 選択中のキーのヘルプ表示
-	const targetKeymode = hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])
-		? g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] : g_keyObj.currentKey;
+	const targetKeymode = hasVal(g_keyObj[`transKey${keyCtrlPtn}`])
+		? g_keyObj[`transKey${keyCtrlPtn}`]
+		: g_keyObj.currentKey;
 	btnKeymodeHelp.classList.remove(g_cssObj.button_Setting, g_cssObj.button_Tweet);
 	btnKeymodeHelp.classList.add(
 		g_cssObj[`button_${targetKeymode !== g_keyObj.currentKey
@@ -1419,14 +1456,14 @@ const setDifficulty = (_initFlg) => {
 	const keyUnitName = getStgDetailName(getKeyUnitName(g_keyObj.currentKey));
 
 	const prefix = `${getKeyName(g_keyObj.currentKey)}${transKeyName} ${keyUnitName} / `;
-	let difLabel = `${g_headerObj.difLabels[g_stateObj.scoreId]}`;
+	let difLabel = `${g_headerObj.difLabels[scoreId]}`;
 
 	const [difName, difSiz] = getFontSizeMulti(difLabel, difWidth, { maxSiz: g_limitObj.setLblSiz, prefix });
 	lnkDifficulty.style.fontSize = wUnit(difSiz);
 
 	const difNames = [difName];
 	if (g_headerObj.makerView) {
-		difNames.push(`(${g_headerObj.creatorNames[g_stateObj.scoreId]})`);
+		difNames.push(`(${g_headerObj.creatorNames[scoreId]})`);
 		difNames.forEach((difName, j) => {
 			const tmpSize = getFontSize2(difName, difWidth);
 			difNames[j] = `<span style="font-size:${wUnit(tmpSize)}">${difName}</span>`;
@@ -1461,28 +1498,28 @@ const setDifficulty = (_initFlg) => {
 	lnkAutoPlay.textContent = getStgDetailName(g_stateObj.autoPlay);
 
 	// 譜面毎のExcessive再設定（意図的に変更した場合のみ元に戻さない）
-	if (g_canLoadDifInfoFlg && (g_stateObj.excessiveScoreId !== g_stateObj.scoreId)) {
-		g_headerObj.excessiveJdgUse = g_headerObj.excessiveJdgUses[g_stateObj.scoreId];
+	if (g_canLoadDifInfoFlg && (g_stateObj.excessiveScoreId !== scoreId)) {
+		g_headerObj.excessiveJdgUse = g_headerObj.excessiveJdgUses[scoreId];
 		g_stateObj.excessive = boolToSwitch(g_headerObj.excessiveJdgUse);
 	}
-	g_headerObj.excessiveUse = g_headerObj.excessiveUses[g_stateObj.scoreId];
+	g_headerObj.excessiveUse = g_headerObj.excessiveUses[scoreId];
 	if (g_headerObj.excessiveUse) {
 		setExcessive(document.getElementById(`lnkExcessive`), g_stateObj.excessive === C_FLG_ON);
 		lblExcessive.style.display = C_DIS_NONE;
 		lnkExcessive.style.display = C_DIS_INHERIT;
 	} else {
 		g_stateObj.excessiveChgFlg = false;
-		lblExcessive.style.display = (g_headerObj.excessiveJdgUses[g_stateObj.scoreId] ? C_DIS_INHERIT : C_DIS_NONE);
+		lblExcessive.style.display = (g_headerObj.excessiveJdgUses[scoreId] ? C_DIS_INHERIT : C_DIS_NONE);
 		lnkExcessive.style.display = C_DIS_NONE;
 	}
 
 	// 譜面明細画面の再描画
 	if (g_settings.scoreDetails.length > 0) {
-		drawSpeedGraph(g_stateObj.scoreId);
-		drawDensityGraph(g_stateObj.scoreId);
-		makeDifInfo(g_stateObj.scoreId);
-		makeHighScore(g_stateObj.scoreId);
-		drawMinimap(g_stateObj.scoreId, { _initFlg: true });
+		drawSpeedGraph(scoreId);
+		drawDensityGraph(scoreId);
+		makeDifInfo(scoreId);
+		makeHighScore(scoreId);
+		drawMinimap(scoreId, { _initFlg: true });
 	}
 
 	// 楽曲データの表示
@@ -1490,7 +1527,7 @@ const setDifficulty = (_initFlg) => {
 	lblMusicInfo.style.fontSize = wUnit(getFontSize2(lblMusicInfo.textContent, g_btnWidth(3 / 4), { maxSiz: 12 }));
 
 	// ユーザカスタムイベント(初期)
-	safeExecuteCustomHooks(`g_customJsObj.difficulty`, g_customJsObj.difficulty, _initFlg, g_canLoadDifInfoFlg);
+	safeExecuteCustomHooks(`g_customJsObj.difficulty`, g_customJsObj.difficulty, _chartChangeFlg, g_canLoadDifInfoFlg);
 	resolveKeyFamily();
 
 	// 設定サマリー表示の更新
@@ -1613,8 +1650,9 @@ const createOptionWindow = _sprite => {
 	}
 	multiAppend(difficultySprite,
 		createCss2Button(`btnKeymodeHelp`, `?`, () => {
-			const targetKeymode = hasVal(g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`])
-				? g_keyObj[`transKey${g_keyObj.currentKey}_${g_keyObj.currentPtn}`] : g_keyObj.currentKey;
+			const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+			const targetKeymode = hasVal(g_keyObj[`transKey${keyCtrlPtn}`])
+				? g_keyObj[`transKey${keyCtrlPtn}`] : g_keyObj.currentKey;
 			openLink(
 				g_keyObj.defaultKeyList.includes(targetKeymode)
 					? g_lblNameObj.keymodeUrl + targetKeymode
@@ -1698,7 +1736,8 @@ const createOptionWindow = _sprite => {
 			// 選択先を表示、ボタン色を選択中に変更
 			// Qキーを押したときのリンク先を次の明細へ変更
 			g_stateObj.scoreDetail = g_settings.scoreDetails[_val];
-			[`option`, `difSelector`, `scoreDetail`].forEach(page => g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[nextPos(_val, 1, g_settings.scoreDetailCursors.length)]);
+			[`option`, `difSelector`, `scoreDetail`].forEach(page =>
+				g_shortcutObj[page].KeyQ.id = g_settings.scoreDetailCursors[nextPos(_val, 1, g_settings.scoreDetailCursors.length)]);
 			g_shortcutObj.scoreDetail.ArrowDown.id = g_settings.scoreDetailCursorsOrg[nextPos(_val, 1, g_settings.scoreDetailCursorsOrg.length)];
 			g_shortcutObj.scoreDetail.ArrowUp.id = g_settings.scoreDetailCursorsOrg[nextPos(_val, -1, g_settings.scoreDetailCursorsOrg.length)];
 
@@ -1858,8 +1897,10 @@ const createOptionWindow = _sprite => {
 					createDivCss2Label(`lnkAdjustment2`, ``, g_lblPosObj.lnkAdjustment2),
 				);
 			}
-			document.getElementById(`lnkAdjustment1`).textContent = `${adjustmentVal}${g_lblNameObj.frame}`;
-			document.getElementById(`lnkAdjustment2`).textContent = `(${g_stateObj.adjustment.toFixed(1)}${g_localStorage.adjustment === g_stateObj.adjustment ? '*' : ''})`;
+			document.getElementById(`lnkAdjustment1`).textContent =
+				`${adjustmentVal}${g_lblNameObj.frame}`;
+			document.getElementById(`lnkAdjustment2`).textContent =
+				`(${g_stateObj.adjustment.toFixed(1)}${g_localStorage.adjustment === g_stateObj.adjustment ? '*' : ''})`;
 		}
 	};
 	viewAdjustment();
@@ -1984,8 +2025,10 @@ const createGeneralSetting = (_obj, _settingName, { unitName = ``,
 		// 右回し・左回しボタン（不可視）
 		if (hiddenBtn) {
 			multiAppend(_obj,
-				makeMiniCssButton(linkId, `HR`, 0, () => setSetting(1, _settingName, { func: () => addRFunc(), unitName, roundNum }), { visibility: `hidden` }),
-				makeMiniCssButton(linkId, `HL`, 0, () => setSetting(-1, _settingName, { func: () => addLFunc(), unitName, roundNum }), { visibility: `hidden` }),
+				makeMiniCssButton(linkId, `HR`, 0, () =>
+					setSetting(1, _settingName, { func: () => addRFunc(), unitName, roundNum }), { visibility: `hidden` }),
+				makeMiniCssButton(linkId, `HL`, 0, () =>
+					setSetting(-1, _settingName, { func: () => addLFunc(), unitName, roundNum }), { visibility: `hidden` }),
 			);
 		}
 
@@ -2054,7 +2097,8 @@ const setSetting = (_scrollNum, _settingName, { func = () => true, unitName = ``
 	g_stateObj[_settingName] = settingList[settingNum];
 	g_settings[`${_settingName}Num`] = settingNum;
 
-	const settingName = `${getStgDetailName(g_stateObj[_settingName])}${unitName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`;
+	const settingName = `${getStgDetailName(g_stateObj[_settingName])}${unitName}` +
+		`${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`;
 	const lnkName = `lnk${toCapitalize(_settingName)}`;
 	document.getElementById(lnkName).textContent = settingName;
 	$id(lnkName).fontSize = wUnit(getFontSize2(settingName, parseFloat($id(lnkName).width), { maxSiz }));
@@ -2120,107 +2164,119 @@ const setReverseView = _btn => {
 	}
 };
 
+// ============================================================
+// ゲージ設定の適用パイプライン（wiki: ゲージ設定適用順仕様）
+// 優先度は「低→高」= 基本設定(g_gaugeDefObj) → 譜面ヘッダー(初期ゲージのみ) → ゲージ個別設定。
+// 下記のapply*/resolve*はsetGaugeから“この順番のまま”呼ばれ、後段が前段を上書きすることで
+// 優先度を表現する。順序の変更は仕様変更を意味する。
+// ============================================================
+
 /**
  * ゲージ設定メイン
- * @param {number} _scrollNum 
- * @param {boolean} _gaugeInitFlg
+ * @param {number} _scrollNum
  */
-const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
+const setGauge = (() => {
 
-	/**
-	 * 数式からゲージ値に変換
-	 * arrow[] -> 矢印数, frz[] -> フリーズアロー数, all[] -> 矢印＋フリーズアロー数に置換する
-	 * @param {string} _val 
-	 * @param {string} _defaultVal
-	 * @returns {number}
-	 */
-	const getGaugeCalc = (_val, _defaultVal) => {
-		return setVal(convertStrToVal(
-			replaceStr(_val, g_escapeStr.gaugeParamName)?.split(`{0}`).join(g_stateObj.scoreId)
-		), _defaultVal, C_TYP_CALC);
-	};
-	/**
-	 * ゲージ詳細一括変更
-	 * @param {object} _baseObj 
-	 * @param {number} object.magInit
-	 * @param {number} object.magRcv
-	 * @param {number} object.magDmg
-	 */
-	const setLifeCategory = (_baseObj, { _magInit = 1, _magRcv = 1, _magDmg = 1 } = {}) => {
-		g_stateObj.lifeInit = getGaugeCalc(_baseObj.lifeInits[g_stateObj.scoreId], g_stateObj.lifeInit) * _magInit;
-		g_stateObj.lifeRcv = getGaugeCalc(_baseObj.lifeRecoverys[g_stateObj.scoreId], g_stateObj.lifeRcv) * _magRcv;
-		g_stateObj.lifeDmg = getGaugeCalc(_baseObj.lifeDamages[g_stateObj.scoreId], g_stateObj.lifeDmg) * _magDmg;
-	};
+	const getGaugeCalc = (_val, _defaultVal) => setVal(convertStrToVal(
+		replaceStr(_val, g_escapeStr.gaugeParamName)?.split(`{0}`).join(g_stateObj.scoreId)
+	), _defaultVal, C_TYP_CALC);
 
-	/**
-	 * ライフモード切替
-	 * @param {object} _baseObj 
-	 */
-	const changeLifeMode = (_baseObj) => {
-		if (_baseObj.lifeBorders[g_stateObj.scoreId] === `x`) {
+	/** Border値からライフ制／ノルマ制を切り替える */
+	const applyLifeModeSwitch = (_border) => {
+		if (_border === `x`) {
 			g_stateObj.lifeBorder = 0;
 			g_stateObj.lifeMode = C_LFE_SURVIVAL;
 		} else {
-			g_stateObj.lifeBorder = getGaugeCalc(_baseObj.lifeBorders[g_stateObj.scoreId], g_stateObj.lifeBorder);
+			g_stateObj.lifeBorder = getGaugeCalc(_border, g_stateObj.lifeBorder);
 			g_stateObj.lifeMode = C_LFE_BORDER;
 		}
 	};
 
-	// ゲージ初期化
+	let currentGaugeSel = null;
 
-	// カスタムゲージの設定取得
-	const defaultCustomGauge = g_gaugeOptionObj.custom0 || g_gaugeOptionObj.customDefault;
-	if (hasVal(defaultCustomGauge)) {
-		g_gaugeOptionObj.custom = (g_gaugeOptionObj[`custom${g_stateObj.scoreId}`] || defaultCustomGauge).concat();
-		g_gaugeOptionObj.varCustom = (g_gaugeOptionObj[`varCustom${g_stateObj.scoreId}`] || g_gaugeOptionObj.varCustom0 || g_gaugeOptionObj.varCustomDefault).concat();
-	}
+	const resolveCustomGaugeSel = () => {
+		currentGaugeSel = g_gaugeSelObj[g_stateObj.scoreId] || g_gaugeSelObj[0] || g_gaugeSelObj.default;
+	};
 
-	// ゲージタイプの設定
-	changeLifeMode(g_headerObj);
-	g_gaugeType = (g_gaugeOptionObj.custom.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
+	/**
+	 * 【Step1】ゲージ種別(g_gaugeType)を確定し、ゲージ配列とカーソル位置を入れ替える
+	 * @param {number} _scrollNum
+	 * @param {boolean} _gaugeInitFlg true時は前回選択していたゲージ名を引き継がず、配列の先頭を強制的に使う
+	 */
+	const resolveGaugeType = (_scrollNum, _gaugeInitFlg) => {
+		applyLifeModeSwitch(g_headerObj.lifeBorders[g_stateObj.scoreId]);
+		g_gaugeType = (currentGaugeSel?.__order?.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
 
-	// ゲージ配列を入れ替え
-	g_settings.gauges = structuredClone(g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
-	g_settings.gaugeNum = getCurrentNo(g_settings.gauges, g_stateObj.gauge);
-	g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
+		g_settings.gauges = structuredClone(g_gaugeType === C_LFE_CUSTOM
+			? currentGaugeSel.__order
+			: g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
+		g_settings.gaugeNum = (_gaugeInitFlg ? 0 : getCurrentNo(g_settings.gauges, g_stateObj.gauge));
+		g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
 
-	setSetting(_scrollNum, `gauge`);
-	g_stateObj.lifeVariable = g_gaugeOptionObj[`var${g_gaugeType}`][g_settings.gaugeNum];
+		setSetting(_scrollNum, `gauge`);
+		g_stateObj.lifeVariable = currentGaugeSel?.[g_stateObj.gauge]?.Variable
+			?? g_gaugeDefObj[g_stateObj.gauge]?.Variable
+			?? C_FLG_OFF;
+	};
 
-	// デフォルトゲージの設定を適用（g_gaugeOptionObjから取得）
-	if (g_settings.gaugeNum !== 0 &&
-		(g_gaugeOptionObj.custom.length === 0 ||
-			g_gaugeOptionObj.defaultList.includes(g_gaugeOptionObj[`defaultGauge${g_stateObj.scoreId}`]))) {
+	/** 【Step2：基本設定】g_gaugeDefObjのカーソル位置に対応する初期設定を適用 */
+	const applyBaseGaugeSettings = () => {
+		const def = g_gaugeDefObj[g_stateObj.gauge];
+		if (!hasVal(def)) return;
+		g_stateObj.lifeMode = (def.Border === `x` ? C_LFE_SURVIVAL : C_LFE_BORDER);
+		g_stateObj.lifeBorder = (def.Border === `x` ? 0 : def.Border);
+		g_stateObj.lifeInit = def.Init;
+		g_stateObj.lifeRcv = def.Recovery;
+		g_stateObj.lifeDmg = def.Damage;
+	};
 
-		const gType = (g_gaugeType === C_LFE_CUSTOM ?
-			toCapitalize(g_gaugeOptionObj[`defaultGauge${g_stateObj.scoreId}`]) : g_gaugeType);
-		const getGaugeVal = _type => g_gaugeOptionObj[`${_type}${gType}`][g_settings.gaugeNum];
-		g_stateObj.lifeMode = getGaugeVal(`type`);
-		g_stateObj.lifeBorder = getGaugeVal(`clear`);
-		g_stateObj.lifeInit = getGaugeVal(`init`);
-		g_stateObj.lifeRcv = getGaugeVal(`rcv`);
-		g_stateObj.lifeDmg = getGaugeVal(`dmg`);
-	}
-
-	// デフォルトゲージの初期設定（Light, Easyでは回復量を2倍にする）
-	if ([`Original`, `Light`, `Normal`, `Easy`].includes(g_stateObj.gauge)) {
-		setLifeCategory(g_headerObj, { _magRcv: [`Light`, `Easy`].includes(g_stateObj.gauge) ? 2 : 1 });
-	}
-
-	// ゲージ設定別に個別設定した場合はここで設定を上書き
-	// 譜面ヘッダー：gaugeXXX で設定した値がここで適用される
-	if (hasVal(g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`])) {
-		const tmpGaugeObj = g_gaugeOptionObj[`gauge${g_stateObj.gauge}s`];
-		if (hasVal(tmpGaugeObj.lifeBorders[g_stateObj.scoreId])) {
-			changeLifeMode(tmpGaugeObj);
+	/** 【Step3：譜面ヘッダー】headerOverridable指定ゲージのみ、difData由来の値で上書き */
+	const applyHeaderGaugeSettings = () => {
+		const def = g_gaugeDefObj[g_stateObj.gauge];
+		if (!def?.headerOverridable) return;
+		if (g_gaugeType === C_LFE_CUSTOM) {
+			// カスタム選択でOriginal/Normal等headerOverridable対象が複数混在する場合、
+			// difDataは1つしか値を持たないため、選択順で最初に出てきた「系統」だけに適用する。
+			// Light/EasyはOriginal/Normalの系統として扱う（deriveRecoveryFromで判定）
+			const getGaugeRoot = _name => g_gaugeDefObj[_name]?.deriveRecoveryFrom ?? _name;
+			const firstOverridableRoot = getGaugeRoot(
+				g_settings.gauges.find(name => g_gaugeDefObj[name]?.headerOverridable)
+			);
+			if (getGaugeRoot(g_stateObj.gauge) !== firstOverridableRoot) return;
 		}
-		setLifeCategory(tmpGaugeObj);
-	}
+		g_stateObj.lifeInit = getGaugeCalc(g_headerObj.lifeInits[g_stateObj.scoreId], g_stateObj.lifeInit);
+		g_stateObj.lifeRcv = getGaugeCalc(g_headerObj.lifeRecoverys[g_stateObj.scoreId], g_stateObj.lifeRcv)
+			* (hasVal(def.deriveRecoveryFrom) ? 2 : 1);
+		g_stateObj.lifeDmg = getGaugeCalc(g_headerObj.lifeDamages[g_stateObj.scoreId], g_stateObj.lifeDmg);
+	};
 
-	// ゲージ詳細情報を表示
-	lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
-		g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
-};
+	/**
+	 * 【Step4：ゲージ個別設定（最優先）】gaugeXXXで明示的に設定された値があれば上書き。
+	 * g_gaugeSelObj[scoreId][name]は既に単一譜面分の値なので、g_headerObj用の
+	 * applyLifeModeSwitch/applyLifeCategory（配列アクセス版）は使わず直接適用する
+	 */
+	const applyIndividualGaugeSettings = () => {
+		const override = currentGaugeSel?.[g_stateObj.gauge];
+		if (override?.Recovery === undefined) return; // gaugeXXXヘッダー由来の上書きが無い（overrideが無い/Variableのみの場合を含む）
+		if (hasVal(override.Border)) {
+			applyLifeModeSwitch(override.Border);
+		}
+		g_stateObj.lifeInit = getGaugeCalc(override.Init, g_stateObj.lifeInit);
+		g_stateObj.lifeRcv = getGaugeCalc(override.Recovery, g_stateObj.lifeRcv);
+		g_stateObj.lifeDmg = getGaugeCalc(override.Damage, g_stateObj.lifeDmg);
+	};
+
+	return (_scrollNum, _gaugeInitFlg = false) => {
+		resolveCustomGaugeSel();
+		resolveGaugeType(_scrollNum, _gaugeInitFlg);
+		applyBaseGaugeSettings();
+		applyHeaderGaugeSettings();
+		applyIndividualGaugeSettings();
+
+		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
+			g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
+	};
+})();
 
 /**
  * ゲージ設定の詳細表示を整形
@@ -2321,7 +2377,9 @@ const getAccuracy = (_border, _rcv, _dmg, _init, _allCnt) => {
 
 	// 許容ミス数の計算
 	const allowableCnts = Math.min(_allCnt - minRecovery, _allCnt);
-	let allowableCntsText = _allCnt > 0 && allowableCnts !== 0 ? (allowableCnts > 0 ? `${allowableCnts}miss↓` : `(${allowableCnts}miss)`) : ``;
+	let allowableCntsText = _allCnt > 0 && allowableCnts !== 0
+		? (allowableCnts > 0 ? `${allowableCnts}miss↓` : `(${allowableCnts}miss)`)
+		: ``;
 
 	if ((_rcv === 0 && _dmg === 0) || _rcv < 0 || _dmg < 0) {
 		rateText = `----`;
@@ -2411,8 +2469,11 @@ const getKeyCtrl = (_localStorage, _extraKeyName = ``) => {
 const makeSettingLblCssButton = (_id, _name, _heightPos, _func, {
 	x = g_limitObj.setLblLeft, y = g_limitObj.setLblHeight * _heightPos,
 	w = g_limitObj.setLblWidth, h = g_limitObj.setLblHeight, siz = g_limitObj.setLblSiz,
-	cxtFunc = () => true, ...rest } = {}, ..._classes) =>
-	createCss2Button(_id, _name, _func, { x, y, w, h, siz: getFontSize2(_name, w, { maxSiz: siz }), cxtFunc, ...rest }, g_cssObj.button_Default, ..._classes);
+	cxtFunc = () => true, ...rest
+} = {}, ..._classes) =>
+	createCss2Button(_id, _name, _func, {
+		x, y, w, h, siz: getFontSize2(_name, w, { maxSiz: siz }), cxtFunc, ...rest
+	}, g_cssObj.button_Default, ..._classes);
 
 /**
  * 譜面変更セレクター用ボタン
@@ -2430,7 +2491,8 @@ const makeSettingLblCssButton = (_id, _name, _heightPos, _func, {
  */
 const makeDifLblCssButton = (_id, _name, _heightPos, _func, {
 	x = 0, h = g_limitObj.setLblHeight, y = h * _heightPos,
-	w = g_limitObj.difSelectorWidth, siz = g_limitObj.difSelectorSiz, btnStyle = `Default` } = {}) =>
+	w = g_limitObj.difSelectorWidth, siz = g_limitObj.difSelectorSiz, btnStyle = `Default`,
+} = {}) =>
 	createCss2Button(_id, _name, _func, {
 		x, y, w, h, siz, borderStyle: `solid`, title: g_msgObj[_id] ?? ``,
 	}, g_cssObj[`button_${btnStyle}`], g_cssObj.button_ON);
@@ -2449,7 +2511,9 @@ const makeDifLblCssButton = (_id, _name, _heightPos, _func, {
  * @param {string} [object.visibility='visible']
  * @returns {HTMLDivElement}
  */
-const makeMiniCssButton = (_id, _directionFlg, _heightPos, _func, { dx = 0, dy = 0, dw = 0, dh = 0, dsiz = 0, visibility = `visible` } = {}) =>
+const makeMiniCssButton = (_id, _directionFlg, _heightPos, _func, {
+	dx = 0, dy = 0, dw = 0, dh = 0, dsiz = 0, visibility = `visible`,
+} = {}) =>
 	createCss2Button(`${_id}${_directionFlg}`, g_settingBtnObj.chara[_directionFlg], _func, {
 		x: g_settingBtnObj.pos[_directionFlg] + dx, y: g_limitObj.setLblHeight * _heightPos + dy,
 		w: g_limitObj.setMiniWidth + dw, h: g_limitObj.setLblHeight + dh, siz: g_limitObj.setLblSiz + dsiz, visibility,
@@ -2826,7 +2890,8 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 	} else {
 		const creditName = `Sample Music / Artist Name`;
 		const difName = `[7key / Normal]`;
-		const checkMusicSiz = (_text, _siz) => getFontSize2(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, { maxSiz: _siz });
+		const checkMusicSiz = (_text, _siz) =>
+			getFontSize2(_text, g_headerObj.playingWidth - g_headerObj.customViewWidth - 125, { maxSiz: _siz });
 
 		multiAppend(_frame,
 			createDivCss2Label(`previewCredit`, creditName, {
@@ -2835,9 +2900,7 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 			createDivCss2Label(`previewDifName`, difName, {
 				...g_lblPosObj.lblDifName, siz: checkMusicSiz(difName, 12)
 			}),
-			createDivCss2Label(`previewTime1`, `0:04 /`, {
-				...g_lblPosObj.lblTime1,
-			}),
+			createDivCss2Label(`previewTime1`, `0:04 /`, g_lblPosObj.lblTime1),
 			createDivCss2Label(`previewTime2`, `2:54`, g_lblPosObj.lblTime2),
 
 			// ゲージ設定名
@@ -2853,15 +2916,27 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		y: _playH - 100 + g_diffObj.shortcutY, w: 80, h: 100, pointerEvents: C_DIS_AUTO,
 	});
 	multiAppend(scGroup,
-		createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, { ...g_lblPosObj.lblMainScHeader, x: 0, y: 0 }),
-		createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry],
-			{ ...g_lblPosObj.lblMainScKey, x: 0, y: 15, fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold` }),
-		createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, { ...g_lblPosObj.lblMainScHeader, x: 0, y: 35 }),
-		createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack],
-			{ ...g_lblPosObj.lblMainScKey, x: 0, y: 50, fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold` }),
-		createDivCss2Label(`lblPause`, `[${g_lblNameObj.l_pause}]`, { ...g_lblPosObj.lblMainScHeader, x: 0, y: 70 }),
-		createDivCss2Label(`lblPauseSc`, g_kCd[g_headerObj.keyPause],
-			{ ...g_lblPosObj.lblMainScKey, x: 0, y: 85, fontWeight: g_headerObj.keyPause === C_KEY_PAUSE ? `normal` : `bold` }),
+		createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, {
+			...g_lblPosObj.lblMainScHeader, x: 0, y: 0,
+		}),
+		createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry], {
+			...g_lblPosObj.lblMainScKey, x: 0, y: 15,
+			fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold`,
+		}),
+		createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, {
+			...g_lblPosObj.lblMainScHeader, x: 0, y: 35,
+		}),
+		createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack], {
+			...g_lblPosObj.lblMainScKey, x: 0, y: 50,
+			fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold`,
+		}),
+		createDivCss2Label(`lblPause`, `[${g_lblNameObj.l_pause}]`, {
+			...g_lblPosObj.lblMainScHeader, x: 0, y: 70,
+		}),
+		createDivCss2Label(`lblPauseSc`, g_kCd[g_headerObj.keyPause], {
+			...g_lblPosObj.lblMainScKey, x: 0, y: 85,
+			fontWeight: g_headerObj.keyPause === C_KEY_PAUSE ? `normal` : `bold`,
+		}),
 	);
 	const scConfig = {
 		toastTitle: g_lblNameObj.shortcutUpdate,
@@ -3072,13 +3147,18 @@ const createSettingsDisplayWindow = _sprite => {
 		if (g_headerObj[`${_name}Use`]) {
 
 			// 設定名、CSS名(2種)、表示名
-			const list = [C_FLG_OFF, C_FLG_ON].concat(g_settings[`d_${_name}s`] || []);
-			const cssBarList = [C_FLG_OFF, C_FLG_ON].concat(Array(g_settings[`d_${_name}s`]?.length).fill(g_settings.d_cssBarExName) || []);
-			const cssBgList = [g_settings.d_cssBgName, g_settings.d_cssBgName].concat(Array(g_settings[`d_${_name}s`]?.length).fill(g_settings.d_cssBgExName) || []);
-			const lbls = [toCapitalize(_name), toCapitalize(_name)].concat(g_settings[`d_${_name}s`] || []);
+			const list = [C_FLG_OFF, C_FLG_ON]
+				.concat(g_settings[`d_${_name}s`] || []);
+			const cssBarList = [C_FLG_OFF, C_FLG_ON]
+				.concat(Array(g_settings[`d_${_name}s`]?.length).fill(g_settings.d_cssBarExName) || []);
+			const cssBgList = [g_settings.d_cssBgName, g_settings.d_cssBgName]
+				.concat(Array(g_settings[`d_${_name}s`]?.length).fill(g_settings.d_cssBgExName) || []);
+			const lbls = [toCapitalize(_name), toCapitalize(_name)]
+				.concat(g_settings[`d_${_name}s`] || []);
 
-			const dispView = () => [C_FLG_OFF, C_FLG_ON].includes(g_stateObj[`d_${_name.toLowerCase()}`]) ?
-				g_lblNameObj[`d_${toCapitalize(_name)}`] : getStgDetailName(lbls[g_settings.displayNum[_name]]);
+			const dispView = () => [C_FLG_OFF, C_FLG_ON].includes(g_stateObj[`d_${_name.toLowerCase()}`])
+				? g_lblNameObj[`d_${toCapitalize(_name)}`]
+				: getStgDetailName(lbls[g_settings.displayNum[_name]]);
 
 			const withShortCutDesc = () => createScText(document.getElementById(linkId), `${toCapitalize(_name)}`,
 				{ displayName: g_currentPage, targetLabel: linkId, x: -5 });
@@ -3111,8 +3191,7 @@ const createSettingsDisplayWindow = _sprite => {
 			displaySprite.appendChild(
 				makeSettingLblCssButton(linkId, dispView(), _heightPos, () => switchDisplay(), {
 					x: 30 + 180 * _widthPos, y: 20 * _heightPos, w: 170, h: 18,
-					title: g_msgObj[`d_${_name.toLowerCase()}`], borderStyle: `solid`,
-					cxtFunc: () => switchDisplay(-1),
+					title: g_msgObj[`d_${_name.toLowerCase()}`], borderStyle: `solid`, cxtFunc: () => switchDisplay(-1),
 				}, `button_${cssBgList[g_settings.displayNum[_name]]}`, `button_${cssBarList[g_settings.displayNum[_name]]}`)
 			);
 			withShortCutDesc();
@@ -3154,8 +3233,11 @@ const createSettingsDisplayWindow = _sprite => {
 
 	// Hidden+/Sudden+初期値用スライダー、ロックボタン
 	multiAppend(spriteList.appearance,
-		createDivCss2Label(`lblAppearancePos`, `${g_hidSudObj.distH[g_stateObj.appearance](g_hidSudObj.filterPos)}`, g_lblPosObj.lblAppearancePos),
-		createDivCss2Label(`lblAppearanceBar`, `<input id="appearanceSlider" type="range" value="${g_hidSudObj.filterPos}" min="0" max="100" step="1">`,
+		createDivCss2Label(`lblAppearancePos`,
+			`${g_hidSudObj.distH[g_stateObj.appearance](g_hidSudObj.filterPos)}`,
+			g_lblPosObj.lblAppearancePos),
+		createDivCss2Label(`lblAppearanceBar`,
+			`<input id="appearanceSlider" type="range" value="${g_hidSudObj.filterPos}" min="0" max="100" step="1">`,
 			g_lblPosObj.lblAppearanceBar),
 		createCss2Button(`lnkLockBtn`, g_lblNameObj.filterLock, evt => setLockView(evt.target), {
 			...g_lblPosObj.lnkLockBtn, cxtFunc: evt => setLockView(evt.target),
@@ -3235,7 +3317,9 @@ const interlockingButton = (_headerObj, _name, _current, _next, _buttonFlg = fal
 						txtDisabled = `Disabled`;
 						document.getElementById(`lnk${defaultOption}`).textContent = `${toCapitalize(defaultOption)}:${_next}`;
 					}
-					document.getElementById(`lnk${defaultOption}`).classList.replace(g_cssObj[`button_${txtDisabled}${_current}`], g_cssObj[`button_Disabled${_next}`]);
+					document.getElementById(`lnk${defaultOption}`).classList.replace(
+						g_cssObj[`button_${txtDisabled}${_current}`], g_cssObj[`button_Disabled${_next}`]
+					);
 				}
 				// さらに連動する場合は設定を反転
 				interlockingButton(_headerObj, defaultOption, _next, _current, _buttonFlg);
@@ -3297,8 +3381,8 @@ const exSettingInit = () => {
 
 	multiAppend(judgRangeSprite,
 		createDivCss2Label(`lblJudgRangeView`, getJudgRangeView(), {
-			x: parseFloat($id(`lblJudgRange`).left) + 10, y: parseFloat($id(`lblJudgRange`).top) + 25, w: 300, h: 30, siz: 13,
-			align: C_ALIGN_LEFT,
+			x: parseFloat($id(`lblJudgRange`).left) + 10, y: parseFloat($id(`lblJudgRange`).top) + 25,
+			w: 300, h: 30, siz: 13, align: C_ALIGN_LEFT,
 		}),
 	);
 
@@ -3345,7 +3429,9 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 			$id(`lnk${camelH}`).width = wUnit(g_limitObj.setLblWidthShort);
 		}
 		const labelWidth = isDefault ? g_limitObj.setLblWidth : g_limitObj.setLblWidthShort - 10;
-		$id(`lnk${camelH}`).fontSize = wUnit(getFontSize2(getStgDetailName(g_stateObj[_name]), labelWidth, { maxSiz: g_limitObj.setLblSiz }));
+		$id(`lnk${camelH}`).fontSize = wUnit(getFontSize2(
+			getStgDetailName(g_stateObj[_name]), labelWidth, { maxSiz: g_limitObj.setLblSiz }
+		));
 	};
 
 	/**
@@ -3380,7 +3466,9 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 			});
 		}
 		document.getElementById(`lnk${settingLabel}`).classList.remove(g_cssObj.button_RevON, g_cssObj.button_RevOFF);
-		document.getElementById(`lnk${settingLabel}`).classList.add(g_cssObj[`button_Rev${boolToSwitch(g_stateObj[`${_name}Type`] !== C_FLG_HYPHEN)}`]);
+		document.getElementById(`lnk${settingLabel}`).classList.add(
+			g_cssObj[`button_Rev${boolToSwitch(g_stateObj[`${_name}Type`] !== C_FLG_HYPHEN)}`]
+		);
 	};
 
 	// TypeUse 未定義時は true 扱いにする
