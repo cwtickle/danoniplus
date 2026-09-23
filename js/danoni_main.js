@@ -8,7 +8,7 @@
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 51.0.0`;
+const g_version = `Ver 51.0.1`;
 const g_revisedDate = `2026/09/23`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
@@ -135,6 +135,7 @@ const waitUntilLoaded = () => {
 	// プレイ画面(g_currentPage === `main`)でのみ有効化される、タブ非表示検知(常時1個だけ登録)
 	g_handler.addListener(document, `visibilitychange`, () => {
 		if (g_currentPage !== `main`) return;
+		if (g_scoreObj.baseFrame > g_scoreObj.lastFrame) return;
 		document.hidden ? g_timelineHooks.pause() : g_timelineHooks.resume();
 	});
 })();
