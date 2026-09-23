@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 
+ * Revised : 2026/09/23 (v50.5.3)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -356,6 +356,7 @@ const prepareScoreData = () => {
 
 	// 最終フレーム数の取得
 	let lastFrame = getLastFrame(g_scoreObj) + g_headerObj.blankFrame;
+	g_scoreObj.lastFrame = lastFrame - g_headerObj.blankFrame + 20;  // Pause適用条件で使用（キータッチのラグを考慮して20フレーム加えておく）
 
 	// 最初の矢印データがあるフレーム数を取得
 	let firstArrowFrame = getFirstArrowFrame(g_scoreObj);
