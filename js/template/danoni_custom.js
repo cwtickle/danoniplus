@@ -73,10 +73,10 @@ g_customJsObj.option.push(() => {
 
 /**
  * 譜面選択(Difficultyボタン)時カスタム処理
- * @param {boolean} _initFlg 譜面変更フラグ (true:譜面変更選択時 / false:画面遷移による移動時)
+ * @param {boolean} _chartChangeFlg 譜面変更フラグ (true:譜面変更選択時 / false:画面遷移による移動時)
  * @param {boolean} _canLoadDifInfoFlg 譜面初期化フラグ (true:譜面設定を再読込 / false:譜面設定を引き継ぐ)
  */
-g_customJsObj.difficulty.push((_initFlg, _canLoadDifInfoFlg) => {
+g_customJsObj.difficulty.push((_chartChangeFlg, _canLoadDifInfoFlg) => {
 
 });
 
