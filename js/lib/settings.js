@@ -2181,12 +2181,6 @@ const setGauge = (() => {
 		replaceStr(_val, g_escapeStr.gaugeParamName)?.split(`{0}`).join(g_stateObj.scoreId)
 	), _defaultVal, C_TYP_CALC);
 
-	const applyLifeCategory = ({ _magInit = 1, _magRcv = 1, _magDmg = 1 } = {}) => {
-		g_stateObj.lifeInit = getGaugeCalc(g_headerObj.lifeInits[g_stateObj.scoreId], g_stateObj.lifeInit) * _magInit;
-		g_stateObj.lifeRcv = getGaugeCalc(g_headerObj.lifeRecoverys[g_stateObj.scoreId], g_stateObj.lifeRcv) * _magRcv;
-		g_stateObj.lifeDmg = getGaugeCalc(g_headerObj.lifeDamages[g_stateObj.scoreId], g_stateObj.lifeDmg) * _magDmg;
-	};
-
 	/** Border値からライフ制／ノルマ制を切り替える */
 	const applyLifeModeSwitch = (_border) => {
 		if (_border === `x`) {
@@ -2250,7 +2244,10 @@ const setGauge = (() => {
 			);
 			if (getGaugeRoot(g_stateObj.gauge) !== firstOverridableRoot) return;
 		}
-		applyLifeCategory({ _magRcv: hasVal(def.deriveRecoveryFrom) ? 2 : 1 });
+		g_stateObj.lifeInit = getGaugeCalc(g_headerObj.lifeInits[g_stateObj.scoreId], g_stateObj.lifeInit);
+		g_stateObj.lifeRcv = getGaugeCalc(g_headerObj.lifeRecoverys[g_stateObj.scoreId], g_stateObj.lifeRcv)
+			* hasVal(def.deriveRecoveryFrom) ? 2 : 1;
+		g_stateObj.lifeDmg = getGaugeCalc(g_headerObj.lifeDamages[g_stateObj.scoreId], g_stateObj.lifeDmg);
 	};
 
 	/**
