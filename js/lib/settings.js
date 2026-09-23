@@ -2246,7 +2246,7 @@ const setGauge = (() => {
 		}
 		g_stateObj.lifeInit = getGaugeCalc(g_headerObj.lifeInits[g_stateObj.scoreId], g_stateObj.lifeInit);
 		g_stateObj.lifeRcv = getGaugeCalc(g_headerObj.lifeRecoverys[g_stateObj.scoreId], g_stateObj.lifeRcv)
-			* hasVal(def.deriveRecoveryFrom) ? 2 : 1;
+			* (hasVal(def.deriveRecoveryFrom) ? 2 : 1);
 		g_stateObj.lifeDmg = getGaugeCalc(g_headerObj.lifeDamages[g_stateObj.scoreId], g_stateObj.lifeDmg);
 	};
 
