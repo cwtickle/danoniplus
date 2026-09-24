@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/09/23 (v50.5.2)
+ * Revised : 2026/09/25 (v50.5.4)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1386,7 +1386,7 @@ const setDifficulty = (_initFlg) => {
 		g_autoPlaysBase.concat());
 
 	// ゲージ設定及びカーソル位置調整
-	setGauge(0, !g_canLoadDifInfoFlg);
+	setGauge(0, !g_initialFlg);
 
 	// 速度、スクロール、アシスト設定のカーソル位置調整
 	if (_initFlg) {
