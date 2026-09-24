@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/09/23
+ * Revised : 2026/09/25
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 44.5.25`;
-const g_revisedDate = `2026/09/23`;
+const g_version = `Ver 44.5.26`;
+const g_revisedDate = `2026/09/25`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -7575,7 +7575,7 @@ const setDifficulty = (_initFlg) => {
 		g_autoPlaysBase.concat());
 
 	// ゲージ設定及びカーソル位置調整
-	setGauge(0, !g_canLoadDifInfoFlg);
+	setGauge(0, !g_initialFlg);
 
 	// 速度、スクロール、アシスト設定のカーソル位置調整
 	if (_initFlg) {
