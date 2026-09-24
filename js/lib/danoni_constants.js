@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/09/23 (v51.0.0)
+ * Revised : 2026/09/25 (v51.0.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1368,7 +1368,13 @@ const g_gaugeDefObj = {
  */
 const g_gaugeSelObj = {};
 
-/** どの名前をどの順で選択肢に出すかだけを持つ。詳細値はg_gaugeDefObjやg_gaugeSelObjを参照 */
+/**
+ * 譜面ヘッダー由来のゲージ設定をまとめて定義
+ * - 定義方法はg_gaugeSelObjと類似しており、ゲージ名プロパティがない以外はほぼ同じ構造。
+ */
+const g_gaugeHeaderObj = {};
+
+/** どの名前をどの順で選択肢に出すかだけを持つ。詳細値はg_gaugeDefObj、g_gaugeHeaderObj, g_gaugeSelObjを参照 */
 const g_gaugeOptionObj = {
     survival: [`Original`, `Heavy`, `NoRecovery`, `SuddenDeath`, `Practice`, `Light`],
     border: [`Normal`, `Hard`, `SuddenDeath`, `Easy`],
@@ -1531,7 +1537,7 @@ const g_settings = {
     settingWindowNum: 0,
 
     preconditions: [`g_rootObj`, `g_headerObj`, `g_keyObj`, `g_scoreObj`, `g_workObj`,
-        `g_detailObj`, `g_stateObj`, `g_attrObj`, `g_gaugeDefObj`, `g_gaugeSelObj`, `g_editorTmp`, `g_editorTmp2`],
+        `g_detailObj`, `g_stateObj`, `g_attrObj`, `g_gaugeDefObj`, `g_gaugeHeaderObj`, `g_gaugeSelObj`, `g_editorTmp`, `g_editorTmp2`],
     preconditionNum: 0,
     preconditionNumSub: 0,
 };
@@ -5328,6 +5334,7 @@ const g_root = {
     get g_judgObj() { return g_judgObj },
     get g_judgRanges() { return g_judgRanges },
     get g_gaugeDefObj() { return g_gaugeDefObj },
+    get g_gaugeHeaderObj() { return g_gaugeHeaderObj },
     get g_gaugeSelObj() { return g_gaugeSelObj },
 };
 const getPathVal = _path => _path.split(`.`).reduce((o, k) => o?.[k], g_root);
