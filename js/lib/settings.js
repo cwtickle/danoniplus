@@ -2204,7 +2204,7 @@ const setGauge = (() => {
 	 * @param {boolean} _gaugeInitFlg true時は前回選択していたゲージ名を引き継がず、配列の先頭を強制的に使う
 	 */
 	const resolveGaugeType = (_scrollNum, _gaugeInitFlg) => {
-		applyLifeModeSwitch(g_headerObj.lifeBorders[g_stateObj.scoreId]);
+		applyLifeModeSwitch(g_gaugeHeaderObj[g_stateObj.scoreId].Border);
 		g_gaugeType = (currentGaugeSel?.__order?.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
 
 		g_settings.gauges = structuredClone(g_gaugeType === C_LFE_CUSTOM
@@ -2244,11 +2244,12 @@ const setGauge = (() => {
 			);
 			if (getGaugeRoot(g_stateObj.gauge) !== firstOverridableRoot) return;
 		}
-		applyLifeModeSwitch(g_headerObj.lifeBorders[g_stateObj.scoreId]);
-		g_stateObj.lifeInit = getGaugeCalc(g_headerObj.lifeInits[g_stateObj.scoreId], g_stateObj.lifeInit);
-		g_stateObj.lifeRcv = getGaugeCalc(g_headerObj.lifeRecoverys[g_stateObj.scoreId], g_stateObj.lifeRcv)
+		const header = g_gaugeHeaderObj[g_stateObj.scoreId];
+		applyLifeModeSwitch(header.Border);
+		g_stateObj.lifeInit = getGaugeCalc(header.Init, g_stateObj.lifeInit);
+		g_stateObj.lifeRcv = getGaugeCalc(header.Recovery, g_stateObj.lifeRcv)
 			* (hasVal(def.deriveRecoveryFrom) ? 2 : 1);
-		g_stateObj.lifeDmg = getGaugeCalc(g_headerObj.lifeDamages[g_stateObj.scoreId], g_stateObj.lifeDmg);
+		g_stateObj.lifeDmg = getGaugeCalc(header.Damage, g_stateObj.lifeDmg);
 	};
 
 	/**

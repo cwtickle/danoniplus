@@ -1242,24 +1242,20 @@ const headerConvert = _dosObj => {
 		obj.keyLabels = [];
 		obj.difLabels = [];
 		obj.initSpeeds = [];
-		obj.lifeBorders = [];
-		obj.lifeRecoverys = [];
-		obj.lifeDamages = [];
-		obj.lifeInits = [];
 		obj.creatorNames = [];
 		obj.difficulties = [];
 		g_stateObj.scoreId = (g_stateObj.scoreId < difs.length ? g_stateObj.scoreId : 0);
 
-		difs.forEach(dif => {
+		difs.forEach((dif, scoreId) => {
 			const difDetails = dif.split(`,`);
 			const lifeData = (_type) =>
 				difDetails[difpos[_type]] || g_presetObj.gauge?.[_type] || g_gaugeDefObj.Original[_type];
 
 			// ライフ：ノルマ、回復量、ダメージ量、初期値の設定
-			obj.lifeBorders.push(lifeData(`Border`));
-			obj.lifeRecoverys.push(lifeData(`Recovery`));
-			obj.lifeDamages.push(lifeData(`Damage`));
-			obj.lifeInits.push(lifeData(`Init`));
+			g_gaugeHeaderObj[scoreId] = {
+				Border: lifeData(`Border`), Recovery: lifeData(`Recovery`),
+				Damage: lifeData(`Damage`), Init: lifeData(`Init`),
+			};
 
 			// キー数
 			const keyLabel = difDetails[difpos.Key] || g_keyObj.initKeyLabel;
@@ -1285,10 +1281,7 @@ const headerConvert = _dosObj => {
 		obj.keyLabels = [g_keyObj.initKeyLabel];
 		obj.difLabels = [`Normal`];
 		obj.initSpeeds = [3.5];
-		obj.lifeBorders = [`x`];
-		obj.lifeRecoverys = [6];
-		obj.lifeDamages = [40];
-		obj.lifeInits = [25];
+		g_gaugeHeaderObj[0] = { ...g_gaugeDefObj.Original };
 		obj.creatorNames = [obj.tuning];
 		obj.difficulties = [0];
 	}
@@ -2157,7 +2150,7 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 
 /**
  * 【参照用】g_gaugeOptionObjの旧プロパティを参照できるようにする関数
- * （initXXX/rcvXXX/dmgXXX/clearXXX、typeXXX/varXXXも参考として）に展開する。
+ * （initXXX/rcvXXX/dmgXXX/clearXXX/typeXXX/varXXX）
  * - カスタムスクリプト側で既存ゲージの既定値を参照するための補助関数。本体からの呼び出しはない。
  */
 const restoreLegacyGaugeReference = () => {
@@ -2173,6 +2166,22 @@ const restoreLegacyGaugeReference = () => {
 		g_gaugeOptionObj[`type${cap}`] = names.map(name =>
 			(g_gaugeDefObj[name]?.Border === `x` ? C_LFE_SURVIVAL : C_LFE_BORDER));
 	});
+};
+
+/**
+ * 【参照用】g_headerObjの旧プロパティを参照可能にする関数
+ * （lifeBorders/lifeRecoverys/lifeDamages/lifeInits）
+ * - カスタムスクリプト側で既存ゲージの既定値を参照するための補助関数。本体からの呼び出しはない。
+ */
+const restoreLegacyGaugeHeaderReference = () => {
+	[`Border`, `Recovery`, `Damage`, `Init`].forEach(type => {
+		const legacyType = `life${type}s`;
+		g_headerObj[legacyType] = [];
+
+		for (let j = 0; j < g_headerObj.difLabels.length; j++) {
+			g_headerObj[legacyType].push(g_gaugeHeaderObj[j][type]);
+		}
+	})
 };
 
 /**
