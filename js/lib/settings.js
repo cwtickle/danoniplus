@@ -1422,7 +1422,7 @@ const setDifficulty = (_chartChangeFlg) => {
 	);
 
 	// ゲージ設定及びカーソル位置調整
-	setGauge(0, !g_canLoadDifInfoFlg);
+	setGauge(0, !g_initialFlg);
 
 	// 速度、スクロール、アシスト設定のカーソル位置調整
 	if (_chartChangeFlg) {
@@ -2244,6 +2244,7 @@ const setGauge = (() => {
 			);
 			if (getGaugeRoot(g_stateObj.gauge) !== firstOverridableRoot) return;
 		}
+		applyLifeModeSwitch(g_headerObj.lifeBorders[g_stateObj.scoreId]);
 		g_stateObj.lifeInit = getGaugeCalc(g_headerObj.lifeInits[g_stateObj.scoreId], g_stateObj.lifeInit);
 		g_stateObj.lifeRcv = getGaugeCalc(g_headerObj.lifeRecoverys[g_stateObj.scoreId], g_stateObj.lifeRcv)
 			* (hasVal(def.deriveRecoveryFrom) ? 2 : 1);
