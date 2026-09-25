@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/09/25 (v51.0.2)
+ * Revised : 2026/09/26 (v51.0.3)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -228,9 +228,6 @@ const initialControl = async () => {
 		// 初期色設定（譜面ヘッダー）の初期設定
 		Object.assign(g_headerObj, resetBaseColorList(g_headerObj, g_rootObj));
 
-		// 非分割時は getGaugeSetting が全難易度を一括構築するため、初回のみで十分
-		const loopCount = g_stateObj.dosDivideFlg ? g_headerObj.keyLabels.length : 1;
-
 		for (let j = 0; j < g_headerObj.difLabels.length; j++) {
 
 			// 譜面ファイルが分割されている場合、譜面詳細情報取得のために譜面をロード
@@ -261,11 +258,8 @@ const initialControl = async () => {
 
 			// カスタムゲージの設定（譜面ヘッダー側）
 			resetCustomGauge(g_rootObj, { scoreId: j });
-			if (j < loopCount) {
-				// ゲージ設定：分割時は各譜面ごとに上書き・補完、非分割時は初回のみ実行
-				Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn =>
-					getGaugeSetting(g_rootObj, gaugePtn, g_headerObj.difLabels.length, { scoreId: j }));
-			}
+			Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn =>
+				getGaugeSetting(g_rootObj, gaugePtn, { scoreId: j }));
 		}
 	}
 	safeExecuteCustomHooks(`g_customJsObj.preTitle`, g_customJsObj.preTitle);
@@ -2103,31 +2097,17 @@ const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
  * ゲージ別個別設定の取得
  * @param {object} _dosObj 
  * @param {string} _name 
- * @param {number} _difLength
  * @param {string} [object.scoreId=0]
  */
-const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
-
-	/** ゲージ設定上書きフラグ */
-	const gaugeUpdateFlg = g_stateObj.scoreLockFlg && scoreId > 0;
+const getGaugeSetting = (_dosObj, _name, { scoreId = 0 } = {}) => {
 	const gauges = hasVal(_dosObj[`gauge${_name}`]) ? splitLF2(_dosObj[`gauge${_name}`]) : [];
-
-	const registerGaugeDetails = (_scoreId) => {
-		const gaugeDetails = getGaugeDetailList(_scoreId);
-		if (!hasVal(gaugeDetails)) return; // baseも譜面別ヘッダーもどちらも無ければ何もしない
-		const [border, recovery, damage, init] = gaugeDetails;
-		g_gaugeSelObj[_scoreId] ??= structuredClone(g_gaugeSelObj.default ?? { __order: [] });
-		g_gaugeSelObj[_scoreId][_name] = { ...g_gaugeSelObj[_scoreId][_name], Border: border, Recovery: recovery, Damage: damage, Init: init };
-	};
 
 	/**
 	 * gaugeNormal2, gaugeEasy2などの個別設定があった場合にその値から配列を作成
-	 * @param {number} _scoreId 
-	 * @param {number[]} _defaultGaugeList
 	 * @returns {number[]}
 	 */
-	const getGaugeDetailList = (_scoreId) => {
-		const idHeader = (_scoreId === 0) ? 1 : setScoreIdHeader(_scoreId, g_stateObj.scoreLockFlg, false);
+	const getGaugeDetailList = () => {
+		const idHeader = (scoreId === 0) ? 1 : setScoreIdHeader(scoreId, g_stateObj.scoreLockFlg, false);
 		if (hasVal(idHeader)) {
 			const dosId = (idHeader || 0) - 1;
 			const headerName = `gauge${_name}${idHeader}`;
@@ -2136,16 +2116,14 @@ const getGaugeSetting = (_dosObj, _name, _difLength, { scoreId = 0 } = {}) => {
 				return (detailGauges[dosId] || detailGauges[0])?.split(`,`);
 			}
 		}
-		return (gauges[_scoreId] || gauges[0])?.split(`,`);
+		return (gauges[scoreId] || gauges[0])?.split(`,`);
 	};
 
-	if (gaugeUpdateFlg) {
-		registerGaugeDetails(scoreId);
-	} else {
-		for (let j = 0; j < _difLength; j++) {
-			registerGaugeDetails(j);
-		}
-	}
+	const gaugeDetails = getGaugeDetailList();
+	if (!hasVal(gaugeDetails)) return;
+	const [border, recovery, damage, init] = gaugeDetails;
+	g_gaugeSelObj[scoreId] ??= structuredClone(g_gaugeSelObj.default ?? { __order: [] });
+	g_gaugeSelObj[scoreId][_name] = { ...g_gaugeSelObj[scoreId][_name], Border: border, Recovery: recovery, Damage: damage, Init: init };
 };
 
 /**
