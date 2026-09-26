@@ -2175,110 +2175,25 @@ const setReverseView = _btn => {
  * ゲージ設定メイン
  * @param {number} _scrollNum
  */
-const setGauge = (() => {
+const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
+	const resolved = g_gaugeResolvedObj[g_stateObj.scoreId];
 
-	const getGaugeCalc = (_val, _defaultVal) => setVal(convertStrToVal(
-		replaceStr(_val, g_escapeStr.gaugeParamName)?.split(`{0}`).join(g_stateObj.scoreId)
-	), _defaultVal, C_TYP_CALC);
+	g_settings.gauges = structuredClone(resolved.__order);
+	g_settings.gaugeNum = (_gaugeInitFlg ? 0 : getCurrentNo(g_settings.gauges, g_stateObj.gauge));
+	g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
+	setSetting(_scrollNum, `gauge`);
 
-	/** Border値からライフ制／ノルマ制を切り替える */
-	const applyLifeModeSwitch = (_border) => {
-		if (_border === `x`) {
-			g_stateObj.lifeBorder = 0;
-			g_stateObj.lifeMode = C_LFE_SURVIVAL;
-		} else {
-			g_stateObj.lifeBorder = getGaugeCalc(_border, g_stateObj.lifeBorder);
-			g_stateObj.lifeMode = C_LFE_BORDER;
-		}
-	};
+	const value = resolved[g_stateObj.gauge];
+	g_stateObj.lifeMode = (value.Border === `x` ? C_LFE_SURVIVAL : C_LFE_BORDER);
+	g_stateObj.lifeBorder = (value.Border === `x` ? 0 : value.Border);
+	g_stateObj.lifeInit = value.Init;
+	g_stateObj.lifeRcv = value.Recovery;
+	g_stateObj.lifeDmg = value.Damage;
+	g_stateObj.lifeVariable = value.Variable;
 
-	let currentGaugeSel = null;
-
-	const resolveCustomGaugeSel = () => {
-		currentGaugeSel = g_gaugeSelObj[g_stateObj.scoreId] || g_gaugeSelObj[0] || g_gaugeSelObj.default;
-	};
-
-	/**
-	 * 【Step1】ゲージ種別(g_gaugeType)を確定し、ゲージ配列とカーソル位置を入れ替える
-	 * @param {number} _scrollNum
-	 * @param {boolean} _gaugeInitFlg true時は前回選択していたゲージ名を引き継がず、配列の先頭を強制的に使う
-	 */
-	const resolveGaugeType = (_scrollNum, _gaugeInitFlg) => {
-		applyLifeModeSwitch(g_gaugeHeaderObj[g_stateObj.scoreId].Border);
-		g_gaugeType = (currentGaugeSel?.__order?.length > 0 ? C_LFE_CUSTOM : g_stateObj.lifeMode);
-
-		g_settings.gauges = structuredClone(g_gaugeType === C_LFE_CUSTOM
-			? currentGaugeSel.__order
-			: g_gaugeOptionObj[g_gaugeType.toLowerCase()]);
-		g_settings.gaugeNum = (_gaugeInitFlg ? 0 : getCurrentNo(g_settings.gauges, g_stateObj.gauge));
-		g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
-
-		setSetting(_scrollNum, `gauge`);
-		g_stateObj.lifeVariable = currentGaugeSel?.[g_stateObj.gauge]?.Variable
-			?? g_gaugeDefObj[g_stateObj.gauge]?.Variable
-			?? C_FLG_OFF;
-	};
-
-	/** 【Step2：基本設定】g_gaugeDefObjのカーソル位置に対応する初期設定を適用 */
-	const applyBaseGaugeSettings = () => {
-		const def = g_gaugeDefObj[g_stateObj.gauge];
-		if (!hasVal(def)) return;
-		g_stateObj.lifeMode = (def.Border === `x` ? C_LFE_SURVIVAL : C_LFE_BORDER);
-		g_stateObj.lifeBorder = (def.Border === `x` ? 0 : def.Border);
-		g_stateObj.lifeInit = def.Init;
-		g_stateObj.lifeRcv = def.Recovery;
-		g_stateObj.lifeDmg = def.Damage;
-	};
-
-	/** 【Step3：譜面ヘッダー】headerOverridable指定ゲージのみ、difData由来の値で上書き */
-	const applyHeaderGaugeSettings = () => {
-		const def = g_gaugeDefObj[g_stateObj.gauge];
-		if (!def?.headerOverridable) return;
-		if (g_gaugeType === C_LFE_CUSTOM) {
-			// カスタム選択でOriginal/Normal等headerOverridable対象が複数混在する場合、
-			// difDataは1つしか値を持たないため、選択順で最初に出てきた「系統」だけに適用する。
-			// Light/EasyはOriginal/Normalの系統として扱う（deriveRecoveryFromで判定）
-			const getGaugeRoot = _name => g_gaugeDefObj[_name]?.deriveRecoveryFrom ?? _name;
-			const firstOverridableRoot = getGaugeRoot(
-				g_settings.gauges.find(name => g_gaugeDefObj[name]?.headerOverridable)
-			);
-			if (getGaugeRoot(g_stateObj.gauge) !== firstOverridableRoot) return;
-		}
-		const header = g_gaugeHeaderObj[g_stateObj.scoreId];
-		applyLifeModeSwitch(header.Border);
-		g_stateObj.lifeInit = getGaugeCalc(header.Init, g_stateObj.lifeInit);
-		g_stateObj.lifeRcv = getGaugeCalc(header.Recovery, g_stateObj.lifeRcv)
-			* (hasVal(def.deriveRecoveryFrom) ? 2 : 1);
-		g_stateObj.lifeDmg = getGaugeCalc(header.Damage, g_stateObj.lifeDmg);
-	};
-
-	/**
-	 * 【Step4：ゲージ個別設定（最優先）】gaugeXXXで明示的に設定された値があれば上書き。
-	 * g_gaugeSelObj[scoreId][name]は既に単一譜面分の値なので、g_headerObj用の
-	 * applyLifeModeSwitch/applyLifeCategory（配列アクセス版）は使わず直接適用する
-	 */
-	const applyIndividualGaugeSettings = () => {
-		const override = currentGaugeSel?.[g_stateObj.gauge];
-		if (override?.Recovery === undefined) return; // gaugeXXXヘッダー由来の上書きが無い（overrideが無い/Variableのみの場合を含む）
-		if (hasVal(override.Border)) {
-			applyLifeModeSwitch(override.Border);
-		}
-		g_stateObj.lifeInit = getGaugeCalc(override.Init, g_stateObj.lifeInit);
-		g_stateObj.lifeRcv = getGaugeCalc(override.Recovery, g_stateObj.lifeRcv);
-		g_stateObj.lifeDmg = getGaugeCalc(override.Damage, g_stateObj.lifeDmg);
-	};
-
-	return (_scrollNum, _gaugeInitFlg = false) => {
-		resolveCustomGaugeSel();
-		resolveGaugeType(_scrollNum, _gaugeInitFlg);
-		applyBaseGaugeSettings();
-		applyHeaderGaugeSettings();
-		applyIndividualGaugeSettings();
-
-		lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
-			g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
-	};
-})();
+	lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
+		g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
+};
 
 /**
  * ゲージ設定の詳細表示を整形

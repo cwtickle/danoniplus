@@ -260,6 +260,7 @@ const initialControl = async () => {
 			resetCustomGauge(g_rootObj, { scoreId: j });
 			Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn =>
 				getGaugeSetting(g_rootObj, gaugePtn, { scoreId: j }));
+			resolveGaugeValues(j);
 		}
 	}
 	safeExecuteCustomHooks(`g_customJsObj.preTitle`, g_customJsObj.preTitle);
@@ -2068,7 +2069,7 @@ const resetCustomGauge = (_dosObj, { scoreId = 0 } = {}) => {
 
 	const scoreIdHeader = (scoreId === 0 && hasVal(_dosObj[`customGauge1`]))
 		? 1 : setScoreIdHeader(scoreId, g_stateObj.scoreLockFlg, false);
-	const dosCustomGauge = _dosObj[`customGauge${scoreIdHeader}`];
+	const dosCustomGauge = _dosObj[`customGauge${scoreIdHeader}`] ?? _dosObj.customGauge;
 	if (!hasVal(dosCustomGauge)) return;
 
 	g_gaugeSelObj[scoreId] = structuredClone(g_gaugeSelObj.default ?? { __order: [] });
@@ -2127,6 +2128,61 @@ const getGaugeSetting = (_dosObj, _name, { scoreId = 0 } = {}) => {
 };
 
 /**
+ * (scoreId)単位で、その譜面の全ゲージ名の最終値（Border/Recovery/Damage/Init/Variable）を
+ * 事前に解決し、g_gaugeResolvedObj[scoreId]として保持する。
+ * カーソル位置には依存しない、譜面が決まれば決まる値なので、getGaugeSetting(j)の直後に1回だけ呼ぶ
+ * @param {number} _scoreId
+ */
+const resolveGaugeValues = (_scoreId) => {
+	const getGaugeCalc = (_val, _defaultVal) => setVal(convertStrToVal(
+		replaceStr(_val, g_escapeStr.gaugeParamName)?.split(`{0}`).join(_scoreId)
+	), _defaultVal, C_TYP_CALC);
+	const resolveBorder = (_border, _defaultVal) => (_border === `x` ? `x` : getGaugeCalc(_border, _defaultVal));
+
+	const currentGaugeSel = g_gaugeSelObj[_scoreId] || g_gaugeSelObj[0] || g_gaugeSelObj.default;
+	const header = g_gaugeHeaderObj[_scoreId];
+	const isCustom = currentGaugeSel?.__order?.length > 0;
+	const order = isCustom
+		? currentGaugeSel.__order
+		: g_gaugeOptionObj[header.Border === `x` ? `survival` : `border`];
+
+	// __order内で最初に出てくるheaderOverridable「系統」だけにdifDataを適用する（Light/EasyはOriginal/Normalの系統扱い）
+	const getGaugeRoot = _name => g_gaugeDefObj[_name]?.deriveRecoveryFrom ?? _name;
+	const firstOverridableRoot = getGaugeRoot(order.find(name => g_gaugeDefObj[name]?.headerOverridable));
+
+	const resolved = { __order: order.concat(), __custom: isCustom };
+	order.forEach(name => {
+		const def = g_gaugeDefObj[name] ?? {};
+
+		// Step1：基本設定（g_gaugeDefObj）をまず適用
+		const value = { Border: def.Border, Recovery: def.Recovery, Damage: def.Damage, Init: def.Init };
+
+		// Step2：譜面ヘッダー（headerOverridable、系統一致のみ）
+		if (def.headerOverridable && (!isCustom || getGaugeRoot(name) === firstOverridableRoot)) {
+			value.Border = resolveBorder(header.Border, value.Border);
+			value.Recovery = getGaugeCalc(header.Recovery, value.Recovery) * (hasVal(def.deriveRecoveryFrom) ? 2 : 1);
+			value.Damage = getGaugeCalc(header.Damage, value.Damage);
+			value.Init = getGaugeCalc(header.Init, value.Init);
+		}
+
+		// Step3：ゲージ個別設定（最優先）
+		const override = currentGaugeSel?.[name];
+		if (override?.Recovery !== undefined) {
+			if (hasVal(override.Border)) {
+				value.Border = resolveBorder(override.Border, value.Border);
+			}
+			value.Recovery = getGaugeCalc(override.Recovery, value.Recovery);
+			value.Damage = getGaugeCalc(override.Damage, value.Damage);
+			value.Init = getGaugeCalc(override.Init, value.Init);
+		}
+
+		value.Variable = override?.Variable ?? def.Variable ?? C_FLG_OFF;
+		resolved[name] = value;
+	});
+	g_gaugeResolvedObj[_scoreId] = resolved;
+};
+
+/**
  * 【参照用】g_gaugeOptionObjの旧プロパティを参照できるようにする関数
  * （initXXX/rcvXXX/dmgXXX/clearXXX/typeXXX/varXXX）
  * - カスタムスクリプト側で既存ゲージの既定値を参照するための補助関数。本体からの呼び出しはない。
@@ -2163,10 +2219,22 @@ const restoreLegacyGaugeHeaderReference = () => {
 };
 
 /**
+ * 【反映用】カスタムスクリプトが旧形式で作った個別ゲージ設定の適用
+ * - g_gaugeOptionObj[`gauge${name}s`]（旧形式）で用意した各ゲージ名の個別設定を
+ * まとめてg_gaugeSelObjへ反映し、影響する全譜面分のg_gaugeResolvedObjを再計算する。
+ * - カスタムJS側はこの1関数を呼ぶだけでよく、applyLegacyGaugeOverride単体での呼び出しは不要
+ */
+const applyLegacyGaugeOverrides = () => {
+	Object.keys(g_gaugeOptionObj.customFulls).forEach(name => applyLegacyGaugeOverride(name));
+	for (let j = 0; j < g_headerObj.difLabels.length; j++) {
+		resolveGaugeValues(j);
+	}
+};
+
+/**
  * 【反映用】カスタムスクリプトが旧形式で作った個別ゲージ設定
  * - g_gaugeOptionObj[`gauge${_name}s`] = { lifeBorders, lifeRecoverys, lifeDamages, lifeInits }
  * （それぞれscoreId順の配列）を、新プロパティ g_gaugeSelObj[scoreId][_name] へ変換して反映する
- * - 本体からの呼び出しは無いため、カスタムスクリプト側で呼び出しする想定
  * @param {string} _name ゲージ名
  */
 const applyLegacyGaugeOverride = (_name) => {
