@@ -260,9 +260,12 @@ const initialControl = async () => {
 			resetCustomGauge(g_rootObj, { scoreId: j });
 			Object.keys(g_gaugeOptionObj.customFulls).forEach(gaugePtn =>
 				getGaugeSetting(g_rootObj, gaugePtn, { scoreId: j }));
-			resolveGaugeValues(j);
 		}
 	}
+	// g_loadObj.mainがfalseで上のブロックが丸ごとスキップされた場合でも、
+	// setGaugeが必ずg_gaugeResolvedObjを引けるよう毎回解決し直す
+	resolveGaugeValuesAll();
+
 	safeExecuteCustomHooks(`g_customJsObj.preTitle`, g_customJsObj.preTitle);
 	const queryMusicId = getQueryParamVal(`musicId`);
 	g_settings.musicIdxNum = queryMusicId !== null ? Number(queryMusicId) :
@@ -2128,6 +2131,15 @@ const getGaugeSetting = (_dosObj, _name, { scoreId = 0 } = {}) => {
 };
 
 /**
+ * 全ゲージ名の最終値（Border/Recovery/Damage/Init/Variable）を決定する関数
+ */
+const resolveGaugeValuesAll = () => {
+	for (let j = 0; j < g_headerObj.difLabels.length; j++) {
+		resolveGaugeValues(j);
+	}
+}
+
+/**
  * (scoreId)単位で、その譜面の全ゲージ名の最終値（Border/Recovery/Damage/Init/Variable）を
  * 事前に解決し、g_gaugeResolvedObj[scoreId]として保持する。
  * カーソル位置には依存しない、譜面が決まれば決まる値なので、getGaugeSetting(j)の直後に1回だけ呼ぶ
@@ -2226,9 +2238,7 @@ const restoreLegacyGaugeHeaderReference = () => {
  */
 const applyLegacyGaugeOverrides = () => {
 	Object.keys(g_gaugeOptionObj.customFulls).forEach(name => applyLegacyGaugeOverride(name));
-	for (let j = 0; j < g_headerObj.difLabels.length; j++) {
-		resolveGaugeValues(j);
-	}
+	resolveGaugeValuesAll();
 };
 
 /**
