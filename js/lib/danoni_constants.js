@@ -1341,6 +1341,12 @@ const g_gaugeDefObj = {
 };
 
 /**
+ * 譜面ヘッダー由来のゲージ設定をまとめて定義
+ * - 定義方法はg_gaugeSelObjと類似しており、ゲージ名プロパティがない以外はほぼ同じ構造。
+ */
+const g_gaugeHeaderObj = {};
+
+/**
  * カスタムゲージの選択状態・個別上書き値
  * - g_gaugeSelObj[scoreId] = {
  *   __order: [名前, ...],         // customGauge指定時のみ存在。並び順がそのままカーソル移動の順序
@@ -1368,11 +1374,10 @@ const g_gaugeDefObj = {
  */
 const g_gaugeSelObj = {};
 
-/**
- * 譜面ヘッダー由来のゲージ設定をまとめて定義
- * - 定義方法はg_gaugeSelObjと類似しており、ゲージ名プロパティがない以外はほぼ同じ構造。
+/** 
+ * 最終的に適用するゲージ設定値のサマリー
  */
-const g_gaugeHeaderObj = {};
+const g_gaugeResolvedObj = {};
 
 /** どの名前をどの順で選択肢に出すかだけを持つ。詳細値はg_gaugeDefObj、g_gaugeHeaderObj, g_gaugeSelObjを参照 */
 const g_gaugeOptionObj = {
@@ -1537,7 +1542,8 @@ const g_settings = {
     settingWindowNum: 0,
 
     preconditions: [`g_rootObj`, `g_headerObj`, `g_keyObj`, `g_scoreObj`, `g_workObj`,
-        `g_detailObj`, `g_stateObj`, `g_attrObj`, `g_gaugeDefObj`, `g_gaugeHeaderObj`, `g_gaugeSelObj`, `g_editorTmp`, `g_editorTmp2`],
+        `g_detailObj`, `g_stateObj`, `g_attrObj`,
+        `g_gaugeDefObj`, `g_gaugeHeaderObj`, `g_gaugeSelObj`, `g_gaugeResolvedObj`, `g_editorTmp`, `g_editorTmp2`],
     preconditionNum: 0,
     preconditionNumSub: 0,
 };
