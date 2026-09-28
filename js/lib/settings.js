@@ -1421,8 +1421,12 @@ const setDifficulty = (_chartChangeFlg) => {
 			: g_autoPlaysBase.concat()
 	);
 
-	// ゲージ設定及びカーソル位置調整
-	setGauge(0, !g_initialFlg);
+	// ゲージ設定配列の入れ替え
+	g_settings.gauges = structuredClone(g_gaugeResolvedObj[g_stateObj.scoreId].__order);
+	g_settings.gaugeNum = (g_initialFlg ? getCurrentNo(g_settings.gauges, g_stateObj.gauge) : 0);
+	g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
+	setSetting(0, `gauge`);
+	setGauge();
 
 	// 速度、スクロール、アシスト設定のカーソル位置調整
 	if (_chartChangeFlg) {
@@ -1845,35 +1849,22 @@ const createOptionWindow = _sprite => {
 	// ---------------------------------------------------
 	// ゲージ設定 (Gauge)
 	// 縦位置: 7.5
-	spriteList.gauge.appendChild(createLblSetting(`Gauge`));
+	createGeneralSetting(spriteList.gauge, `gauge`, {
+		addRFunc: () => setGauge(),
+	});
+	multiAppend(spriteList.gauge,
+		// ゲージ設定詳細 縦位置: ゲージ設定+1
+		createDivCss2Label(`lblGauge2`, ``, g_lblPosObj.lblGauge2),
 
-	// ゲージ設定詳細 縦位置: ゲージ設定+1
-	spriteList.gauge.appendChild(createDivCss2Label(`lblGauge2`, ``, g_lblPosObj.lblGauge2));
-
-	if (g_headerObj.gaugeUse) {
-		multiAppend(spriteList.gauge,
-			makeSettingLblCssButton(`lnkGauge`, ``, 0, () => setGauge(1), { cxtFunc: () => setGauge(-1) }),
-			makeMiniCssButton(`lnkGauge`, `R`, 0, () => setGauge(1)),
-			makeMiniCssButton(`lnkGauge`, `L`, 0, () => setGauge(-1)),
-		);
-		createScText(spriteList.gauge, `Gauge`);
-	} else {
-		lblGauge.classList.add(g_cssObj.settings_Disabled);
-		spriteList.gauge.appendChild(makeDisabledLabel(`lnkGauge`, 0, getStgDetailName(g_stateObj.gauge)));
-	}
-
-	// 空押し判定設定 (Excessive)
-	spriteList.gauge.appendChild(
+		// 空押し判定設定 (Excessive)
 		createDivCss2Label(`lblExcessive`, `${g_lblNameObj.Excessive}:${C_FLG_ON}`,
 			g_lblPosObj.lblExcessive, g_cssObj[`button_Disabled${C_FLG_ON}`]
-		)
-	);
-	spriteList.gauge.appendChild(
+		),
 		createCss2Button(`lnkExcessive`, g_lblNameObj.Excessive, evt => setExcessive(evt.target), {
 			...g_lblPosObj.btnExcessive,
 			title: g_msgObj.excessive, cxtFunc: evt => setExcessive(evt.target),
-		}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.excessive}`])
-	);
+		}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.excessive}`]),
+	)
 	createScText(lnkExcessive, `Excessive`, { x: -13, targetLabel: `lnkExcessive` });
 
 	// ---------------------------------------------------
@@ -2164,26 +2155,11 @@ const setReverseView = _btn => {
 	}
 };
 
-// ============================================================
-// ゲージ設定の適用パイプライン（wiki: ゲージ設定適用順仕様）
-// 優先度は「低→高」= 基本設定(g_gaugeDefObj) → 譜面ヘッダー(初期ゲージのみ) → ゲージ個別設定。
-// 下記のapply*/resolve*はsetGaugeから“この順番のまま”呼ばれ、後段が前段を上書きすることで
-// 優先度を表現する。順序の変更は仕様変更を意味する。
-// ============================================================
-
 /**
- * ゲージ設定メイン
- * @param {number} _scrollNum
+ * ゲージ設定切替後の設定処理
  */
-const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
-	const resolved = g_gaugeResolvedObj[g_stateObj.scoreId];
-
-	g_settings.gauges = structuredClone(resolved.__order);
-	g_settings.gaugeNum = (_gaugeInitFlg ? 0 : getCurrentNo(g_settings.gauges, g_stateObj.gauge));
-	g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
-	setSetting(_scrollNum, `gauge`);
-
-	const value = resolved[g_stateObj.gauge];
+const setGauge = () => {
+	const value = g_gaugeResolvedObj[g_stateObj.scoreId][g_stateObj.gauge];
 	g_stateObj.lifeMode = (value.Border === `x` ? C_LFE_SURVIVAL : C_LFE_BORDER);
 	g_stateObj.lifeBorder = (value.Border === `x` ? 0 : value.Border);
 	g_stateObj.lifeInit = value.Init;

@@ -5342,6 +5342,7 @@ const g_root = {
     get g_gaugeDefObj() { return g_gaugeDefObj },
     get g_gaugeHeaderObj() { return g_gaugeHeaderObj },
     get g_gaugeSelObj() { return g_gaugeSelObj },
+    get g_gaugeResolvedObj() { return g_gaugeResolvedObj },
 };
 const getPathVal = _path => _path.split(`.`).reduce((o, k) => o?.[k], g_root);
 const setPathVal = (_path, _value) => {
