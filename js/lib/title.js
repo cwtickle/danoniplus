@@ -471,46 +471,51 @@ const drawTitle = (_titleName = g_headerObj.musicTitleForView, _scoreId = ``) =>
 	// 変数 titlelineheight の定義 (使用例： |titlelineheight=50|)
 	const titlelineheight = (g_headerObj.titlelineheight !== `` ? g_headerObj.titlelineheight - (titlefontsize2 + 10) : 0);
 
-	const txtAnimations = [``, ``];
+	const txtAnimStyles = [{}, {}];
 	if (!g_headerObj.customTitleAnimationUse) {
-		for (let j = 0; j < txtAnimations.length; j++) {
-			txtAnimations[j] = `animation-name:${g_headerObj.titleAnimationName[j]};
-			animation-duration:${g_headerObj.titleAnimationDuration[j]}s;
-			animation-delay:${g_headerObj.titleAnimationDelay[j]}s;
-			animation-timing-function:${g_headerObj.titleAnimationTimingFunction[j]};`;
+		for (let j = 0; j < txtAnimStyles.length; j++) {
+			txtAnimStyles[j] = {
+				animationName: g_headerObj.titleAnimationName[j],
+				animationDuration: `${g_headerObj.titleAnimationDuration[j]}s`,
+				animationDelay: `${g_headerObj.titleAnimationDelay[j]}s`,
+				animationTimingFunction: g_headerObj.titleAnimationTimingFunction[j],
+			};
 		}
 	}
-	return createDivCss2Label(`lblmusicTitle`,
-		`<div id="lblmusicTitle1" style="
-			font-family:${g_headerObj.titlefonts[0]};
-			background: ${titlegrds[0]};
-			background-clip: text;
-			-webkit-background-clip: text;
-			color: rgba(255,255,255,0.0);
-			${txtAnimations[0]}
-		" class="${g_headerObj.titleAnimationClass[0]}">
-			${_titleName[0]}
-		</div>
-		<div id="lblmusicTitle2" style="
-			font-size:${wUnit(titlefontsize2)};
-			position:relative;left:${wUnit(g_headerObj.titlepos[1][0])};
-			top:${wUnit(g_headerObj.titlepos[1][1] + titlelineheight)};
-			font-family:${g_headerObj.titlefonts[1]};
-			background: ${titlegrds[1]};
-			background-clip: text;
-			-webkit-background-clip: text;
-			color: rgba(255,255,255,0.0);
-			${txtAnimations[1]}
-		" class="${g_headerObj.titleAnimationClass[1]}">
-			${_titleName[1] ?? ``}
-		</div>
-		`,
-		{
-			x: Number(g_headerObj.titlepos[0][0]), y: Number(g_headerObj.titlepos[0][1]),
-			w: g_sWidth, h: g_sHeight - 40, siz: titlefontsize1,
-			display: `flex`, flexDirection: `column`, justifyContent: `center`, alignItems: `center`,
-		}
-	);
+	const titleDiv = createDivCss2Label(`lblmusicTitle`, ``, {
+		x: Number(g_headerObj.titlepos[0][0]), y: Number(g_headerObj.titlepos[0][1]),
+		w: g_sWidth, h: g_sHeight - 40, siz: titlefontsize1,
+		display: `flex`, flexDirection: `column`, justifyContent: `center`, alignItems: `center`,
+	});
+
+	// createDivCss2Label が付与するインラインの配置・文字設定を解除する
+	const reset = { position: ``, left: ``, top: ``, width: ``, height: ``, fontSize: ``, textAlign: `` };
+	const gradStyle = {
+		backgroundClip: `text`, webkitBackgroundClip: `text`, color: `rgba(255,255,255,0.0)`,
+	};
+	// 空文字・スペース区切りの複数クラスに対応
+	const toClasses = _cls => (_cls ?? ``).split(` `).filter(Boolean);
+	multiAppend(titleDiv,
+		createDivCss2Label(`lblmusicTitle1`, `${_titleName[0]}`, {
+			...reset,
+			fontFamily: g_headerObj.titlefonts[0],
+			background: titlegrds[0],
+			...gradStyle,
+			...txtAnimStyles[0],
+		}, ...toClasses(g_headerObj.titleAnimationClass[0])),
+		createDivCss2Label(`lblmusicTitle2`, `${_titleName[1] ?? ``}`, {
+			...reset,
+			position: `relative`,
+			fontSize: wUnit(titlefontsize2),
+			left: wUnit(g_headerObj.titlepos[1][0]),
+			top: wUnit(g_headerObj.titlepos[1][1] + titlelineheight),
+			fontFamily: g_headerObj.titlefonts[1],
+			background: titlegrds[1],
+			...gradStyle,
+			...txtAnimStyles[1],
+		}, ...toClasses(g_headerObj.titleAnimationClass[1])),
+	)
+	return titleDiv;
 };
 
 /**
