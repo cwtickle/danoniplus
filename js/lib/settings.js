@@ -2186,6 +2186,7 @@ const setGauge = () => {
  * @param {number} _dmg 
  * @param {number} _init 
  * @param {string} _lifeValFlg 
+ * @param {string} ゲージ詳細表示用のhtml（互換のため。利用なしでも作成される）
  */
 const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const initVal = g_headerObj.maxLifeVal * _init / 100;
@@ -2233,26 +2234,28 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 
 	// ラベル行
 	const lblTable = createEmptySprite(cover, `lblGaugeDivTable`, reset, `settings_gaugeDivTable`);
+	const lblBaseClass = [`settings_gaugeEtc`];
 	multiAppend(lblTable,
 		cell(`lblGaugeStart`, g_lblNameObj.g_start, [`settings_gaugeStart`]),
-		cell(`lblGaugeBorder`, g_lblNameObj.g_border, [`settings_gaugeEtc`]),
-		cell(`lblGaugeRecovery`, g_lblNameObj.g_recovery, [`settings_gaugeEtc`]),
-		cell(`lblGaugeDamage`, g_lblNameObj.g_damage, [`settings_gaugeEtc`]),
-		cell(`lblGaugeRate`, g_lblNameObj.g_rate, [`settings_gaugeEtc`]),
+		cell(`lblGaugeBorder`, g_lblNameObj.g_border, lblBaseClass),
+		cell(`lblGaugeRecovery`, g_lblNameObj.g_recovery, lblBaseClass),
+		cell(`lblGaugeDamage`, g_lblNameObj.g_damage, lblBaseClass),
+		cell(`lblGaugeRate`, g_lblNameObj.g_rate, lblBaseClass),
 	)
 
 	// 値行
 	const dataTable = createEmptySprite(cover, `dataGaugeDivTable`, reset, `settings_gaugeDivTable`);
-	const baseClass = [`settings_gaugeVal`, `settings_gaugeEtc`];
+	const dataBaseClass = [`settings_gaugeVal`, `settings_gaugeEtc`];
 	multiAppend(dataTable,
 		cell(`dataGaugeStart`, `${init}/${g_headerObj.maxLifeVal}`,
 			[`settings_gaugeVal`, `settings_gaugeStart`]),
-		cell(`dataGaugeBorder`, `${borderText}`, baseClass),
-		cell(`dataGaugeRecovery`, `${rcvText}`, baseClass),
-		cell(`dataGaugeDamage`, `${dmgText}`, baseClass),
+		cell(`dataGaugeBorder`, `${borderText}`, dataBaseClass),
+		cell(`dataGaugeRecovery`, `${rcvText}`, dataBaseClass),
+		cell(`dataGaugeDamage`, `${dmgText}`, dataBaseClass),
 		cell(`dataGaugeRate`, `${rateText}<br><span style="font-size: 10px;">${allowableCntsText}</span>`,
-			baseClass, { lineHeight: `12px` }),
+			dataBaseClass, { lineHeight: `12px` }),
 	)
+	return lblGauge2.innerHTML;
 };
 
 /**
