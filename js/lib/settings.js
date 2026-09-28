@@ -2168,9 +2168,14 @@ const setGauge = () => {
 	g_stateObj.lifeRcv = value.Recovery;
 	g_stateObj.lifeDmg = value.Damage;
 	g_stateObj.lifeVariable = value.Variable;
-
-	lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
-		g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
+	gaugeFormat(
+		g_stateObj.lifeMode,
+		g_stateObj.lifeBorder,
+		g_stateObj.lifeRcv,
+		g_stateObj.lifeDmg,
+		g_stateObj.lifeInit,
+		g_stateObj.lifeVariable
+	);
 };
 
 /**
@@ -2181,7 +2186,6 @@ const setGauge = () => {
  * @param {number} _dmg 
  * @param {number} _init 
  * @param {string} _lifeValFlg 
- * @returns {string}
  */
 const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const initVal = g_headerObj.maxLifeVal * _init / 100;
@@ -2215,44 +2219,40 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const [rateText, allowableCntsText] = getAccuracy(borderVal, realRcv, realDmg, initVal, allCnt);
 	g_workObj.requiredAccuracy = rateText;
 
+	// createDiv が付与するインラインの配置・サイズ指定を解除し、CSSクラス側のレイアウトを使う
+	const reset = { position: ``, left: ``, top: ``, width: ``, height: `` };
+	const labelReset = { ...reset, fontSize: ``, fontFamily: ``, textAlign: `` };
+
 	// このテーブルのみpointer-eventsを有効にする（オンマウス許可）
-	return `<div id="gaugeDivCover" class="settings_gaugeDivCover" style="pointer-events: auto;">
-		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
-			<div id="lblGaugeStart" class="settings_gaugeDivTableCol settings_gaugeStart">
-				${g_lblNameObj.g_start}
-			</div>
-			<div id="lblGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeEtc">
-				${g_lblNameObj.g_border}
-			</div>
-			<div id="lblGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeEtc">
-				${g_lblNameObj.g_recovery}
-			</div>
-			<div id="lblGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeEtc">
-				${g_lblNameObj.g_damage}
-			</div>
-			<div id="lblGaugeRate" class="settings_gaugeDivTableCol settings_gaugeEtc">
-				${g_lblNameObj.g_rate}
-			</div>
-		</div>
-		<div id="dataGaugeDivTable" class="settings_gaugeDivTable">
-			<div id="dataGaugeStart" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
-				${init}/${g_headerObj.maxLifeVal}
-			</div>
-			<div id="dataGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
-				${borderText}
-			</div>
-			<div id="dataGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
-				${rcvText}
-			</div>
-			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
-				${dmgText}
-			</div>
-			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc" style="line-height: 12px;">
-				${rateText}<br><span style="font-size: 10px;">${allowableCntsText}</span>
-			</div>
-		</div>
-	</div>
-	`;
+	deleteChildspriteAll(`lblGauge2`);
+	const cover = createEmptySprite(lblGauge2, `gaugeDivCover`,
+		{ ...reset, pointerEvents: C_DIS_AUTO }, `settings_gaugeDivCover`);
+
+	const cell = (_id, _text, _classes, _style = {}) =>
+		createDivCss2Label(_id, _text, { ...labelReset, ..._style }, `settings_gaugeDivTableCol`, ..._classes);
+
+	// ラベル行
+	const lblTable = createEmptySprite(cover, `lblGaugeDivTable`, reset, `settings_gaugeDivTable`);
+	multiAppend(lblTable,
+		cell(`lblGaugeStart`, g_lblNameObj.g_start, [`settings_gaugeStart`]),
+		cell(`lblGaugeBorder`, g_lblNameObj.g_border, [`settings_gaugeEtc`]),
+		cell(`lblGaugeRecovery`, g_lblNameObj.g_recovery, [`settings_gaugeEtc`]),
+		cell(`lblGaugeDamage`, g_lblNameObj.g_damage, [`settings_gaugeEtc`]),
+		cell(`lblGaugeRate`, g_lblNameObj.g_rate, [`settings_gaugeEtc`]),
+	)
+
+	// 値行
+	const dataTable = createEmptySprite(cover, `dataGaugeDivTable`, reset, `settings_gaugeDivTable`);
+	const baseClass = [`settings_gaugeVal`, `settings_gaugeEtc`];
+	multiAppend(dataTable,
+		cell(`dataGaugeStart`, `${init}/${g_headerObj.maxLifeVal}`,
+			[`settings_gaugeVal`, `settings_gaugeStart`]),
+		cell(`dataGaugeBorder`, `${borderText}`, baseClass),
+		cell(`dataGaugeRecovery`, `${rcvText}`, baseClass),
+		cell(`dataGaugeDamage`, `${dmgText}`, baseClass),
+		cell(`dataGaugeRate`, `${rateText}<br><span style="font-size: 10px;">${allowableCntsText}</span>`,
+			baseClass, { lineHeight: `12px` }),
+	)
 };
 
 /**
