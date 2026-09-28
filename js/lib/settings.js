@@ -1422,18 +1422,15 @@ const setDifficulty = (_chartChangeFlg) => {
 	);
 
 	// ゲージ設定配列の入れ替え
-	g_settings.gauges = structuredClone(g_gaugeResolvedObj[g_stateObj.scoreId].__order);
-	g_settings.gaugeNum = (g_initialFlg ? getCurrentNo(g_settings.gauges, g_stateObj.gauge) : 0);
-	g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
-	setSetting(0, `gauge`);
-	setGauge();
+	g_settings.gauges = structuredClone(g_gaugeResolvedObj[scoreId].__order);
 
-	// 速度、スクロール、アシスト設定のカーソル位置調整
+	// 速度、スクロール、ゲージ、アシスト設定のカーソル位置調整
 	if (_chartChangeFlg) {
 		g_stateObj.speed = g_headerObj.initSpeeds[scoreId];
 		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
 	}
 	g_settings.scrollNum = getCurrentNo(g_settings.scrolls, g_stateObj.scroll);
+	g_settings.gaugeNum = (g_initialFlg ? getCurrentNo(g_settings.gauges, g_stateObj.gauge) : 0);
 	g_settings.autoPlayNum = getCurrentNo(g_settings.autoPlays, g_stateObj.autoPlay);
 
 
@@ -1496,6 +1493,11 @@ const setDifficulty = (_chartChangeFlg) => {
 		g_settings.scrolls = structuredClone(g_keyObj.scrollName_def);
 		setSetting(0, `reverse`);
 	}
+
+	// ゲージ設定
+	g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
+	setSetting(0, `gauge`);
+	setGauge();
 
 	// オート・アシスト設定 (AutoPlay)
 	g_stateObj.autoPlay = g_settings.autoPlays[g_settings.autoPlayNum];
