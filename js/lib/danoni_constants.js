@@ -1386,7 +1386,6 @@ const g_gaugeOptionObj = {
     customFulls: {},
     defaultPlusList: [`survival`, `border`, `customDefault`],
 };
-let g_gaugeType;
 
 const g_autoPlaysBase = [C_FLG_OFF, C_FLG_ALL];
 
