@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/09/27 (v51.1.0)
+ * Revised : 2026/09/29 (v51.1.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1386,7 +1386,6 @@ const g_gaugeOptionObj = {
     customFulls: {},
     defaultPlusList: [`survival`, `border`, `customDefault`],
 };
-let g_gaugeType;
 
 const g_autoPlaysBase = [C_FLG_OFF, C_FLG_ALL];
 
@@ -5342,6 +5341,7 @@ const g_root = {
     get g_gaugeDefObj() { return g_gaugeDefObj },
     get g_gaugeHeaderObj() { return g_gaugeHeaderObj },
     get g_gaugeSelObj() { return g_gaugeSelObj },
+    get g_gaugeResolvedObj() { return g_gaugeResolvedObj },
 };
 const getPathVal = _path => _path.split(`.`).reduce((o, k) => o?.[k], g_root);
 const setPathVal = (_path, _value) => {

@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/09/27 (v51.1.0)
+ * Revised : 2026/09/29 (v51.1.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1421,15 +1421,16 @@ const setDifficulty = (_chartChangeFlg) => {
 			: g_autoPlaysBase.concat()
 	);
 
-	// ゲージ設定及びカーソル位置調整
-	setGauge(0, !g_initialFlg);
+	// ゲージ設定配列の入れ替え
+	g_settings.gauges = structuredClone(g_gaugeResolvedObj[scoreId].__order);
 
-	// 速度、スクロール、アシスト設定のカーソル位置調整
+	// 速度、スクロール、ゲージ、アシスト設定のカーソル位置調整
 	if (_chartChangeFlg) {
 		g_stateObj.speed = g_headerObj.initSpeeds[scoreId];
 		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
 	}
 	g_settings.scrollNum = getCurrentNo(g_settings.scrolls, g_stateObj.scroll);
+	g_settings.gaugeNum = (g_initialFlg ? getCurrentNo(g_settings.gauges, g_stateObj.gauge) : 0);
 	g_settings.autoPlayNum = getCurrentNo(g_settings.autoPlays, g_stateObj.autoPlay);
 
 
@@ -1492,6 +1493,11 @@ const setDifficulty = (_chartChangeFlg) => {
 		g_settings.scrolls = structuredClone(g_keyObj.scrollName_def);
 		setSetting(0, `reverse`);
 	}
+
+	// ゲージ設定
+	g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
+	setSetting(0, `gauge`);
+	setGauge();
 
 	// オート・アシスト設定 (AutoPlay)
 	g_stateObj.autoPlay = g_settings.autoPlays[g_settings.autoPlayNum];
@@ -1845,35 +1851,22 @@ const createOptionWindow = _sprite => {
 	// ---------------------------------------------------
 	// ゲージ設定 (Gauge)
 	// 縦位置: 7.5
-	spriteList.gauge.appendChild(createLblSetting(`Gauge`));
+	createGeneralSetting(spriteList.gauge, `gauge`, {
+		addRFunc: () => setGauge(),
+	});
+	multiAppend(spriteList.gauge,
+		// ゲージ設定詳細 縦位置: ゲージ設定+1
+		createDivCss2Label(`lblGauge2`, ``, g_lblPosObj.lblGauge2),
 
-	// ゲージ設定詳細 縦位置: ゲージ設定+1
-	spriteList.gauge.appendChild(createDivCss2Label(`lblGauge2`, ``, g_lblPosObj.lblGauge2));
-
-	if (g_headerObj.gaugeUse) {
-		multiAppend(spriteList.gauge,
-			makeSettingLblCssButton(`lnkGauge`, ``, 0, () => setGauge(1), { cxtFunc: () => setGauge(-1) }),
-			makeMiniCssButton(`lnkGauge`, `R`, 0, () => setGauge(1)),
-			makeMiniCssButton(`lnkGauge`, `L`, 0, () => setGauge(-1)),
-		);
-		createScText(spriteList.gauge, `Gauge`);
-	} else {
-		lblGauge.classList.add(g_cssObj.settings_Disabled);
-		spriteList.gauge.appendChild(makeDisabledLabel(`lnkGauge`, 0, getStgDetailName(g_stateObj.gauge)));
-	}
-
-	// 空押し判定設定 (Excessive)
-	spriteList.gauge.appendChild(
+		// 空押し判定設定 (Excessive)
 		createDivCss2Label(`lblExcessive`, `${g_lblNameObj.Excessive}:${C_FLG_ON}`,
 			g_lblPosObj.lblExcessive, g_cssObj[`button_Disabled${C_FLG_ON}`]
-		)
-	);
-	spriteList.gauge.appendChild(
+		),
 		createCss2Button(`lnkExcessive`, g_lblNameObj.Excessive, evt => setExcessive(evt.target), {
 			...g_lblPosObj.btnExcessive,
 			title: g_msgObj.excessive, cxtFunc: evt => setExcessive(evt.target),
-		}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.excessive}`])
-	);
+		}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.excessive}`]),
+	)
 	createScText(lnkExcessive, `Excessive`, { x: -13, targetLabel: `lnkExcessive` });
 
 	// ---------------------------------------------------
@@ -2164,35 +2157,25 @@ const setReverseView = _btn => {
 	}
 };
 
-// ============================================================
-// ゲージ設定の適用パイプライン（wiki: ゲージ設定適用順仕様）
-// 優先度は「低→高」= 基本設定(g_gaugeDefObj) → 譜面ヘッダー(初期ゲージのみ) → ゲージ個別設定。
-// 下記のapply*/resolve*はsetGaugeから“この順番のまま”呼ばれ、後段が前段を上書きすることで
-// 優先度を表現する。順序の変更は仕様変更を意味する。
-// ============================================================
-
 /**
- * ゲージ設定メイン
- * @param {number} _scrollNum
+ * ゲージ設定切替後の設定処理
  */
-const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
-	const resolved = g_gaugeResolvedObj[g_stateObj.scoreId];
-
-	g_settings.gauges = structuredClone(resolved.__order);
-	g_settings.gaugeNum = (_gaugeInitFlg ? 0 : getCurrentNo(g_settings.gauges, g_stateObj.gauge));
-	g_stateObj.gauge = g_settings.gauges[g_settings.gaugeNum];
-	setSetting(_scrollNum, `gauge`);
-
-	const value = resolved[g_stateObj.gauge];
+const setGauge = () => {
+	const value = g_gaugeResolvedObj[g_stateObj.scoreId][g_stateObj.gauge];
 	g_stateObj.lifeMode = (value.Border === `x` ? C_LFE_SURVIVAL : C_LFE_BORDER);
 	g_stateObj.lifeBorder = (value.Border === `x` ? 0 : value.Border);
 	g_stateObj.lifeInit = value.Init;
 	g_stateObj.lifeRcv = value.Recovery;
 	g_stateObj.lifeDmg = value.Damage;
 	g_stateObj.lifeVariable = value.Variable;
-
-	lblGauge2.innerHTML = gaugeFormat(g_stateObj.lifeMode,
-		g_stateObj.lifeBorder, g_stateObj.lifeRcv, g_stateObj.lifeDmg, g_stateObj.lifeInit, g_stateObj.lifeVariable);
+	gaugeFormat(
+		g_stateObj.lifeMode,
+		g_stateObj.lifeBorder,
+		g_stateObj.lifeRcv,
+		g_stateObj.lifeDmg,
+		g_stateObj.lifeInit,
+		g_stateObj.lifeVariable
+	);
 };
 
 /**
@@ -2203,7 +2186,7 @@ const setGauge = (_scrollNum, _gaugeInitFlg = false) => {
  * @param {number} _dmg 
  * @param {number} _init 
  * @param {string} _lifeValFlg 
- * @returns {string}
+ * @param {string} ゲージ詳細表示用のhtml（互換のため。利用なしでも作成される）
  */
 const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const initVal = g_headerObj.maxLifeVal * _init / 100;
@@ -2237,44 +2220,42 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	const [rateText, allowableCntsText] = getAccuracy(borderVal, realRcv, realDmg, initVal, allCnt);
 	g_workObj.requiredAccuracy = rateText;
 
+	// createDiv が付与するインラインの配置・サイズ指定を解除し、CSSクラス側のレイアウトを使う
+	const reset = { position: ``, left: ``, top: ``, width: ``, height: `` };
+	const labelReset = { ...reset, fontSize: ``, fontFamily: ``, textAlign: `` };
+
 	// このテーブルのみpointer-eventsを有効にする（オンマウス許可）
-	return `<div id="gaugeDivCover" class="settings_gaugeDivCover" style="pointer-events: auto;">
-		<div id="lblGaugeDivTable" class="settings_gaugeDivTable">
-			<div id="lblGaugeStart" class="settings_gaugeDivTableCol settings_gaugeStart">
-				${g_lblNameObj.g_start}
-			</div>
-			<div id="lblGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeEtc">
-				${g_lblNameObj.g_border}
-			</div>
-			<div id="lblGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeEtc">
-				${g_lblNameObj.g_recovery}
-			</div>
-			<div id="lblGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeEtc">
-				${g_lblNameObj.g_damage}
-			</div>
-			<div id="lblGaugeRate" class="settings_gaugeDivTableCol settings_gaugeEtc">
-				${g_lblNameObj.g_rate}
-			</div>
-		</div>
-		<div id="dataGaugeDivTable" class="settings_gaugeDivTable">
-			<div id="dataGaugeStart" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeStart">
-				${init}/${g_headerObj.maxLifeVal}
-			</div>
-			<div id="dataGaugeBorder" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
-				${borderText}
-			</div>
-			<div id="dataGaugeRecovery" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
-				${rcvText}
-			</div>
-			<div id="dataGaugeDamage" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc">
-				${dmgText}
-			</div>
-			<div id="dataGaugeRate" class="settings_gaugeDivTableCol settings_gaugeVal settings_gaugeEtc" style="line-height: 12px;">
-				${rateText}<br><span style="font-size: 10px;">${allowableCntsText}</span>
-			</div>
-		</div>
-	</div>
-	`;
+	deleteChildspriteAll(`lblGauge2`);
+	const cover = createEmptySprite(lblGauge2, `gaugeDivCover`,
+		{ ...reset, pointerEvents: C_DIS_AUTO }, `settings_gaugeDivCover`);
+
+	const cell = (_id, _text, _classes, _style = {}) =>
+		createDivCss2Label(_id, _text, { ...labelReset, ..._style }, `settings_gaugeDivTableCol`, ..._classes);
+
+	// ラベル行
+	const lblTable = createEmptySprite(cover, `lblGaugeDivTable`, reset, `settings_gaugeDivTable`);
+	const lblBaseClass = [`settings_gaugeEtc`];
+	multiAppend(lblTable,
+		cell(`lblGaugeStart`, g_lblNameObj.g_start, [`settings_gaugeStart`]),
+		cell(`lblGaugeBorder`, g_lblNameObj.g_border, lblBaseClass),
+		cell(`lblGaugeRecovery`, g_lblNameObj.g_recovery, lblBaseClass),
+		cell(`lblGaugeDamage`, g_lblNameObj.g_damage, lblBaseClass),
+		cell(`lblGaugeRate`, g_lblNameObj.g_rate, lblBaseClass),
+	)
+
+	// 値行
+	const dataTable = createEmptySprite(cover, `dataGaugeDivTable`, reset, `settings_gaugeDivTable`);
+	const dataBaseClass = [`settings_gaugeVal`, `settings_gaugeEtc`];
+	multiAppend(dataTable,
+		cell(`dataGaugeStart`, `${init}/${g_headerObj.maxLifeVal}`,
+			[`settings_gaugeVal`, `settings_gaugeStart`]),
+		cell(`dataGaugeBorder`, `${borderText}`, dataBaseClass),
+		cell(`dataGaugeRecovery`, `${rcvText}`, dataBaseClass),
+		cell(`dataGaugeDamage`, `${dmgText}`, dataBaseClass),
+		cell(`dataGaugeRate`, `${rateText}<br><span style="font-size: 10px;">${allowableCntsText}</span>`,
+			dataBaseClass, { lineHeight: `12px` }),
+	)
+	return lblGauge2.innerHTML;
 };
 
 /**
