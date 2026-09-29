@@ -835,7 +835,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 		if (j === 0) {
 		} else {
 			document.getElementById(`btnMusicSelect${j}`).style.fontSize =
-				getFontSize2(g_headerObj.musicTitles[idx].slice(0, limitedMLength), g_btnWidth(1 / 2));
+				wUnit(getFontSize2(g_headerObj.musicTitles[idx].slice(0, limitedMLength), g_btnWidth(1 / 2)));
 			document.getElementById(`btnMusicSelect${j}`).innerHTML =
 				`${g_headerObj.musicTitles[idx].slice(0, limitedMLength)}${g_headerObj.musicTitles[idx].length > limitedMLength ? '...' : ''}<br>` +
 				`<span style="font-size:0.7em;line-height:9px"> / ${g_headerObj.artistNames[idx]}</span>`;
