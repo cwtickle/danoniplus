@@ -30,6 +30,12 @@ jobs:
         run: |
           set -euo pipefail
 
+          # major_version は jq / sed のプログラムに埋め込まれるため、形式を厳密に検証する
+          if [[ ! "$MAJOR" =~ ^v[0-9]+$ ]]; then
+            echo "major_version の形式が不正です (例: v48): ${MAJOR}" >&2
+            exit 1
+          fi
+
           echo "=== 対象メジャー: ${MAJOR} ==="
           echo "=== dry_run: ${DRY_RUN} ==="
 
