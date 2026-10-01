@@ -38,7 +38,7 @@ jobs:
           set -euo pipefail
 
           # MAJOR は sed / シェルに埋め込まれるため、形式を厳密に検証する
-          if [[ ! "$MAJOR" =~ ^v[0-9]+$ ]]; then
+          if [[ ! "$MAJOR" =~ ^v[1-9][0-9]*$ ]]; then
             echo "major_version の形式が不正です (例: v48)" >&2
             exit 1
           fi
