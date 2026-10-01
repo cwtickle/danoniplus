@@ -31,6 +31,26 @@ jobs:
       DEFAULT_EXCLUDES_GITLAB: "Changelog-latest.md,AboutReleaseInfo.md,AccessMap.md,HowToUpdate.md,MigrationGuide.md,Security-Policy.md,Release-*.md"
 
     steps:
+      - name: Validate inputs
+        env:
+          EXTRA: ${{ inputs.exclude_files }}
+        run: |
+          set -euo pipefail
+
+          # MAJOR は sed / シェルに埋め込まれるため、形式を厳密に検証する
+          if [[ ! "$MAJOR" =~ ^v[1-9][0-9]*$ ]]; then
+            echo "major_version の形式が不正です (例: v48)" >&2
+            exit 1
+          fi
+
+          # exclude_files は basename のパターン(英数字, ., _, -, *, ?, カンマ, 空白)のみ許可
+          # 改行や ' " $ ` / | などは拒否される
+          re='^[A-Za-z0-9._*?, -]*$'
+          if [[ ! "$EXTRA" =~ $re ]]; then
+            echo "exclude_files に使用できない文字が含まれています" >&2
+            exit 1
+          fi
+
       - name: Set up git identity
         run: |
           git config --global user.name "github-actions[bot]"
@@ -38,8 +58,9 @@ jobs:
 
       - name: Build exclude lists
         id: excl
+        env:
+          EXTRA: ${{ inputs.exclude_files }}
         run: |
-          EXTRA="${{ inputs.exclude_files }}"
           echo "gh_main=${DEFAULT_EXCLUDES_GH_MAIN}${EXTRA:+,${EXTRA}}" >> "$GITHUB_OUTPUT"
           echo "gh_docs=${DEFAULT_EXCLUDES_GH_DOCS}${EXTRA:+,${EXTRA}}" >> "$GITHUB_OUTPUT"
           echo "gitlab=${DEFAULT_EXCLUDES_GITLAB}${EXTRA:+,${EXTRA}}" >> "$GITHUB_OUTPUT"
@@ -121,10 +142,12 @@ jobs:
         run: git clone "https://x-access-token:${TOKEN}@github.com/cwtickle/danoniplus.wiki.git" wiki-gh-main
 
       - name: Sweep GitHub wiki (danoniplus)
-        run: ./sweep.sh wiki-gh-main "${{ steps.excl.outputs.gh_main }}"
+        env:
+          EXCLUDES: ${{ steps.excl.outputs.gh_main }}
+        run: ./sweep.sh wiki-gh-main "$EXCLUDES"
 
       - name: Archive latest → vXX (danoniplus)
-        run: ./archive.sh wiki-gh-main "Changelog-latest.md" "Changelog-${{ inputs.major_version }}.md"
+        run: ./archive.sh wiki-gh-main "Changelog-latest.md" "Changelog-${MAJOR}.md"
 
       - name: Commit & push GitHub wiki (danoniplus)
         if: ${{ inputs.dry_run == false }}
@@ -147,10 +170,12 @@ jobs:
         run: git clone "https://x-access-token:${TOKEN}@github.com/cwtickle/danoniplus-docs.wiki.git" wiki-gh-docs
 
       - name: Sweep GitHub wiki (danoniplus-docs)
-        run: ./sweep.sh wiki-gh-docs "${{ steps.excl.outputs.gh_docs }}"
+        env:
+          EXCLUDES: ${{ steps.excl.outputs.gh_docs }}
+        run: ./sweep.sh wiki-gh-docs "$EXCLUDES"
 
       - name: Archive latest → vXX (danoniplus-docs)
-        run: ./archive.sh wiki-gh-docs "Changelog-latest.md" "Changelog-${{ inputs.major_version }}.md"
+        run: ./archive.sh wiki-gh-docs "Changelog-latest.md" "Changelog-${MAJOR}.md"
 
       - name: Commit & push GitHub wiki (danoniplus-docs)
         if: ${{ inputs.dry_run == false }}
@@ -173,12 +198,14 @@ jobs:
         run: git clone "https://oauth2:${TOKEN}@gitlab.com/${GITLAB_NAMESPACE}/danonicw.wiki.git" wiki-gitlab
 
       - name: Sweep GitLab wiki (danonicw)
-        run: ./sweep.sh wiki-gitlab "${{ steps.excl.outputs.gitlab }}" "Ja En"
+        env:
+          EXCLUDES: ${{ steps.excl.outputs.gitlab }}
+        run: ./sweep.sh wiki-gitlab "$EXCLUDES" "Ja En"
 
       - name: Archive latest → vXX (danonicw, Ja + En)
         run: |
-          ./archive.sh wiki-gitlab "Ja/Changelog-latest.md" "Ja/Changelog-${{ inputs.major_version }}.md"
-          ./archive.sh wiki-gitlab "En/Changelog-latest.md" "En/Changelog-${{ inputs.major_version }}.md"
+          ./archive.sh wiki-gitlab "Ja/Changelog-latest.md" "Ja/Changelog-${MAJOR}.md"
+          ./archive.sh wiki-gitlab "En/Changelog-latest.md" "En/Changelog-${MAJOR}.md"
 
       - name: Commit & push GitLab wiki (danonicw)
         if: ${{ inputs.dry_run == false }}
