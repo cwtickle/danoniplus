@@ -267,11 +267,7 @@ const g_workObj = {
 };
 
 // 歌詞制御
-let g_wordSprite;
-
 const g_wordObj = {
-	wordDir: 0,
-	wordDat: ``,
 	fadeInFlg0: false,
 	fadeInFlg1: false,
 	fadeOutFlg0: false,
