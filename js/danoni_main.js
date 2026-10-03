@@ -598,11 +598,15 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 	 * @returns {string}
 	 */
 	const formatValue = (_value, _rootKey) => {
+		// XSS対策: colorFmtの有無に関わらず文字列は必ずエスケープする
+		if (typeof _value === C_TYP_STRING) {
+			_value = escapeHtml(_value);
+		}
 		if (colorFmt) {
 			if (typeof _value === C_TYP_STRING) {
 
 				// カラーコードの色付け処理
-				_value = escapeHtml(_value).replaceAll(`\n`, `<br>`);
+				_value = _value.replaceAll(`\n`, `<br>`);
 				const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
 				if (_value === C_FLG_ON) {
 					return `<span style="color:#66ff66">${g_emojiObj.checkMark} ON</span>`;
