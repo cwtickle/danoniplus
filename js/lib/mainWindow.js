@@ -25,8 +25,6 @@ const mainInit = () => {
 
 	g_currentArrows = 0;
 	const wordMaxLen = g_scoreObj.wordMaxDepth + 1;
-	g_workObj.fadeInNo = fillArray(wordMaxLen);
-	g_workObj.fadeOutNo = fillArray(wordMaxLen);
 	g_workObj.lastFadeFrame = fillArray(wordMaxLen);
 	g_workObj.wordFadeFrame = fillArray(wordMaxLen);
 	const mainCommonPos = { w: g_headerObj.playingWidth, h: g_posObj.arrowHeight };
@@ -176,7 +174,6 @@ const mainInit = () => {
 	// 開始位置、楽曲再生位置の設定
 	const firstFrame = g_scoreObj.frameNum;
 	let musicStartFrame = firstFrame + g_headerObj.blankFrame;
-	const fadeFlgs = { fadein: [`In`, `Out`], fadeout: [`Out`, `In`] };
 	g_audio.volume = (firstFrame === 0 ? g_stateObj.volume / 100 : 0);
 
 	// 曲時間制御変数
@@ -1372,6 +1369,70 @@ const mainInit = () => {
 	};
 
 	/**
+	 * 歌詞表示の更新
+	 * - 歌詞データは [深度, 歌詞 or 制御コマンド, (フェード時間フレーム)] の形式
+	 * - 制御コマンド: [fadein], [fadeout], [left], [center], [right], [fontSize=n]
+	 *   制御コマンド以外は歌詞として表示する
+	 * @param {Array} _wordData 歌詞データ
+	 * @param {number} _currentFrame 現在のフレーム数
+	 */
+	const updateWord = (_wordData, _currentFrame) => {
+		const [wordDir, wordDat, wordFadeFrame] = _wordData;
+		const wordDepth = Number(wordDir);
+		const targetId = `lblword${wordDepth}`;
+		const styWord = $id(targetId);
+
+		const wordFadeCmds = new Map([
+			[`[fadein]`, [`In`, `Out`]],
+			[`[fadeout]`, [`Out`, `In`]],
+		]);
+		const alignCmds = [`[left]`, `[center]`, `[right]`];
+
+		const fadeTypes = wordFadeCmds.get(wordDat);
+		if (fadeTypes !== undefined) {
+
+			// フェードイン・アウト開始（フェードイン中はフェードアウト処理を無効にする。その逆も同様）
+			const [onType, offType] = fadeTypes;
+			g_wordObj[`fade${onType}Flg${wordDepth}`] = true;
+			g_wordObj[`fade${offType}Flg${wordDepth}`] = false;
+			styWord.animationName = `fade${onType}0`;
+
+			const fadeFrame = setIntVal(wordFadeFrame, C_WOD_FRAME);
+			g_workObj.lastFadeFrame[wordDepth] = _currentFrame;
+			g_workObj.wordFadeFrame[wordDepth] = fadeFrame;
+
+			styWord.animationDuration = `${fadeFrame / g_fps}s`;
+			styWord.animationTimingFunction = `linear`;
+			styWord.animationFillMode = `forwards`;
+
+		} else if (alignCmds.includes(wordDat)) {
+
+			// 歌詞位置変更
+			styWord.textAlign = wordDat.slice(1, -1);
+
+		} else if (/\[fontSize=\d+\]/.test(wordDat)) {
+
+			// フォントサイズ変更
+			const fontSize = setIntVal(wordDat.match(/\d+/)[0], g_limitObj.mainSiz);
+			styWord.fontSize = wUnit(fontSize);
+
+		} else {
+
+			// フェードイン・アウトが完了していれば、アニメーションを解除してから歌詞を表示
+			const fadeFinished = _currentFrame - g_workObj.lastFadeFrame[wordDepth] >= g_workObj.wordFadeFrame[wordDepth];
+			if (fadeFinished) {
+				[`Out`, `In`].forEach(type => {
+					if (g_wordObj[`fade${type}Flg${wordDepth}`]) {
+						styWord.animationName = `none`;
+						g_wordObj[`fade${type}Flg${wordDepth}`] = false;
+					}
+				});
+			}
+			document.getElementById(targetId).innerHTML = wordDat;
+		}
+	};
+
+	/**
 	 * フレーム処理(譜面台)
 	 */
 	const flowTimeline = () => {
@@ -1520,52 +1581,7 @@ const mainInit = () => {
 		}
 
 		// 歌詞表示
-		g_scoreObj.wordData[currentFrame]?.forEach(tmpObj => {
-			g_wordObj.wordDir = tmpObj[0];
-			g_wordObj.wordDat = tmpObj[1];
-			g_wordSprite = document.getElementById(`lblword${g_wordObj.wordDir}`);
-
-			const wordDepth = Number(g_wordObj.wordDir);
-			if (g_wordObj.wordDat.substring(0, 5) === `[fade`) {
-
-				// フェードイン・アウト開始
-				const fkey = fadeFlgs[Object.keys(fadeFlgs).find(flg => g_wordObj.wordDat === `[${flg}]`)];
-				g_wordObj[`fade${fkey[0]}Flg${wordDepth}`] = true;
-				g_wordObj[`fade${fkey[1]}Flg${wordDepth}`] = false;
-				g_wordSprite.style.animationName =
-					`fade${fkey[0]}${(++g_workObj[`fade${fkey[0]}No`][wordDepth] % 2)}`;
-
-				g_workObj.lastFadeFrame[wordDepth] = currentFrame;
-				g_workObj.wordFadeFrame[wordDepth] = (tmpObj.length > 2 ?
-					setIntVal(tmpObj[2], C_WOD_FRAME) : C_WOD_FRAME);
-
-				g_wordSprite.style.animationDuration = `${g_workObj.wordFadeFrame[wordDepth] / g_fps}s`;
-				g_wordSprite.style.animationTimingFunction = `linear`;
-				g_wordSprite.style.animationFillMode = `forwards`;
-
-			} else if ([`[center]`, `[left]`, `[right]`].includes(g_wordObj.wordDat)) {
-
-				// 歌詞位置変更
-				g_wordSprite.style.textAlign = g_wordObj.wordDat.slice(1, -1);
-
-			} else if (/\[fontSize=\d+\]/.test(g_wordObj.wordDat)) {
-
-				// フォントサイズ変更
-				const fontSize = setIntVal(g_wordObj.wordDat.match(/\d+/)[0], g_limitObj.mainSiz);
-				g_wordSprite.style.fontSize = wUnit(fontSize);
-
-			} else {
-
-				// フェードイン・アウト処理後、表示する歌詞を表示
-				const fadingFlg = currentFrame - g_workObj.lastFadeFrame[wordDepth] >= g_workObj.wordFadeFrame[wordDepth];
-				[`Out`, `In`].filter(pattern => g_wordObj[`fade${pattern}Flg${g_wordObj.wordDir}`] && fadingFlg).forEach(pattern => {
-					g_wordSprite.style.animationName = `none`;
-					g_wordObj[`fade${pattern}Flg${g_wordObj.wordDir}`] = false;
-				});
-				g_workObj[`word${g_wordObj.wordDir}Data`] = g_wordObj.wordDat;
-				g_wordSprite.innerHTML = g_wordObj.wordDat;
-			}
-		});
+		g_scoreObj.wordData[currentFrame]?.forEach(wordData => updateWord(wordData, currentFrame));
 
 		// 判定キャラクタ消去
 		jdgGroups.forEach(jdg => {
