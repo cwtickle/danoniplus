@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/09/29 (v51.1.1)
+ * Revised : 2026/10/03 (v51.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1581,6 +1581,29 @@ const g_transPriority = {
 };
 
 /**
+ * transform情報の連結
+ * - 優先度の降順 (同一優先度は登録順) で半角スペース区切りに連結
+ * - 要素数1・2 (矢印・フリーズアローの root / rootX) は配列生成・ソートを省略
+ * @param {Map} _transformMap
+ * @returns {string}
+ */
+const joinTransforms = _transformMap => {
+    if (_transformMap.size === 1) {
+        return _transformMap.values().next().value.transform;
+    }
+    if (_transformMap.size === 2) {
+        const it = _transformMap.values();
+        const a = it.next().value;
+        const b = it.next().value;
+        return b.priority > a.priority ? `${b.transform} ${a.transform}` : `${a.transform} ${b.transform}`;
+    }
+    return Array.from(_transformMap.values())
+        .sort((a, b) => b.priority - a.priority)
+        .map(v => v.transform)
+        .join(` `);
+};
+
+/**
  * idごとのtransformを追加・変更
  * - _transformIdごとに transform情報を管理
  * @param {string} _id 
@@ -1589,14 +1612,18 @@ const g_transPriority = {
  * @param {number} [_priority=1000] transformの優先度（数値が小さいほど優先される。デフォルトは1000）
  */
 const addTransform = (_id, _transformId, _transform, _priority = 1000) => {
-    if (g_transforms[_id] === undefined) {
-        g_transforms[_id] = new Map();
+    let transforms = g_transforms[_id];
+    if (transforms === undefined) {
+        transforms = g_transforms[_id] = new Map();
     }
-    g_transforms[_id].set(_transformId, { transform: _transform, priority: _priority });
-    $id(_id).transform = Array.from(g_transforms[_id].values())
-        .sort((a, b) => b.priority - a.priority)
-        .map(v => v.transform)
-        .join(` `);
+    const current = transforms.get(_transformId);
+    if (current !== undefined && current.priority === _priority) {
+        // 既存エントリは値のみ更新 (登録順は変わらない)
+        current.transform = _transform;
+    } else {
+        transforms.set(_transformId, { transform: _transform, priority: _priority });
+    }
+    $id(_id).transform = joinTransforms(transforms);
 };
 
 /**
@@ -1605,17 +1632,15 @@ const addTransform = (_id, _transformId, _transform, _priority = 1000) => {
  * @param {string} _transformId 
  */
 const delTransform = (_id, _transformId) => {
-    if (g_transforms[_id]) {
-        g_transforms[_id].delete(_transformId);
-        if (g_transforms[_id].size === 0) {
+    const transforms = g_transforms[_id];
+    if (transforms) {
+        transforms.delete(_transformId);
+        if (transforms.size === 0) {
             delete g_transforms[_id];
             $id(_id).transform = ``;
             return;
         }
-        $id(_id).transform = Array.from(g_transforms[_id].values())
-            .sort((a, b) => b.priority - a.priority)
-            .map(v => v.transform)
-            .join(` `);
+        $id(_id).transform = joinTransforms(transforms);
     }
 };
 
@@ -1877,10 +1902,11 @@ const g_motionAlphaFunc = new Map([
 
 const motionAlphaToggle = (_obj, _property) => {
     const dir = (_property.y - _property.prevY) * _property.dir;
-    if (($id(_obj).opacity === ``) && dir > 0) {
-        $id(_obj).opacity = g_settings.motionAlpha;
-    } else if (Number($id(_obj).opacity) === g_settings.motionAlpha && dir < 0) {
-        $id(_obj).opacity = ``;
+    const style = $id(_obj);
+    if ((style.opacity === ``) && dir > 0) {
+        style.opacity = g_settings.motionAlpha;
+    } else if (Number(style.opacity) === g_settings.motionAlpha && dir < 0) {
+        style.opacity = ``;
     }
 };
 

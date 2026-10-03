@@ -14,33 +14,35 @@ on:
         type: boolean
         default: true
 
+permissions:
+  contents: write
+
 jobs:
   migrate-release-notes:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up variables
-        id: vars
-        run: |
-          echo "major=${{ inputs.major_version }}" >> "$GITHUB_OUTPUT"
-
       - name: Migrate releases
         env:
-          # Contents: Read and write 権限を持つ、対象リポジトリ限定のトークンを
-          # リポジトリのSecretsに事前登録しておくこと。
-          GH_TOKEN: ${{ secrets.RELEASE_EDIT_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: cwtickle/danoniplus
-          MAJOR: ${{ steps.vars.outputs.major }}
+          MAJOR: ${{ inputs.major_version }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
           set -euo pipefail
+
+          # major_version は jq / sed のプログラムに埋め込まれるため、形式を厳密に検証する
+          if [[ ! "$MAJOR" =~ ^v[0-9]+$ ]]; then
+            echo "major_version の形式が不正です (例: v48): ${MAJOR}" >&2
+            exit 1
+          fi
 
           echo "=== 対象メジャー: ${MAJOR} ==="
           echo "=== dry_run: ${DRY_RUN} ==="
 
           # 対象メジャーに属するリリース一覧を取得 (例: v48.0.0, v48.1.0, ..., v48.5.3)
           # per_page=100 で足りない場合はページネーション対応を追加すること
-          releases=$(gh api "repos/${REPO}/releases?per_page=100" \
-            --jq ".[] | select(.tag_name | startswith(\"${MAJOR}.\")) | .id")
+          releases=$(gh api --paginate "repos/${REPO}/releases?per_page=100" \
+            --jq ".[] | select(.draft == false and (.tag_name | startswith(\"${MAJOR}.\"))) | .id")
 
           if [ -z "$releases" ]; then
             echo "対象バージョンが見つかりませんでした。MAJOR の指定を確認してください。"
@@ -48,23 +50,24 @@ jobs:
           fi
 
           for release_id in $releases; do
-            tag=$(gh api "repos/${REPO}/releases/${release_id}" --jq ".tag_name")
-            body=$(gh api "repos/${REPO}/releases/${release_id}" --jq ".body")
+            release=$(gh api "repos/${REPO}/releases/${release_id}")
+            tag=$(jq -r .tag_name <<< "$release")
+            body=$(jq -r .body <<< "$release")
 
             # --- 置換ルール ---
             # 区切り文字は | を使用(置換後の文字列に # が含まれるため # は使えない)
 
             # 1. commits-since バッジのブランチ指定
             #    /{tag}/master?style=social -> /{tag}/support/{MAJOR}?style=social
-            new_body=$(echo "$body" | sed "s|/${tag}/master?style=social|/${tag}/support/${MAJOR}?style=social|g")
+            new_body=$(printf '%s' "$body" | sed "s|/${tag}/master?style=social|/${tag}/support/${MAJOR}?style=social|g")
 
             # 2. compare リンクの比較先ブランチ
             #    {tag}...master#files_bucket -> {tag}...support/{MAJOR}#files_bucket
-            new_body=$(echo "$new_body" | sed "s|${tag}\.\.\.master#files_bucket|${tag}...support/${MAJOR}#files_bucket|g")
+            new_body=$(printf '%s' "$new_body" | sed "s|${tag}\.\.\.master#files_bucket|${tag}...support/${MAJOR}#files_bucket|g")
 
             # 3. Changelog Wiki アンカーリンク
             #    Changelog-latest -> Changelog-{MAJOR}
-            new_body=$(echo "$new_body" | sed "s|Changelog-latest|Changelog-${MAJOR}|g")
+            new_body=$(printf '%s' "$new_body" | sed "s|Changelog-latest|Changelog-${MAJOR}|g")
 
             if [ "$body" = "$new_body" ]; then
               echo "--- ${tag}: 変更なし(対象文字列が見つかりませんでした) ---"
@@ -72,7 +75,7 @@ jobs:
             fi
 
             echo "--- ${tag}: 変更あり ---"
-            diff <(echo "$body") <(echo "$new_body") || true
+            diff <(printf '%s\n' "$body") <(printf '%s\n' "$new_body") || true
 
             if [ "$DRY_RUN" = "false" ]; then
               gh api \
