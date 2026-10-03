@@ -1395,7 +1395,20 @@ const mainInit = () => {
 			const [onType, offType] = fadeTypes;
 			g_wordObj[`fade${onType}Flg${wordDepth}`] = true;
 			g_wordObj[`fade${offType}Flg${wordDepth}`] = false;
-			styWord.animationName = `fade${onType}0`;
+
+			const animationName = `fade${onType}0`;
+			const isRepeatedFade =
+				styWord.animationName === animationName &&
+				g_workObj.lastFadeFrame[wordDepth] !== _currentFrame;
+
+			if (isRepeatedFade) {
+				styWord.animationName = `none`;
+
+				// 幅の読み取りにより、未反映のスタイル・レイアウトを更新する
+				// 幅の値そのものは使わない
+				void document.getElementById(targetId).offsetWidth;
+			}
+			styWord.animationName = animationName;
 
 			const fadeFrame = setIntVal(wordFadeFrame, C_WOD_FRAME);
 			g_workObj.lastFadeFrame[wordDepth] = _currentFrame;
