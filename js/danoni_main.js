@@ -645,7 +645,7 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 			if (_list.findIndex(val => val === rootKey) >= 0) {
 				let result = `[`;
 				for (let j = 0; j < _obj.length; j += _numOfSet) {
-					result += `<br>${nestedIndent}${_obj[j]}: ${_obj[j + 1]}`;
+					result += `<br>${nestedIndent}${escapeHtml(_obj[j])}: ${escapeHtml(_obj[j + 1])}`;
 					for (let k = 0; k < _numOfSet - 2; k++) {
 						const idx = j + k + 2;
 						if (idx < _obj.length) {
@@ -708,7 +708,8 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 			})
 			: Object.entries(_obj).map(([key, value]) => {
 				const formattedValue = getNextObject(value, rootKey === `` ? key : rootKey);
-				return `<br>${nestedIndent}"${key}": ${formattedValue}`;
+				const formattedKey = colorFmt ? escapeHtml(key) : key;
+				return `<br>${nestedIndent}"${formattedKey}": ${formattedValue}`;
 			})).filter(val => !hasVal(val) || val !== `----`);
 
 		// 配列なら[]で囲む、オブジェクトなら{}で囲む
