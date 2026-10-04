@@ -598,15 +598,11 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 	 * @returns {string}
 	 */
 	const formatValue = (_value, _rootKey) => {
-		// XSS対策: colorFmtの有無に関わらず文字列は必ずエスケープする
-		if (typeof _value === C_TYP_STRING) {
-			_value = escapeHtml(_value);
-		}
 		if (colorFmt) {
 			if (typeof _value === C_TYP_STRING) {
 
 				// カラーコードの色付け処理
-				_value = _value.replaceAll(`\n`, `<br>`);
+				_value = escapeHtml(_value).replaceAll(`\n`, `<br>`);
 				const colorCodePattern = /(#|0x)(?:[A-Fa-f0-9]{6}(?:[A-Fa-f0-9]{2})?|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{3})/g;
 				if (_value === C_FLG_ON) {
 					return `<span style="color:#66ff66">${g_emojiObj.checkMark} ON</span>`;
@@ -649,7 +645,7 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 			if (_list.findIndex(val => val === rootKey) >= 0) {
 				let result = `[`;
 				for (let j = 0; j < _obj.length; j += _numOfSet) {
-					result += `<br>${nestedIndent}${_obj[j]}: ${_obj[j + 1]}`;
+					result += `<br>${nestedIndent}${escapeHtml(_obj[j])}: ${escapeHtml(_obj[j + 1])}`;
 					for (let k = 0; k < _numOfSet - 2; k++) {
 						const idx = j + k + 2;
 						if (idx < _obj.length) {
@@ -712,7 +708,8 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 			})
 			: Object.entries(_obj).map(([key, value]) => {
 				const formattedValue = getNextObject(value, rootKey === `` ? key : rootKey);
-				return `<br>${nestedIndent}"${key}": ${formattedValue}`;
+				const formattedKey = colorFmt ? escapeHtml(key) : key;
+				return `<br>${nestedIndent}"${formattedKey}": ${formattedValue}`;
 			})).filter(val => !hasVal(val) || val !== `----`);
 
 		// 配列なら[]で囲む、オブジェクトなら{}で囲む
