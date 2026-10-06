@@ -2219,7 +2219,7 @@ const executeRetry = async (_logLabel = `Retry`) => {
 		clearWindow(`Main`);
 		await musicAfterLoaded();
 		await loadChartFile();
-		prepareScoreData();
+		prepareScoreData(true);
 		mainInit();
 	} catch (e) {
 		console.warn(`${_logLabel} audio load error: ${e}`);
