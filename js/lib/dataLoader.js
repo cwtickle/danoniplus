@@ -2151,6 +2151,10 @@ const getArrowSettings = (_retryFlg = false) => {
 	const [keyCtrlPtn, keyNum, posMax, divideCnt] =
 		[tkObj.keyCtrlPtn, tkObj.keyNum, tkObj.posMax, tkObj.divideCnt];
 
+	// 新しいプレイ開始時は前回プレイの退避を破棄 (リトライ時は保持して復元に使う)
+	if (!_retryFlg) {
+		g_keyCtrlBackup = {};
+	}
 	// リトライ時: 退避済みのキー割り当てをメモリへ戻してから以降の処理を行う
 	const restoredFlg = _retryFlg && g_keyCtrlBackup[keyCtrlPtn] !== undefined;
 	if (restoredFlg) {
