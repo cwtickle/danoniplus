@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 
+ * Revised : 2026/10/07 (v50.5.6)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2012,7 +2012,7 @@ const executeRetry = async (_logLabel = `Retry`) => {
 		clearWindow(`Main`);
 		await musicAfterLoaded();
 		await loadChartFile();
-		prepareScoreData();
+		prepareScoreData(true);
 		mainInit();
 	} catch (e) {
 		console.warn(`${_logLabel} audio load error: ${e}`);

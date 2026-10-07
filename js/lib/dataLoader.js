@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/09/23 (v50.5.3)
+ * Revised : 2026/10/07 (v50.5.6)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -306,12 +306,15 @@ const musicAfterLoaded = () => new Promise((resolve, reject) => {
 	}
 });
 
+// リトライ時にプレイ用キー割り当てを復元するための退避 (初回保存でメモリが既定値へ戻るため)
+let g_keyCtrlBackup = {};
+
 /**
  * 譜面データの変換処理
  * - 音源データの状態に依存しない部分のみを担う(g_audio非参照)
  * - loadMusic経由(並行フロー)、executeRetry経由(曲中リトライ)の両方から呼ばれる
  */
-const prepareScoreData = () => {
+const prepareScoreData = (_retryFlg = false) => {
 
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum] = [tkObj.keyCtrlPtn, tkObj.keyNum];
@@ -457,7 +460,7 @@ const prepareScoreData = () => {
 	pushArrows(g_scoreObj, speedOnFrame, arrivalFrame);
 
 	// メインに入る前の最終初期化処理
-	getArrowSettings();
+	getArrowSettings(_retryFlg);
 
 	// ユーザカスタムイベント
 	safeExecuteCustomHooks(`g_customJsObj.loading`, g_customJsObj.loading);
@@ -2137,13 +2140,22 @@ const invertSpecificTransforms = (cssString, exceptList = []) => {
 /**
  * メイン画面前の初期化処理
  */
-const getArrowSettings = () => {
+const getArrowSettings = (_retryFlg = false) => {
 
 	g_attrObj = {};
 	const tkObj = getKeyInfo();
 	const [keyCtrlPtn, keyNum, posMax, divideCnt] =
 		[tkObj.keyCtrlPtn, tkObj.keyNum, tkObj.posMax, tkObj.divideCnt];
 
+	// 新しいプレイ開始時は前回プレイの退避を破棄 (リトライ時は保持して復元に使う)
+	if (!_retryFlg) {
+		g_keyCtrlBackup = {};
+	}
+	// リトライ時: 退避済みのキー割り当てをメモリへ戻してから以降の処理を行う
+	const restoredFlg = _retryFlg && g_keyCtrlBackup[keyCtrlPtn] !== undefined;
+	if (restoredFlg) {
+		g_keyObj[`keyCtrl${keyCtrlPtn}`] = structuredClone(g_keyCtrlBackup[keyCtrlPtn]);
+	}
 	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
 	g_headerObj.tuning = g_headerObj.creatorNames[g_stateObj.scoreId];
 
@@ -2532,7 +2544,13 @@ const getArrowSettings = () => {
 	}
 
 	// リバース、キーコンフィグなどをローカルストレージへ保存（Data Save: ON かつ別キーモードで無い場合) 
-	if (g_stateObj.dataSaveFlg && !hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
+	if (_retryFlg) {
+		// リトライ時は初回に保存済みのため再保存しない (prevKey等も触らない)
+		// 復元したキー割り当ては、初回保存時と同様にメモリ上を既定値へ戻す
+		if (restoredFlg) {
+			g_keyObj[`keyCtrl${keyCtrlPtn}`] = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
+		}
+	} else if (g_stateObj.dataSaveFlg && !hasVal(g_keyObj[`transKey${keyCtrlPtn}`])) {
 
 		// 次回キーコンフィグ画面へ戻ったとき、保存済みキーコンフィグ設定が表示されるようにする
 		g_keyObj.prevKey = `Dummy`;
@@ -2554,6 +2572,7 @@ const getArrowSettings = () => {
 		storageObj[`keyCtrl${addKey}`] = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
 		if (g_keyObj.currentPtn !== -1) {
 			storageObj[`keyCtrlPtn${addKey}`] = g_keyObj.currentPtn;
+			g_keyCtrlBackup[keyCtrlPtn] = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 			g_keyObj[`keyCtrl${keyCtrlPtn}`] = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
 		}
 
