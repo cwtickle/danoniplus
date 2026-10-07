@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/10/03
+ * Revised : 2026/10/07
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 51.2.0`;
-const g_revisedDate = `2026/10/03`;
+const g_version = `Ver 51.2.1`;
+const g_revisedDate = `2026/10/07`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -645,7 +645,7 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 			if (_list.findIndex(val => val === rootKey) >= 0) {
 				let result = `[`;
 				for (let j = 0; j < _obj.length; j += _numOfSet) {
-					result += `<br>${nestedIndent}${_obj[j]}: ${_obj[j + 1]}`;
+					result += `<br>${nestedIndent}${escapeHtml(_obj[j])}: ${escapeHtml(_obj[j + 1])}`;
 					for (let k = 0; k < _numOfSet - 2; k++) {
 						const idx = j + k + 2;
 						if (idx < _obj.length) {
@@ -708,7 +708,8 @@ const formatObject = (_obj, _indent = 0, { colorFmt = true, rootKey = `` } = {})
 			})
 			: Object.entries(_obj).map(([key, value]) => {
 				const formattedValue = getNextObject(value, rootKey === `` ? key : rootKey);
-				return `<br>${nestedIndent}"${key}": ${formattedValue}`;
+				const formattedKey = colorFmt ? escapeHtml(key) : key;
+				return `<br>${nestedIndent}"${formattedKey}": ${formattedValue}`;
 			})).filter(val => !hasVal(val) || val !== `----`);
 
 		// 配列なら[]で囲む、オブジェクトなら{}で囲む
