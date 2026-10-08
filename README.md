@@ -3,7 +3,7 @@
 [![CodeQL](https://github.com/cwtickle/danoniplus/workflows/CodeQL/badge.svg)](https://github.com/cwtickle/danoniplus/actions?query=workflow%3ACodeQL)
 [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/cwtickle/danoniplus?utm_source=oss&utm_medium=github&utm_campaign=cwtickle%2Fdanoniplus&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews&logo=coderabbit)](https://www.coderabbit.ai/)
 [![Discord](https://img.shields.io/discord/698460971231870977?style=flat&logo=discord&logoColor=%23ffffff&label=Discord&labelColor=%236666ff&color=%23000066)](https://discord.gg/YVWUdUGyMy)
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/cwtickle/danoniplus) 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/cwtickle/danoniplus)  
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/cwtickle/danoniplus?sort=semver)](https://github.com/cwtickle/danoniplus/security/policy)
 [![GitHub All Releases](https://dl-danoniplus.qu7-52m.workers.dev/badge/danoniplus/total/)](https://github.com/cwtickle/danoniplus/releases)
 [![GitHub](https://img.shields.io/github/license/cwtickle/danoniplus)](https://github.com/cwtickle/danoniplus/blob/develop/LICENSE)  
