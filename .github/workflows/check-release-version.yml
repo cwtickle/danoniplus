@@ -14,11 +14,20 @@ jobs:
           fetch-depth: 0
 
       - name: Check release version
+        env:
+          BASE_REF: ${{ github.base_ref }}
         run: |
-          BASE_VER=$(git show origin/${{ github.base_ref }}:package.json | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version")
+          BASE_VER=$(git show "origin/${BASE_REF}:package.json" | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version")
           PKG_VER=$(node -p "require('./package.json').version")
-          SRC_VER=$(sed -nE 's/.*g_version[[:space:]]*=[[:space:]]*.Ver ([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' js/danoni_main.js | head -1)
+          SRC_VER=$(sed -nE 's/^const g_version[[:space:]]*=[[:space:]]*.Ver ([0-9]+\.[0-9]+\.[0-9]+).*/\1/p' js/danoni_main.js | head -1)
           MAJOR=${PKG_VER%%.*}
+
+          for v in BASE_VER PKG_VER SRC_VER; do
+            if [ -z "${!v}" ]; then
+              echo "::error::${v} を取得できませんでした"
+              exit 1
+            fi
+          done
 
           # 1. package.json が master から更新されているか
           if [ "$PKG_VER" = "$BASE_VER" ]; then
