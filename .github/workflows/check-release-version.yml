@@ -1,0 +1,36 @@
+name: Check release version
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check_version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check package.json / SECURITY.md
+        run: |
+          SRC_VER=$(grep -oP 'g_version\s*=\s*"Ver \K[0-9.]+' js/danoni_main.js | head -1)
+          PKG_VER=$(node -p "require('./package.json').version")
+          MAJOR=${SRC_VER%%.*}
+
+          # package.json
+          if [ "$SRC_VER" != "$PKG_VER" ]; then
+            echo "::error file=package.json::package.json の version ($PKG_VER) が danoni_main.js ($SRC_VER) と一致しません"
+            exit 1
+          fi
+
+          # SECURITY.md: 「| v51 ...」で始まる行を取り出し、Latest Version のリンクを確認
+          ROW=$(grep -E "^\| v${MAJOR}( |:)" SECURITY.md | head -1)
+          if [ -z "$ROW" ]; then
+            echo "::error file=SECURITY.md::SECURITY.md に v${MAJOR} の行がありません"
+            exit 1
+          fi
+
+          if ! echo "$ROW" | grep -qF "[v${SRC_VER}](https://github.com/cwtickle/danoniplus/releases/tag/v${SRC_VER})"; then
+            echo "::error file=SECURITY.md::SECURITY.md の v${MAJOR} 行の Latest Version が v${SRC_VER} になっていません"
+            exit 1
+          fi
