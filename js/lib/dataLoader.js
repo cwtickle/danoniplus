@@ -2580,6 +2580,7 @@ const getArrowSettings = (_retryFlg = false) => {
 		storageObj[`keyCtrl${addKey}`] = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
 		if (g_keyObj.currentPtn !== -1) {
 			storageObj[`keyCtrlPtn${addKey}`] = g_keyObj.currentPtn;
+			g_keyObj.storagePtn = g_keyObj.currentPtn;
 			g_keyCtrlBackup[keyCtrlPtn] = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 			g_keyObj[`keyCtrl${keyCtrlPtn}`] = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
 		}
