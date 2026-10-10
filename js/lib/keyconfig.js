@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/09/23 (v51.0.0)
+ * Revised : 2026/10/10 (v51.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -480,6 +480,21 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		viewGroup(_type);
 	};
 
+	/**
+	 * ショートカットキーボタンの表示更新
+	 * @param {string} _type Retry / TitleBack / Pause
+	 */
+	const updateScButton = _type => {
+		const siz = wUnit(getFontSize2(getScMsg[_type](), g_btnWidth(1 / 4) - 40, { maxSiz: g_limitObj.mainSiz }));
+		document.getElementById(`sc${_type}`).textContent = getScMsg[_type]();
+		document.getElementById(`sc${_type}`).style.fontSize = siz;
+		if (g_isMac) {
+			scTitleBack.textContent = getScMsg.TitleBack();
+			scTitleBack.style.fontSize = wUnit(getFontSize2(getScMsg.TitleBack(), g_btnWidth(1 / 4) - 40, { maxSiz: g_limitObj.mainSiz }));
+		}
+		changeConfigColor(document.getElementById(`sc${_type}`), getScButtonColor(_type));
+	};
+
 	const kcSubX = parseFloat(keyconSprite.style.width) * ((1 - g_keyObj.scale) / 4);
 	const kcSubY = parseFloat(keyconSprite.style.height) / ((1 + g_keyObj.scale) / 2) - parseFloat(keyconSprite.style.height);
 	multiAppend(divRoot,
@@ -494,27 +509,21 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 				cursor.style.top = wUnit(g_sHeight - 160 + kcSubY);
 				selectedKc = `TitleBack`;
 			}
-		}, g_lblPosObj.scTitleBack, g_cssObj.button_Default_NoColor,
-			g_headerObj.keyTitleBack === g_headerObj.keyTitleBackDef2 ?
-				g_cssObj.title_base : g_cssObj.keyconfig_Changekey),
+		}, g_lblPosObj.scTitleBack, g_cssObj.button_Default_NoColor, getScButtonColor(`TitleBack`)),
 
 		// リトライのショートカットキー変更
 		createCss2Button(`scRetry`, getScMsg.Retry(), () => {
 			cursor.style.left = wUnit(g_btnX(1 / 2) + kcSubX);
 			cursor.style.top = wUnit(g_sHeight - 160 + kcSubY);
 			selectedKc = `Retry`;
-		}, g_lblPosObj.scRetry, g_cssObj.button_Default_NoColor,
-			g_headerObj.keyRetry === g_headerObj.keyRetryDef2 ?
-				g_cssObj.title_base : g_cssObj.keyconfig_Changekey),
+		}, g_lblPosObj.scRetry, g_cssObj.button_Default_NoColor, getScButtonColor(`Retry`)),
 
 		// ポーズのショートカットキー変更
 		createCss2Button(`scPause`, getScMsg.Pause(), () => {
 			cursor.style.left = wUnit(g_btnX(3 / 4) + kcSubX);
 			cursor.style.top = wUnit(g_sHeight - 160 + kcSubY);
 			selectedKc = `Pause`;
-		}, g_lblPosObj.scPause, g_cssObj.button_Default_NoColor,
-			g_headerObj.keyPause === g_headerObj.keyPauseDef2 ?
-				g_cssObj.title_base : g_cssObj.keyconfig_Changekey),
+		}, g_lblPosObj.scPause, g_cssObj.button_Default_NoColor, getScButtonColor(`Pause`)),
 
 		// 別キーモード警告メッセージ
 		createDivCss2Label(
@@ -973,6 +982,10 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 						changeKeyConfigColor(j, k, g_keyObj.currentPtn === -1 ? g_cssObj.keyconfig_Defaultkey : g_cssObj.title_base);
 					}
 				}
+				g_keycons.shortcutTypes.forEach(type => {
+					g_headerObj[`key${type}`] = getDefaultShortcut(type);
+					updateScButton(type);
+				});
 				changeConfigCursor(0);
 			}
 		}, g_lblPosObj.btnKcReset, g_cssObj.button_Reset),
@@ -1035,17 +1048,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 			}
 			// プレイ中ショートカットキー変更
 			g_headerObj[`key${selectedKc}`] = setKey;
-			g_headerObj[`key${selectedKc}Def`] = setKey;
-			document.getElementById(`sc${selectedKc}`).textContent = getScMsg[selectedKc]();
-			document.getElementById(`sc${selectedKc}`).style.fontSize =
-				wUnit(getFontSize2(getScMsg[selectedKc](), g_btnWidth(1 / 4) - 40, { maxSiz: g_limitObj.mainSiz }));
-			if (g_isMac) {
-				scTitleBack.textContent = getScMsg.TitleBack();
-				scTitleBack.style.fontSize = wUnit(getFontSize2(getScMsg.TitleBack(), g_btnWidth(1 / 4) - 40, { maxSiz: g_limitObj.mainSiz }));
-			}
-			changeConfigColor(document.getElementById(`sc${selectedKc}`),
-				g_headerObj[`key${selectedKc}`] === g_headerObj[`key${selectedKc}Def2`] ?
-					g_cssObj.title_base : g_cssObj.keyconfig_Changekey);
+			updateScButton(selectedKc);
 			return;
 		}
 
@@ -1131,6 +1134,61 @@ const completeTransKeyPtn = (_keyList) => {
 	});
 };
 
+/**
+ * 別キーモード時、移行先キーが保持するSelf保存パターンの取得可否チェック
+ * @param {string} _keyCtrlPtn 例: "7_2"
+ * @returns {number[][]|undefined} 適用可能な場合はSelf保存済みkeyCtrl配列、不可ならundefined
+ */
+const getTransKeySelfCtrl = (_keyCtrlPtn) => {
+	const transKeyName = g_keyObj[`transKey${_keyCtrlPtn}`];
+	const transKeyPtn = g_keyObj[`transKeyPtn${_keyCtrlPtn}`];
+	if (!hasVal(transKeyName) || transKeyPtn === undefined) {
+		return undefined;
+	}
+	const [storageObj, addKey] = getKeyStorageObjByName(transKeyName);
+	const savedCtrl = storageObj[`keyCtrl${addKey}`];
+	const savedPtn = storageObj[`keyCtrlPtn${addKey}`];
+
+	if (savedPtn !== transKeyPtn) {
+		return undefined;
+	}
+
+	// 現在のキー配置(基準形状)とレーン数・各レーン長が完全一致することを確認
+	const baseCtrl = g_keyObj[`keyCtrl${_keyCtrlPtn}`];
+	const isValidShape = hasArrayList(savedCtrl, baseCtrl.length) &&
+		savedCtrl.length === baseCtrl.length &&
+		baseCtrl.every((lane, j) => hasArrayList(savedCtrl[j], lane.length) && savedCtrl[j].length === lane.length);
+
+	return isValidShape ? savedCtrl : undefined;
+};
+
+/**
+ * 別キーモードの移行先Selfパターンを現在のキー配置へ反映（保存はしない）
+ */
+const applyTransKeySelfPattern = () => {
+	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
+	const savedCtrl = getTransKeySelfCtrl(keyCtrlPtn);
+	if (savedCtrl === undefined) {
+		return;
+	}
+	const baseKeyNum = g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length;
+	for (let j = 0; j < baseKeyNum; j++) {
+		for (let k = 0; k < (savedCtrl[j]?.length ?? 0); k++) {
+			g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setIntVal(savedCtrl[j][k], 0);
+		}
+	}
+	// ショートカットも取込元の保存内容で上書き（レーンキーと重複するものは無視）
+	const [storageObj, addKey] = getKeyStorageObjByName(g_keyObj[`transKey${keyCtrlPtn}`]);
+	const savedShortcut = storageObj[`shortcut${addKey}`] ?? {};
+	const usedKeys = g_keyObj[`keyCtrl${keyCtrlPtn}`].flat();
+	g_keycons.shortcutTypes.forEach(type => {
+		const savedKey = savedShortcut[type];
+		g_headerObj[`key${type}`] = (savedKey !== undefined && !usedKeys.includes(savedKey))
+			? savedKey : getDefaultShortcut(type);
+	});
+	keyConfigInit();
+};
+
 // KeyLockボタンを押したときの表示切替
 const toggleKcDesc = () => {
 	if (document.getElementById(`kcDesc`) !== null) {
@@ -1152,6 +1210,44 @@ const getKcDescMsg = () =>
 const getKeyLockName = () =>
 	`${g_lblNameObj.b_keyLock}${g_stateObj.keyLockFlg ? g_emojiObj.locked : g_emojiObj.unlocked}`;
 
+/** 保存・Self時に基準とするキーパターン番号 */
+const getBasePtn = () => g_keyObj.currentPtn === -1 ? g_keyObj.storagePtn : g_keyObj.currentPtn;
+
+/**
+ * ショートカットキーのデフォルト値（基盤パターン基準）
+ * 優先順: ヘッダー指定 > パターン別定義(keyRetryX_Y等) > 定数
+ * @params {string} _type Retry / TitleBack / Pause
+ * @returns {number}
+ */
+const getDefaultShortcut = _type => {
+	const baseVal = g_keycons.defaultShortCuts[_type];
+	const headerVal = g_headerObj[`key${_type}Def2`];
+	if (headerVal !== baseVal) {
+		return headerVal;
+	}
+	return setIntVal(getKeyCtrlVal(g_keyObj[`key${_type}${g_keyObj.currentKey}_${getBasePtn()}`]), headerVal);
+};
+
+/**
+ * ショートカットキーボタンの色クラスを取得
+ * - ロード済みの保存値(Self)と同じ: Defaultkey
+ * - 基準値(保存値 or パターンのデフォルト)と違う: Changekey
+ * - 通常パターンでデフォルトのまま: title_base
+ * @param {string} _type Retry / TitleBack / Pause
+ * @returns {string}
+ */
+const getScButtonColor = _type => {
+	const current = g_headerObj[`key${_type}`];
+	const loaded = g_keyObj.currentPtn === -1
+		? g_keyObj[`shortcut${g_keyObj.currentKey}_-1`]?.[_type] : undefined;
+
+	// ロード済みの保存値のまま
+	if (loaded !== undefined && current === loaded) {
+		return g_cssObj.keyconfig_Defaultkey;
+	}
+	// 本当のデフォルト(BackSpace/Delete/Pause)と違う場合は、変更の経緯を問わずChangekey
+	return current !== g_keycons.defaultShortCuts[_type] ? g_cssObj.keyconfig_Changekey : g_cssObj.title_base;
+};
 /**
  * キーボードレイアウトプレビュー（Canvas版）
  *
@@ -1826,19 +1922,18 @@ const getShadowColor = (_colorPos, _arrowColor) => g_headerObj.setShadowColor[_c
 
 /**
  * デフォルトの曲中ショートカットをキー数・キーパターンにより切り替え
- * - キーコンフィグ画面で個別に変えていた場合は変更しない
+ * - Self(-1)のときは保存済みの値を優先（レーンキーと重複する場合は無視）
+ * - それ以外はパターンのデフォルトへ戻す
  */
 const setPlayingShortcut = () => {
 	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	if (g_headerObj.keyRetryDef === C_KEY_RETRY) {
-		g_headerObj.keyRetry = setIntVal(getKeyCtrlVal(g_keyObj[`keyRetry${keyCtrlPtn}`]), g_headerObj.keyRetryDef);
-	}
-	if (g_headerObj.keyTitleBackDef === C_KEY_TITLEBACK) {
-		g_headerObj.keyTitleBack = setIntVal(getKeyCtrlVal(g_keyObj[`keyTitleBack${keyCtrlPtn}`]), g_headerObj.keyTitleBackDef);
-	}
-	if (g_headerObj.keyPauseDef === C_KEY_PAUSE) {
-		g_headerObj.keyPause = setIntVal(getKeyCtrlVal(g_keyObj[`keyPause${keyCtrlPtn}`]), g_headerObj.keyPauseDef);
-	}
+	const saved = g_keyObj.currentPtn === -1 ? g_keyObj[`shortcut${g_keyObj.currentKey}_-1`] : undefined;
+	const usedKeys = (g_keyObj[`keyCtrl${keyCtrlPtn}`] ?? []).flat();
+	g_keycons.shortcutTypes.forEach(type => {
+		const savedKey = saved?.[type];
+		g_headerObj[`key${type}`] = (savedKey !== undefined && !usedKeys.includes(savedKey))
+			? savedKey : getDefaultShortcut(type);
+	});
 };
 
 /**

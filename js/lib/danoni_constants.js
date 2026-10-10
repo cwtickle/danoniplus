@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/10/03 (v51.2.0)
+ * Revised : 2026/10/10 (v51.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2353,6 +2353,9 @@ const g_keycons = {
     cursorNum: 0,
     keySwitchNum: 0,
     colorCursorNum: 0,
+
+    shortcutTypes: [`Retry`, `TitleBack`, `Pause`],
+    defaultShortCuts: { Retry: C_KEY_RETRY, TitleBack: C_KEY_TITLEBACK, Pause: C_KEY_PAUSE },
 };
 
 let g_displays = [`stepZone`, `judgment`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,

@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/09/27 (v51.1.0)
+ * Revised : 2026/10/10 (v51.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1182,13 +1182,10 @@ const headerConvert = _dosObj => {
 
 	// プレイ中のショートカットキー
 	obj.keyRetry = setIntVal(getKeyCtrlVal(_dosObj.keyRetry), C_KEY_RETRY);
-	obj.keyRetryDef = obj.keyRetry;
 	obj.keyRetryDef2 = obj.keyRetry;
 	obj.keyTitleBack = setIntVal(getKeyCtrlVal(_dosObj.keyTitleBack), C_KEY_TITLEBACK);
-	obj.keyTitleBackDef = obj.keyTitleBack;
 	obj.keyTitleBackDef2 = obj.keyTitleBack;
 	obj.keyPause = setIntVal(getKeyCtrlVal(_dosObj.keyPause), C_KEY_PAUSE);
-	obj.keyPauseDef = obj.keyPause;
 	obj.keyPauseDef2 = obj.keyPause;
 
 	// フリーズアローの許容フレーム数設定

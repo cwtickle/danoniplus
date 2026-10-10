@@ -1,0 +1,53 @@
+name: Check release version
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check_version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Check release version
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          BASE_VER=$(git show "origin/${BASE_REF}:package.json" | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version")
+          PKG_VER=$(node -p "require('./package.json').version")
+          SRC_VER=$(sed -nE 's/^const g_version[[:space:]]*=[[:space:]]*`Ver ([0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?)`;?[[:space:]]*$/\1/p' js/danoni_main.js | head -1)
+          MAJOR=${PKG_VER%%.*}
+
+          for v in BASE_VER PKG_VER SRC_VER; do
+            if [ -z "${!v}" ]; then
+              echo "::error::${v} を取得できませんでした"
+              exit 1
+            fi
+          done
+
+          # 1. package.json が master から更新されているか
+          if [ "$PKG_VER" = "$BASE_VER" ]; then
+            echo "::error file=package.json::version が master ($BASE_VER) から更新されていません"
+            exit 1
+          fi
+
+          # 2. danoni_main.js と package.json が一致しているか
+          if [ "$SRC_VER" != "$PKG_VER" ]; then
+            echo "::error::danoni_main.js ($SRC_VER) と package.json ($PKG_VER) が一致しません"
+            exit 1
+          fi
+
+          # 3. SECURITY.md の該当メジャー行の Latest Version
+          ROW=$(grep -E "^\| v${MAJOR}( |:)" SECURITY.md | head -1)
+          if [ -z "$ROW" ]; then
+            echo "::error file=SECURITY.md::SECURITY.md に v${MAJOR} の行がありません"
+            exit 1
+          fi
+          if ! echo "$ROW" | grep -qF "[v${PKG_VER}](https://github.com/cwtickle/danoniplus/releases/tag/v${PKG_VER})"; then
+            echo "::error file=SECURITY.md::SECURITY.md の v${MAJOR} 行の Latest Version が v${PKG_VER} になっていません"
+            exit 1
+          fi
