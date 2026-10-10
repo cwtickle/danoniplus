@@ -1275,52 +1275,6 @@ const getKeyStorageObjByName = (_keyName) => {
 };
 
 /**
- * 別キーモード時、移行先キーが保持するSelf保存パターンの取得可否チェック
- * @param {string} _keyCtrlPtn 例: "7_2"
- * @returns {number[][]|undefined} 適用可能な場合はSelf保存済みkeyCtrl配列、不可ならundefined
- */
-const getTransKeySelfCtrl = (_keyCtrlPtn) => {
-	const transKeyName = g_keyObj[`transKey${_keyCtrlPtn}`];
-	const transKeyPtn = g_keyObj[`transKeyPtn${_keyCtrlPtn}`];
-	if (!hasVal(transKeyName) || transKeyPtn === undefined) {
-		return undefined;
-	}
-	const [storageObj, addKey] = getKeyStorageObjByName(transKeyName);
-	const savedCtrl = storageObj[`keyCtrl${addKey}`];
-	const savedPtn = storageObj[`keyCtrlPtn${addKey}`];
-
-	if (savedPtn !== transKeyPtn) {
-		return undefined;
-	}
-
-	// 現在のキー配置(基準形状)とレーン数・各レーン長が完全一致することを確認
-	const baseCtrl = g_keyObj[`keyCtrl${_keyCtrlPtn}`];
-	const isValidShape = hasArrayList(savedCtrl, baseCtrl.length) &&
-		savedCtrl.length === baseCtrl.length &&
-		baseCtrl.every((lane, j) => hasArrayList(savedCtrl[j], lane.length) && savedCtrl[j].length === lane.length);
-
-	return isValidShape ? savedCtrl : undefined;
-};
-
-/**
- * 別キーモードの移行先Selfパターンを現在のキー配置へ反映（保存はしない）
- */
-const applyTransKeySelfPattern = () => {
-	const keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`;
-	const savedCtrl = getTransKeySelfCtrl(keyCtrlPtn);
-	if (savedCtrl === undefined) {
-		return;
-	}
-	const baseKeyNum = g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length;
-	for (let j = 0; j < baseKeyNum; j++) {
-		for (let k = 0; k < (savedCtrl[j]?.length ?? 0); k++) {
-			g_keyObj[`keyCtrl${keyCtrlPtn}`][j][k] = setIntVal(savedCtrl[j][k], 0);
-		}
-	}
-	keyConfigInit();
-};
-
-/**
  * 譜面初期化処理
  * - 譜面の基本設定（キー数、初期速度、リバース、ゲージ設定）をここで行う
  * - g_canLoadDifInfoFlg は譜面初期化フラグで、初期化したくない場合は対象画面にて false にしておく
@@ -1371,6 +1325,7 @@ const setDifficulty = (_chartChangeFlg) => {
 				storageObj[`keyCtrlPtn${addKey}`] = 0;
 			}
 			getKeyCtrl(storageObj, addKey);
+			g_keyObj[`shortcut${g_keyObj.currentKey}_-1`] = structuredClone(storageObj[`shortcut${addKey}`] ?? {});
 
 			// カラーセット初期値設定
 			if (storageObj[`setColor${addKey}`] === undefined) {
@@ -1401,10 +1356,9 @@ const setDifficulty = (_chartChangeFlg) => {
 					g_keyObj[`${type}${keyCtrlPtn}`] = structuredClone(g_keyObj[`${type}${keyCtrlPtn}_0`]);
 				}
 			});
-
+			// 曲中ショートカットキーの切り替え
+			setPlayingShortcut();
 		}
-		// 曲中ショートカットキーの切り替え
-		setPlayingShortcut();
 	}
 
 	// スクロール設定用の配列を入れ替え

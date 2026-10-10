@@ -1182,13 +1182,10 @@ const headerConvert = _dosObj => {
 
 	// プレイ中のショートカットキー
 	obj.keyRetry = setIntVal(getKeyCtrlVal(_dosObj.keyRetry), C_KEY_RETRY);
-	obj.keyRetryDef = obj.keyRetry;
 	obj.keyRetryDef2 = obj.keyRetry;
 	obj.keyTitleBack = setIntVal(getKeyCtrlVal(_dosObj.keyTitleBack), C_KEY_TITLEBACK);
-	obj.keyTitleBackDef = obj.keyTitleBack;
 	obj.keyTitleBackDef2 = obj.keyTitleBack;
 	obj.keyPause = setIntVal(getKeyCtrlVal(_dosObj.keyPause), C_KEY_PAUSE);
-	obj.keyPauseDef = obj.keyPause;
 	obj.keyPauseDef2 = obj.keyPause;
 
 	// フリーズアローの許容フレーム数設定
