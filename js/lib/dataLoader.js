@@ -2580,8 +2580,20 @@ const getArrowSettings = (_retryFlg = false) => {
 		storageObj[`keyCtrl${addKey}`] = setKeyCtrl(g_localKeyStorage, keyNum, keyCtrlPtn);
 		if (g_keyObj.currentPtn !== -1) {
 			storageObj[`keyCtrlPtn${addKey}`] = g_keyObj.currentPtn;
+			g_keyObj.storagePtn = g_keyObj.currentPtn;
 			g_keyCtrlBackup[keyCtrlPtn] = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}`]);
 			g_keyObj[`keyCtrl${keyCtrlPtn}`] = structuredClone(g_keyObj[`keyCtrl${keyCtrlPtn}d`]);
+		}
+
+		// ショートカットキーの保存（基盤パターンのデフォルトと異なるものだけ）
+		const savedShortcut = {};
+		const isDefaultShortcut = _type => g_headerObj[`key${_type}`] === getDefaultShortcut(_type);
+		g_keycons.shortcutTypes.filter(type => !isDefaultShortcut(type))
+			.forEach(type => savedShortcut[type] = g_headerObj[`key${type}`]);
+		if (Object.keys(savedShortcut).length > 0) {
+			storageObj[`shortcut${addKey}`] = savedShortcut;
+		} else {
+			delete storageObj[`shortcut${addKey}`];
 		}
 
 		// カラーセットの保存（キー別）

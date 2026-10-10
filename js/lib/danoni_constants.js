@@ -2353,6 +2353,9 @@ const g_keycons = {
     cursorNum: 0,
     keySwitchNum: 0,
     colorCursorNum: 0,
+
+    shortcutTypes: [`Retry`, `TitleBack`, `Pause`],
+    defaultShortCuts: { Retry: C_KEY_RETRY, TitleBack: C_KEY_TITLEBACK, Pause: C_KEY_PAUSE },
 };
 
 let g_displays = [`stepZone`, `judgment`, `lifeGauge`, `score`, `musicInfo`, `filterLine`,
