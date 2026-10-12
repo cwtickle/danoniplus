@@ -172,6 +172,10 @@ const optionInit = () => {
 	// ボタン描画
 	commonSettingBtn(`Display`);
 
+	if (g_settings.settingWindows.length === 1) {
+		$id(`btnDisplay`).visibility = `hidden`;
+	}
+
 	// キー操作イベント（デフォルト）
 	setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
 	document.oncontextmenu = () => true;

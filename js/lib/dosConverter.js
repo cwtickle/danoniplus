@@ -1665,6 +1665,14 @@ const headerConvert = _dosObj => {
 	g_canDisabledSettings.forEach(option =>
 		obj[`${option}Use`] = setBoolVal(_dosObj[`${option}Use`] ?? g_presetObj.settingUse?.[option], true));
 
+	// 拡張機能の無効設定
+	if (!setBoolVal(_dosObj.displayUse, true)) {
+		g_settings.settingWindows = g_settings.settingWindows.filter(option => option !== settingsDisplayInit);
+	}
+	if (!setBoolVal(_dosObj.exSettingUse, true)) {
+		g_settings.settingWindows = g_settings.settingWindows.filter(option => option !== exSettingInit);
+	}
+
 	let interlockingErrorFlg = false;
 	g_displays.forEach((option, j) => {
 
