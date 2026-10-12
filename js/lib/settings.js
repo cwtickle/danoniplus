@@ -14,7 +14,7 @@
 /* Scene : SETTINGS [lime] */
 /*-----------------------------------------------------------*/
 
-const commonSettingBtn = _labelName => {
+const commonSettingBtn = () => {
 
 	const switchSave = evt => {
 		const from = boolToSwitch(g_stateObj.dataSaveFlg);
@@ -24,6 +24,8 @@ const commonSettingBtn = _labelName => {
 		const to = boolToSwitch(g_stateObj.dataSaveFlg);
 		evt.target.classList.replace(g_cssObj[`button_${from}`], g_cssObj[`button_${to}`]);
 	};
+	const nextPageNum = nextPos(g_settings.settingWindowNum, 1, g_settings.settingWindows.length);
+	const labelName = g_settingWindowTitleKeys.get(g_settings.settingWindows[nextPageNum]);
 
 	multiAppend(divRoot,
 
@@ -42,11 +44,12 @@ const commonSettingBtn = _labelName => {
 		// プレイ開始
 		makePlayButton(() => loadMusic()),
 
-		// Display設定へ移動
-		createCss2Button(`btn${_labelName}`, `>`, () => true, {
+		// 次の設定へ移動
+		createCss2Button(`btnNextSetting`, `>`, () => true, {
 			...g_lblPosObj.btnSwitchSetting,
-			title: g_msgObj[`to${_labelName}`], resetFunc: () => g_moveSettingWindow(),
+			title: g_msgObj[`to${labelName}`], resetFunc: () => g_moveSettingWindow(),
 			cxtFunc: () => g_moveSettingWindow(true, -1),
+			visibility: g_settings.settingWindows.length > 1 ? C_DIS_INHERIT : `hidden`,
 		}, g_cssObj.button_Mini),
 
 		// データセーブフラグの切替
@@ -170,11 +173,7 @@ const optionInit = () => {
 	safeExecuteCustomHooks(`g_customJsObj.option`, g_customJsObj.option);
 
 	// ボタン描画
-	commonSettingBtn(`Display`);
-
-	if (g_settings.settingWindows.length === 1) {
-		$id(`btnDisplay`).visibility = `hidden`;
-	}
+	commonSettingBtn();
 
 	// キー操作イベント（デフォルト）
 	setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
@@ -2407,7 +2406,7 @@ const settingsDisplayInit = () => {
 	safeExecuteCustomHooks(`g_customJsObj.settingsDisplay`, g_customJsObj.settingsDisplay);
 
 	// ボタン描画
-	commonSettingBtn(`Settings`);
+	commonSettingBtn();
 
 	// キー操作イベント（デフォルト）
 	setShortcutEvent(g_currentPage);
@@ -3246,7 +3245,7 @@ const exSettingInit = () => {
 	safeExecuteCustomHooks(`g_customJsObj.exSetting`, g_customJsObj.exSetting);
 
 	// 設定系のボタン群をまとめて作成（Data Save, Display切替, Back, KeyConfig, Playボタン）
-	commonSettingBtn(g_currentPage);
+	commonSettingBtn();
 
 	// キー操作イベント（デフォルト）
 	setShortcutEvent(g_currentPage, () => true, { dfEvtFlg: true });
