@@ -1666,10 +1666,10 @@ const headerConvert = _dosObj => {
 		obj[`${option}Use`] = setBoolVal(_dosObj[`${option}Use`] ?? g_presetObj.settingUse?.[option], true));
 
 	// 拡張機能の無効設定
-	if (!setBoolVal(_dosObj.displayUse, true)) {
+	if (!setBoolVal(_dosObj.displayWindowUse, true)) {
 		g_settings.settingWindows = g_settings.settingWindows.filter(option => option !== settingsDisplayInit);
 	}
-	if (!setBoolVal(_dosObj.exSettingUse, true)) {
+	if (!setBoolVal(_dosObj.exSettingWindowUse, true)) {
 		g_settings.settingWindows = g_settings.settingWindows.filter(option => option !== exSettingInit);
 	}
 
