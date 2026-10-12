@@ -33,6 +33,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	if (_initFlg) {
 		g_stateObj.keyLockFlg = false;
 		g_stateObj.kbPreviewFlg = false;
+		g_stateObj.kbLaneFlg = false;
 	}
 
 	multiAppend(divRoot,
@@ -400,6 +401,9 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		viewGroup(_type);
 		if (_type === `stepRtn`) {
 			keyConfigInit(g_kcType);
+		} else if (_type === `color`) {
+			// カラーグループ変更時はレーン色分けプレビューへ反映
+			keyconfigKeyboardPreview.refresh();
 		}
 	};
 
@@ -580,6 +584,11 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 
 		// 次の位置が見えなくなったらkeyconSpriteの位置を調整する
 		adjustScrollPoint(nextLeft);
+
+		// レーン色分けプレビュー中はカーソルレーンの強調を更新
+		if (g_stateObj.kbLaneFlg) {
+			keyconfigKeyboardPreview.refresh();
+		}
 	};
 
 	/**
@@ -1311,10 +1320,21 @@ const keyconfigKeyboardPreview = (() => {
 		},
 		bgFill: `#0d0d1a`,        // Canvas 背景
 		legendText: `#cccccc`,    // 凡例テキスト
+
+		// レーン色分けモード用（凡例と文字色。レーン色自体は g_dfColorObj.setColorType2 を使用）
+		// 枠線は未割当キーと同色に統一し、メイン/代替は塗りのアルファのみで区別する
+		laneMain: { fill: `#cccccc`, stroke: `#555577` },
+		laneAlt: { fill: `rgba(204,204,204,0.35)`, stroke: `#555577` },
+		laneAltBright: { fill: `rgba(204,204,204,0.6)`, stroke: `#555577` },
+		laneStroke: `#555577`,
+		laneText: `#111111`,
 	};
 
 	// 凡例エリアの高さ
 	const LEGEND_H = 25;
+
+	// レーン色分けモードで、同一キーに割り当てられた色を分割描画する上限数
+	const C_LANE_SPLIT_MAX = 3;
 
 	// -------------------------------------------------------------------------
 	// キーレイアウト定義
@@ -1475,6 +1495,7 @@ const keyconfigKeyboardPreview = (() => {
 		mappedSet: new Set(),     // メインキー（code文字列）
 		altSet: new Set(),        // 代替キー（code文字列）
 		shortcutSet: new Set(),   // ショートカットキー（code文字列）
+		laneMap: new Map(),       // code文字列 → { entries: [{ colorPos, alt }], cursor: boolean }
 		canvasBase: null,
 		canvasMap: null,
 		keyDataList: [],          // { code, x, y, w, h, label } — drawMap で照合するキャッシュ
@@ -1620,13 +1641,16 @@ const keyconfigKeyboardPreview = (() => {
 	 * @param {Object} keyData - 位置・サイズ・キーコードを含むキー情報
 	 * @param {Object} style   - fill, stroke, text 等の色セット
 	 * @param {number} lw      - 枠線の太さ(lineWidth)
+	 * @param {boolean} shapeFlg - 枠線・背景を描画するかどうか（false の場合はテキストのみ描画）
 	 */
-	const drawOneKey = (ctx, { keyData, style, lw = 1 }) => {
+	const drawOneKey = (ctx, { keyData, style, lw = 1, shapeFlg = true }) => {
 		const { x, y, w: keyW, h: keyH, code, label } = keyData;
 
 		// 1. キーの枠線・背景を描画
-		roundRect(ctx, x + 0.5, y + 0.5, keyW - 1, keyH - 1, kr());
-		fillStrokeShape(ctx, { fill: style.fill, stroke: style.stroke, lineWidth: lw });
+		if (shapeFlg) {
+			roundRect(ctx, x + 0.5, y + 0.5, keyW - 1, keyH - 1, kr());
+			fillStrokeShape(ctx, { fill: style.fill, stroke: style.stroke, lineWidth: lw });
+		}
 
 		// 2. キー内部のテキスト（メイン・サブ）を描画
 		const [primary, sub] = getKeyLabels(code, label);
@@ -1744,9 +1768,13 @@ const keyconfigKeyboardPreview = (() => {
 
 		const legends = [
 			{ style: C_COLOR.normal, label: g_lblNameObj.unallocated },
-			{ style: C_COLOR.mapped, label: g_lblNameObj.allocated },
-			{ style: C_COLOR.alt, label: g_lblNameObj.altAllocated },
-			{ style: C_COLOR.shortcut, label: g_lblNameObj.shortcutKey }
+			{ style: g_stateObj.kbLaneFlg ? C_COLOR.laneMain : C_COLOR.mapped, label: g_lblNameObj.allocated },
+			{
+				style: g_stateObj.kbLaneFlg
+					? (g_headerObj.baseBrightFlg ? C_COLOR.laneAltBright : C_COLOR.laneAlt) : C_COLOR.alt,
+				label: g_lblNameObj.altAllocated,
+			},
+			{ style: C_COLOR.shortcut, label: g_lblNameObj.shortcutKey },
 		];
 
 		let lx = 8;
@@ -1762,6 +1790,111 @@ const keyconfigKeyboardPreview = (() => {
 	};
 
 	/**
+	 * 明度が低い色を、未割当キーと区別できる下限まで持ち上げる
+	 * @param {string} _hex #rrggbb 形式の色
+	 * @param {number} _minLum 下限値（RGBの最大成分で判定）
+	 * @returns {string}
+	 */
+	const liftDarkColor = (_hex, _minLum = 0x66) => {
+		const n = parseInt(_hex.slice(1, 7), 16);
+		const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+		const lum = Math.max(r, g, b);
+		if (lum >= _minLum) {
+			return _hex;
+		}
+		const d = _minLum - lum;
+		return `#${[r, g, b].map(v => (v + d).toString(16).padStart(2, `0`)).join(``)}`;
+	};
+
+	/**
+	 * #rrggbb 形式の色にアルファ値を付与する
+	 * @param {string} _hex
+	 * @param {number} _alpha
+	 * @returns {string}
+	 */
+	const hexToRgba = (_hex, _alpha) => {
+		const n = parseInt(_hex.slice(1, 7), 16);
+		return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${_alpha})`;
+	};
+
+	/**
+	 * レーン色分けモードのスタイル取得（色は譜面ミニマップと同じ setColorType2 固定）
+	 * @param {number} _colorPos カラーグループ番号
+	 * @param {boolean} _altFlg 代替キーか
+	 */
+	const getLaneStyle = (_colorPos, _altFlg) => {
+		const brightFlg = g_headerObj.baseBrightFlg;
+		const baseColor = g_dfColorObj.setColorType2[_colorPos] ?? `#ffffff`;
+
+		// 明背景のみ、黒に近い色を未割当キーと区別できる明るさまで持ち上げる
+		const color = brightFlg ? liftDarkColor(baseColor) : baseColor;
+		// 明背景では暗色セットが使われるため、文字は白にする
+		const mainText = brightFlg ? `#ffffff` : C_COLOR.laneText;
+		if (!_altFlg) {
+			return { fill: color, text: mainText };
+		}
+		return brightFlg
+			? { fill: hexToRgba(color, 0.6), text: `#ffffff` }
+			: { fill: hexToRgba(color, 0.35), text: color };
+	};
+
+	/**
+	 * レーン色分けモードでの単一キー描画
+	 * - 複数色の場合は縦方向に等分割して塗り分ける
+	 * @param {CanvasRenderingContext2D} ctx
+	 * @param {Object} keyData
+	 * @param {{colorPos: number, alt: boolean}[]} entries
+	 * @param {boolean} cursorFlg カーソル中のレーンか
+	 */
+	const drawLaneKey = (ctx, keyData, entries, cursorFlg) => {
+		const { x, y, w: keyW, h: keyH } = keyData;
+		const styles = entries.map(val => getLaneStyle(val.colorPos, val.alt));
+		const segW = keyW / styles.length;
+
+		styles.forEach((style, i) => {
+			ctx.save();
+			ctx.beginPath();
+			ctx.rect(x + segW * i, y, segW, keyH);
+			ctx.clip();
+			roundRect(ctx, x + 0.5, y + 0.5, keyW - 1, keyH - 1, kr());
+			fillStrokeShape(ctx, { fill: style.fill });
+			ctx.restore();
+		});
+
+		// 枠線はキー全体に対して1回だけ、全キー共通の色で描画
+		roundRect(ctx, x + 0.5, y + 0.5, keyW - 1, keyH - 1, kr());
+		fillStrokeShape(ctx, { stroke: C_COLOR.laneStroke, lineWidth: 1.5 });
+
+		// 文字は全体に1回だけ描画（メインが含まれる場合はメインの文字色）
+		const mainIdx = entries.findIndex(val => !val.alt);
+		const textColor = styles[mainIdx >= 0 ? mainIdx : 0].text;
+		drawOneKey(ctx, { keyData, style: { text: textColor }, shapeFlg: false });
+
+		// カーソル中のレーンは白枠で強調
+		if (cursorFlg) {
+			roundRect(ctx, x + 0.5, y + 0.5, keyW - 1, keyH - 1, kr());
+			fillStrokeShape(ctx, { stroke: `#ffffff`, lineWidth: 2.5 });
+		}
+	};
+
+	/**
+	 * レーン色分けモードのマッピング描画（ショートカットキーは専用色で最優先）
+	 * @param {CanvasRenderingContext2D} ctx
+	 */
+	const drawLaneMap = ctx => {
+		_state.keyDataList.forEach(keyData => {
+			if (_state.shortcutSet.has(keyData.code)) {
+				drawOneKey(ctx, { keyData, style: C_COLOR.shortcut, lw: 1.5 });
+				return;
+			}
+			const info = _state.laneMap.get(keyData.code);
+			if (info !== undefined) {
+				drawLaneKey(ctx, keyData, info.entries, info.cursor);
+			}
+		});
+	};
+
+	/**
 	 * マッピング強調レイヤーを再描画する。
 	 * メインキー（mappedSet）を青系、代替キー（altSet）を黄系で色分けする。
 	 * 同一キーにメインと代替が重なる場合はメインを優先する。
@@ -1770,6 +1903,11 @@ const keyconfigKeyboardPreview = (() => {
 		const ctx = _state.canvasMap.getContext(`2d`);
 
 		ctx.clearRect(0, 0, _state.cvsW, _state.cvsH);
+
+		if (g_stateObj.kbLaneFlg) {
+			drawLaneMap(ctx);
+			return;
+		}
 
 		// キー状態に応じた色取得ロジック（優先度: ショートカット > メイン > 代替）
 		const getKeyStyle = (code) => {
@@ -1814,6 +1952,16 @@ const keyconfigKeyboardPreview = (() => {
 			x: areaX, y: areaY - 60, w: _state.cvsW, h: _state.cvsH + 80,
 			pointerEvents: C_DIS_AUTO, background: `#00000080`, display: C_DIS_NONE, overflow: `hidden`,
 		});
+
+		// レーン色分け表示の切替ボタン（プレビューエリア内の上部余白に配置）
+		const getLaneBtnName = () => `${g_lblNameObj.b_kbLane ?? `Lane Color`}: ${boolToSwitch(!!g_stateObj.kbLaneFlg)}`;
+		const btnLane = createCss2Button(`btnKbLane`, getLaneBtnName(), () => {
+			g_stateObj.kbLaneFlg = !g_stateObj.kbLaneFlg;
+			btnLane.textContent = getLaneBtnName();
+			drawBase();   // 凡例の切替
+			refresh();
+		}, { x: _state.cvsW - 130, y: 10, w: 120, h: 22, siz: 12 }, g_cssObj.button_Mini);
+		areaDiv.appendChild(btnLane);
 
 		/**
 		 * プレビュー用canvasを生成しareaDivに追加、_stateに登録する
@@ -1873,6 +2021,33 @@ const keyconfigKeyboardPreview = (() => {
 			[g_headerObj.keyRetry, g_headerObj.keyTitleBack, g_headerObj.keyPause, 34, 33].map(toCodeStr).filter(v => v !== ``)
 		);
 
+		// レーン色分け用: キーコード → 割り当て先レーンのカラーグループ情報
+		const colorList = g_keyObj[`color${tkObj.keyCtrlPtn}`];
+		_state.laneMap = new Map();
+		g_keyObj[`keyCtrl${tkObj.keyCtrlPtn}`].forEach((arr, j) => {
+			if (!tkObj.keyGroupMaps[j].includes(configKeyGroupList[g_keycons.keySwitchNum])) {
+				return;
+			}
+			arr.forEach((num, k) => {
+				const code = toCodeStr(num);
+				if (code === ``) {
+					return;
+				}
+				const info = _state.laneMap.get(code) ?? { entries: [], cursor: false };
+				const [colorPos, alt] = [colorList[j], k > 0];
+				if (!info.entries.some(val => val.colorPos === colorPos && val.alt === alt)) {
+					info.entries.push({ colorPos, alt });
+				}
+				info.cursor ||= (j === g_currentj);
+				_state.laneMap.set(code, info);
+			});
+		});
+		// メイン優先で並べ、分割数は上限まで
+		_state.laneMap.forEach(info => {
+			info.entries.sort((a, b) => Number(a.alt) - Number(b.alt));
+			info.entries = info.entries.slice(0, C_LANE_SPLIT_MAX);
+		});
+
 		if (_state.visible) drawMap();
 	};
 
@@ -1885,6 +2060,7 @@ const keyconfigKeyboardPreview = (() => {
 		_state.mappedSet = new Set();
 		_state.altSet = new Set();
 		_state.shortcutSet = new Set();
+		_state.laneMap = new Map();
 		_state.keyDataList = [];
 		_state.canvasBase = null;
 		_state.canvasMap = null;
