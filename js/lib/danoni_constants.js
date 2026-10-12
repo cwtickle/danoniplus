@@ -4658,6 +4658,7 @@ const g_lblNameObj = {
     b_cReset: `Reset`,
     b_precond: `Precondition`,
     b_keyLock: `KeyLock`,
+    b_kbLane: `Group Color`,
 
     Difficulty: `Difficulty`,
     Speed: `Speed`,
