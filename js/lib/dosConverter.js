@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/10/10 (v51.3.0)
+ * Revised : 2026/10/12 (v51.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1664,6 +1664,14 @@ const headerConvert = _dosObj => {
 	// オプション利用可否設定
 	g_canDisabledSettings.forEach(option =>
 		obj[`${option}Use`] = setBoolVal(_dosObj[`${option}Use`] ?? g_presetObj.settingUse?.[option], true));
+
+	// 拡張機能の無効設定
+	if (!setBoolVal(_dosObj.displayWindowUse, true)) {
+		g_settings.settingWindows = g_settings.settingWindows.filter(option => option !== settingsDisplayInit);
+	}
+	if (!setBoolVal(_dosObj.exSettingWindowUse, true)) {
+		g_settings.settingWindows = g_settings.settingWindows.filter(option => option !== exSettingInit);
+	}
 
 	let interlockingErrorFlg = false;
 	g_displays.forEach((option, j) => {
