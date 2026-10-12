@@ -1406,7 +1406,7 @@ const g_settings = {
     },
     environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`,
         `arrowJdgX`, `arrowJdgY`, `frzJdgX`, `frzJdgY`, `shortcutX`, `shortcutY`],
-    keyStorages: [`reverse`, `keyCtrl`, `keyCtrlPtn`, `shuffle`, `color`, `stepRtn`],
+    keyStorages: [`reverse`, `keyCtrl`, `keyCtrlPtn`, `shuffle`, `color`, `stepRtn`, `shortcut`],
     colorStorages: [`setColor`, `setShadowColor`, `frzColor`, `frzShadowColor`],
 
     mSelectableTerms: 3,
