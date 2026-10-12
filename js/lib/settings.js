@@ -49,14 +49,14 @@ const commonSettingBtn = () => {
 			...g_lblPosObj.btnSwitchSetting,
 			title: g_msgObj[`to${labelName}`], resetFunc: () => g_moveSettingWindow(),
 			cxtFunc: () => g_moveSettingWindow(true, -1),
-			visibility: g_settings.settingWindows.length > 1 ? C_DIS_INHERIT : `hidden`,
+			display: g_settings.settingWindows.length > 1 ? C_DIS_INHERIT : C_DIS_NONE,
 		}, g_cssObj.button_Mini),
 
 		// データセーブフラグの切替
 		createCss2Button(`btnSave`, g_lblNameObj.dataSave, evt => switchSave(evt), {
 			...g_lblPosObj.btnSave,
 			cxtFunc: evt => switchSave(evt),
-			visibility: g_langStorage.safeMode === C_FLG_OFF ? C_DIS_INHERIT : `hidden`,
+			display: g_langStorage.safeMode === C_FLG_OFF ? C_DIS_INHERIT : C_DIS_NONE,
 		}, g_cssObj.button_Default, (g_stateObj.dataSaveFlg ? g_cssObj.button_ON : g_cssObj.button_OFF)),
 
 		// データ管理画面へ移動
