@@ -1551,6 +1551,12 @@ g_settings.volumeNum = g_settings.volumes.length - 1;
 g_settings.bgmVolumeNum = roundZero(g_settings.volumes.findIndex(v => v === g_stateObj.bgmVolume));
 g_settings.opacityNum = g_settings.opacitys.length - 1;
 
+const g_settingWindowTitleKeys = new Map([
+    [optionInit, `Option`],
+    [settingsDisplayInit, `Display`],
+    [exSettingInit, `Settings`],
+]);
+
 /**
  * 設定画面間移動
  */
@@ -2916,7 +2922,7 @@ const g_shortcutObj = {
         NumpadEnter: { id: `btnPlay` },
         ShiftLeft_Tab: { id: `btnBack` },
         ShiftRight_Tab: { id: `btnBack` },
-        Tab: { id: `btnDisplay` },
+        Tab: { id: `btnNextSetting` },
         KeyU: { id: `btnSettingSummary` },
     },
     difSelector: {
@@ -2951,7 +2957,7 @@ const g_shortcutObj = {
         NumpadEnter: { id: `lnkDifficulty` },
         ShiftLeft_Tab: { id: `btnBack` },
         ShiftRight_Tab: { id: `btnBack` },
-        Tab: { id: `btnDisplay` },
+        Tab: { id: `btnNextSetting` },
         KeyU: { id: `btnSettingSummary` },
     },
     scoreDetail: {
@@ -3000,7 +3006,7 @@ const g_shortcutObj = {
         NumpadEnter: { id: `btnPlay` },
         ShiftLeft_Tab: { id: `btnBack` },
         ShiftRight_Tab: { id: `btnBack` },
-        Tab: { id: `btnDisplay` },
+        Tab: { id: `btnNextSetting` },
         KeyU: { id: `btnSettingSummary` },
     },
     settingsDisplay: {
@@ -3097,7 +3103,7 @@ const g_shortcutObj = {
         NumpadEnter: { id: `btnPlay` },
         ShiftLeft_Tab: { id: `btnBack` },
         ShiftRight_Tab: { id: `btnBack` },
-        Tab: { id: `btnSettings` },
+        Tab: { id: `btnNextSetting` },
         KeyU: { id: `btnSettingSummary` },
     },
     displayPreview: {
@@ -3116,7 +3122,7 @@ const g_shortcutObj = {
         NumpadEnter: { id: `btnPlay` },
         ShiftLeft_Tab: { id: `btnBack` },
         ShiftRight_Tab: { id: `btnBack` },
-        Tab: { id: `btnSettings` },
+        Tab: { id: `btnNextSetting` },
     },
     exSetting: {
         ShiftLeft_KeyP: { id: `lnkPlayWindowL` },
@@ -3157,7 +3163,7 @@ const g_shortcutObj = {
         Enter: { id: `btnPlay` },
         ShiftLeft_Tab: { id: `btnBack` },
         ShiftRight_Tab: { id: `btnBack` },
-        Tab: { id: `btnexSetting` },
+        Tab: { id: `btnNextSetting` },
         KeyU: { id: `btnSettingSummary` },
     },
     keyConfig: {
@@ -3220,11 +3226,11 @@ const g_btnPatterns = {
     title: { Start: 0, Comment: -10, MusicSelectRandom: -10 },
     dataMgt: { Back: 0, Environment: -35, Highscores: -35, CustomKey: -35, Others: -35 },
     precondition: { Back: 0 },
-    option: { Back: 0, KeyConfig: 0, Play: 0, Display: -5, Save: -10, Graph: -25, SettingSummary: -10 },
+    option: { Back: 0, KeyConfig: 0, Play: 0, NextSetting: -5, Save: -10, Graph: -25, SettingSummary: -10 },
     difSelector: {},
     scoreDetail: {},
-    settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Save: -10, Settings: -5, SettingSummary: -10 },
-    exSetting: { Back: 0, KeyConfig: 0, Play: 0, exSetting: -5, Save: -10, SettingSummary: -10 },
+    settingsDisplay: { Back: 0, KeyConfig: 0, Play: 0, Save: -10, NextSetting: -5, SettingSummary: -10 },
+    exSetting: { Back: 0, KeyConfig: 0, Play: 0, NextSetting: -5, Save: -10, SettingSummary: -10 },
     loadingIos: { Play: 0 },
     keyConfig: { Back: -3, Play: 0 },
     result: { Back: -5, Copy: -5, Tweet: -5, Gitter: -5, Retry: 0, GaugeTransition: -15 },
@@ -5091,6 +5097,7 @@ const g_lang_msgObj = {
 
         graph: `譜面密度や速度変化状況、\n譜面の難易度などの情報を表示します。`,
         dataSave: `ハイスコア、リバース設定、\nキーコンフィグの保存の有無を設定します。`,
+        toOption: `譜面、速度、ゲージなどの基本設定を設定します。`,
         toDisplay: `プレイ画面上のオブジェクトの\n表示・非表示（一部透明度）を設定します。`,
         toSettings: `その他の拡張設定を設定します。`,
 
@@ -5201,6 +5208,7 @@ const g_lang_msgObj = {
 
         graph: `Displays detailed information about the chart, such as chart's density status, sequences' velocity changes, and chart's difficulty.`,
         dataSave: `Set whether to save the high score, reverse setting, and key config.`,
+        toOption: `Set basic settings such as chart, speed, and gauge.`,
         toDisplay: `Set the display or non-display (partial transparency) of objects on the play screen.`,
         toSettings: `Set other extended settings.`,
 
