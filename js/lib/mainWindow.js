@@ -405,10 +405,12 @@ const mainInit = () => {
 	};
 	Object.keys(jdgMainScoreObj).forEach(jdgScore =>
 		infoSprite.appendChild(
-			makeCounterSymbol(`lbl${jdgScore}`,
-				g_headerObj.playingWidth - 110 + (g_workObj.nonDefaultSc ? g_headerObj.scAreaWidth : 0),
-				g_cssObj[`common_${jdgMainScoreObj[jdgScore][0]}`], jdgMainScoreObj[jdgScore][1] + 1, 0, g_workObj.scoreDisp
-			)
+			createDivCss2Label(`lbl${jdgScore}`, 0, {
+				x: g_headerObj.playingWidth - 110 + (g_workObj.nonDefaultSc ? g_headerObj.scAreaWidth : 0),
+				y: g_limitObj.jdgCntsHeight * (jdgMainScoreObj[jdgScore][1] + 1),
+				w: g_limitObj.jdgCntsWidth, h: g_limitObj.jdgCntsHeight, siz: g_limitObj.jdgCntsSiz, align: C_ALIGN_RIGHT,
+				display: g_workObj.scoreDisp,
+			}, g_cssObj[`common_${jdgMainScoreObj[jdgScore][0]}`])
 		)
 	);
 
@@ -1116,8 +1118,9 @@ const mainInit = () => {
 
 		// 移動
 		updateArrowPos(arrowName, currentArrow);
+		currentArrow.cnt--;
 
-		funcs.judgeMotion(_j, arrowName, --currentArrow.cnt);
+		funcs.judgeMotion(_j, arrowName, currentArrow.cnt);
 		funcs.judgeNext(_j, _k, currentArrow.cnt);
 	};
 
@@ -1273,7 +1276,7 @@ const mainInit = () => {
 	 * @param {string} _frzName 
 	 * @param {object} _frz g_attrObj[_frzName]
 	 */
-	const movFrzMoving = (_j, _k, _name, _frzName, _frz) => {
+	const movFrz = (_j, _k, _name, _frzName, _frz) => {
 
 		// 全体色変化 (通常時)
 		changeColorOnFrame(_j, _k, _name, `Normal`);
@@ -1295,7 +1298,7 @@ const mainInit = () => {
 	 * @param {object} _frz g_attrObj[_frzName]
 	 * @param {number} _movY 1フレームあたりの移動量
 	 */
-	const movFrzHolding = (_j, _k, _name, _frzName, _frz, _movY) => {
+	const holdFrz = (_j, _k, _name, _frzName, _frz, _movY) => {
 		const funcs = objFuncs[_name];
 
 		// 全体色変化 (ヒット時)
@@ -1332,7 +1335,7 @@ const mainInit = () => {
 	 * @param {object} _frz g_attrObj[_frzName]
 	 * @param {number} _movY 1フレームあたりの移動量
 	 */
-	const movFrzEnded = (_j, _name, _frzName, _frz, _movY) => {
+	const endFrz = (_j, _name, _frzName, _frz, _movY) => {
 		_frz.frzBarLength -= _movY * _frz.dir;
 		if (_frz.frzBarLength > 0) {
 			_frz.y -= _movY;
@@ -1354,14 +1357,14 @@ const mainInit = () => {
 		const movY = g_workObj.currentSpeed * currentFrz.boostSpd * currentFrz.dir;
 
 		if (currentFrz.judgEndFlg) {
-			movFrzEnded(_j, _name, frzName, currentFrz, movY);
+			endFrz(_j, _name, frzName, currentFrz, movY);
 			return;
 		}
 
 		if (currentFrz.isMoving) {
-			movFrzMoving(_j, _k, _name, frzName, currentFrz);
+			movFrz(_j, _k, _name, frzName, currentFrz);
 		} else {
-			movFrzHolding(_j, _k, _name, frzName, currentFrz, movY);
+			holdFrz(_j, _k, _name, frzName, currentFrz, movY);
 		}
 
 		// フリーズアローが枠外に出たときの処理
@@ -1426,8 +1429,7 @@ const mainInit = () => {
 		} else if (/\[fontSize=\d+\]/.test(wordDat)) {
 
 			// フォントサイズ変更
-			const fontSize = setIntVal(wordDat.match(/\d+/)[0], g_limitObj.mainSiz);
-			styWord.fontSize = wUnit(fontSize);
+			styWord.fontSize = wUnit(setIntVal(wordDat.match(/\d+/)[0], g_limitObj.mainSiz));
 
 		} else {
 
@@ -1435,9 +1437,10 @@ const mainInit = () => {
 			const fadeFinished = _currentFrame - g_workObj.lastFadeFrame[wordDepth] >= g_workObj.wordFadeFrame[wordDepth];
 			if (fadeFinished) {
 				[`Out`, `In`].forEach(type => {
-					if (g_wordObj[`fade${type}Flg${wordDepth}`]) {
+					const key = `fade${type}Flg${wordDepth}`;
+					if (g_wordObj[key]) {
 						styWord.animationName = `none`;
-						g_wordObj[`fade${type}Flg${wordDepth}`] = false;
+						g_wordObj[key] = false;
 					}
 				});
 			}
@@ -2057,24 +2060,6 @@ const changeAppearanceFilter = (_num = 10) => {
 	safeExecuteCustomHooks(`g_customJsObj.appearanceFilter`, g_customJsObj.appearanceFilter, topNum, bottomNum);
 
 	return doubleFilterFlg;
-};
-
-/**
- * 判定カウンタ表示作成
- * @param {string} _id 
- * @param {number} _x
- * @param {string} _class 
- * @param {number} _heightPos 
- * @param {string|number} _text
- * @param {string} [_display='inherit'] 表示有無 (inherit: 表示 / none: 非表示)
- * @returns {HTMLDivElement}
- */
-const makeCounterSymbol = (_id, _x, _class, _heightPos, _text, _display = C_DIS_INHERIT) => {
-	return createDivCss2Label(_id, _text, {
-		x: _x, y: g_limitObj.jdgCntsHeight * _heightPos,
-		w: g_limitObj.jdgCntsWidth, h: g_limitObj.jdgCntsHeight, siz: g_limitObj.jdgCntsSiz, align: C_ALIGN_RIGHT,
-		display: _display,
-	}, _class);
 };
 
 /**
