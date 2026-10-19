@@ -1732,6 +1732,7 @@ const mainInit = () => {
 			// FrzReturn演出はflowTimelineと独立したタイマーで動いているため、
 			// 一時停止時点で早期終了させる(位置復元はせず、通常終了時と同じ後片付けを行う)
 			resetFrzReturn();
+			g_workObj.frzReturnPausedFlg = true;
 		}
 		g_timerHandler.clearTimeout(g_timeoutEvtId);
 		g_audio.pause();
@@ -1808,6 +1809,11 @@ const mainInit = () => {
 			pausedElapsedTime = null;
 			pausedStartAdjustment = null;
 			g_timeoutEvtId = g_timerHandler.setTimeout(flowTimeline, 1000 / g_fps);
+
+			if (g_workObj.frzReturnPausedFlg) {
+				startFrzReturn();
+				g_workObj.frzReturnPausedFlg = false;
+			}
 		};
 
 		const tick = _remaining => {
@@ -2141,6 +2147,7 @@ const executeFrzReturn = (_seq, _idx, _axis) => {
 		// 画面がプレイ画面から移動した場合
 		g_workObj.frzReturnFlg = false;
 		g_workObj.frzReturnTimerId = null;
+		g_workObj.frzReturnPausedFlg = false;
 		return;
 	}
 
@@ -2585,11 +2592,10 @@ const changeLifeColor = (_state = ``) => {
 
 	if (_state !== `` && _state !== g_workObj.currentLifeState) {
 		const lifeCss = g_cssObj[`life_${_state}`];
-		lblLife.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared, g_cssObj.life_Failed);
-		lifeBar.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared, g_cssObj.life_Failed);
-		lblLife.classList.add(lifeCss);
-		lifeBar.classList.add(lifeCss);
-
+		[lblLife, lifeBar].forEach(elm => {
+			elm.classList.remove(g_cssObj.life_Max, g_cssObj.life_Cleared, g_cssObj.life_Failed);
+			elm.classList.add(lifeCss);
+		});
 		g_workObj.currentLifeState = _state;
 	}
 
