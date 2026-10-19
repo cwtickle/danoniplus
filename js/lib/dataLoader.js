@@ -2466,6 +2466,7 @@ const getArrowSettings = (_retryFlg = false) => {
 
 	// FrzReturnの初期化
 	g_workObj.frzReturnFlg = false;
+	g_workObj.frzReturnPausedFlg = false;
 	g_workObj.frzReturnSeq = g_frzReturnSeqFunc.get(g_stateObj.frzReturnType)();
 	if (g_workObj.frzReturnTimerId) {
 		g_timerHandler.clearTimeout(g_workObj.frzReturnTimerId);
