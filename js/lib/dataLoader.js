@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/10/10 (v51.3.0)
+ * Revised : 2026/10/20 (v51.4.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2466,6 +2466,7 @@ const getArrowSettings = (_retryFlg = false) => {
 
 	// FrzReturnの初期化
 	g_workObj.frzReturnFlg = false;
+	g_workObj.frzReturnPausedFlg = false;
 	g_workObj.frzReturnSeq = g_frzReturnSeqFunc.get(g_stateObj.frzReturnType)();
 	if (g_workObj.frzReturnTimerId) {
 		g_timerHandler.clearTimeout(g_workObj.frzReturnTimerId);
