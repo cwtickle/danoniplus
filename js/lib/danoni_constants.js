@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/10/20 (v51.4.1)
+ * Revised : 2026/10/24 (v51.4.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1595,17 +1595,18 @@ const g_transPriority = {
  */
 const joinTransforms = _transformMap => {
     if (_transformMap.size === 1) {
-        return _transformMap.values().next().value.transform;
+        return _transformMap.values().next().value.transform ?? ``;
     }
     if (_transformMap.size === 2) {
         const it = _transformMap.values();
         const a = it.next().value;
         const b = it.next().value;
-        return b.priority > a.priority ? `${b.transform} ${a.transform}` : `${a.transform} ${b.transform}`;
+        const [ta, tb] = [a.transform ?? ``, b.transform ?? ``];
+        return b.priority > a.priority ? `${tb} ${ta}` : `${ta} ${tb}`;
     }
     return Array.from(_transformMap.values())
         .sort((a, b) => b.priority - a.priority)
-        .map(v => v.transform)
+        .map(v => v.transform ?? ``)
         .join(` `);
 };
 

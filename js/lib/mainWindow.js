@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/10/20 (v51.4.1)
+ * Revised : 2026/10/24 (v51.4.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -106,8 +106,10 @@ const mainInit = () => {
 		// レイヤーごとのTransition設定
 		// StepAreaオプションにより、レイヤーが倍化される場合があるため基準レイヤー数ごとに設定
 		const transj = j % g_stateObj.layerNumDf;
-		addTransform(`mainSprite${j}`, `mainSprite${j}`,
-			g_workObj.layerTrans[Math.floor(transj / 2) * 2 + (transj + Number(g_stateObj.reverse === C_FLG_ON)) % 2], g_transPriority.layer);
+		const layerTrans = g_workObj.layerTrans[Math.floor(transj / 2) * 2 + (transj + Number(g_stateObj.reverse === C_FLG_ON)) % 2];
+		if (layerTrans !== undefined) {
+			addTransform(`mainSprite${j}`, `mainSprite${j}`, layerTrans, g_transPriority.layer);
+		}
 
 		stepSprite.push(createEmptySprite(mainSpriteJ, `stepSprite${j}`, mainCommonPos));
 		arrowSprite.push(createEmptySprite(mainSpriteJ, `arrowSprite${j}`, { ...mainCommonPos, y: g_workObj.hitPosition * (j % 2 === 0 ? 1 : -1) }));
