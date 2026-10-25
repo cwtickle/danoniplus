@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/10/07
+ * Revised : 2026/10/25
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 49.6.6`;
-const g_revisedDate = `2026/10/07`;
+const g_version = `Ver 49.6.7`;
+const g_revisedDate = `2026/10/25`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -14929,7 +14929,7 @@ const mainInit = () => {
 	}
 
 	addTransform(`mainSprite`, `root`, `scale(${g_workObj.scale})`, g_transPriority.scale);
-	addTransform(`mainSprite`, `main`, `translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_posObj.stepY - C_STEP_Y + g_headerObj.playingY)})`, g_transPriority.base);
+	addTransform(`mainSprite`, `main`, `translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_posObj.stepY - C_STEP_Y + g_headerObj.playingY)})`, g_transPriority.shift);
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
 	const infoSprite = createEmptySprite(divRoot, `infoSprite`, mainCommonPos);
