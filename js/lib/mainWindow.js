@@ -44,7 +44,7 @@ const mainInit = () => {
 	addTransform(`mainSprite`, `root`,
 		`scale(${g_workObj.scale})`, g_transPriority.scale);
 	addTransform(`mainSprite`, `main`,
-		`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_posObj.stepY - C_STEP_Y + g_headerObj.playingY)})`, g_transPriority.base);
+		`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_posObj.stepY - C_STEP_Y + g_headerObj.playingY)})`, g_transPriority.shift);
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
 	const infoSprite = createEmptySprite(divRoot, `infoSprite`, mainCommonPos);

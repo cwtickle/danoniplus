@@ -1584,6 +1584,7 @@ const g_transPriority = {
     shakingX: 140,
     shakingY: 150,
     scale: 200,
+    shift: 210,
 };
 
 /**
