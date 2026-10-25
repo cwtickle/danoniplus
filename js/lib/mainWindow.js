@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/10/24 (v51.4.2)
+ * Revised : 2026/10/25 (v51.4.3)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -44,7 +44,7 @@ const mainInit = () => {
 	addTransform(`mainSprite`, `root`,
 		`scale(${g_workObj.scale})`, g_transPriority.scale);
 	addTransform(`mainSprite`, `main`,
-		`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_posObj.stepY - C_STEP_Y + g_headerObj.playingY)})`, g_transPriority.base);
+		`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_posObj.stepY - C_STEP_Y + g_headerObj.playingY)})`, g_transPriority.shift);
 
 	// 曲情報・判定カウント用スプライトを作成（メインスプライトより上位）
 	const infoSprite = createEmptySprite(divRoot, `infoSprite`, mainCommonPos);

@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/10/24 (v51.4.2)
+ * Revised : 2026/10/25 (v51.4.3)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -1584,6 +1584,7 @@ const g_transPriority = {
     shakingX: 140,
     shakingY: 150,
     scale: 200,
+    shift: 210,
 };
 
 /**
