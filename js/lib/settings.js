@@ -2002,8 +2002,714 @@ const createLblSetting = (_settingName, _adjY = 0, _settingLabel = _settingName)
 	const lbl = createDivCss2Label(`lbl${_settingName}`, g_lblNameObj[_settingLabel], {
 		x: -5, y: _adjY, w: 110, pointerEvents: C_DIS_AUTO,
 	}, `settings_${_settingName}`);
-	lbl.title = g_msgObj[`${_settingName.charAt(0).toLowerCase()}${_settingName.slice(1)}`];
+	const msgKey = `${_settingName.charAt(0).toLowerCase()}${_settingName.slice(1)}`;
+	attachHelp(lbl, g_msgObj[msgKey], { title: g_lblNameObj[_settingLabel], stateKey: msgKey });
 	return lbl;
+};
+
+/**
+ * 要素にヘルプを付与する
+ * - 短文: 従来どおり title のみ
+ * - 長文: title は1行目のみ。クリックで全文オーバーレイを表示
+ * @param {HTMLElement} _elem
+ * @param {string} _msg g_msgObj の文字列(文面はユーザが上書き可能なため、構造は仮定しない)
+ * @param {string} [object.title=''] オーバーレイの見出し
+ * @param {string} [object.stateKey=''] 現在値の突き合わせ先 (g_stateObj のキー)
+ */
+const attachHelp = (_elem, _msg, { title = ``, stateKey = `` } = {}) => {
+	if (!hasVal(_msg)) return;
+	const longFlg = isLongHelp(_msg);
+	if (!longFlg && g_helpPreviewDefs[stateKey] === undefined) {
+		_elem.title = _msg;
+		return;
+	}
+	_elem.title = longFlg ? `${_msg.split(/\r?\n/)[0]} …` : _msg;
+	_elem.style.cursor = `help`;
+	g_handler.addListener(_elem, `click`, () => openHelpOverlay(title, _msg, stateKey));
+};
+
+/**
+ * ヘルプ文面を行ごとに分解する
+ * `[名前] 説明` 形式の行は選択肢行、それ以外は通常の文として扱う
+ * @param {string} _msg
+ * @returns {{ name?: string, desc?: string, text?: string }[]}
+ */
+const parseHelpLines = _msg => _msg.split(/\r?\n/).map(line => {
+	const m = line.match(/^\[(.+?)\]\s*(.*)$/);
+	return m ? { name: m[1], desc: m[2] } : { text: line };
+});
+
+/**
+ * 詳細ヘルプのオーバーレイを開く
+ * @param {string} _title
+ * @param {string} _msg
+ * @param {string} _stateKey
+ */
+const openHelpOverlay = (_title, _msg, _stateKey) => {
+	const divRoot = document.getElementById(`divRoot`);
+	if (!divRoot || document.getElementById(`helpOverlay`) !== null) return;
+	if (![`option`, `exSetting`, `settingsDisplay`].includes(g_currentPage)) return;
+
+	// 現在値は、g_currentPage を切り替える前に取得する(getStgDetailName が画面名を参照するため)
+	const currentVal = g_stateObj[_stateKey];
+	const currentNames = [currentVal, getStgDetailName(currentVal)];
+	const bright = g_headerObj.baseBrightFlg;
+
+	g_helpPrevPage = g_currentPage;
+	g_currentPage = `helpOverlay`;
+
+	const overlay = createEmptySprite(divRoot, `helpOverlay`, {
+		w: g_sWidth, h: g_sHeight, background: bright ? `#eeeeeeee` : `#111111ee`, pointerEvents: C_DIS_AUTO,
+	});
+	// オーバーレイ自身(背景)をクリックしたときだけ閉じる。子要素(隠しボタン等)のクリックは対象外
+	g_handler.addListener(overlay, `click`, evt => {
+		if (evt.target === overlay) {
+			closeHelpOverlay();
+		}
+	});
+
+	// プレビューがある設定は、本文の下にプレビュー領域を確保する
+	const previewH = g_helpPreviewDefs[_stateKey] === undefined ? 0 : Math.round(g_sHeight * g_limitObj.helpPreviewRate);
+
+	// 本文(スクロール可)。本文内のクリックでは閉じない
+	const body = createEmptySprite(overlay, `helpBody`, {
+		x: 30, y: 60, w: g_sWidth - 60, h: g_sHeight - 90 - (previewH > 0 ? previewH + 10 : 0),
+		overflowY: `auto`, pointerEvents: C_DIS_AUTO,
+	});
+	g_handler.addListener(body, `click`, evt => evt.stopPropagation());
+
+	parseHelpLines(_msg).forEach(line => {
+		const row = document.createElement(`div`);
+		Object.assign(row.style, {
+			fontFamily: getBasicFont(), fontSize: wUnit(14), lineHeight: `1.1`, textAlign: `left`,
+			whiteSpace: `normal`, wordBreak: `break-word`, padding: `2px 6px`,
+			color: bright ? `#222222` : `#eeeeee`,
+		});
+		if (line.name === undefined) {
+			row.textContent = line.text;
+			if (line.text === ``) row.style.height = `0.8em`;
+		} else {
+			const isCurrent = currentNames.includes(line.name);
+			const nameElm = document.createElement(`span`);
+			const descElm = document.createElement(`span`);
+			nameElm.textContent = `[${line.name}]`;
+			nameElm.style.fontWeight = `bold`;
+			descElm.textContent = line.desc;
+			Object.assign(row.style, {
+				display: `grid`, gridTemplateColumns: `10em 1fr`, columnGap: `0.8em`,
+				background: isCurrent ? `rgba(80,140,255,0.25)` : ``,
+				borderLeft: `3px solid ${isCurrent ? `#66aaff` : `transparent`}`,
+			});
+			row.append(nameElm, descElm);
+		}
+		body.appendChild(row);
+	});
+
+	multiAppend(overlay,
+		createDivCss2Label(`lblHelpTitle`, _title, { x: 0, y: 15, w: g_sWidth, h: 30, siz: 20 }),
+		createCss2Button(`btnHelpClose`, g_lblNameObj.b_back, () => true, {
+			x: g_btnX() + 30, y: 15, w: 100, h: 30, siz: 14, resetFunc: () => closeHelpOverlay(),
+		}, g_cssObj.button_Back),
+
+		// 選択肢の前後移動 (ショートカットキー専用の隠しボタン)
+		createCss2Button(`btnHelpPrev`, ``, () => true, {
+			x: 0, y: 0, w: 0, h: 0, opacity: 0, resetFunc: () => g_helpPreviewMove(-1),
+		}, g_cssObj.button_Mini),
+		createCss2Button(`btnHelpNext`, ``, () => true, {
+			x: 0, y: 0, w: 0, h: 0, opacity: 0, resetFunc: () => g_helpPreviewMove(1),
+		}, g_cssObj.button_Mini),
+	);
+	createScText(btnHelpClose, `HelpClose`, { displayName: `helpOverlay`, targetLabel: `btnHelpClose`, x: -5 });
+	if (previewH > 0) {
+		makeHelpPreview(overlay, _stateKey, g_sHeight - 30 - previewH, previewH);
+	}
+	setShortcutEvent(g_currentPage, () => true, { displayFlg: false });
+};
+
+/**
+ * 詳細ヘルプのオーバーレイを閉じ、元の画面のショートカットを復帰する
+ */
+const closeHelpOverlay = () => {
+	const overlay = document.getElementById(`helpOverlay`);
+	if (overlay === null) return;
+	g_helpPreviewStop();
+	deleteChildspriteAll(`helpOverlay`);
+	overlay.remove();
+	g_currentPage = g_helpPrevPage;
+	setShortcutEvent(g_currentPage, () => true, {
+		displayFlg: false, dfEvtFlg: g_currentPage !== `settingsDisplay`,
+	});
+};
+
+/** 詳細ヘルプを開く直前のページ名 */
+let g_helpPrevPage = ``;
+
+/**
+ * 詳細ヘルプを出すべき長文かどうかの判定
+ * @param {string} _msg
+ * @returns {boolean}
+ */
+const isLongHelp = _msg =>
+	_msg.split(/\r?\n/).length - 1 >= g_limitObj.helpLongLines || _msg.length > g_limitObj.helpLongChars;
+
+/*-----------------------------------------------------------*/
+/* 詳細ヘルプ内プレビュー */
+/*-----------------------------------------------------------*/
+
+/**
+ * 詳細ヘルプ内でプレビューを出す設定
+ * - キー名は g_stateObj のキー名 (選択肢は g_settings[`${key}s`] を使用)
+ * - splitLayer: 右半分のレーンを逆スクロール(レイヤー1)側に配置する
+ */
+const g_helpPreviewDefs = {
+	motion: { currentKey: true },
+	scroll: { currentKey: true },
+	appearance: { currentKey: true, splitLayer: true },
+	playWindow: {},
+	stepArea: {},
+	shaking: { splitLayer: true },
+	frzReturn: {},
+	effect: {},
+	swapping: {},
+};
+
+/**
+ * StepAreaプレビュー用のレーン配置 (4レーン分のレイヤー番号。偶数: 通常スクロール、奇数: 逆スクロール)
+ * - キー非依存のため、サンプル用に定義
+ */
+const g_helpStepAreaLayouts = {
+	Default: [0, 0, 0, 0],
+	Halfway: [0, 0, 1, 1],
+	'2Step': [0, 0, 2, 2],
+	Mismatched: [0, 0, 1, 1],
+	'R-Mismatched': [0, 0, 1, 1],
+	'X-Flower': [0, 0, 2, 2],
+	'Alt-Crossing': [0, 2, 0, 2],
+};
+
+/**
+ * Swappingプレビュー用のレーン配置
+ */
+const g_helpSwappingLayouts = {
+	OFF: [0, 1, 2, 3],
+	InnerSwap: [0, 2, 1, 3],
+	OuterSwap: [3, 1, 2, 0],
+	Mirror: [3, 2, 1, 0],
+	'Mirror+': [3, 2, 1, 0],
+};
+
+/** プレビューの停止処理 (プレビュー表示中のみ差し替わる) */
+let g_helpPreviewStop = () => true;
+
+/** プレビューの選択肢を前後へ動かす処理 (プレビュー表示中のみ差し替わる) */
+let g_helpPreviewMove = _dir => true;
+
+/**
+ * 詳細ヘルプ内プレビューの作成
+ * @param {HTMLDivElement} _parent オーバーレイ
+ * @param {string} _key g_helpPreviewDefs のキー
+ * @param {number} _top 配置Y座標
+ * @param {number} _height 領域の高さ
+ */
+const makeHelpPreview = (_parent, _key, _top, _height) => {
+	const def = g_helpPreviewDefs[_key];
+	const optList = g_settings[`${_key}s`];
+	if (def === undefined || optList === undefined || document.getElementById(`mainSprite`) !== null) {
+		return;
+	}
+	const playH = g_headerObj.playingHeight || g_sHeight;
+	const chipW = 120;
+	const areaW = g_sWidth - 60;
+
+	// レーン定義: Scrollのみ現在選択中のキー・パターンの定義を使用 (他は4レーン固定)
+	const tkObj = def.currentKey === true ? getKeyInfo() : null;
+	const useKey = tkObj !== null && tkObj.keyNum > 0;
+	const keyCtrlPtn = useKey ? tkObj.keyCtrlPtn : ``;
+	const laneNum = useKey ? tkObj.keyNum : 4;
+	const laneW = (useKey ? g_keyObj[`blank${keyCtrlPtn}`] : null) ?? g_keyObj.blank_def;
+	const keyPos = useKey ? g_keyObj[`pos${keyCtrlPtn}`] : null;
+
+	// 表示するレーン (キースイッチがあるキーは、選択中のキーグループのレーンのみ)
+	const configKeyGroupList = useKey
+		? (g_headerObj.keyGroupOrder?.[g_stateObj.scoreId] ?? g_keyObj[`keyGroupOrder${keyCtrlPtn}`] ?? tkObj.keyGroupList)
+		: [];
+	const activeGroup = configKeyGroupList[g_keycons.keySwitchNum] ?? configKeyGroupList[0];
+	const laneVisible = [...Array(laneNum).keys()].map(j =>
+		!useKey || configKeyGroupList.length <= 1 || (tkObj.keyGroupMaps[j]?.includes(activeGroup) ?? true));
+	const visibleLanes = [...Array(laneNum).keys()].filter(j => laneVisible[j]);
+	if (visibleLanes.length === 0) {
+		visibleLanes.push(...Array(laneNum).keys());   // 該当レーンが無い場合は全て表示
+		laneVisible.fill(true);
+	}
+
+	// 段 (下段: pos が divideCnt を超えるレーン) と、中央からのX座標差分
+	// prepareScoreData の stdPos と同じ式。下段は既定で逆スクロールになる
+	const laneLower = [...Array(laneNum).keys()].map(j => useKey && keyPos[j] > tkObj.divideCnt);
+	const laneOffsets = [...Array(laneNum).keys()].map(j => useKey
+		? laneW * (keyPos[j] - ((laneLower[j] ? tkObj.posMax : 0) + tkObj.divideCnt) / 2)
+		: (j - (laneNum - 1) / 2) * laneW);
+
+	// レイヤー数 (layerGroup 指定のあるキーは4を超える)
+	const baseLayers = useKey ? (g_keyObj[`layerGroup${keyCtrlPtn}`] ?? []) : [];
+	const layerCnt = Math.max(4, (Math.max(0, ...baseLayers) + 1) * 2);
+
+	// キーが多い場合はフレームを広げ、縮小率で収める
+	const halfSpan = Math.max(...laneOffsets.map(Math.abs)) + C_ARW_WIDTH / 2;
+	const playW = Math.max(g_headerObj.playingWidth || g_sWidth, Math.ceil(halfSpan * 2) + 60);
+	const rate = Math.min(g_limitObj.helpPreviewMaxRate, _height / playH, (areaW - chipW - 15) / playW);
+	const viewW = Math.round(playW * rate);
+	const baseX = Math.max(Math.round((areaW - viewW - chipW - 15) / 2), 0);
+
+	// 領域内のクリックでオーバーレイが閉じないようにする
+	const area = createEmptySprite(_parent, `helpPreview`, {
+		x: 30, y: _top, w: areaW, h: _height, pointerEvents: C_DIS_AUTO,
+	});
+	g_handler.addListener(area, `click`, evt => evt.stopPropagation());
+
+	// ---------------------------------------------------
+	// ミニプレイ画面 (縮小表示)
+	const scaler = createEmptySprite(area, `pvScale`, {
+		x: baseX, y: 0, w: playW, h: playH, transform: `scale(${rate})`, transformOrigin: `top left`,
+	});
+	const pvFrame = createEmptySprite(scaler, `pvFrame`, {
+		w: playW, h: playH, background: g_headerObj.baseBrightFlg ? `#eeeeee` : `#111111`,
+		border: `1px solid #444444`, boxSizing: `border-box`, overflow: `hidden`,
+		perspective: `1400px`, perspectiveOrigin: `center 60%`,
+	});
+
+	// g_shakingFunc などが決め打ちで参照する id (設定画面には存在しないためここで作る)
+	const spriteIds = [`mainSprite`, `infoSprite`, `judgeSprite`];
+	const mainSprite = createEmptySprite(pvFrame, `mainSprite`, { w: playW, h: playH });
+
+	// レイヤー (StepAreaで最大4レイヤー)。ゲーム側と同じ id でステップ・矢印・フリーズヒット用スプライトを持つ
+	const stepSprites = [], arrowSprites = [];
+	for (let j = 0; j < layerCnt; j++) {
+		const layer = createEmptySprite(mainSprite, `mainSprite${j}`, { w: playW, h: playH });
+		stepSprites.push(createEmptySprite(layer, `stepSprite${j}`, { w: playW, h: playH }));
+		arrowSprites.push(createEmptySprite(layer, `arrowSprite${j}`, { w: playW, h: playH }));
+		createEmptySprite(layer, `frzHitSprite${j}`, { w: playW, h: playH });
+		spriteIds.push(`mainSprite${j}`, `stepSprite${j}`, `arrowSprite${j}`, `frzHitSprite${j}`);
+	}
+	const infoSprite = createEmptySprite(pvFrame, `infoSprite`, { w: playW, h: playH });
+	const judgeSprite = createEmptySprite(pvFrame, `judgeSprite`, { w: playW, h: playH });
+	if (_key === `frzReturn`) {
+		mainSprite.style.transformOrigin = `center 55%`;
+		mainSprite.style.transformStyle = `preserve-3d`;
+	}
+
+	// レーン、ステップゾーン (4レーン。splitLayer時は右2レーンを逆スクロール側へ)
+	const stepY = C_STEP_Y;
+	const revStepY = playH - C_STEP_Y - C_ARW_WIDTH;
+	const baseRtns = useKey
+		? (g_keyObj[`stepRtn${keyCtrlPtn}`] ?? Array(laneNum).fill(0))
+		: [0, -90, 90, 180];
+	let rtnOffset = 0;   // SideScroll時はゲーム側と同様に矢印を90度回転する
+	// 矢印名 (onigiri等の文字列) は加算しない
+	const getRtn = j => rtnOffset === 0 ? baseRtns[j] : baseRtns[j] + rtnOffset;
+	const colors = useKey
+		? (g_keyObj[`color${keyCtrlPtn}`] ?? []).map(c => g_headerObj.setColor?.[c] ?? g_dfColorObj.setColorType1[c] ?? `#ffffff`)
+		: [0, 1, 3, 4].map(j => g_dfColorObj.setColorType1[j]);
+	const laneX = j => Math.round(laneOffsets[j] + (playW - C_ARW_WIDTH) / 2);
+	const getLaneInfo = laneIdxs => laneIdxs.map(j => ({ x: laneX(j), layer: 0, dir: 1, stepTop: stepY }));
+
+	// レーンの配置 (layer / dir / stepTop は assignLanes で設定)
+	let laneInfo = getLaneInfo([...Array(laneNum).keys()]);
+	let stepElms = laneInfo.map((lane, j) =>
+		createColorObject2(`pvStep${j}`, { x: lane.x, y: stepY, rotate: getRtn(j) }, g_cssObj.main_stepDefault));
+
+	const assignSwapping = _option => {
+		laneInfo = getLaneInfo(g_helpSwappingLayouts[_option] ?? [...Array(laneNum).keys()]);
+		laneInfo.forEach((lane, j) => document.getElementById(`pvStep${j}`)?.remove());
+		stepElms = laneInfo.map((lane, j) =>
+			createColorObject2(`pvStep${j}`, { x: lane.x, y: stepY, rotate: getRtn(j) }, g_cssObj.main_stepDefault));
+	};
+	const assignLanes = layout => laneInfo.forEach((lane, j) => {
+		lane.layer = layout[j];
+		lane.dir = lane.layer % 2 === 0 ? 1 : -1;
+		lane.stepTop = lane.dir === 1 ? stepY : revStepY;
+		stepElms[j].style.top = wUnit(lane.stepTop);
+		stepElms[j].style.display = laneVisible[j] ? `` : C_DIS_NONE;
+		stepSprites[lane.layer].appendChild(stepElms[j]);
+	});
+
+	// ライフゲージ、判定キャラクタ (画面全体を揺らす設定の確認用)
+	multiAppend(infoSprite,
+		createDivCss2Label(`pvLifeBack`, ``, g_lblPosObj.previewLifeBack, g_cssObj.life_Background),
+		createDivCss2Label(`pvLifeBar`, ``, g_lblPosObj.previewLifeBar, g_cssObj.life_Cleared),
+	);
+	const jdgPos = { y: Math.round(playH / 2 - 60), w: g_limitObj.jdgCharaWidth, h: g_limitObj.jdgCharaHeight, siz: g_limitObj.jdgCharaSiz };
+	multiAppend(judgeSprite,
+		createDivCss2Label(`pvChara`, g_lblNameObj.j_ii, { ...jdgPos, x: Math.round(playW / 2 - 220) }, g_cssObj.common_ii),
+		createDivCss2Label(`pvCombo`, `5 Combo!!`, { ...jdgPos, x: Math.round(playW / 2 - 50) }, g_cssObj.common_comboJ),
+	);
+
+	// ---------------------------------------------------
+	// プレビュー状態
+	const noteInterval = Math.max(8, Math.round(24 * 4 / visibleLanes.length));
+	const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+	let stride = Math.max(Math.round(visibleLanes.length * 0.6), 1);
+	while (gcd(stride, visibleLanes.length) !== 1) stride++;
+	let selected = ``;
+	let frameCnt = 0;
+	let noteCnt = 0;
+	let timerId = null;
+	let notes = [];
+	let dist = [];
+	let bStart = 0;
+	let effectCls = { arrow: ``, frz: ``, frzArrow: `` };
+	let filterElms = [];   // Appearanceのフィルターバー・ラベル
+	const frzLen = 90;   // Effectプレビュー用フリーズアローの長さ(px)
+	const work = { drunkXFlg: true, drunkYFlg: true, drunkAxisFlg: false, drunkRotateFlg: false };
+	const frz = { seq: null, axes: [], start: 0, next: 0 };
+
+	/** 付与したtransformの初期化 */
+	const resetTransforms = () => spriteIds.forEach(id => {
+		delete g_transforms[id];
+		const elm = document.getElementById(id);
+		if (elm !== null) {
+			elm.style.transform = ``;
+			elm.style.opacity = ``;
+		}
+	});
+
+	const clearNotes = () => {
+		notes.forEach(note => note.el.remove());
+		notes = [];
+	};
+
+	/**
+	 * Effectのクラス名取得
+	 * - g_effectFunc は g_workObj.*CssMotions へ書き込むため、呼び出し中だけ空配列へ差し替え、
+	 *   ユーザ個別指定のモーションを排除したうえで元に戻す
+	 */
+	const getEffectClasses = opt => {
+		const keys = [`arrowCssMotions`, `frzCssMotions`, `frzArrowCssMotions`];
+		const org = {};
+		const result = { arrow: ``, frz: ``, frzArrow: `` };
+		keys.forEach(key => {
+			org[key] = g_workObj[key];
+			g_workObj[key] = [];
+		});
+		try {
+			g_effectFunc.get(opt)();
+			result.arrow = g_workObj.arrowCssMotions[0] ?? ``;
+			result.frz = g_workObj.frzCssMotions[0] ?? ``;
+			result.frzArrow = g_workObj.frzArrowCssMotions[0] ?? ``;
+		} catch (e) {
+			console.warn(`Effect preview error: ${e}`);
+		} finally {
+			keys.forEach(key => g_workObj[key] = org[key]);
+		}
+		return result;
+	};
+
+	/** StepArea: ゲーム側の関数を、プレビュー用の状態に一時的に差し替えて実行 */
+	const runStepArea = opt => {
+		const orgState = {
+			layerNum: g_stateObj.layerNum, layerNumDf: g_stateObj.layerNumDf, appearance: g_stateObj.appearance,
+		};
+		const orgFlatFlg = g_workObj.orgFlatFlg;
+		Object.assign(g_stateObj, {
+			layerNumDf: 2, layerNum: g_settings.stepAreaLayers.includes(opt) ? 4 : 2, appearance: `Visible`,
+		});
+		g_workObj.orgFlatFlg = false;
+		try {
+			g_stepAreaFunc.get(opt)();
+		} finally {
+			Object.assign(g_stateObj, orgState);
+			g_workObj.orgFlatFlg = orgFlatFlg;
+		}
+	};
+
+	/**
+	 * Appearance: フィルター範囲の切り抜きとフィルターバーの表示
+	 * - changeAppearanceFilter は g_hidSudObj.filterPos の書き換えやカスタムフックの実行を伴うため使わず、
+	 *   切り抜き範囲の考え方 (g_hidSudObj の上下対応) のみ同じにして自前で設定する
+	 */
+	const applyAppearance = opt => {
+		arrowSprites.forEach(sprite => sprite.style.clipPath = ``);
+		filterElms.forEach(elm => elm.remove());
+		filterElms = [];
+		const defaultFilterPos = 30;
+
+		const hidSudFlg = opt === `Hid&Sud+`;
+		let num = g_appearanceRanges.includes(opt) ? defaultFilterPos : (g_hidSudObj.filterPosDefault[opt] ?? 0);
+		if (hidSudFlg) {
+			num = Math.min(num, 50);
+		}
+		if (num <= 0) return;
+
+		const numPlus = hidSudFlg ? num : 0;
+		const topNum = g_hidSudObj[opt];
+		const edges = new Set();
+		[0, 1].forEach(s => {
+			const [cutTop, cutBottom] = s === topNum ? [num, numPlus] : [numPlus, num];
+			arrowSprites[s].style.clipPath = `inset(${cutTop}% 0% ${cutBottom}% 0%)`;
+			if (cutTop > 0) edges.add(cutTop);
+			if (cutBottom > 0) edges.add(100 - cutBottom);
+		});
+
+		const filterCss = g_stateObj.filterLock === C_FLG_OFF ? g_cssObj.life_Failed : g_cssObj.life_Cleared;
+		[...edges].forEach((pct, i) => {
+			const bar = createColorObject2(`pvFilterBar${i}`, {
+				x: 0, y: Math.round(playH * pct / 100), w: playW - 50, h: 4, styleName: `lifeBar`, opacity: 1,
+			}, filterCss);
+			mainSprite.appendChild(bar);
+			filterElms.push(bar);
+		});
+
+		// 割合の表示 (最も上のバーの下、右端)
+		const viewText = `${num}%` + (g_appearanceRanges.includes(opt) ? `↑↓` : ``);
+		const view = createDivCss2Label(`pvFilterView`, viewText, {
+			x: playW - 120, y: Math.round(playH * Math.min(...edges) / 100) + 6, w: 100, h: 26, siz: 24, align: C_ALIGN_RIGHT,
+		});
+		mainSprite.appendChild(view);
+		filterElms.push(view);
+	};
+
+	/** Scroll: 選択中のキー・パターンのスクロール方向 (1: 通常、-1: 逆) をレイヤー番号 (0, 1) へ変換 */
+	const getScrollLayout = opt => {
+		const dirs = g_keyObj[`scrollDir${keyCtrlPtn}`]?.[opt] ?? Array(laneNum).fill(1);
+		return [...Array(laneNum).keys()].map(j => (baseLayers[j] || 0) * 2 +
+			((laneLower[j] ? 1 : 0) + (dirs[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2);
+	};
+
+	/** Flat系のスクロール: ステップゾーンを帯状 (横線2本) に切り替える */
+	let flatElms = [];
+	const applyFlat = opt => {
+		flatElms.forEach(elm => elm.remove());
+		flatElms = [];
+		const flatFlg = _key === `scroll` && opt.endsWith(`Flat`);
+		stepElms.forEach((elm, j) => elm.style.display = (flatFlg || !laneVisible[j]) ? C_DIS_NONE : ``);
+		if (!flatFlg) return;
+
+		[...new Set(laneInfo.map(lane => lane.layer))].forEach(layer => {
+			const top = layer % 2 === 0 ? stepY : revStepY;
+			const h = g_stateObj.flatStepHeight;
+			[(C_ARW_WIDTH - h) / 2, (C_ARW_WIDTH + h) / 2].forEach((y, k) => {
+				const bar = createColorObject2(`pvFlatBar${layer}_${k}`, {
+					x: 25, y: top + y, w: playW - 50, h: 1, styleName: `lifeBar`, background: `#999999`
+				}, g_cssObj.life_Failed);
+				stepSprites[layer].appendChild(bar);
+				flatElms.push(bar);
+			});
+		});
+	};
+
+	/**
+	 * 選択肢の適用
+	 * - Motion: 「配列の15がステップゾーン上」として、ステップゾーンからの距離を逆算する
+	 *   distance(b) = Σ(speed + motion[i]), i = 16..b (b: 到達までの残りフレーム数)
+	 */
+	const applyOption = opt => {
+		selected = opt;
+		resetTransforms();
+		clearNotes();
+		effectCls = _key === `effect` ? getEffectClasses(opt) : { arrow: ``, frz: ``, frzArrow: `` };
+
+		assignSwapping(_key === `swapping` ? opt : null);
+		// レーンのレイヤー配置 (StepAreaは選択肢ごと、Shakingは右半分を逆スクロール側へ)
+		assignLanes((_key === `stepArea` ? g_helpStepAreaLayouts[opt] : null)
+			?? (g_helpPreviewDefs[_key]?.currentKey ? getScrollLayout(opt) : null)
+			?? (def.splitLayer ? [0, 0, 1, 1] : [0, 0, 0, 0]));
+		applyFlat(opt);
+		if (_key === `stepArea`) {
+			runStepArea(opt);
+		}
+		if (_key === `appearance`) {
+			applyAppearance(opt);
+		}
+
+		// SideScrollのみ矢印を90度回転 (ゲーム側の changeStepRtn と同じ符号)
+		rtnOffset = (_key === `playWindow` && opt === `SideScroll` && g_stateObj.rotateEnabled)
+			? 90 * (g_stateObj.playWindowType === C_FLG_REVERSE2 ? -1 : 1) : 0;
+		if (g_stateObj.rotateEnabled) {
+			laneInfo.forEach((lane, j) => {
+				if (typeof getRtn(j) === `number`) {
+					document.getElementById(`pvStep${j}`).style.transform = `rotate(${getRtn(j)}deg)`;
+				}
+			});
+		}
+
+		const trace = g_motionFunc.get(_key === `motion` ? opt : C_FLG_OFF)(fillArray(101));
+		// 移動距離倍率: Compress / Fountain / Magnet は表示に掛かる時間を伸ばす
+		const distRate = _key === `motion` ? (g_settings.motionDistRates[g_settings.motions.indexOf(opt)] ?? 1) : 1;
+		bStart = C_MOTION_STD_POS + Math.ceil((playH - C_STEP_Y) * distRate / g_stateObj.speed);
+		dist = [];
+		dist[C_MOTION_STD_POS] = 0;
+		for (let b = C_MOTION_STD_POS + 1; b <= bStart; b++) {
+			dist[b] = dist[b - 1] + g_stateObj.speed + (trace[b] || 0);
+		}
+		if (_key === `playWindow`) {
+			addTransform(`mainSprite`, `playWindow`, g_playWindowFunc.get(opt)(), g_transPriority.playWindow);
+		}
+		if (_key === `shaking`) {
+			Object.assign(work, { drunkXFlg: true, drunkYFlg: true, drunkAxisFlg: false, drunkRotateFlg: false });
+		}
+		if (_key === `frzReturn`) {
+			frz.seq = null;
+			frz.next = frameCnt + 30;
+		}
+	};
+
+	const spawnNote = () => {
+		const j = visibleLanes[(noteCnt * stride) % visibleLanes.length];
+		const lane = laneInfo[j];
+		const frzFlg = _key === `effect` && noteCnt % 4 === 2;
+		const len = frzFlg ? frzLen : 0;
+		noteCnt++;
+
+		const el = createEmptySprite(arrowSprites[lane.layer], `pvNote${noteCnt}`, {
+			x: lane.x, y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH + len,
+		});
+		const sub = createEmptySprite(el, `pvSub${noteCnt}`, { x: 0, y: 0, w: C_ARW_WIDTH, h: C_ARW_WIDTH + len });
+
+		// setCssMotions と同様に、クラス付与と到達フレーム数に合わせたアニメーション時間を設定
+		const duration = `${(bStart - C_MOTION_STD_POS) / g_fps}s`;
+		const addEffect = (target, cls) => {
+			if (cls !== ``) {
+				target.classList.add(cls);
+				target.style.animationDuration = duration;
+			}
+		};
+
+		if (!frzFlg) {
+			sub.appendChild(createColorObject2(`pvNoteTop${noteCnt}`, { background: colors[j], rotate: getRtn(j) }));
+			addEffect(sub, effectCls.arrow);
+		} else {
+			const [normalColor, barColor] = g_dfColorObj.frzColorType1[0];
+			const makeArrowRoot = (_name, _y) => {
+				const root = createEmptySprite(sub, `pv${_name}Root${noteCnt}`, { x: 0, y: _y, w: C_ARW_WIDTH, h: C_ARW_WIDTH });
+				root.appendChild(createColorObject2(`pv${_name}${noteCnt}`, { background: normalColor, rotate: getRtn(j) }));
+				addEffect(root, effectCls.frzArrow);
+				return root;
+			};
+			sub.appendChild(createColorObject2(`pvBar${noteCnt}`, {
+				x: 5, y: C_ARW_WIDTH / 2, w: C_ARW_WIDTH - 10, h: len, background: barColor, styleName: `frzBar`, opacity: 0.75,
+			}));
+			makeArrowRoot(`Top`, 0);
+			makeArrowRoot(`Btm`, len);
+			addEffect(sub, effectCls.frz);
+		}
+		const note = { el, lane, b: bStart };
+		placeNote(note);
+		notes.push(note);
+	};
+
+	const placeNote = note => {
+		const d = dist[note.b];
+		note.el.style.top = wUnit(note.lane.dir === 1 ? stepY + d : revStepY - d);
+	};
+
+	/** Shaking: ゲーム側の関数を、プレビュー用の状態に一時的に差し替えて実行 */
+	const runShaking = () => {
+		const orgWork = {};
+		Object.keys(work).forEach(key => orgWork[key] = g_workObj[key]);
+		const orgState = { layerNum: g_stateObj.layerNum, layerNumDf: g_stateObj.layerNumDf };
+		const orgFrame = g_scoreObj.baseFrame;
+
+		Object.assign(g_workObj, work);
+		Object.assign(g_stateObj, { layerNum: 2, layerNumDf: 2 });
+		g_scoreObj.baseFrame = frameCnt;
+		try {
+			g_shakingFunc.get(selected)();
+		} finally {
+			Object.keys(work).forEach(key => work[key] = g_workObj[key]);
+			Object.assign(g_workObj, orgWork);
+			Object.assign(g_stateObj, orgState);
+			g_scoreObj.baseFrame = orgFrame;
+		}
+	};
+
+	/** FrzReturn: 回転配列・回転軸はゲーム側の定義を使用し、一定間隔で自動実行 */
+	const runFrzReturn = () => {
+		if (selected === C_FLG_OFF) return;
+		if (frz.seq === null) {
+			if (frameCnt < frz.next) return;
+			const seqs = (g_frzReturnSeqFunc.get(g_stateObj.frzReturnType) ?? g_frzReturnSeqFunc.get(`360deg`))();
+			frz.seq = seqs[Math.floor(Math.random() * seqs.length)];
+			frz.axes = [...g_frzReturnFunc.get(selected)()].filter(Boolean);
+			frz.start = frameCnt;
+		}
+		const idx = Math.floor((frameCnt - frz.start) * 1000 / g_fps / 20);
+		if (idx >= frz.seq.length) {
+			frz.seq = null;
+			frz.next = frameCnt + 60;
+			delTransform(`mainSprite`, `frzReturn`);
+			mainSprite.style.opacity = 1;
+			return;
+		}
+		const deg = frz.seq[idx];
+		const rad360 = ((deg % 360) + 360) % 360;
+		const isBack = frz.axes.some(axis => (axis === `X` || axis === `Y`) && rad360 > 90 && rad360 < 270);
+		mainSprite.style.opacity = isBack ? 0.7 : 1;
+		addTransform(`mainSprite`, `frzReturn`,
+			frz.axes.map(axis => `rotate${axis}(${deg}deg)`).join(` `), g_transPriority.frzReturn);
+	};
+
+	const tick = () => {
+		if (document.getElementById(`pvFrame`) === null) {
+			stop();
+			return;
+		}
+		frameCnt++;
+		if (frameCnt % noteInterval === 0) {
+			spawnNote();
+		}
+		notes = notes.filter(note => {
+			note.b--;
+			if (note.b < C_MOTION_STD_POS) {
+				note.el.remove();
+				return false;
+			}
+			placeNote(note);
+			return true;
+		});
+		if (_key === `shaking` && frameCnt % 2 === 0) {
+			runShaking();
+		} else if (_key === `frzReturn`) {
+			runFrzReturn();
+		}
+		timerId = g_timerHandler.setTimeout(tick, 1000 / g_fps);
+	};
+
+	const stop = () => {
+		if (timerId !== null) {
+			g_timerHandler.clearTimeout(timerId);
+		}
+		timerId = null;
+		spriteIds.forEach(id => delete g_transforms[id]);
+		g_helpPreviewStop = () => true;
+		g_helpPreviewMove = _dir => true;
+	};
+	g_helpPreviewStop = stop;
+
+	// ---------------------------------------------------
+	// 選択肢ボタン (g_settings の一覧から作成)
+	const chipH = Math.min(20, Math.floor(_height / optList.length));
+	const markChips = () => chips.forEach((chip, i) => {
+		chip.classList.remove(g_cssObj.button_Default, g_cssObj.button_Setting);
+		chip.classList.add(optList[i] === selected ? g_cssObj.button_Setting : g_cssObj.button_Default);
+	});
+	const chips = optList.map((opt, i) =>
+		createCss2Button(`pvChip${i}`, getStgDetailName(opt), () => {
+			applyOption(opt);
+			markChips();
+		}, { x: baseX + viewW + 15, y: i * chipH, w: chipW, h: chipH - 2, siz: 12 }, g_cssObj.button_Default)
+	);
+	multiAppend(area, ...chips);
+
+	// 上下キー: 選択肢を前後に動かす (端では反対側へ循環)
+	g_helpPreviewMove = _dir => {
+		applyOption(optList[nextPos(optList.indexOf(selected), _dir, optList.length)]);
+		markChips();
+	};
+
+	// 初期表示: 現在値 (OFF/Default の場合は最初の非OFFの選択肢)
+	const current = g_stateObj[_key];
+	applyOption(optList.includes(current) && current !== optList[0] ? current : (optList[1] ?? optList[0]));
+	markChips();
+	timerId = g_timerHandler.setTimeout(tick, 1000 / g_fps);
 };
 
 /**
