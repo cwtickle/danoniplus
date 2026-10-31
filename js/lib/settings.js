@@ -2105,6 +2105,15 @@ const openHelpOverlay = (_title, _msg, _stateKey) => {
 		body.appendChild(row);
 	});
 
+	// 上下キー: プレビューの選択肢移動、または本文のスクロール
+	const moveHelp = _dir => {
+		if (previewH > 0) {
+			g_helpPreviewMove(_dir);
+		} else {
+			body.scrollTop += _dir * 32;
+		}
+	};
+
 	multiAppend(overlay,
 		createDivCss2Label(`lblHelpTitle`, _title, { x: 0, y: 15, w: g_sWidth, h: 30, siz: 20 }),
 		createCss2Button(`btnHelpClose`, g_lblNameObj.b_back, () => true, {
@@ -2113,16 +2122,19 @@ const openHelpOverlay = (_title, _msg, _stateKey) => {
 
 		// 選択肢の前後移動 (ショートカットキー専用の隠しボタン)
 		createCss2Button(`btnHelpPrev`, ``, () => true, {
-			x: 0, y: 0, w: 0, h: 0, opacity: 0, resetFunc: () => g_helpPreviewMove(-1),
+			x: 0, y: 0, w: 0, h: 0, opacity: 0, resetFunc: () => moveHelp(-1),
 		}, g_cssObj.button_Mini),
 		createCss2Button(`btnHelpNext`, ``, () => true, {
-			x: 0, y: 0, w: 0, h: 0, opacity: 0, resetFunc: () => g_helpPreviewMove(1),
+			x: 0, y: 0, w: 0, h: 0, opacity: 0, resetFunc: () => moveHelp(1),
 		}, g_cssObj.button_Mini),
 	);
 	createScText(btnHelpClose, `HelpClose`, { displayName: `helpOverlay`, targetLabel: `btnHelpClose`, x: -5 });
 	if (previewH > 0) {
 		makeHelpPreview(overlay, _stateKey, g_sHeight - 30 - previewH, previewH);
 	}
+	// ユーザカスタムイベント(ヘルプ表示)
+	safeExecuteCustomHooks(`g_customJsObj.helpOverlay`, g_customJsObj.helpOverlay);
+
 	setShortcutEvent(g_currentPage, () => true, { displayFlg: false });
 };
 
@@ -2531,14 +2543,17 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 			});
 		}
 
+		// Motion用の加算フレーム数計算
 		const trace = g_motionFunc.get(_key === `motion` ? opt : C_FLG_OFF)(fillArray(101));
-		// 移動距離倍率: Compress / Fountain / Magnet は表示に掛かる時間を伸ばす
 		const distRate = _key === `motion` ? (g_settings.motionDistRates[g_settings.motions.indexOf(opt)] ?? 1) : 1;
-		bStart = C_MOTION_STD_POS + Math.ceil((playH - C_STEP_Y) * distRate / g_stateObj.speed);
+		const stretchRate = g_headerObj.stretchYRate?.[g_stateObj.scoreId] ?? 1;
+		const distY = Math.max(stretchRate, distRate) * (g_posObj.distY || (playH - C_STEP_Y));
+		const frameSpd = g_stateObj.speed * g_headerObj.baseSpeed * 2;
+		bStart = C_MOTION_STD_POS + Math.ceil(distY / frameSpd);
 		dist = [];
 		dist[C_MOTION_STD_POS] = 0;
 		for (let b = C_MOTION_STD_POS + 1; b <= bStart; b++) {
-			dist[b] = dist[b - 1] + g_stateObj.speed + (trace[b] || 0);
+			dist[b] = dist[b - 1] + frameSpd + (trace[b] || 0);
 		}
 		if (_key === `playWindow`) {
 			addTransform(`mainSprite`, `playWindow`, g_playWindowFunc.get(opt)(), g_transPriority.playWindow);
