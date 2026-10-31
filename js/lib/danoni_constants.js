@@ -5121,7 +5121,9 @@ const g_lang_msgObj = {
             `[Scatter] 譜面をグループごと、矢印個別に矢印・フリーズアローが散らばるように再配置します。\n` +
             `[Scatter+] 譜面をグループに関係なく、矢印個別に矢印・フリーズアローが散らばるように再配置します。`,
         autoPlay: `オートプレイや一部キーを自動で打たせる設定を行います。\nオートプレイ時はハイスコアを保存しません。`,
-        gauge: `クリア条件を設定します。\n[Start] ゲージ初期値\n[Border] クリア条件(ハイフン時は0)\n[Recovery] 回復量\n[Damage] ダメージ量\n[Accuracy] クリアに必要な正確率、許容ミス数`,
+        gauge: `クリア条件を設定します。\n表にある表記は次の通りです。\n` +
+            `- Start) ゲージ初期値\n- Border) クリア条件(ハイフン時は0)\n` +
+            `- Recovery) 回復量\n- Damage) ダメージ量\n- Accuracy) クリアに必要な正確率、許容ミス数`,
         excessive: `空押し判定を行うか設定します。`,
         adjustment: `曲とのタイミングにズレを感じる場合、数値を変えることでフレーム単位のズレを直すことができます。\n` +
             `外側のボタンは5f刻み、真ん中は1f刻み、内側は0.5f刻みで調整できます。`,
@@ -5282,7 +5284,10 @@ const g_lang_msgObj = {
             `[Scatter] Rearrange the chart so that arrows and freeze arrows are scattered for each group and each arrow.\n` +
             `[Scatter+] Rearrange the chart so that arrows and freeze arrows are scattered for each arrow regardless of the group.`,
         autoPlay: `Set to auto play and to hit some keys automatically.\nHigh score is not saved during auto play.`,
-        gauge: `Set the clear condition.\n[Start] initial value\n[Border] borderline value (hyphen means zero)\n[Recovery] recovery amount\n[Damage] damage amount\n[Accuracy] accuracy required to clear and the number of allowed mistakes`,
+        gauge: `Set the clear condition.\n` +
+            `The notation used in the table is as follows.\n` +
+            `- Start) initial value\n- Border) borderline value (hyphen means zero)\n` +
+            `- Recovery) recovery amount\n- Damage) damage amount\n- Accuracy) accuracy required to clear and the number of allowed mistakes`,
         excessive: `Set whether to use excessive miss judgment.`,
         adjustment: `If you feel that the timing is out of sync with the music, you can correct the shift in frame units by changing the value.\n` +
             `The outer button can be adjusted in 5 frame increments, the middle in 1 frame increments, and the inner button in 0.5 frame increments.`,
