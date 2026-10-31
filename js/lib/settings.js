@@ -2294,12 +2294,12 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const mainSprite = createEmptySprite(pvFrame, `mainSprite`, { w: playW, h: playH });
 
 	// レイヤー (StepAreaで最大4レイヤー)。ゲーム側と同じ id でステップ・矢印・フリーズヒット用スプライトを持つ
-	const stepSprites = [], arrowSprites = [];
+	const stepSprites = [], arrowSprites = [], frzHitSprites = [];
 	for (let j = 0; j < layerCnt; j++) {
 		const layer = createEmptySprite(mainSprite, `mainSprite${j}`, { w: playW, h: playH });
 		stepSprites.push(createEmptySprite(layer, `stepSprite${j}`, { w: playW, h: playH }));
 		arrowSprites.push(createEmptySprite(layer, `arrowSprite${j}`, { w: playW, h: playH }));
-		createEmptySprite(layer, `frzHitSprite${j}`, { w: playW, h: playH });
+		frzHitSprites.push(createEmptySprite(layer, `frzHitSprite${j}`, { w: playW, h: playH }));
 		spriteIds.push(`mainSprite${j}`, `stepSprite${j}`, `arrowSprite${j}`, `frzHitSprite${j}`);
 	}
 	const infoSprite = createEmptySprite(pvFrame, `infoSprite`, { w: playW, h: playH });
@@ -2329,11 +2329,47 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	let stepElms = laneInfo.map((lane, j) =>
 		createColorObject2(`pvStep${j}`, { x: lane.x, y: stepY, rotate: getRtn(j) }, g_cssObj.main_stepDefault));
 
+	// ヒットモーション用の要素 (ゲーム側の stepHit と同じ位置・大きさ)
+	const hitPos = g_lblPosObj.stepHit;
+	const makeHitElms = () => laneInfo.map((lane, j) => createColorObject2(`pvStepHit${j}`, {
+		...hitPos, x: lane.x + hitPos.x, y: stepY + hitPos.y, rotate: getRtn(j), styleName: `StepHit`, opacity: 0,
+	}, g_cssObj.main_stepDefault));
+	let hitElms = makeHitElms();
+	const hitCnts = Array(laneNum).fill(0);
+
+	// フリーズアローのヒット表示 (ゲーム側の frzHit と同じ構成。先頭の矢印位置のみ光らせる)
+	const frzHitFrames = 20;
+	const frzHitColor = g_dfColorObj.frzColorType1[0][2];
+	const frzHitCnts = Array(laneNum).fill(0);
+	const makeFrzHitElms = () => laneInfo.map((lane, j) => {
+		const root = createEmptySprite(frzHitSprites[0], `pvFrzHit${j}`, {
+			x: lane.x, y: stepY, w: C_ARW_WIDTH, h: C_ARW_WIDTH, opacity: 0,
+		});
+		if (isNaN(parseFloat(baseRtns[j]))) {
+			multiAppend(root,
+				createColorObject2(`pvFrzHitShadow${j}`, { rotate: getRtn(j), styleName: `Shadow` }, g_cssObj.main_objShadow),
+				createColorObject2(`pvFrzHitTop${j}`, { background: frzHitColor, rotate: getRtn(j) }),
+			);
+		} else {
+			root.appendChild(createColorObject2(`pvFrzHitTop${j}`, {
+				...g_lblPosObj.frzHitTop, rotate: getRtn(j), styleName: `Shadow`,
+			}, g_cssObj.main_frzHitTop));
+		}
+		return root;
+	});
+	let frzHitElms = makeFrzHitElms();
+
 	const assignSwapping = _option => {
 		laneInfo = getLaneInfo(g_helpSwappingLayouts[_option] ?? [...Array(laneNum).keys()]);
-		laneInfo.forEach((lane, j) => document.getElementById(`pvStep${j}`)?.remove());
+		laneInfo.forEach((lane, j) => {
+			document.getElementById(`pvStep${j}`)?.remove();
+			document.getElementById(`pvStepHit${j}`)?.remove();
+			document.getElementById(`pvFrzHit${j}`)?.remove();
+		});
 		stepElms = laneInfo.map((lane, j) =>
 			createColorObject2(`pvStep${j}`, { x: lane.x, y: stepY, rotate: getRtn(j) }, g_cssObj.main_stepDefault));
+		hitElms = makeHitElms();
+		frzHitElms = makeFrzHitElms();
 	};
 	const assignLanes = layout => laneInfo.forEach((lane, j) => {
 		lane.layer = layout[j];
@@ -2342,6 +2378,10 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		stepElms[j].style.top = wUnit(lane.stepTop);
 		stepElms[j].style.display = laneVisible[j] ? `` : C_DIS_NONE;
 		stepSprites[lane.layer].appendChild(stepElms[j]);
+		hitElms[j].style.top = wUnit(lane.stepTop + hitPos.y);
+		stepSprites[lane.layer].appendChild(hitElms[j]);
+		frzHitElms[j].style.top = wUnit(lane.stepTop);
+		frzHitSprites[lane.layer].appendChild(frzHitElms[j]);
 	});
 
 	// ライフゲージ、判定キャラクタ (画面全体を揺らす設定の確認用)
@@ -2387,6 +2427,25 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const clearNotes = () => {
 		notes.forEach(note => note.el.remove());
 		notes = [];
+		hitCnts.fill(0);
+		frzHitCnts.fill(0);
+		hitElms.forEach(elm => elm.style.opacity = 0);
+		frzHitElms.forEach(elm => elm.style.opacity = 0);
+	};
+
+	/** ヒットモーション (矢印のみ。自動判定時と同様、イイ判定の見た目で表示) */
+	const hitArrow = j => {
+		const hit = hitElms[j];
+		hit.style.opacity = 0.75;
+		hit.classList.value = ``;
+		hit.classList.add(g_cssObj.main_stepIi);
+		hitCnts[j] = C_FRM_HITMOTION;
+	};
+
+	/** フリーズアローのヒット表示 (先頭の矢印位置のみ。長さは待たず、一定フレームで消す) */
+	const hitFrz = j => {
+		frzHitElms[j].style.opacity = 0.9;
+		frzHitCnts[j] = frzHitFrames;
 	};
 
 	/**
@@ -2539,6 +2598,11 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 			laneInfo.forEach((lane, j) => {
 				if (typeof getRtn(j) === `number`) {
 					document.getElementById(`pvStep${j}`).style.transform = `rotate(${getRtn(j)}deg)`;
+					hitElms[j].style.transform = `rotate(${getRtn(j)}deg)`;
+					const frzHitTop = document.getElementById(`pvFrzHitTop${j}`);
+					if (frzHitTop !== null) {
+						frzHitTop.style.transform = `rotate(${getRtn(j)}deg)`;
+					}
 				}
 			});
 		}
@@ -2606,7 +2670,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 			makeArrowRoot(`Btm`, len);
 			addEffect(sub, effectCls.frz);
 		}
-		const note = { el, lane, b: bStart };
+		const note = { el, lane, j, frzFlg, b: bStart };
 		placeNote(note);
 		notes.push(note);
 	};
@@ -2673,12 +2737,29 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		}
 		notes = notes.filter(note => {
 			note.b--;
-			if (note.b < C_MOTION_STD_POS) {
+			if (note.b <= C_MOTION_STD_POS) {
+				if (note.frzFlg) {
+					hitFrz(note.j);
+				} else {
+					hitArrow(note.j);
+				}
 				note.el.remove();
 				return false;
 			}
 			placeNote(note);
 			return true;
+		});
+
+		// ヒットモーションの消去 (一定フレームで非表示)
+		hitCnts.forEach((cnt, j) => {
+			if (cnt > 0 && --hitCnts[j] === 0) {
+				hitElms[j].style.opacity = 0;
+			}
+		});
+		frzHitCnts.forEach((cnt, j) => {
+			if (cnt > 0 && --frzHitCnts[j] === 0) {
+				frzHitElms[j].style.opacity = 0;
+			}
 		});
 		if (_key === `shaking` && frameCnt % 2 === 0) {
 			runShaking();

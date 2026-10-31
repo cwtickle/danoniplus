@@ -5208,7 +5208,15 @@ const g_lang_msgObj = {
         lnkResetHighScore: `譜面のハイスコア情報を消去`,
         lnkHighScore: `譜面のハイスコアをクリップボードへコピー`,
 
-        appearance: `流れる矢印の見え方を制御します。`,
+        appearance: `流れる矢印の見え方を制御します。\n` +
+            `[Hidden] 初めの50%までは見えますが、その後は見えなくなります。\n` +
+            `[Hidden+] 基本的にHiddenと同じですが、Hiddenの可視範囲をプレイ中に調整できます。` +
+            `初期値を10%～100%の間で設定できます。「Lock」ボタンで可視範囲の調整を不可にします。\n` +
+            `[Sudden] 初めの40%までは見えませんが、その後は見えるようになります。\n` +
+            `[Sudden+] 基本的にSuddenと同じですが、Suddenの可視範囲をプレイ中に調整できます。` +
+            `初期値を0%～90%の間で設定できます。「Lock」ボタンで可視範囲の調整を不可にします。\n` +
+            `[Hid&Sud+] Hidden+とSudden+を組み合わせて表示します。` +
+            `初期値を0%～50%の間で設定できます。「Lock」ボタンで可視範囲の調整を不可にします。`,
         opacity: `判定キャラクタ、コンボ数、Fast/Slowの透明度を設定します。`,
         hitPosition: `判定位置にズレを感じる場合、\n数値を変えることで判定の中央位置を1px単位(プラス:手前, マイナス:奥側)で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
         displayPreview: `プレイ画面上のオブジェクトの表示状態をプレビューします。\n判定キャラクタ部分をドラッグで移動するとその位置に補正されます。`,
@@ -5368,7 +5376,16 @@ const g_lang_msgObj = {
         lnkResetHighScore: `Erase the high score information in the chart.`,
         lnkHighScore: `Copies the high score of the chart to the clipboard.`,
 
-        appearance: `Controls how the flowing sequences look.`,
+        appearance: `Controls how the flowing sequences look.\n` +
+            `[Hidden] Visible up to the first 50%, then disappears.\n` +
+            `[Hidden+] Same as "Hidden", but the visibility of "Hidden" can be adjusted during play. ` +
+            `The initial value can be set between 10% and 100%. The "Lock" button disables adjustment of the visible range.\n` +
+            `[Sudden] Not visible until first 40%, then visible.\n` +
+            `[Sudden+] Same as "Sudden", but the visibility of "Sudden" can be adjusted during play. The initial value can be set` +
+            `between 0% and 90%. The "Lock" button disables adjustment of the visible range.\n` +
+            `[Hid&Sud+] The combination of "Hidden+" and "Sudden+" is displayed. The initial value can be set between 0% and 50%. ` +
+            `The "Lock" button disables adjustment of the visible range.`,
+        opacity: `判定キャラクタ、コンボ数、Fast/Slowの透明度を設定します。`,
         opacity: `Set the transparency of some objects such as judgment, combo counts, fast and slow`,
         hitPosition: `If you feel a discrepancy in the judgment position, you can adjust the center position of the judgment in 1px increments (plus: in front, minus: at the back) by changing the numerical value. \n` +
             `Use this function when there is a tendency to push too fast or too slow.`,
