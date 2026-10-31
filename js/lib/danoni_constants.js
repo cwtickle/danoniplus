@@ -96,6 +96,11 @@ const g_limitObj = {
 
     // キーコンフィグで表示するカラーピッカー数
     kcColorPickerNum: 5,
+
+    helpLongLines: 2,     // 改行がこの数以上なら詳細ヘルプ化
+    helpLongChars: 120,   // 文字数がこの値を超えたら詳細ヘルプ化
+    helpPreviewRate: 0.44,     // 詳細ヘルプ内プレビューの高さ (画面高に対する割合)
+    helpPreviewMaxRate: 0.5,   // プレビュー内プレイ画面の最大縮小率
 };
 
 /** 設定項目の位置 */
@@ -3168,6 +3173,11 @@ const g_shortcutObj = {
         Tab: { id: `btnNextSetting` },
         KeyU: { id: `btnSettingSummary` },
     },
+    helpOverlay: {
+        Escape: { id: `btnHelpClose` },
+        ArrowUp: { id: `btnHelpPrev` },
+        ArrowDown: { id: `btnHelpNext` },
+    },
     keyConfig: {
         //Escape: { id: `btnBack` },  // Escapeを別用途でも使用するため、ここではコメントアウト
         Backspace_Enter: { id: `btnPlay` },
@@ -5084,14 +5094,37 @@ const g_lang_msgObj = {
 
         difficulty: `譜面を選択します。`,
         speed: `矢印の流れる速度を設定します。\n外側のボタンは1x単位、内側は0.25x単位で変更できます。`,
-        motion: `矢印の速度を一定ではなく、変動させるモーションをつけるか設定します。`,
+        motion: `矢印の速度を一定ではなく、変動させるモーションをつけるか設定します。\n` +
+            `[Boost] 初めは初速、ステップゾーンに近づくにつれて速くなります。\n` +
+            `[Hi-Boost] 基本的にはBoostと同じですが、終端速度が初速に比例して速くなります。\n` +
+            `[Brake] 初めは速く、ステップゾーンに近づくにつれて初速になります。\n` +
+            `[Compress] 初めは初速、ステップゾーンに近づくにつれて徐々に遅くなります。\n` +
+            `[Fountain] 矢印・フリーズアローが流れる反対側から出現し、画面奥で折り返してステップゾーンへ向かう動きをします。\n` +
+            `[Magnet] Fountainに似ていますが、画面中央で折り返します。\n`,
         reverse: `矢印の流れる向きを設定します。`,
-        scroll: `各レーンのスクロール方向をパターンに沿って設定します。\nReverse:ONでスクロール方向を反転します。`,
-        shuffle: `譜面を左右反転したり、ランダムにします。ランダムにした場合は別譜面扱いとなります。\nハイスコアは保存されるのはOFF,Mirror,X-Mirrorのみです。`,
+        scroll: `各レーンのスクロール方向をパターンに沿って設定します。\nReverse:ONでスクロール方向を反転します。\n` +
+            `[Cross] 正、逆、正の順に流れるよう設定します。\n` +
+            `[Split] 中央を境界として、スクロール方向を反転します。 \n` +
+            `[Alternate] 交互にスクロール方向が反転するよう設定します。\n` +
+            `[Twist] Crossの亜種で、もう少し細かくスクロール方向が反転するよう設定します。\n` +
+            `[Asymmetry] Alternateの亜種で、基本的には交互にスクロール方向が反転するよう設定しますが、左右非対称になるよう設定します。\n` +
+            `[AA-Split] アスキーアート(AA)のみスクロールを反転します。\n` +
+            `[Flat] すべてのレーンが矢印の重なりに関係なく同じ方向に流れます。`,
+        shuffle: `譜面を左右反転したり、ランダムにします。ランダムにした場合は別譜面扱いとなります。\nハイスコアは保存されるのはOFF,Mirror,X-Mirrorのみです。\n` +
+            `[Mirror] 譜面をグループレーンごとに左右反転します。\n` +
+            `[X-Mirror] Mirrorに対して、グループ内のレーン数が4, 5, 6, 7の倍数のとき中央の2, 3個（上下左右なら、上下矢印）のみさらに反転します。該当キーが無い場合は、Mirrorと同じです。\n` +
+            `[Turning] 譜面をグループレーンごとに出現レーンを左右にスライドします。その上で反転する場合もあります。\n` +
+            `[Random] 譜面をグループレーンごとにランダムに再配置します。\n` +
+            `[Random+] 譜面をグループに関係なくレーンごとにランダムに再配置します。\n` +
+            `[S-Random] 譜面をグループごとに矢印個別にランダムに再配置します。\n` +
+            `[S-Random+] 譜面をグループに関係なく矢印個別にランダムに再配置します。\n` +
+            `[Scatter] 譜面をグループごと、矢印個別に矢印・フリーズアローが散らばるように再配置します。\n` +
+            `[Scatter+] 譜面をグループに関係なく、矢印個別に矢印・フリーズアローが散らばるように再配置します。`,
         autoPlay: `オートプレイや一部キーを自動で打たせる設定を行います。\nオートプレイ時はハイスコアを保存しません。`,
-        gauge: `クリア条件を設定します。\n[Start] ゲージ初期値, [Border] クリア条件(ハイフン時は0),\n[Recovery] 回復量, [Damage] ダメージ量, [Accuracy] クリアに必要な正確率、許容ミス数`,
+        gauge: `クリア条件を設定します。\n[Start] ゲージ初期値\n[Border] クリア条件(ハイフン時は0)\n[Recovery] 回復量\n[Damage] ダメージ量\n[Accuracy] クリアに必要な正確率、許容ミス数`,
         excessive: `空押し判定を行うか設定します。`,
-        adjustment: `曲とのタイミングにズレを感じる場合、\n数値を変えることでフレーム単位のズレを直すことができます。\n外側のボタンは5f刻み、真ん中は1f刻み、内側は0.5f刻みで調整できます。`,
+        adjustment: `曲とのタイミングにズレを感じる場合、数値を変えることでフレーム単位のズレを直すことができます。\n` +
+            `外側のボタンは5f刻み、真ん中は1f刻み、内側は0.5f刻みで調整できます。`,
         fadein: `譜面を途中から再生します。\n途中から開始した場合はハイスコアを保存しません。`,
         volume: `ゲーム内の音量を設定します。`,
 
@@ -5118,23 +5151,49 @@ const g_lang_msgObj = {
         d_arroweffect: `矢印・フリーズアローモーションの有効化設定`,
         d_special: `作品固有の特殊演出の有効化設定`,
 
-        playWindow: `ステップゾーン及び矢印の位置を全体的に回転する等の設定です。\n[Stairs/Slope] ステップゾーンを階段状にします\n[Distorted] 画面を歪ませます\n` +
-            `[SideScroll] 横スクロールモードになります`,
+        playWindow: `ステップゾーン及び矢印の位置を全体的に回転する等の設定です。\n` +
+            `[Stairs] ステップゾーン・矢印が階段状になるように表示します。\n` +
+            `[Slope] Stairsよりさらに急になるように表示します。\n` +
+            `[Distorted] ステップゾーン・矢印が歪んだ状態で表示します。\n` +
+            `[SideScroll] 矢印が横スクロールで流れてきます。`,
         playWindowType: `[Reverse] ステップゾーン及び矢印の位置について逆方向の回転が掛かります`,
-        stepArea: `ステップゾーンの位置を変更します。\n[Halfway] ステップゾーンが中央に表示されます\n[2Step] ステップゾーンが2段に分かれて流れてきます\n` +
-            `[Mismatched/R-Mismatched] スクロールの向きが上下で異なる方向に流れます\n` +
-            `[X-Flower] レーンが花びらのように広がります\n[Alt-Crossing] レーンが交互に違う方向から流れます`,
-        frzReturn: `フリーズアロー到達時及び矢印の回復判定が100の倍数に達するごとに、X/Y/Z軸のいずれかに回転します`,
+        stepArea: `ステップゾーンの位置を変更します。\n` +
+            `[Halfway] ステップゾーンが中央に表示されます。\n` +
+            `[2Step] ステップゾーンが2段に分かれて流れてきます。\n` +
+            `[Mismatched] スクロールの向きが上下で異なる方向に流れます。\n` +
+            `[R-Mismatched] Mismatchedに似ていますが、向きが反対になります。\n` +
+            `[X-Flower] レーンが花びらのように広がります。\n` +
+            `[Alt-Crossing] レーンが交互に違う方向から流れます。`,
+        frzReturn: `フリーズアロー到達時及び矢印の回復判定が100の倍数に達するごとに、X/Y/Z軸のいずれかに回転します。\n` +
+            `[X-Axis] X軸回転\n` +
+            `[Y-Axis] Y軸回転\n` +
+            `[Z-Axis] Z軸回転\n` +
+            `[Random] X軸, Y軸, Z軸のいずれかが適用されます。\n` +
+            `[XY-Axis] X-Y軸回転\n` +
+            `[XZ-Axis] X-Z軸回転\n` +
+            `[YZ-Axis] Y-Z軸回転\n` +
+            `[Random+] X軸, Y軸, Z軸, X-Y軸, X-Z軸, Y-Z回転のいずれかが適用されます。`,
         frzReturnType: `[360°/120°/60°] 指定の角度まで回転します\n[±360°/±120°] 360°/120°に加えて逆回転が掛かることがあります\n[Pendulum] 振り子のように左右に動きます`,
-        shaking: `ステップゾーン及び矢印を揺らす設定です。\n[Horizontal] 横方向に揺らします\n[Vertical] 縦方向に揺らします\n` +
-            `[X-Horizontal] レイヤーごとに左右交互の向きで横に揺らします\n[X-Vertical] レイヤーごとに上下交互の向きで縦に揺らします\n[Drunk] 画面全体を上下左右ランダムに揺らします。画面酔いに注意してください\n` +
-            `[S-Drunk] 画面全体を上下左右ランダムに揺らし、さらにレイヤーごとに上下左右に揺らします\n` +
-            `[H-Drunk] S-Drunkより大きく上下に揺らし、さらに回転が掛かります`,
-        effect: `矢印・フリーズアローにエフェクトをかけます。\n[Dizzy/Spin] 矢印が回転します\n[Wave/Storm] 矢印の軌道が左右に揺れます\n[Blinking] 矢印が点滅します\n[Squids] 矢印が伸び縮みします`,
+        shaking: `ステップゾーン及び矢印を揺らす設定です。\n` +
+            `[Horizontal] 横方向に揺らします。\n[Vertical] 縦方向に揺らします。\n` +
+            `[X-Horizontal] レイヤーごとに左右交互の向きで横に揺らします。\n` +
+            `[X-Vertical] レイヤーごとに上下交互の向きで縦に揺らします。\n` +
+            `[Drunk] 画面全体を上下左右ランダムに揺らします。画面酔いに注意してください。\n` +
+            `[S-Drunk] 画面全体を上下左右ランダムに揺らし、さらにレイヤーごとに上下左右に揺らします。\n` +
+            `[H-Drunk] S-Drunkより大きく上下に揺らし、さらに回転が掛かります。`,
+        effect: `矢印・フリーズアローにエフェクトをかけます。\n` +
+            `[Dizzy] 矢印がZ軸回転します。\n` +
+            `[Spin] 矢印がY軸回転します。\n` +
+            `[Wave] 矢印とフリーズアローが左右に揺れながら移動します。\n` +
+            `[Storm] 矢印とフリーズアローが左右に激しく揺れ、回転します。\n` +
+            `[Blinking] 矢印が点滅します。\n[Squids] 矢印が伸び縮みします。`,
         camoufrage: `ステップの見た目が配置は同じでランダムに変わります。`,
         camoufrageType: `[FrzArrow] フリーズアローの帯部分を初期表示のみ非表示にし、矢印のみで表示します（ヒット/失敗時は帯を再表示）`,
-        swapping: `ステップゾーンの位置を入れ替える設定です。\n[InnerSwap] ステップゾーンの中央部分のみグループ単位で入れ替えます。\n[OuterSwap] InnerSwapの逆側（外側）をグループ単位で入れ替えます。\n` +
-            `[Mirror] ステップゾーンの位置をグループ単位で入れ替えます。\n[Mirror+] ステップゾーンの位置をグループに関係なく全体的に反転します。`,
+        swapping: `ステップゾーンの位置を入れ替える設定です。\n` +
+            `[InnerSwap] ステップゾーンの中央部分のみグループ単位で入れ替えます。\n` +
+            `[OuterSwap] InnerSwapの逆側（外側）をグループ単位で入れ替えます。\n` +
+            `[Mirror] ステップゾーンの位置をグループ単位で入れ替えます。\n` +
+            `[Mirror+] ステップゾーンの位置をグループに関係なく全体的に反転します。`,
         judgRange: `判定の許容範囲を設定します。\n[Normal] 通常、[Narrow/Hard] 辛判定、[ExHard] 激辛判定`,
         autoRetry: `自動リトライの条件を設定します。\n[Miss] ミス時、[Matari] マターリ時、[Shakin] シャキン時、[FS] Fast/Slow発生時`,
 
@@ -5195,14 +5254,38 @@ const g_lang_msgObj = {
 
         difficulty: `Select a chart.`,
         speed: `Set the speed of the sequences.\nThe outer button can be changed in 1x increments and the inner button in 0.25x increments.`,
-        motion: `Set whether to turn on acceleration or deceleration\nin the middle of the sequence.`,
+        motion: `Set whether to turn on acceleration or deceleration in the middle of the sequence.\n` +
+            `[Boost] The speed starts at the initial speed and increases as it approaches the step zone.\n` +
+            `[Hi-Boost] Similar to Boost, but the terminal speed increases in proportion to the initial speed.\n` +
+            `[Brake] The speed starts fast and slows down as it approaches the step zone.\n` +
+            `[Compress] The speed starts at the initial speed and gradually slows down as it approaches the step zone.\n` +
+            `[Fountain] The sequences appear from the opposite side of the flow and turn back at the back of the screen to head towards the step zone.\n` +
+            `[Magnet] Similar to Fountain, but turns back at the center of the screen.\n`,
         reverse: `Set the flow direction of the sequences.`,
-        scroll: `Set the scroll direction for each lane according to the pattern.\nIf "Reverse:ON" sets, reverse the scroll direction.`,
-        shuffle: `Flip the chart left and right or make it random.\nIf you make it random, it will be treated as a different chart.\nOnly when OFF, Mirror, or X-Mirror is selected, the high score will be saved.`,
+        scroll: `Set the scroll direction for each lane according to the pattern.\nIf "Reverse:ON" sets, reverse the scroll direction.\n` +
+            `[Cross] Generally, set the flow to be default, reverse, and default.\n` +
+            `[Split] Reverses the scroll direction with the center as the boundary.\n` +
+            `[Alternate] Set the scroll direction to be reversed alternately.\n` +
+            `[Twist] A variant of "Cross" that sets the scroll direction to be slightly more reversed.\n` +
+            `[Asymmetry] A variant of "Alternate" that basically sets the scroll direction to be alternately reversed, but sets it to be asymmetrical.\n` +
+            `[AA-Split] Reverses scrolling for ASCII art (AA) only.\n` +
+            `[Flat] All lanes flow in the same direction regardless of arrow overlap.`,
+        shuffle: `Flip the chart left and right or make it random.\nIf you make it random, it will be treated as a different chart.\n` +
+            `Only when OFF, Mirror, or X-Mirror is selected, the high score will be saved.\n` +
+            `[Mirror] Flip the chart left and right for each group lane.\n` +
+            `[X-Mirror] In addition to Mirror, when the number of lanes in the group is a multiple of 4, 5, 6, or 7, only the center 2 or 3 (up and down arrows for up and down) are further flipped. If there are no corresponding keys, it will be the same as Mirror.\n` +
+            `[Turning] Slide the appearance lane left and right for each group lane. In some cases, it may also be flipped.\n` +
+            `[Random] Randomly rearrange the chart for each group lane.\n` +
+            `[Random+] Randomly rearrange the chart for each lane regardless of the group.\n` +
+            `[S-Random] Randomly rearrange the chart for each arrow in each group.\n` +
+            `[S-Random+] Randomly rearrange the chart for each arrow regardless of the group.\n` +
+            `[Scatter] Rearrange the chart so that arrows and freeze arrows are scattered for each group and each arrow.\n` +
+            `[Scatter+] Rearrange the chart so that arrows and freeze arrows are scattered for each arrow regardless of the group.`,
         autoPlay: `Set to auto play and to hit some keys automatically.\nHigh score is not saved during auto play.`,
-        gauge: `Set the clear condition.\n[Start] initial value, [Border] borderline value (hyphen means zero),\n[Recovery] recovery amount, [Damage] damage amount,\n[Accuracy] accuracy required to clear and the number of allowed mistakes`,
+        gauge: `Set the clear condition.\n[Start] initial value\n[Border] borderline value (hyphen means zero)\n[Recovery] recovery amount\n[Damage] damage amount\n[Accuracy] accuracy required to clear and the number of allowed mistakes`,
         excessive: `Set whether to use excessive miss judgment.`,
-        adjustment: `If you feel that the timing is out of sync with the music, \nyou can correct the shift in frame units by changing the value.\nThe outer button can be adjusted in 5 frame increments, the middle in 1 frame increments, \nand the inner button in 0.5 frame increments.`,
+        adjustment: `If you feel that the timing is out of sync with the music, you can correct the shift in frame units by changing the value.\n` +
+            `The outer button can be adjusted in 5 frame increments, the middle in 1 frame increments, and the inner button in 0.5 frame increments.`,
         fadein: `Plays the chart from the middle.\nIf you start in the middle, the high score will not be saved.`,
         volume: `Set the in-game volume.`,
 
@@ -5227,26 +5310,49 @@ const g_lang_msgObj = {
         d_arroweffect: `Enable sequences' animations`,
         d_special: `Enable setting of special effects to the work`,
 
-        playWindow: `This is the setting for overall rotation of the step zone and arrow position, etc.\n[Stairs/Slope] The step zone is in a staircase shape.\n[Distorted] Distorts the screen.\n` +
-            `[SideScroll] It becomes a side scroll mode.`,
+        playWindow: `This is the setting for overall rotation of the step zone and arrow position, etc.\n` +
+            `[Stairs] Step zones/arrows are displayed in a staircase-like pattern.\n` +
+            `[Slope] Step zone arrows are shown steeper than Stairs.\n` +
+            `[Distorted] Step zones and arrows are shown distorted.\n` +
+            `[SideScroll] The arrows scroll horizontally.`,
         playWindowType: `[Reverse] Applies reverse rotation to the step zone and arrow positions.`,
-        stepArea: `Change the position of the step zone.\n[Halfway] Step zones are centered.\n[2Step] Step zones are divided into two layers.\n` +
-            `[Mismatched/R-Mismatched] Scroll direction flows in different directions up and down.\n` +
+        stepArea: `Change the position of the step zone.\n` +
+            `[Halfway] Step zones are centered.\n[2Step] Step zones are divided into two layers.\n` +
+            `[Mismatched] Scroll direction flows in different directions up and down.\n` +
+            `[R-Mismatched] It's similar to "Mismatched", but the orientation is reversed.\n` +
             `[X-Flower] Lanes spread out like flower petals.\n[Alt-Crossing] Lanes flow from different directions alternately.`,
-        frzReturn: `When the Freeze Arrow is reached, and every time the arrow's recovery judgment \nreaches a multiple of 100, it will rotate on either the X, Y, or Z axis.`,
+        frzReturn: `When the Freeze Arrow is reached, and every time the arrow's recovery judgment \n` +
+            `reaches a multiple of 100, it will rotate on either the X, Y, or Z axis.\n` +
+            `[X-Axis] X-axis rotation\n` +
+            `[Y-Axis] Y-axis rotation\n` +
+            `[Z-Axis] Z-axis rotation\n` +
+            `[Random] Randomly rotates to one of the X/Y/Z axes.\n` +
+            `[XY-Axis] X-Y axis rotation\n` +
+            `[XZ-Axis] X-Z axis rotation\n` +
+            `[YZ-Axis] Y-Z axis rotation\n` +
+            `[Random+] Randomly rotates to one of the X/Y/Z/X-Y/X-Z/Y-Z axes.`,
         frzReturnType: `[360deg/120deg/60deg] Rotates to the specified angle.\n[±360deg/±120deg] May rotate in the opposite direction in addition to 360deg/120deg.\n[Pendulum] Moves back and forth like a pendulum.`,
-        shaking: `This sets shaking for the step zone and arrows.\n[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n` +
-            `[X-Horizontal] Per-layer shaking with alternating left/right direction by layer.\n[X-Vertical] Per-layer shaking with alternating up/down direction by layer.\n` +
+        shaking: `This sets shaking for the step zone and arrows.\n` +
+            `[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n` +
+            `[X-Horizontal] Per-layer shaking with alternating left/right direction by layer.\n` +
+            `[X-Vertical] Per-layer shaking with alternating up/down direction by layer.\n` +
             `[Drunk] Shakes the entire screen randomly in all directions (may cause motion sickness).\n` +
             `[S-Drunk] Shakes the entire screen randomly in all directions, and also shakes each layer randomly in all directions.\n` +
             `[H-Drunk] Adds stronger vertical movement than S-Drunk and adds rotation.`,
         effect: `Applies effects to the arrows and freeze arrows.\n[Dizzy/Spin] Arrows rotate.\n[Wave/Storm] Swing from left to right.\n[Blinking] Arrows blink.\n[Squids] Arrows stretch and shrink.`,
         camoufrage: `The appearance of the steps changes randomly with the same placement.`,
         camoufrageType: `[FrzArrow] Initially hides freeze-arrow bars and displays only the arrow portion (bars reappear on hit/failure)`,
-        swapping: `This setting allows you to swap the positions of the step zones.\n[InnerSwap] Swaps only the inner portion of step zones within each shuffle group.\n[OuterSwap] Swaps the outer portion (inverse of InnerSwap) within each shuffle group.\n` +
-            `[Mirror] Swaps the positions of step zones within each shuffle group. \n[Mirror+] Flips the position of all step zones, regardless of shuffle groups. `,
+        swapping: `This setting allows you to swap the positions of the step zones.\n` +
+            `[InnerSwap] Swaps only the inner portion of step zones within each shuffle group.\n` +
+            `[OuterSwap] Swaps the outer portion (inverse of InnerSwap) within each shuffle group.\n` +
+            `[Mirror] Swaps the positions of step zones within each shuffle group. \n` +
+            `[Mirror+] Flips the position of all step zones, regardless of shuffle groups. `,
         judgRange: `Set the allowable range of judgment.\n[Normal] Normal judgment, [Narrow/Hard] Hard judgment, [ExHard] Very hard judgment`,
-        autoRetry: `Set the conditions for automatic retry.\n[Miss] When missed, [Matari] When good, [Shakin] When great, [FS] When Fast/Slow occurs`,
+        autoRetry: `Set the conditions for automatic retry.\n` +
+            `[Miss] When missed\n` +
+            `[Matari(Good)] When good\n` +
+            `[Shakin(Great)] When great\n` +
+            `[Fast/Slow] When Fast/Slow occurs`,
 
         lnkSpeedG: `Displays the velocity change status by progression of the chart.`,
         lnkDensityG: `Displays the density status of the chart.`,
@@ -5259,7 +5365,8 @@ const g_lang_msgObj = {
 
         appearance: `Controls how the flowing sequences look.`,
         opacity: `Set the transparency of some objects such as judgment, combo counts, fast and slow`,
-        hitPosition: `If you feel a discrepancy in the judgment position, \nyou can adjust the center position of the judgment in 1px increments \n (plus: in front, minus: at the back) by changing the numerical value. \nUse this function when there is a tendency to push too fast or too slow.`,
+        hitPosition: `If you feel a discrepancy in the judgment position, you can adjust the center position of the judgment in 1px increments (plus: in front, minus: at the back) by changing the numerical value. \n` +
+            `Use this function when there is a tendency to push too fast or too slow.`,
         displayPreview: `Preview the display status of objects on the play screen.\nDragging the judgment character section will adjust it to that position.`,
         displayPreviewResetConfirm: `Reset the position of objects on the play screen to the initial state. Is it OK?`,
 
