@@ -2053,6 +2053,8 @@ const openHelpOverlay = (_title, _msg, _stateKey) => {
 	// 現在値は、g_currentPage を切り替える前に取得する(getStgDetailName が画面名を参照するため)
 	const currentVal = g_stateObj[_stateKey];
 	const currentNames = [currentVal, getStgDetailName(currentVal)];
+	const optNames = new Map((g_settings[`${_stateKey}s`] ?? []).map(val => [val, [val, getStgDetailName(val)]]));
+	const rowElms = [];
 	const bright = g_headerObj.baseBrightFlg;
 
 	g_helpPrevPage = g_currentPage;
@@ -2089,7 +2091,8 @@ const openHelpOverlay = (_title, _msg, _stateKey) => {
 			row.textContent = line.text;
 			if (line.text === ``) row.style.height = `0.8em`;
 		} else {
-			const isCurrent = currentNames.includes(line.name);
+			const nameList = line.name.split(`/`).map(name => name.trim());
+			const isCurrent = nameList.some(name => currentNames.includes(name));
 			const nameElm = document.createElement(`span`);
 			const descElm = document.createElement(`span`);
 			nameElm.textContent = `[${line.name}]`;
@@ -2097,13 +2100,33 @@ const openHelpOverlay = (_title, _msg, _stateKey) => {
 			descElm.textContent = line.desc;
 			Object.assign(row.style, {
 				display: `grid`, gridTemplateColumns: `10em 1fr`, columnGap: `0.8em`,
-				background: isCurrent ? `rgba(80,140,255,0.25)` : ``,
 				borderLeft: `3px solid ${isCurrent ? `#66aaff` : `transparent`}`,
 			});
 			row.append(nameElm, descElm);
+			rowElms.push({ nameList, row });
 		}
 		body.appendChild(row);
 	});
+
+	// 説明文の選択行 (背景) をプレビューのカーソルに追従させる
+	const markHelpRows = _val => {
+		const names = optNames.get(_val) ?? [_val];
+		rowElms.forEach(({ nameList, row }) => {
+			const on = nameList.some(name => names.includes(name));
+			row.style.background = on ? `rgba(80,140,255,0.25)` : ``;
+			if (on) {
+				// 本文がスクロールする場合は、選択行が見える位置へ寄せる
+				const [top, bottom] = [row.offsetTop, row.offsetTop + row.offsetHeight];
+				if (top < body.scrollTop) {
+					body.scrollTop = top;
+				} else if (bottom > body.scrollTop + body.clientHeight) {
+					body.scrollTop = bottom - body.clientHeight;
+				}
+			}
+		});
+	};
+	markHelpRows(currentVal);
+	g_helpSelectHook = markHelpRows;
 
 	// 上下キー: プレビューの選択肢移動、または本文のスクロール
 	const moveHelp = _dir => {
@@ -2145,6 +2168,7 @@ const closeHelpOverlay = () => {
 	const overlay = document.getElementById(`helpOverlay`);
 	if (overlay === null) return;
 	g_helpPreviewStop();
+	g_helpSelectHook = _val => true;
 	deleteChildspriteAll(`helpOverlay`);
 	overlay.remove();
 	g_currentPage = g_helpPrevPage;
@@ -2155,6 +2179,9 @@ const closeHelpOverlay = () => {
 
 /** 詳細ヘルプを開く直前のページ名 */
 let g_helpPrevPage = ``;
+
+/** プレビューの選択が変わったときに、説明文の選択行を更新する処理 (ヘルプ表示中のみ差し替わる) */
+let g_helpSelectHook = _val => true;
 
 /**
  * 詳細ヘルプを出すべき長文かどうかの判定
@@ -2790,10 +2817,13 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	// ---------------------------------------------------
 	// 選択肢ボタン (g_settings の一覧から作成)
 	const chipH = Math.min(20, Math.floor(_height / optList.length));
-	const markChips = () => chips.forEach((chip, i) => {
-		chip.classList.remove(g_cssObj.button_Default, g_cssObj.button_Setting);
-		chip.classList.add(optList[i] === selected ? g_cssObj.button_Setting : g_cssObj.button_Default);
-	});
+	const markChips = () => {
+		chips.forEach((chip, i) => {
+			chip.classList.remove(g_cssObj.button_Default, g_cssObj.button_Setting);
+			chip.classList.add(optList[i] === selected ? g_cssObj.button_Setting : g_cssObj.button_Default);
+		});
+		g_helpSelectHook(selected);
+	};
 	const chips = optList.map((opt, i) =>
 		createCss2Button(`pvChip${i}`, getStgDetailName(opt), () => {
 			autoCnt = -g_limitObj.helpPreviewAutoFrames;
