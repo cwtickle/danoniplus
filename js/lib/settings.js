@@ -2762,7 +2762,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 			return;
 		}
 		frameCnt++;
-		if (++autoCnt >= g_limitObj.helpPreviewAutoFrames) {
+		if (++autoCnt >= g_limitObj.helpPreviewAutoFrames && g_limitObj.helpPreviewAutoFrames > 0) {
 			autoCnt = 0;
 			moveOption(1);
 		}
