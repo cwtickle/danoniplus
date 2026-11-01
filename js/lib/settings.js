@@ -2200,7 +2200,8 @@ const isLongHelp = _msg =>
  * - キー名は g_stateObj のキー名 (選択肢は g_settings[`${key}s`] を使用)
  * - splitLayer: 右半分のレーンを逆スクロール(レイヤー1)側に配置する
  * - currentKey: サンプルキーではなく実際のキーに合わせてマッピングする
- *               (StepArea, Swapping及びフリーズアローは実際のキーには非対応)
+ *               (StepArea, Swappingは実際のキーには非対応)
+ * - frzUse    : サンプルでフリーズアローを使用するかどうか
  */
 const g_helpPreviewDefs = {
 	motion: {},
@@ -2210,8 +2211,8 @@ const g_helpPreviewDefs = {
 	stepArea: {},
 	shaking: { splitLayer: true },
 	frzReturn: {},
-	effect: {},
-	swapping: {},
+	effect: { currentKey: true, frzUse: true },
+	swapping: { frzUse: true },
 };
 
 /**
@@ -2664,7 +2665,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const spawnNote = () => {
 		const j = visibleLanes[(noteCnt * stride) % visibleLanes.length];
 		const lane = laneInfo[j];
-		const frzFlg = _key === `effect` && noteCnt % 4 === 2;
+		const frzFlg = g_helpPreviewDefs[_key]?.frzUse && noteCnt % 4 === 2;
 		const len = frzFlg ? frzLen : 0;
 		noteCnt++;
 
@@ -2694,10 +2695,11 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 				return root;
 			};
 			sub.appendChild(createColorObject2(`pvBar${noteCnt}`, {
-				x: 5, y: C_ARW_WIDTH / 2, w: C_ARW_WIDTH - 10, h: len, background: barColor, styleName: `frzBar`, opacity: 0.75,
+				x: 5, y: C_ARW_WIDTH / 2 + (lane.dir === 1 ? 0 : -len), w: C_ARW_WIDTH - 10,
+				h: len, background: barColor, styleName: `frzBar`, opacity: 0.75,
 			}));
 			makeArrowRoot(`Top`, 0);
-			makeArrowRoot(`Btm`, len);
+			makeArrowRoot(`Btm`, lane.dir === 1 ? len : -len);
 			addEffect(sub, effectCls.frz);
 		}
 		const note = { el, lane, j, frzFlg, b: bStart };
