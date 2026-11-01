@@ -5443,6 +5443,7 @@ const g_customJsObj = {
     settingsDisplay: [],
     displayPreview: [],
     helpOverlay: [],
+    helpPreview: [],
     exSetting: [],
     settingSummary: [],
     keyconfig: [],

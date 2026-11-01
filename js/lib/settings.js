@@ -2823,6 +2823,8 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 			chip.classList.add(optList[i] === selected ? g_cssObj.button_Setting : g_cssObj.button_Default);
 		});
 		g_helpSelectHook(selected);
+		safeExecuteCustomHooks(`g_customJsObj.helpPreview`, g_customJsObj.helpPreview, _key, selected,
+			{ pvFrame, mainSprite, stepSprites, arrowSprites, playW, playH });
 	};
 	const chips = optList.map((opt, i) =>
 		createCss2Button(`pvChip${i}`, getStgDetailName(opt), () => {
