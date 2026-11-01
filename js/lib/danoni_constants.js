@@ -101,6 +101,7 @@ const g_limitObj = {
     helpLongChars: 120,   // 文字数がこの値を超えたら詳細ヘルプ化
     helpPreviewRate: 0.44,     // 詳細ヘルプ内プレビューの高さ (画面高に対する割合)
     helpPreviewMaxRate: 0.5,   // プレビュー内プレイ画面の最大縮小率
+    helpPreviewAutoFrames: 500, // 次の選択肢へ自動で切り替えるまでのフレーム数 (0で無効)
 };
 
 /** 設定項目の位置 */
@@ -5381,7 +5382,7 @@ const g_lang_msgObj = {
             `[Hidden+] Same as "Hidden", but the visibility of "Hidden" can be adjusted during play. ` +
             `The initial value can be set between 10% and 100%. The "Lock" button disables adjustment of the visible range.\n` +
             `[Sudden] Not visible until first 40%, then visible.\n` +
-            `[Sudden+] Same as "Sudden", but the visibility of "Sudden" can be adjusted during play. The initial value can be set` +
+            `[Sudden+] Same as "Sudden", but the visibility of "Sudden" can be adjusted during play. The initial value can be set ` +
             `between 0% and 90%. The "Lock" button disables adjustment of the visible range.\n` +
             `[Hid&Sud+] The combination of "Hidden+" and "Sudden+" is displayed. The initial value can be set between 0% and 50%. ` +
             `The "Lock" button disables adjustment of the visible range.`,

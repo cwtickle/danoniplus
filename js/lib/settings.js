@@ -2172,11 +2172,13 @@ const isLongHelp = _msg =>
  * 詳細ヘルプ内でプレビューを出す設定
  * - キー名は g_stateObj のキー名 (選択肢は g_settings[`${key}s`] を使用)
  * - splitLayer: 右半分のレーンを逆スクロール(レイヤー1)側に配置する
+ * - currentKey: サンプルキーではなく実際のキーに合わせてマッピングする
+ *               (StepArea, Swapping及びフリーズアローは実際のキーには非対応)
  */
 const g_helpPreviewDefs = {
-	motion: { currentKey: true },
+	motion: {},
 	scroll: { currentKey: true },
-	appearance: { currentKey: true, splitLayer: true },
+	appearance: { splitLayer: true },
 	playWindow: {},
 	stepArea: {},
 	shaking: { splitLayer: true },
@@ -2331,11 +2333,11 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 
 	// ヒットモーション用の要素 (ゲーム側の stepHit と同じ位置・大きさ)
 	const hitPos = g_lblPosObj.stepHit;
+	const hitCnts = Array(laneNum).fill(0);
 	const makeHitElms = () => laneInfo.map((lane, j) => createColorObject2(`pvStepHit${j}`, {
 		...hitPos, x: lane.x + hitPos.x, y: stepY + hitPos.y, rotate: getRtn(j), styleName: `StepHit`, opacity: 0,
 	}, g_cssObj.main_stepDefault));
 	let hitElms = makeHitElms();
-	const hitCnts = Array(laneNum).fill(0);
 
 	// フリーズアローのヒット表示 (ゲーム側の frzHit と同じ構成。先頭の矢印位置のみ光らせる)
 	const frzHitFrames = 20;
@@ -2404,6 +2406,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	let selected = ``;
 	let frameCnt = 0;
 	let noteCnt = 0;
+	let autoCnt = 0;   // 自動切替までの経過フレーム数
 	let timerId = null;
 	let notes = [];
 	let dist = [];
@@ -2732,6 +2735,10 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 			return;
 		}
 		frameCnt++;
+		if (++autoCnt >= g_limitObj.helpPreviewAutoFrames) {
+			autoCnt = 0;
+			moveOption(1);
+		}
 		if (frameCnt % noteInterval === 0) {
 			spawnNote();
 		}
@@ -2789,16 +2796,21 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	});
 	const chips = optList.map((opt, i) =>
 		createCss2Button(`pvChip${i}`, getStgDetailName(opt), () => {
+			autoCnt = -g_limitObj.helpPreviewAutoFrames;
 			applyOption(opt);
 			markChips();
 		}, { x: baseX + viewW + 15, y: i * chipH, w: chipW, h: chipH - 2, siz: 12 }, g_cssObj.button_Default)
 	);
 	multiAppend(area, ...chips);
 
-	// 上下キー: 選択肢を前後に動かす (端では反対側へ循環)
-	g_helpPreviewMove = _dir => {
+	const moveOption = _dir => {
 		applyOption(optList[nextPos(optList.indexOf(selected), _dir, optList.length)]);
 		markChips();
+	};
+	// 上下キー: 選択肢を前後に動かす (端では反対側へ循環)
+	g_helpPreviewMove = _dir => {
+		autoCnt = -g_limitObj.helpPreviewAutoFrames;
+		moveOption(_dir);
 	};
 
 	// 初期表示: 現在値 (OFF/Default の場合は最初の非OFFの選択肢)
