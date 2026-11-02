@@ -2211,7 +2211,7 @@ const g_helpPreviewDefs = {
 	stepArea: {},
 	shaking: { splitLayer: true },
 	frzReturn: {},
-	effect: { currentKey: true, frzUse: true },
+	effect: { frzUse: true, splitLayer: true },
 	swapping: { frzUse: true },
 };
 
