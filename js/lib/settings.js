@@ -2611,10 +2611,10 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 
 		assignSwapping(_key === `swapping` ? opt : null);
 		// レーンのレイヤー配置 (StepAreaは選択肢ごと、Shakingは右半分を逆スクロール側へ)
-		assignLanes((_key === `stepArea` ? g_helpStepAreaLayouts[opt] : null)
-			?? (g_helpPreviewDefs[_key]?.currentKey ? getScrollLayout(opt) : null)
+		assignLanes((g_helpPreviewDefs[_key]?.currentKey ? getScrollLayout(opt) : null)
+			?? (_key === `stepArea` ? g_helpStepAreaLayouts[opt] : null)
 			?? (def.splitLayer ? [0, 0, 1, 1] : [0, 0, 0, 0])
-				.map(val => g_stateObj.reverse === C_FLG_OFF ? val : (val + 1) % 2));
+				.map(val => g_stateObj.reverse === C_FLG_OFF ? val : val ^ 1));
 		applyFlat(opt);
 		if (_key === `stepArea`) {
 			runStepArea(opt);
