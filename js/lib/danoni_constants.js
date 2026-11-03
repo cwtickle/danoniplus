@@ -3178,6 +3178,8 @@ const g_shortcutObj = {
         Escape: { id: `btnHelpClose` },
         ArrowUp: { id: `btnHelpPrev` },
         ArrowDown: { id: `btnHelpNext` },
+        ArrowLeft: { id: `btnHelpLeft` },
+        ArrowRight: { id: `btnHelpRight` },
     },
     keyConfig: {
         //Escape: { id: `btnBack` },  // Escapeを別用途でも使用するため、ここではコメントアウト
@@ -5158,7 +5160,7 @@ const g_lang_msgObj = {
             `[Stairs] ステップゾーン・矢印が階段状になるように表示します。\n` +
             `[Slope] Stairsよりさらに急になるように表示します。\n` +
             `[Distorted] ステップゾーン・矢印が歪んだ状態で表示します。\n` +
-            `[SideScroll] 矢印が横スクロールで流れてきます。`,
+            `[SideScroll] 矢印が横スクロールで流れてきます。\n`,
         playWindowType: `[Reverse] ステップゾーン及び矢印の位置について逆方向の回転が掛かります`,
         stepArea: `ステップゾーンの位置を変更します。\n` +
             `[Halfway] ステップゾーンが中央に表示されます。\n` +
@@ -5175,8 +5177,8 @@ const g_lang_msgObj = {
             `[XY-Axis] X-Y軸回転\n` +
             `[XZ-Axis] X-Z軸回転\n` +
             `[YZ-Axis] Y-Z軸回転\n` +
-            `[Random+] X軸, Y軸, Z軸, X-Y軸, X-Z軸, Y-Z回転のいずれかが適用されます。`,
-        frzReturnType: `[360°/120°/60°] 指定の角度まで回転します\n[±360°/±120°] 360°/120°に加えて逆回転が掛かることがあります\n[Pendulum] 振り子のように左右に動きます`,
+            `[Random+] X軸, Y軸, Z軸, X-Y軸, X-Z軸, Y-Z回転のいずれかが適用されます。\n`,
+        frzReturnType: `回転幅を変更する設定です。\n[360°/120°/60°] 指定の角度まで回転します\n[±360°/±120°] 360°/120°に加えて逆回転が掛かることがあります\n[Pendulum] 振り子のように左右に動きます`,
         shaking: `ステップゾーン及び矢印を揺らす設定です。\n` +
             `[Horizontal] 横方向に揺らします。\n[Vertical] 縦方向に揺らします。\n` +
             `[X-Horizontal] レイヤーごとに左右交互の向きで横に揺らします。\n` +
@@ -5328,7 +5330,7 @@ const g_lang_msgObj = {
             `[Stairs] Step zones/arrows are displayed in a staircase-like pattern.\n` +
             `[Slope] Step zone arrows are shown steeper than Stairs.\n` +
             `[Distorted] Step zones and arrows are shown distorted.\n` +
-            `[SideScroll] The arrows scroll horizontally.`,
+            `[SideScroll] The arrows scroll horizontally.\n`,
         playWindowType: `[Reverse] Applies reverse rotation to the step zone and arrow positions.`,
         stepArea: `Change the position of the step zone.\n` +
             `[Halfway] Step zones are centered.\n[2Step] Step zones are divided into two layers.\n` +
@@ -5344,8 +5346,8 @@ const g_lang_msgObj = {
             `[XY-Axis] X-Y axis rotation\n` +
             `[XZ-Axis] X-Z axis rotation\n` +
             `[YZ-Axis] Y-Z axis rotation\n` +
-            `[Random+] Randomly rotates to one of the X/Y/Z/X-Y/X-Z/Y-Z axes.`,
-        frzReturnType: `[360deg/120deg/60deg] Rotates to the specified angle.\n[±360deg/±120deg] May rotate in the opposite direction in addition to 360deg/120deg.\n[Pendulum] Moves back and forth like a pendulum.`,
+            `[Random+] Randomly rotates to one of the X/Y/Z/X-Y/X-Z/Y-Z axes.\n`,
+        frzReturnType: `Set the rotation range.\n[360deg/120deg/60deg] Rotates to the specified angle.\n[±360deg/±120deg] May rotate in the opposite direction in addition to 360deg/120deg.\n[Pendulum] Moves back and forth like a pendulum.`,
         shaking: `This sets shaking for the step zone and arrows.\n` +
             `[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n` +
             `[X-Horizontal] Per-layer shaking with alternating left/right direction by layer.\n` +
