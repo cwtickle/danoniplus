@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/11/01 (v52.0.0)
+ * Revised : 2026/11/03 (v52.1.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3178,6 +3178,8 @@ const g_shortcutObj = {
         Escape: { id: `btnHelpClose` },
         ArrowUp: { id: `btnHelpPrev` },
         ArrowDown: { id: `btnHelpNext` },
+        ArrowLeft: { id: `btnHelpLeft` },
+        ArrowRight: { id: `btnHelpRight` },
     },
     keyConfig: {
         //Escape: { id: `btnBack` },  // Escapeを別用途でも使用するため、ここではコメントアウト
@@ -5176,7 +5178,7 @@ const g_lang_msgObj = {
             `[XZ-Axis] X-Z軸回転\n` +
             `[YZ-Axis] Y-Z軸回転\n` +
             `[Random+] X軸, Y軸, Z軸, X-Y軸, X-Z軸, Y-Z回転のいずれかが適用されます。`,
-        frzReturnType: `[360°/120°/60°] 指定の角度まで回転します\n[±360°/±120°] 360°/120°に加えて逆回転が掛かることがあります\n[Pendulum] 振り子のように左右に動きます`,
+        frzReturnType: `回転幅を変更する設定です。\n[360°/120°/60°] 指定の角度まで回転します\n[±360°/±120°] 360°/120°に加えて逆回転が掛かることがあります\n[Pendulum] 振り子のように左右に動きます`,
         shaking: `ステップゾーン及び矢印を揺らす設定です。\n` +
             `[Horizontal] 横方向に揺らします。\n[Vertical] 縦方向に揺らします。\n` +
             `[X-Horizontal] レイヤーごとに左右交互の向きで横に揺らします。\n` +
@@ -5190,7 +5192,12 @@ const g_lang_msgObj = {
             `[Wave] 矢印とフリーズアローが左右に揺れながら移動します。\n` +
             `[Storm] 矢印とフリーズアローが左右に激しく揺れ、回転します。\n` +
             `[Blinking] 矢印が点滅します。\n[Squids] 矢印が伸び縮みします。`,
-        camoufrage: `ステップの見た目が配置は同じでランダムに変わります。`,
+        camoufrage: `ステップの見た目が配置は同じでランダムに変わります。\n` +
+            `[Color] 矢印とフリーズアローの色が他のものに擬態します。\n` +
+            `[Arrow] 矢印とフリーズアローの矢印形状が他のものに擬態します。\n` +
+            `[Step+Arrow] 矢印とフリーズアローの矢印形状・ステップゾーンが他のものに擬態します。\n` +
+            `[Color+Arrow] 矢印とフリーズアローの色・矢印形状が他のものに擬態します。\n` +
+            `[Color+Step+Arrow] 矢印とフリーズアローの色・矢印形状・ステップゾーン全てが他のものに擬態します。`,
         camoufrageType: `[FrzArrow] フリーズアローの帯部分を初期表示のみ非表示にし、矢印のみで表示します（ヒット/失敗時は帯を再表示）`,
         swapping: `ステップゾーンの位置を入れ替える設定です。\n` +
             `[InnerSwap] ステップゾーンの中央部分のみグループ単位で入れ替えます。\n` +
@@ -5345,7 +5352,7 @@ const g_lang_msgObj = {
             `[XZ-Axis] X-Z axis rotation\n` +
             `[YZ-Axis] Y-Z axis rotation\n` +
             `[Random+] Randomly rotates to one of the X/Y/Z/X-Y/X-Z/Y-Z axes.`,
-        frzReturnType: `[360deg/120deg/60deg] Rotates to the specified angle.\n[±360deg/±120deg] May rotate in the opposite direction in addition to 360deg/120deg.\n[Pendulum] Moves back and forth like a pendulum.`,
+        frzReturnType: `Set the rotation range.\n[360deg/120deg/60deg] Rotates to the specified angle.\n[±360deg/±120deg] May rotate in the opposite direction in addition to 360deg/120deg.\n[Pendulum] Moves back and forth like a pendulum.`,
         shaking: `This sets shaking for the step zone and arrows.\n` +
             `[Horizontal] Shakes horizontally.\n[Vertical] Shakes vertically.\n` +
             `[X-Horizontal] Per-layer shaking with alternating left/right direction by layer.\n` +
@@ -5354,8 +5361,13 @@ const g_lang_msgObj = {
             `[S-Drunk] Shakes the entire screen randomly in all directions, and also shakes each layer randomly in all directions.\n` +
             `[H-Drunk] Adds stronger vertical movement than S-Drunk and adds rotation.`,
         effect: `Applies effects to the arrows and freeze arrows.\n[Dizzy/Spin] Arrows rotate.\n[Wave/Storm] Swing from left to right.\n[Blinking] Arrows blink.\n[Squids] Arrows stretch and shrink.`,
-        camoufrage: `The appearance of the steps changes randomly with the same placement.`,
-        camoufrageType: `[FrzArrow] Initially hides freeze-arrow bars and displays only the arrow portion (bars reappear on hit/failure)`,
+        camoufrage: `The appearance of the steps changes randomly with the same placement.\n` +
+            `[Color] The color of the arrows and freeze arrows mimics other objects.\n` +
+            `[Arrow] The arrow shape of the arrows and freeze arrows mimics other objects.\n` +
+            `[Step+Arrow] The arrow shape and step zone of the arrows and freeze arrows mimics other objects.\n` +
+            `[Color+Arrow] The color and arrow shape of the arrows and freeze arrows mimics other objects.\n` +
+            `[Color+Step+Arrow] The color, arrow shape, and step zone of the arrows and freeze arrows mimics other objects.`,
+        camoufrageType: `[FrzArrow] Initially hides freeze-arrow bars and displays only the arrow portion (bars reappear on hit/failure).`,
         swapping: `This setting allows you to swap the positions of the step zones.\n` +
             `[InnerSwap] Swaps only the inner portion of step zones within each shuffle group.\n` +
             `[OuterSwap] Swaps the outer portion (inverse of InnerSwap) within each shuffle group.\n` +
