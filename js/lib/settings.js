@@ -2901,6 +2901,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 
 	// Typeの選択 (本体がOFF/Defaultのときは、効果が見える基準の選択肢へ切り替える)
 	const selectSub = opt => {
+		autoCnt = -g_limitObj.helpPreviewAutoFrames;
 		activeCol = 1;
 		subSelected = opt;
 		const base = optList[1];
