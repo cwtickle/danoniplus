@@ -4237,6 +4237,10 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 					funcEx();
 					createExpandedScView(_name);
 				},
+				// 拡張ボタンの説明文表示は「拡張元」設定のヘルプが長い場合、詳細ヘルプ表示側で表示するため省略する
+				title: isLongHelp(g_msgObj[`${_name}`] ?? ``)
+					? ``
+					: (g_msgObj[`${_name}Type`] ?? ``),
 			}, g_cssObj.button_Default, g_cssObj.button_RevON);
 
 	/**
