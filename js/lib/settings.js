@@ -2051,9 +2051,15 @@ const openHelpOverlay = (_title, _msg, _stateKey) => {
 	if (![`option`, `exSetting`, `settingsDisplay`].includes(g_currentPage)) return;
 
 	// 現在値は、g_currentPage を切り替える前に取得する(getStgDetailName が画面名を参照するため)
-	const currentVal = g_stateObj[_stateKey];
-	const currentNames = [currentVal, getStgDetailName(currentVal)];
-	const optNames = new Map((g_settings[`${_stateKey}s`] ?? []).map(val => [val, [val, getStgDetailName(val)]]));
+	const sub = g_helpPreviewDefs[_stateKey]?.sub || (_stateKey + `Type`);
+	const subList = sub !== undefined ? (g_settings[`${sub}s`] ?? []) : [];
+	const currentVals = [g_stateObj[_stateKey], ...(subList.length > 0 ? [g_stateObj[sub]] : [])];
+	const currentNames = currentVals.flatMap(val => [val, getStgDetailName(val)]);
+	const optNames = new Map([...(g_settings[`${_stateKey}s`] ?? []), ...subList]
+		.map(val => [val, [val, getStgDetailName(val)]]));
+
+	// Typeがある設定は、本体の説明文の後にTypeの説明文を続ける
+	const helpMsg = [_msg, ...(subList.length > 0 ? [g_msgObj[sub]] : [])].filter(hasVal).join(`\n\n`);
 	const rowElms = [];
 	const bright = g_headerObj.baseBrightFlg;
 
@@ -2080,7 +2086,7 @@ const openHelpOverlay = (_title, _msg, _stateKey) => {
 	});
 	g_handler.addListener(body, `click`, evt => evt.stopPropagation());
 
-	parseHelpLines(_msg).forEach(line => {
+	parseHelpLines(helpMsg).forEach(line => {
 		const row = document.createElement(`div`);
 		Object.assign(row.style, {
 			fontFamily: getBasicFont(), fontSize: wUnit(14), lineHeight: `1.1`, textAlign: `left`,
@@ -2109,12 +2115,13 @@ const openHelpOverlay = (_title, _msg, _stateKey) => {
 	});
 
 	// 説明文の選択行 (背景) をプレビューのカーソルに追従させる
-	const markHelpRows = _val => {
-		const names = optNames.get(_val) ?? [_val];
+	const markHelpRows = (_vals, _focus = 0) => {
+		const names = _vals.flatMap(val => optNames.get(val) ?? [val]);
+		const focusNames = optNames.get(_vals[_focus]) ?? [_vals[_focus]];
 		rowElms.forEach(({ nameList, row }) => {
 			const on = nameList.some(name => names.includes(name));
 			row.style.background = on ? `rgba(80,140,255,0.25)` : ``;
-			if (on) {
+			if (nameList.some(name => focusNames.includes(name))) {
 				// 本文がスクロールする場合は、選択行が見える位置へ寄せる
 				const [top, bottom] = [row.offsetTop, row.offsetTop + row.offsetHeight];
 				if (top < body.scrollTop) {
@@ -2125,7 +2132,7 @@ const openHelpOverlay = (_title, _msg, _stateKey) => {
 			}
 		});
 	};
-	markHelpRows(currentVal);
+	markHelpRows(currentVals);
 	g_helpSelectHook = markHelpRows;
 
 	// 上下キー: プレビューの選択肢移動、または本文のスクロール
@@ -2149,6 +2156,14 @@ const openHelpOverlay = (_title, _msg, _stateKey) => {
 		}, g_cssObj.button_Mini),
 		createCss2Button(`btnHelpNext`, ``, () => true, {
 			x: 0, y: 0, w: 0, h: 0, opacity: 0, resetFunc: () => moveHelp(1),
+		}, g_cssObj.button_Mini),
+
+		// 操作対象の列の切り替え (本体 / Type)
+		createCss2Button(`btnHelpLeft`, ``, () => true, {
+			x: 0, y: 0, w: 0, h: 0, opacity: 0, resetFunc: () => g_helpPreviewColumn(-1),
+		}, g_cssObj.button_Mini),
+		createCss2Button(`btnHelpRight`, ``, () => true, {
+			x: 0, y: 0, w: 0, h: 0, opacity: 0, resetFunc: () => g_helpPreviewColumn(1),
 		}, g_cssObj.button_Mini),
 	);
 	createScText(btnHelpClose, `HelpClose`, { displayName: `helpOverlay`, targetLabel: `btnHelpClose`, x: -5 });
@@ -2202,15 +2217,16 @@ const isLongHelp = _msg =>
  * - currentKey: サンプルキーではなく実際のキーに合わせてマッピングする
  *               (StepArea, Swappingは実際のキーには非対応)
  * - frzUse    : サンプルでフリーズアローを使用するかどうか
+ * - sub       : 派生する設定 (Typeなど)。選択肢の列を2列目に追加する
  */
 const g_helpPreviewDefs = {
 	motion: {},
 	scroll: { currentKey: true },
 	appearance: { splitLayer: true },
-	playWindow: {},
+	playWindow: { sub: `playWindowType` },
 	stepArea: {},
 	shaking: { splitLayer: true },
-	frzReturn: {},
+	frzReturn: { sub: `frzReturnType` },
 	effect: { frzUse: true, splitLayer: true },
 	swapping: { frzUse: true },
 };
@@ -2246,6 +2262,9 @@ let g_helpPreviewStop = () => true;
 /** プレビューの選択肢を前後へ動かす処理 (プレビュー表示中のみ差し替わる) */
 let g_helpPreviewMove = _dir => true;
 
+/** プレビューの操作対象の列を切り替える処理 (-1: 本体、1: Type。プレビュー表示中のみ差し替わる) */
+let g_helpPreviewColumn = _dir => true;
+
 /**
  * 詳細ヘルプ内プレビューの作成
  * @param {HTMLDivElement} _parent オーバーレイ
@@ -2260,7 +2279,10 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		return;
 	}
 	const playH = g_headerObj.playingHeight || g_sHeight;
-	const chipW = 120;
+	const subList = def.sub !== undefined ? g_settings[`${def.sub}s`] : undefined;
+	const subUse = subList !== undefined;
+	const colW = subUse ? 90 : 120;
+	const chipW = subUse ? colW * 2 + 6 : colW;   // 選択肢ボタン列の全体幅 (Typeがある場合は2列) 	
 	const areaW = g_sWidth - 60;
 
 	// レーン定義: Scrollのみ現在選択中のキー・パターンの定義を使用 (他は4レーン固定)
@@ -2432,6 +2454,8 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	let stride = Math.max(Math.round(visibleLanes.length * 0.6), 1);
 	while (gcd(stride, visibleLanes.length) !== 1) stride++;
 	let selected = ``;
+	let subSelected = subUse ? (subList.includes(g_stateObj[def.sub]) ? g_stateObj[def.sub] : subList[0]) : ``;
+	let activeCol = 0;   // 上下キーの対象列 (0: 本体、1: Type)
 	let frameCnt = 0;
 	let noteCnt = 0;
 	let autoCnt = 0;   // 自動切替までの経過フレーム数
@@ -2443,7 +2467,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	let filterElms = [];   // Appearanceのフィルターバー・ラベル
 	const frzLen = 90;   // Effectプレビュー用フリーズアローの長さ(px)
 	const work = { drunkXFlg: true, drunkYFlg: true, drunkAxisFlg: false, drunkRotateFlg: false };
-	const frz = { seq: null, axes: [], start: 0, next: 0 };
+	const frz = { seq: null, seqNo: 0, axes: [], start: 0, next: 0 };
 
 	/** 付与したtransformの初期化 */
 	const resetTransforms = () => spriteIds.forEach(id => {
@@ -2598,6 +2622,18 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		});
 	};
 
+	/** Typeの選択値を、ゲーム側の関数が参照する g_stateObj へ一時的に差し替えて実行 (g_playWindowDir など) */
+	const withSub = func => {
+		if (!subUse) return func();
+		const org = g_stateObj[def.sub];
+		g_stateObj[def.sub] = subSelected;
+		try {
+			return func();
+		} finally {
+			g_stateObj[def.sub] = org;
+		}
+	};
+
 	/**
 	 * 選択肢の適用
 	 * - Motion: 「配列の15がステップゾーン上」として、ステップゾーンからの距離を逆算する
@@ -2625,7 +2661,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 
 		// SideScrollのみ矢印を90度回転 (ゲーム側の changeStepRtn と同じ符号)
 		rtnOffset = (_key === `playWindow` && opt === `SideScroll` && g_stateObj.rotateEnabled)
-			? 90 * (g_stateObj.playWindowType === C_FLG_REVERSE2 ? -1 : 1) : 0;
+			? 90 * (subSelected === C_FLG_REVERSE2 ? -1 : 1) : 0;
 		if (g_stateObj.rotateEnabled) {
 			laneInfo.forEach((lane, j) => {
 				if (typeof getRtn(j) === `number`) {
@@ -2652,13 +2688,14 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 			dist[b] = dist[b - 1] + frameSpd + (trace[b] || 0);
 		}
 		if (_key === `playWindow`) {
-			addTransform(`mainSprite`, `playWindow`, g_playWindowFunc.get(opt)(), g_transPriority.playWindow);
+			addTransform(`mainSprite`, `playWindow`, withSub(() => g_playWindowFunc.get(opt)()), g_transPriority.playWindow);
 		}
 		if (_key === `shaking`) {
 			Object.assign(work, { drunkXFlg: true, drunkYFlg: true, drunkAxisFlg: false, drunkRotateFlg: false });
 		}
 		if (_key === `frzReturn`) {
 			frz.seq = null;
+			frz.seqNo = 0;
 			frz.next = frameCnt + 30;
 		}
 	};
@@ -2738,8 +2775,8 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		if (selected === C_FLG_OFF) return;
 		if (frz.seq === null) {
 			if (frameCnt < frz.next) return;
-			const seqs = (g_frzReturnSeqFunc.get(g_stateObj.frzReturnType) ?? g_frzReturnSeqFunc.get(`360deg`))();
-			frz.seq = seqs[Math.floor(Math.random() * seqs.length)];
+			const seqs = (g_frzReturnSeqFunc.get(subSelected) ?? g_frzReturnSeqFunc.get(`360deg`))();
+			frz.seq = seqs[frz.seqNo++ % seqs.length];
 			frz.axes = [...g_frzReturnFunc.get(selected)()].filter(Boolean);
 			frz.start = frameCnt;
 		}
@@ -2814,38 +2851,83 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		spriteIds.forEach(id => delete g_transforms[id]);
 		g_helpPreviewStop = () => true;
 		g_helpPreviewMove = _dir => true;
+		g_helpPreviewColumn = _dir => true;
 	};
 	g_helpPreviewStop = stop;
 
 	// ---------------------------------------------------
-	// 選択肢ボタン (g_settings の一覧から作成)
-	const chipH = Math.min(20, Math.floor(_height / optList.length));
-	const markChips = () => {
-		chips.forEach((chip, i) => {
-			chip.classList.remove(g_cssObj.button_Default, g_cssObj.button_Setting);
-			chip.classList.add(optList[i] === selected ? g_cssObj.button_Setting : g_cssObj.button_Default);
-		});
-		g_helpSelectHook(selected);
-		safeExecuteCustomHooks(`g_customJsObj.helpPreview`, g_customJsObj.helpPreview, _key, selected,
-			{ pvFrame, mainSprite, stepSprites, arrowSprites, playW, playH });
-	};
-	const chips = optList.map((opt, i) =>
-		createCss2Button(`pvChip${i}`, getStgDetailName(opt), () => {
-			autoCnt = -g_limitObj.helpPreviewAutoFrames;
-			applyOption(opt);
-			markChips();
-		}, { x: baseX + viewW + 15, y: i * chipH, w: chipW, h: chipH - 2, siz: 12 }, g_cssObj.button_Default)
-	);
-	multiAppend(area, ...chips);
+	// 選択肢ボタン (本体の列と、Typeがある設定のみTypeの列)
+	const chipX = baseX + viewW + 15;
+	const colMain = createEmptySprite(area, `pvColMain`, { x: chipX, y: 0, w: colW, h: _height });
+	const colSub = subUse ? createEmptySprite(area, `pvColSub`, { x: chipX + colW + 6, y: 0, w: colW, h: _height }) : null;
 
+	const makeChips = (_list, _prefix, _onSelect, _title = ``) => {
+		const chipH = Math.min(20, Math.floor(_height / _list.length));
+		return _list.map((opt, i) =>
+			createCss2Button(`${_prefix}${i}`, getStgDetailName(opt), () => _onSelect(opt), {
+				x: 0, y: i * chipH, w: colW, h: chipH - 2, siz: 12, title: _title,
+			}, g_cssObj.button_Default));
+	};
+	const chips = makeChips(optList, `pvChip`, opt => selectMain(opt));
+	const subChips = subUse ? makeChips(subList, `pvSubChip`, opt => selectSub(opt), g_msgObj[def.sub] ?? ``) : [];
+	multiAppend(colMain, ...chips);
+	if (subUse) {
+		multiAppend(colSub, ...subChips);
+	}
+
+	const markChips = () => {
+		const mark = (_list, _chips, _current) => _chips.forEach((chip, i) => {
+			chip.classList.remove(g_cssObj.button_Default, g_cssObj.button_Setting);
+			chip.classList.add(_list[i] === _current ? g_cssObj.button_Setting : g_cssObj.button_Default);
+		});
+		mark(optList, chips, selected);
+		if (subUse) {
+			mark(subList, subChips, subSelected);
+			colSub.style.opacity = activeCol === 1 ? 1 : 0.5;   // 操作対象でない列は薄く表示
+		}
+		colMain.style.opacity = subUse && activeCol !== 0 ? 0.5 : 1;
+		g_helpSelectHook(subUse ? [selected, subSelected] : [selected], activeCol);
+		safeExecuteCustomHooks(`g_customJsObj.helpPreview`, g_customJsObj.helpPreview, _key, selected,
+			{ pvFrame, mainSprite, stepSprites, arrowSprites, playW, playH, sub: subSelected });
+	};
+
+	// 本体の選択（選択時は自動移動時間を2倍にする）
+	const selectMain = opt => {
+		autoCnt = -g_limitObj.helpPreviewAutoFrames;
+		activeCol = 0;
+		applyOption(opt);
+		markChips();
+	};
+
+	// Typeの選択 (本体がOFF/Defaultのときは、効果が見える基準の選択肢へ切り替える)
+	const selectSub = opt => {
+		autoCnt = -g_limitObj.helpPreviewAutoFrames;
+		activeCol = 1;
+		subSelected = opt;
+		const base = optList[1];
+		applyOption(selected === optList[0] && optList.includes(base) ? base : selected);
+		markChips();
+	};
+
+	// 上下キー: 操作対象の列の選択肢を前後に動かす (端では反対側へ循環)
 	const moveOption = _dir => {
 		applyOption(optList[nextPos(optList.indexOf(selected), _dir, optList.length)]);
 		markChips();
 	};
-	// 上下キー: 選択肢を前後に動かす (端では反対側へ循環)
 	g_helpPreviewMove = _dir => {
-		autoCnt = -g_limitObj.helpPreviewAutoFrames;
-		moveOption(_dir);
+		if (subUse && activeCol === 1) {
+			selectSub(subList[nextPos(subList.indexOf(subSelected), _dir, subList.length)]);
+		} else {
+			autoCnt = -g_limitObj.helpPreviewAutoFrames;
+			moveOption(_dir);
+		}
+	};
+
+	// 左右キー: 操作対象の列を切り替える (←: 本体、→: Type)
+	g_helpPreviewColumn = _dir => {
+		if (!subUse) return;
+		activeCol = _dir > 0 ? 1 : 0;
+		markChips();
 	};
 
 	// 初期表示: 現在値 (OFF/Default の場合は最初の非OFFの選択肢)
@@ -4156,7 +4238,10 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 					funcEx();
 					createExpandedScView(_name);
 				},
-				title: g_msgObj[`${_name}Type`] ?? ``,
+				// 拡張ボタンの説明文表示は「拡張元」設定のヘルプが長い場合、詳細ヘルプ表示側で表示するため省略する
+				title: isLongHelp(g_msgObj[`${_name}`] ?? ``) || g_helpPreviewDefs[_name] !== undefined
+					? ``
+					: (g_msgObj[`${_name}Type`] ?? ``),
 			}, g_cssObj.button_Default, g_cssObj.button_RevON);
 
 	/**
