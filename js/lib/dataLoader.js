@@ -423,7 +423,7 @@ const loadRingSounds = async () => {
 	});
 
 	// |ringSound=| の指定でデフォルト音を上書き (空欄はデフォルトのまま)
-	const names = (g_rootObj.ringSound ?? ``).split(`,`).map(val => trimStr(val));
+	const names = g_headerObj.ringSound.split(`,`).map(val => trimStr(val));
 	if (names.every(name => !hasVal(name))) {
 		return;
 	}
@@ -1173,7 +1173,8 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			return [];
 		}
 		const ringData = [];
-		const getNum = (_val, _default) => hasVal(_val) && !isNaN(parseFloat(_val)) ? parseFloat(_val) : _default;
+		const getNum = (_val, _default, _condition = true) =>
+			hasVal(_val) && !isNaN(parseFloat(_val)) && _condition ? parseFloat(_val) : _default;
 
 		splitLF(dosRingData).filter(data => hasVal(data)).forEach(tmpData => {
 			const t = tmpData.split(`,`).map(val => trimStr(val));
@@ -1184,7 +1185,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			ringData.push([
 				calcFrame(t[0]), parseFloat(t[1]), parseFloat(t[2]),
 				getNum(t[3], g_ringObj.sound),
-				getNum(t[4], g_ringObj.radius),
+				getNum(t[4], g_ringObj.radius, t[4] >= g_ringObj.minRadius),
 				hasVal(t[5]) ? t[5] : (g_headerObj.baseBrightFlg ? g_ringObj.colorLight : g_ringObj.color),
 				getNum(t[6], 0),
 			]);
@@ -1395,6 +1396,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		obj.ncolorDummyData = setColor2Data(`ncolor`, _dummyNo);
 	}
 
+	// リングノート・リング速度変化の分解 (速度変化は既存のsetSpeedDataを流用)
+	obj.ringSpeedData = setSpeedData(`ringspeed`, scoreIdHeader);
+	obj.ringData = setRingData(scoreIdHeader);
+
 	if (_scoreAnalyzeFlg) {
 		return obj;
 	}
@@ -1415,10 +1420,6 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 	// スクロール変化データの分解
 	obj.scrollchData = setScrollchData(scoreIdHeader);
-
-	// リングノート・リング速度変化の分解 (速度変化は既存のsetSpeedDataを流用)
-	obj.ringSpeedData = setSpeedData(`ringspeed`, scoreIdHeader);
-	obj.ringData = setRingData(scoreIdHeader);
 
 	// 歌詞データの分解 (3つで1セット, セット毎の改行区切り可)
 	obj.wordData = [];

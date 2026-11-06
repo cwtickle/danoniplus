@@ -1521,6 +1521,9 @@ const headerConvert = _dosObj => {
 		makeWarningWindow(g_msgInfoObj.E_0031);
 	}
 
+	// リング音の設定
+	obj.ringSound = _dosObj.ringSound ?? ``;
+
 	// ハッシュタグ
 	obj.hashTag = _dosObj.hashTag ?? ``;
 

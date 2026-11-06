@@ -52,13 +52,12 @@ const mainInit = () => {
 		`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
 
 	// リングノート用スプライト (mainSpriteの外: PlayWindow/Shaking等の影響を受けない)
-	bindRingPointer();
+	bindRingPointer(divRoot);
 	if ((g_scoreObj.ringData?.length ?? 0) > 0) {
 		startRingKeepAlive();
 	} else {
 		stopRingKeepAlive();
 	}
-	divRoot.style.touchAction = `none`;
 	const ringSprite = createEmptySprite(divRoot, `ringSprite`, mainCommonPos);
 	addTransform(`ringSprite`, `main`,
 		`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
@@ -1501,24 +1500,31 @@ const mainInit = () => {
 			// リング本体の大きさ (cnt === 0 でガイドと一致)
 			const t = Math.min(Math.max(1 - ring.cnt / ring.total, 0), 1);
 			ring.body.style.transform = `scale(${g_ringObj.startRate + (1 - g_ringObj.startRate) * t})`;
+
+			// ガイド到達前は判定しない
 			if (ring.cnt > 0) {
 				continue;
 			}
 
-			// 判定 (遅れフレーム数)
-			let difFrame = null;
-			if (g_stateObj.autoAll === C_FLG_ON) {
-				difFrame = (ring.cnt === 0 ? 0 : null);
-			} else if (isPointerInside(ring.guide)) {
-				difFrame = -ring.cnt;
+			// 判定範囲外は、ポインタ位置に関係なくミスにする
+			if (ring.cnt < -g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+				judgeUwan(ring.cnt, -1);
+				removeRing(i);
+				continue;
 			}
 
-			if (difFrame !== null) {
-				checkJudgment(difFrame)[0](difFrame, -1);
+			const autoPlay = g_stateObj.autoAll === C_FLG_ON;
+			const hit = autoPlay ? ring.cnt === 0 : isPointerInside(ring.guide);
+
+			if (hit) {
+				// 判定の選択には正の遅れ、フックには符号付きのカウントを渡す
+				checkJudgment(-ring.cnt)[0](ring.cnt, -1);
+
+				if (!autoPlay) {
+					displayDiff(ring.cnt);
+				}
+
 				playRingSound(ring.sound);
-				removeRing(i);
-			} else if (ring.cnt < -g_judgObj.arrowJ[g_judgPosObj.shobon]) {
-				judgeUwan(ring.cnt, -1);
 				removeRing(i);
 			}
 		}
@@ -1528,6 +1534,12 @@ const mainInit = () => {
 	 * フレーム処理(譜面台)
 	 */
 	const flowTimeline = () => {
+		if (g_audio instanceof AudioPlayer && g_audioClockSync &&
+			musicStartCtxTime !== undefined && g_audio.contextState !== `running`) {
+			getSharedAudioContext(); // suspended時はresumeを試行
+			g_timeoutEvtId = g_timerHandler.setTimeout(flowTimeline, g_maxFrameWait);
+			return;
+		}
 
 		const currentFrame = g_scoreObj.frameNum;
 		lblframe.textContent = g_scoreObj.baseFrame;
@@ -1731,27 +1743,20 @@ const mainInit = () => {
 			//   再生開始時のオフセットずれやsuspend/resumeによるずれを吸収できない
 			thisTime = performance.now();
 			buffTime = 0;
-			let holdFrame = false;
 
 			if (g_audio instanceof AudioPlayer && g_audioClockSync && musicStartCtxTime !== undefined) {
-				if (g_audio.contextState === `running`) {
-					buffTime = (g_audio.contextTime - musicStartCtxTime) * 1000
-						- (currentFrame - musicStartFrame) * 1000 / g_fps;
-				} else {
-					// AudioContext停止中は音源も止まっているため、フレーム進行も止めて復帰を待つ
-					getSharedAudioContext(); // suspended時はresumeを試行
-					holdFrame = true;
-				}
+				buffTime = (g_audio.contextTime - musicStartCtxTime) * 1000
+					- (currentFrame - musicStartFrame) * 1000 / g_fps;
 			} else if (g_audio instanceof AudioPlayer || currentFrame >= musicStartFrame) {
-				buffTime = (thisTime - musicStartTime - (currentFrame - musicStartFrame) * 1000 / g_fps);
+				buffTime = thisTime - musicStartTime - (currentFrame - musicStartFrame) * 1000 / g_fps;
 			}
 
-			if (!holdFrame) {
-				g_scoreObj.frameNum++;
-				g_scoreObj.baseFrame++;
-			}
-			g_timeoutEvtId = g_timerHandler.setTimeout(flowTimeline, holdFrame ? g_maxFrameWait :
-				Math.min(Math.max(1000 / g_fps - buffTime, 0), g_maxFrameWait));
+			g_scoreObj.frameNum++;
+			g_scoreObj.baseFrame++;
+			g_timeoutEvtId = g_timerHandler.setTimeout(
+				flowTimeline,
+				Math.min(Math.max(1000 / g_fps - buffTime, 0), g_maxFrameWait)
+			);
 		}
 	};
 
@@ -1934,8 +1939,10 @@ const mainInit = () => {
 };
 
 /** マウス/タッチ位置 (リングノートの判定用) */
-const g_pointer = { x: 0, y: 0, valid: false };
-let g_pointerBound = false;
+const g_pointer = { x: 0, y: 0, valid: false, type: null, id: null };
+
+// 接触中のタッチ位置
+const g_touchPointers = new Map();
 
 /** デバイス待機防止用の維持音 */
 let g_ringKeepAlive = null;
@@ -1971,33 +1978,106 @@ const stopRingKeepAlive = () => {
 	}
 };
 
-/**
- * ポインタ監視の登録
- * - divRootに登録することで、画面遷移時の clearWindow (removeByContainer) で自動的に解除される
- * - mainInitのたびに clearWindow が先に呼ばれるため、リトライ時も重複しない
- * - マウス: divRoot内にいる間は常に有効 (リングはdivRoot内にしか無いため十分)
- * - タッチ: 触れている間のみ有効
- */
-const bindRingPointer = () => {
+// ポインタ状態をクリア
+const resetRingPointers = () => {
 	g_pointer.valid = false;
+	g_touchPointers.clear();
+};
 
+// プレイ開始前に一度だけ登録する。
+// document のリスナーは clearWindow では解除されない。
+const bindRingMouse = () => {
 	const update = evt => {
+		if (evt.pointerType !== `mouse`) {
+			return;
+		}
 		g_pointer.x = evt.clientX;
 		g_pointer.y = evt.clientY;
+		g_pointer.type = `mouse`;
+		g_pointer.id = evt.pointerId;
 		g_pointer.valid = true;
 	};
+
+	g_handler.addListener(document, `pointermove`, update, true);
+	g_handler.addListener(document, `pointerdown`, update, true);
+	g_handler.addListener(document, `pointerover`, evt => {
+		// 文書外から入った場合だけ更新する。
+		if (evt.relatedTarget === null) {
+			update(evt);
+		}
+	}, true);
+	g_handler.addListener(document, `pointerout`, evt => {
+		if (evt.pointerType === `mouse` && evt.relatedTarget === null &&
+			g_pointer.type === `mouse`) {
+			g_pointer.valid = false;
+		}
+	}, true);
+};
+
+// mainInit のたびに登録する。
+// clearWindow は _root のリスナーを解除する。
+const bindRingPointer = _root => {
+	g_touchPointers.clear();
+
+	// マウスの位置だけをリトライ後も保持する。
+	if (g_pointer.type !== `mouse`) {
+		g_pointer.valid = false;
+	}
+
+	const update = evt => {
+		if (evt.pointerType === `touch`) {
+			if (evt.type === `pointerdown`) {
+				// 古いマウス・ペン位置による判定を防ぐ。
+				g_pointer.valid = false;
+				g_touchPointers.set(evt.pointerId, { x: evt.clientX, y: evt.clientY });
+
+				// 開始位置の子要素が削除されても終了イベントを受け取る。
+				_root.setPointerCapture(evt.pointerId);
+			} else if (g_touchPointers.has(evt.pointerId)) {
+				g_touchPointers.set(evt.pointerId, { x: evt.clientX, y: evt.clientY });
+			}
+			return;
+		}
+
+		// マウスは document 側で追跡する。
+		if (evt.pointerType === `mouse`) {
+			return;
+		}
+		g_pointer.x = evt.clientX;
+		g_pointer.y = evt.clientY;
+		g_pointer.type = evt.pointerType;
+		g_pointer.id = evt.pointerId;
+		g_pointer.valid = true;
+	};
+
 	const release = evt => {
 		if (evt.pointerType === `touch`) {
+			g_touchPointers.delete(evt.pointerId);
+		} else if (evt.type === `pointercancel` &&
+			g_pointer.type === evt.pointerType && g_pointer.id === evt.pointerId) {
 			g_pointer.valid = false;
 		}
 	};
-	const invalidate = () => g_pointer.valid = false;
 
-	g_handler.addListener(divRoot, `pointermove`, update);
-	g_handler.addListener(divRoot, `pointerdown`, update);
-	g_handler.addListener(divRoot, `pointerup`, release);
-	g_handler.addListener(divRoot, `pointercancel`, release);
-	g_handler.addListener(divRoot, `pointerleave`, invalidate);
+	const leave = evt => {
+		if (evt.pointerType === `touch`) {
+			g_touchPointers.delete(evt.pointerId);
+		} else if (evt.pointerType !== `mouse` &&
+			g_pointer.type === evt.pointerType && g_pointer.id === evt.pointerId) {
+			g_pointer.valid = false;
+		}
+	};
+
+	g_handler.addListener(_root, `pointermove`, update);
+	g_handler.addListener(_root, `pointerdown`, update);
+	g_handler.addListener(_root, `pointerup`, release);
+	g_handler.addListener(_root, `pointercancel`, release);
+	g_handler.addListener(_root, `pointerleave`, leave);
+	g_handler.addListener(_root, `lostpointercapture`, evt => {
+		if (evt.pointerType === `touch`) {
+			g_touchPointers.delete(evt.pointerId);
+		}
+	});
 };
 
 /**
@@ -2028,14 +2108,26 @@ const playRingSound = _no => {
  * - 画面の拡縮・transform後の実座標で判定するため getBoundingClientRect を使用
  */
 const isPointerInside = _el => {
-	if (!g_pointer.valid) {
-		return false;
-	}
 	const rect = _el.getBoundingClientRect();
 	const radius = rect.width / 2;
-	const dx = g_pointer.x - (rect.left + radius);
-	const dy = g_pointer.y - (rect.top + rect.height / 2);
-	return dx * dx + dy * dy <= radius * radius;
+	const centerX = rect.left + radius;
+	const centerY = rect.top + rect.height / 2;
+
+	const inside = pointer => {
+		const dx = pointer.x - centerX;
+		const dy = pointer.y - centerY;
+		return dx * dx + dy * dy <= radius * radius;
+	};
+
+	if (g_pointer.valid && inside(g_pointer)) {
+		return true;
+	}
+	for (const pointer of g_touchPointers.values()) {
+		if (inside(pointer)) {
+			return true;
+		}
+	}
+	return false;
 };
 
 /**
