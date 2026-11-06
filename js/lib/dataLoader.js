@@ -439,11 +439,21 @@ const loadRingSounds = async () => {
 		try {
 			let buffer = g_ringSoundCache.get(url);
 			if (buffer === undefined) {
-				const response = await fetch(url);
-				if (!response.ok) {
-					throw new Error(`HTTP ${response.status}`);
+				const controller = new AbortController();
+				const timer = setTimeout(() => controller.abort(), 30000);
+				let arrayBuffer;
+
+				try {
+					const response = await fetch(url, { signal: controller.signal });
+					if (!response.ok) {
+						throw new Error(`HTTP ${response.status}`);
+					}
+					arrayBuffer = await response.arrayBuffer();
+				} finally {
+					clearTimeout(timer);
 				}
-				buffer = await getSharedAudioContext().decodeAudioData(await response.arrayBuffer());
+
+				buffer = await getSharedAudioContext().decodeAudioData(arrayBuffer);
 				g_ringSoundCache.set(url, buffer);
 			}
 			g_ringSoundBuffers.set(i + 1, buffer);
