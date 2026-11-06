@@ -448,6 +448,7 @@ const loadRingSounds = async () => {
 			}
 			g_ringSoundBuffers.set(i + 1, buffer);
 		} catch (e) {
+			g_ringSoundBuffers.delete(i + 1);
 			console.warn(`ringSound load error (${name}): ${e}`);
 		}
 	}));
