@@ -839,6 +839,7 @@ const C_JSF_BLANK = `danoni_blank.js`;
 const C_DIR_JS = `../js/`;
 const C_DIR_CSS = `../css/`;
 const C_DIR_MUSIC = `../music/`;
+const C_DIR_SOUND = `../sound/`;
 const C_DIR_SKIN = `../skin/`;
 
 // カレントディレクトリマーク
@@ -1152,6 +1153,42 @@ const g_judgPosObj = {
     ii: 0, shakin: 1, matari: 2, shobon: 3, uwan: 4,
     kita: 0, sfsf: 1, iknai: 2,
 };
+/** リングノートの共通設定 */
+const g_ringObj = {
+    baseFrame: 60,          // リング速度1のときの出現～到達フレーム数
+    radius: 40,             // ガイド半径の既定値(px)
+    startRate: 0.1,         // 出現時のリング半径(ガイド半径に対する比)
+    color: `#ffffff`,       // リング色の既定値
+    colorLight: `#000000`,  // リング色の既定値（明背景時）
+    guideColor: `#00ff00`,  // ガイド色
+    lineWidth: 2,           // 線の太さ(px)
+    sound: 1,               // 音番号の既定値 (0: 無音)
+    cols: 7,                // 内部の列数 [到達フレーム, X, Y, 音番号, 半径, 色, 出現～到達フレーム数(0:未指定)]
+};
+
+/** リングノートのデフォルト音 (音番号1～。外部ファイル不要でコード生成する) */
+const g_ringDefaultSounds = [
+    // 0: 無音
+    // 1: 従来のサリングのデフォルト音に近い音色
+    {
+        dur: 0.32, attack: 0.012, level: 0.5, lowpass: 10200, lpPasses: 4, bands: [
+            { f: 6935, q: 18, gain: 0.99, tau: 0.024, tau2: 0.09, mix2: 0.18 },
+            { f: 9150, q: 58, gain: 0.62, tau: 0.057, tau2: 0.089, mix2: 0.18 },
+            { f: 6000, q: 5.5, gain: 0.03, tau: 0.053, tau2: 0.145, mix2: 0.24 },
+            { f: 8400, q: 9.8, gain: 0.3, tau: 0.034, tau2: 0.072, mix2: 0.26 },
+            { f: 3500, q: 2, gain: 0.02, tau: 0.03, tau2: 0.04, mix2: 0.5 },
+        ]
+    },
+    // 2: パーン
+    { wave: `sine`, freq: 1800, freqEnd: 250, sweep: 0.025, noise: 0.6, dur: 0.28, decay: 9 },
+    // 3: パン(短め・乾いた音)
+    { wave: `sine`, freq: 2400, freqEnd: 400, sweep: 0.015, noise: 0.85, dur: 0.12, decay: 14 },
+    { wave: `sine`, freq: 880, dur: 0.12 },       // 4
+    { wave: `sine`, freq: 1320, dur: 0.12 },      // 5
+    { wave: `triangle`, freq: 660, dur: 0.12 },   // 6
+    { wave: `square`, freq: 440, dur: 0.15 },     // 7
+];
+
 const g_judgRanges = {
     'Normal': [[2, 4, 6, 8, 16], [2, 4, 8]],
     'Narrow': [[2, 3, 4, 8, 16], [2, 4, 8]],
@@ -1318,6 +1355,9 @@ const g_stateObj = {
 
     layerNum: 2,    // オプションを加味した実際のレイヤー数
     layerNumDf: 2,  // 基準レイヤー数
+
+    // リング速度オプション (将来用。現状は常に1。大きいほど出現～到達が短くなる)
+    ringSpeed: 1,
 };
 
 const C_VAL_MAXLIFE = 1000;
@@ -4349,6 +4389,8 @@ const g_dataMinObj = {
     mask: 1,
     back: 1,
     style: 1,
+    ring: g_ringObj.cols,
+    ringSpeed: 2,
 };
 
 /**
@@ -5486,6 +5528,13 @@ const g_customJsObj = {
 
     judg_frzHit: [],
     judg_dummyFrzHit: [],
+
+    // リングノート用 (第2引数は常に-1)
+    judg_ring_ii: [],
+    judg_ring_shakin: [],
+    judg_ring_matari: [],
+    judg_ring_shobon: [],
+    judg_ring_uwan: [],
 
     mainEnterFrame: [],
     mainBeforeFrameTimer: [],

@@ -51,6 +51,18 @@ const mainInit = () => {
 	addTransform(`infoSprite`, `main`,
 		`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
 
+	// リングノート用スプライト (mainSpriteの外: PlayWindow/Shaking等の影響を受けない)
+	bindRingPointer();
+	if ((g_scoreObj.ringData?.length ?? 0) > 0) {
+		startRingKeepAlive();
+	} else {
+		stopRingKeepAlive();
+	}
+	divRoot.style.touchAction = `none`;
+	const ringSprite = createEmptySprite(divRoot, `ringSprite`, mainCommonPos);
+	addTransform(`ringSprite`, `main`,
+		`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
+
 	// 判定系スプライトを作成（メインスプライトより上位）
 	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, mainCommonPos);
 	addTransform(`judgeSprite`, `main`,
@@ -1451,6 +1463,68 @@ const mainInit = () => {
 	};
 
 	/**
+	 * リングノート
+	 * - 状態は mainInit ローカルのため、リトライ時は自然に初期化される
+	 * - cnt === 0 がガイドと一致するフレーム。判定は cnt <= 0 の間のみ行い、
+	 *   最初にポインタがガイド内にあったフレームの遅れ (-cnt) で判定する
+	 */
+	const rings = [];
+	let ringCnt = 0;
+
+	const makeRing = _data => {
+		const no = ++ringCnt;
+		const diameter = _data.radius * 2;
+		const base = {
+			x: _data.x - _data.radius, y: _data.y - _data.radius, w: diameter, h: diameter,
+			borderRadius: `50%`, boxSizing: `border-box`,
+		};
+		const guide = createEmptySprite(ringSprite, `ringGuide${no}`, {
+			...base, border: `solid ${g_ringObj.lineWidth}px ${g_ringObj.guideColor}`,
+		});
+		const body = createEmptySprite(ringSprite, `ringBody${no}`, {
+			...base, border: `solid ${g_ringObj.lineWidth}px ${_data.color}`,
+		});
+		rings.push({ ..._data, cnt: _data.arrivalFrame + 1, guide, body });
+	};
+
+	const removeRing = _i => {
+		rings[_i].guide.remove();
+		rings[_i].body.remove();
+		rings.splice(_i, 1);
+	};
+
+	const updateRings = () => {
+		for (let i = rings.length - 1; i >= 0; i--) {
+			const ring = rings[i];
+			ring.cnt--;
+
+			// リング本体の大きさ (cnt === 0 でガイドと一致)
+			const t = Math.min(Math.max(1 - ring.cnt / ring.total, 0), 1);
+			ring.body.style.transform = `scale(${g_ringObj.startRate + (1 - g_ringObj.startRate) * t})`;
+			if (ring.cnt > 0) {
+				continue;
+			}
+
+			// 判定 (遅れフレーム数)
+			let difFrame = null;
+			if (g_stateObj.autoAll === C_FLG_ON) {
+				difFrame = (ring.cnt === 0 ? 0 : null);
+			} else if (isPointerInside(ring.guide)) {
+				difFrame = -ring.cnt;
+			}
+
+			if (difFrame !== null) {
+				checkJudgment(difFrame)[0](difFrame, -1);
+				playRingSound(ring.sound);
+				removeRing(i);
+			} else if (ring.cnt < -g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+				judgeUwan(ring.cnt, -1);
+				removeRing(i);
+			}
+		}
+	};
+
+	/**
 	 * フレーム処理(譜面台)
 	 */
 	const flowTimeline = () => {
@@ -1597,6 +1671,10 @@ const mainInit = () => {
 				}
 			}
 		}
+
+		// リングノート生成・更新
+		g_workObj.mkRing?.[currentFrame]?.forEach(data => makeRing(data));
+		updateRings();
 
 		// 歌詞表示
 		g_scoreObj.wordData[currentFrame]?.forEach(wordData => updateWord(wordData, currentFrame));
@@ -1853,6 +1931,111 @@ const mainInit = () => {
 	} else {
 		g_timeoutEvtId = g_timerHandler.setTimeout(flowTimeline, 1000 / g_fps);
 	}
+};
+
+/** マウス/タッチ位置 (リングノートの判定用) */
+const g_pointer = { x: 0, y: 0, valid: false };
+let g_pointerBound = false;
+
+/** デバイス待機防止用の維持音 */
+let g_ringKeepAlive = null;
+
+/**
+ * リングノートの効果音が欠けないよう、聞こえないレベルのノイズを鳴らし続ける
+ * - 完全な無音だとデバイスが省電力に入り、その直後の短い効果音が欠けることがある
+ * - 振幅1e-4は16bitで約3LSB(約-80dBFS)で、聞こえない
+ */
+const startRingKeepAlive = () => {
+	stopRingKeepAlive();
+	const ctx = getSharedAudioContext();
+	const buffer = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+	const data = buffer.getChannelData(0);
+	for (let i = 0; i < data.length; i++) {
+		data[i] = (Math.random() * 2 - 1) * 1e-4;
+	}
+	const source = ctx.createBufferSource();
+	source.buffer = buffer;
+	source.loop = true;
+	source.connect(ctx.destination);
+	source.start();
+	g_ringKeepAlive = source;
+};
+
+const stopRingKeepAlive = () => {
+	if (g_ringKeepAlive) {
+		try {
+			g_ringKeepAlive.stop();
+		} catch (e) { /* 既に停止済み */ }
+		g_ringKeepAlive.disconnect();
+		g_ringKeepAlive = null;
+	}
+};
+
+/**
+ * ポインタ監視の登録
+ * - divRootに登録することで、画面遷移時の clearWindow (removeByContainer) で自動的に解除される
+ * - mainInitのたびに clearWindow が先に呼ばれるため、リトライ時も重複しない
+ * - マウス: divRoot内にいる間は常に有効 (リングはdivRoot内にしか無いため十分)
+ * - タッチ: 触れている間のみ有効
+ */
+const bindRingPointer = () => {
+	g_pointer.valid = false;
+
+	const update = evt => {
+		g_pointer.x = evt.clientX;
+		g_pointer.y = evt.clientY;
+		g_pointer.valid = true;
+	};
+	const release = evt => {
+		if (evt.pointerType === `touch`) {
+			g_pointer.valid = false;
+		}
+	};
+	const invalidate = () => g_pointer.valid = false;
+
+	g_handler.addListener(divRoot, `pointermove`, update);
+	g_handler.addListener(divRoot, `pointerdown`, update);
+	g_handler.addListener(divRoot, `pointerup`, release);
+	g_handler.addListener(divRoot, `pointercancel`, release);
+	g_handler.addListener(divRoot, `pointerleave`, invalidate);
+};
+
+/**
+ * リングノート用効果音の再生
+ * @param {number} _no 音番号 (0: 無音)
+ */
+const playRingSound = _no => {
+	const buffer = g_ringSoundBuffers.get(_no);
+	if (_no <= 0 || buffer === undefined) {
+		return;
+	}
+	const ctx = getSharedAudioContext();
+	const source = ctx.createBufferSource();
+	const gain = ctx.createGain();
+	source.buffer = buffer;
+	gain.gain.value = g_stateObj.volume / 100;
+	source.connect(gain);
+	gain.connect(ctx.destination);
+	source.onended = () => {
+		source.disconnect();
+		gain.disconnect();
+	};
+	source.start();
+};
+
+/**
+ * 要素(ガイド円)の内側にポインタがあるか
+ * - 画面の拡縮・transform後の実座標で判定するため getBoundingClientRect を使用
+ */
+const isPointerInside = _el => {
+	if (!g_pointer.valid) {
+		return false;
+	}
+	const rect = _el.getBoundingClientRect();
+	const radius = rect.width / 2;
+	const dx = g_pointer.x - (rect.left + radius);
+	const dy = g_pointer.y - (rect.top + rect.height / 2);
+	return dx * dx + dy * dy <= radius * radius;
 };
 
 /**
@@ -2610,6 +2793,11 @@ const changeLifeColor = (_state = ``) => {
 };
 
 /**
+ * 判定カスタムフック名 (リングノートは _j = -1 で専用フックへ)
+ */
+const judgHookName = (_name, _j) => _j < 0 ? `judg_ring_${_name}` : `judg_${_name}`;
+
+/**
  * ゲージ回復処理
  */
 const lifeRecovery = () => {
@@ -2693,7 +2881,7 @@ const judgeRecovery = (_name, _difFrame, _j) => {
 	if (_name === `shakin`) {
 		quickRetry(`Shakin(Great)`);
 	}
-	safeExecuteCustomHooks(`g_customJsObj.judg_${_name}`, g_customJsObj[`judg_${_name}`], _difFrame, _j);
+	safeExecuteCustomHooks(`g_customJsObj.${judgHookName(_name, _j)}`, g_customJsObj[judgHookName(_name, _j)], _difFrame, _j);
 };
 
 /**
@@ -2708,7 +2896,7 @@ const judgeDamage = (_name, _difFrame, _j) => {
 	comboJ.textContent = ``;
 	diffJ.textContent = ``;
 	lifeDamage();
-	safeExecuteCustomHooks(`g_customJsObj.judg_${_name}`, g_customJsObj[`judg_${_name}`], _difFrame, _j);
+	safeExecuteCustomHooks(`g_customJsObj.${judgHookName(_name, _j)}`, g_customJsObj[judgHookName(_name, _j)], _difFrame, _j);
 };
 
 /**
@@ -2736,7 +2924,7 @@ const judgeMatari = (_difFrame, _j) => {
 	finishViewing();
 	quickRetry(`Matari(Good)`);
 
-	safeExecuteCustomHooks(`g_customJsObj.judg_matari`, g_customJsObj.judg_matari, _difFrame, _j);
+	safeExecuteCustomHooks(`g_customJsObj.${judgHookName(`matari`, _j)}`, g_customJsObj[judgHookName(`matari`, _j)], _difFrame, _j);
 };
 
 /**
