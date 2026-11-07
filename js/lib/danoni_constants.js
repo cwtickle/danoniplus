@@ -1156,7 +1156,7 @@ const g_judgPosObj = {
 /** リングノートの共通設定 */
 const g_ringObj = {
     baseFrame: 60,          // リング速度1のときの出現～到達フレーム数
-    radius: 40,             // ガイド半径の既定値(px)
+    radius: 50,             // ガイド半径の既定値(px)
     minRadius: 5,          // ガイド半径の最小値(px)
     startRate: 0.1,         // 出現時のリング半径(ガイド半径に対する比)
     color: `#ffffff`,       // リング色の既定値

@@ -1183,8 +1183,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			return [];
 		}
 		const ringData = [];
-		const getNum = (_val, _default, _condition = true) =>
-			hasVal(_val) && !isNaN(parseFloat(_val)) && _condition ? parseFloat(_val) : _default;
+		const getNum = (_val, _default, _condition = true, _default2 = _default) =>
+			hasVal(_val) && !isNaN(parseFloat(_val))
+				? (_condition ? parseFloat(_val) : _default2)
+				: _default;
 
 		splitLF(dosRingData).filter(data => hasVal(data)).forEach(tmpData => {
 			const t = tmpData.split(`,`).map(val => trimStr(val));
@@ -1195,7 +1197,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 			ringData.push([
 				calcFrame(t[0]), parseFloat(t[1]), parseFloat(t[2]),
 				getNum(t[3], g_ringObj.sound),
-				getNum(t[4], g_ringObj.radius, t[4] >= g_ringObj.minRadius),
+				getNum(t[4], g_ringObj.radius, t[4] >= g_ringObj.minRadius, g_ringObj.minRadius),
 				hasVal(t[5]) ? t[5] : (g_headerObj.baseBrightFlg ? g_ringObj.colorLight : g_ringObj.color),
 				getNum(t[6], 0),
 			]);
