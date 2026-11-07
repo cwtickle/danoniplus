@@ -5303,7 +5303,8 @@ const g_lang_msgObj = {
             `初期値を0%～50%の間で設定できます。「Lock」ボタンで可視範囲の調整を不可にします。`,
         opacity: `判定キャラクタ、コンボ数、Fast/Slowの透明度を設定します。`,
         hitPosition: `判定位置にズレを感じる場合、数値を変えることで判定の中央位置を1px単位(プラス:手前, マイナス:奥側)で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
-        ringSpeed: `リングノートの表示速度を設定します。`,
+        ringSpeed: `リングノートの表示速度を設定します。\n` +
+            `0.5x ～ 3.0xの間で設定できます。初期値は1.0xです。`,
         ringGuide: `リングノートに対するガイド表示の設定です。\n` +
             `[Next] 次に判定するリングのみ表示します。\n` +
             `[ALL] 出現中すべてのリングノートに対するガイドを表示します。\n` +
@@ -5484,7 +5485,8 @@ const g_lang_msgObj = {
         opacity: `Set the transparency of some objects such as judgment, combo counts, fast and slow`,
         hitPosition: `If you feel a discrepancy in the judgment position, you can adjust the center position of the judgment in 1px increments (plus: in front, minus: at the back) by changing the numerical value. \n` +
             `Use this function when there is a tendency to push too fast or too slow.`,
-        ringSpeed: `Set the display speed of the ring notes.`,
+        ringSpeed: `Set the display speed of the ring notes.\n` +
+            `You can set it between 0.5x and 3.0x. The initial value is 1.0x.`,
         ringGuide: `Settings for guide display on ring-bound notebooks. \n` +
             `[Next] Display only the next ring to be judged.\n` +
             `[ALL] Display guides for all ring notes that are currently appearing.\n` +
