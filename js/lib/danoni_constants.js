@@ -48,7 +48,7 @@ const g_limitObj = {
     // 設定画面用のボタンの位置、幅、高さ、フォントサイズ
     setLblLeft: 160,
     setLblWidth: 210,
-    setLblHeight: 22,
+    setLblHeight: 21,
     setLblSiz: 17,
 
     setLblLeftShort: 250,
@@ -124,6 +124,8 @@ const g_settingPos = {
         appearance: { heightPos: 5.8, y: 10 },
         opacity: { heightPos: 7.4, y: 10 },
         hitPosition: { heightPos: 8.4, y: 10 },
+        ringSpeed: { heightPos: 9.8, y: 10 },
+        ringGuide: { heightPos: 10.8, y: 10 },
     },
     exSetting: {
         playWindow: { heightPos: 0 },
@@ -564,6 +566,16 @@ const updateWindowSiz = () => {
             title: g_msgObj.displayPreview,
         },
         btnDisplayReset: {
+            x: g_btnX() + g_btnWidth() - 80, y: 3, w: 80, h: 18, siz: 11,
+        },
+        lblRingSetting: {
+            x: g_sWidth / 2 - 100, y: 0, w: 200, h: 20, siz: 24,
+        },
+        btnRingSetting: {
+            x: g_btnX() + Math.floor((g_btnWidth() - 80) / 2), y: 3, w: 80, h: 18, siz: 11,
+            title: g_msgObj.ringSetting,
+        },
+        btnRingClose: {
             x: g_btnX() + g_btnWidth() - 80, y: 3, w: 80, h: 18, siz: 11,
         },
         lblDisplayPreviewMsg: {
@@ -1502,6 +1514,13 @@ const g_settings = {
     hitPositionNum: g_limitObj.hitPosition * 10,
     hitPositionTerms: [50, 10],
 
+    ringSpeeds: makeSpeedList(0.5, 3),
+    ringSpeedNum: 2,
+    ringSpeedTerms: [5],
+
+    ringGuides: [`All`, `Next`],
+    ringGuideNum: 0,
+
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
     volumeNum: 0,
     bgmVolumeNum: 0,
@@ -2420,7 +2439,7 @@ let g_displays = [`stepZone`, `judgment`, `lifeGauge`, `score`, `musicInfo`, `fi
     `velocity`, `color`, `background`, `arrowEffect`, `special`];
 
 // ローカルストレージ保存対象
-let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`];
+let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`, `ringSpeed`, `ringGuide`];
 
 // 廃棄対象のリスト(過去の登録対象をリスト化。ここに乗せるとローカルストレージから自動消去される)
 let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
@@ -3077,6 +3096,13 @@ const g_shortcutObj = {
         ShiftLeft_KeyT: { id: `lnkHitPositionL` },
         ShiftRight_KeyT: { id: `lnkHitPositionL` },
         KeyT: { id: `lnkHitPositionLL` },
+
+        ShiftLeft_KeyS: { id: `lnkRingSpeedL` },
+        ShiftRight_KeyS: { id: `lnkRingSpeedL` },
+        KeyS: { id: `lnkRingSpeedR` },
+        ShiftLeft_KeyG: { id: `lnkRingGuideL` },
+        ShiftRight_KeyG: { id: `lnkRingGuideL` },
+        KeyG: { id: `lnkRingGuideR` },
 
         ShiftLeft_Digit1: { id: `lnkstepZoneR` },
         ShiftRight_Digit1: { id: `lnkstepZoneR` },
@@ -4799,6 +4825,9 @@ const g_lblNameObj = {
     JudgRange: `JudgRange`,
     AutoRetry: `AutoRetry`,
 
+    RingSpeed: `RingSpeed`,
+    RingGuide: `RingGuide`,
+
     'u_x': `x`,
     'u_%': `%`,
     'u_key': `key`,
@@ -5253,6 +5282,8 @@ const g_lang_msgObj = {
         judgRange: `判定の許容範囲を設定します。\n[Normal] 通常、[Narrow/Hard] 辛判定、[ExHard] 激辛判定`,
         autoRetry: `自動リトライの条件を設定します。\n[Miss] ミス時、[Matari] マターリ時、[Shakin] シャキン時、[FS] Fast/Slow発生時`,
 
+        ringGuide: `リングのガイド表示 [All] 出現中すべて / [Next] 次に判定するリングのみ`,
+
         lnkSpeedG: `譜面の進行別の速度変化状況を表示`,
         lnkDensityG: `譜面の密度状況を表示`,
         lnkToolDifG: `譜面の難易度、矢印・フリーズアローの分布状況を表示`,
@@ -5425,6 +5456,8 @@ const g_lang_msgObj = {
             `[Matari(Good)] When good\n` +
             `[Shakin(Great)] When great\n` +
             `[Fast/Slow] When Fast/Slow occurs`,
+
+        ringGuide: `Ring guide display [All] all rings on screen / [Next] only the next ring to judge`,
 
         lnkSpeedG: `Displays the velocity change status by progression of the chart.`,
         lnkDensityG: `Displays the density status of the chart.`,

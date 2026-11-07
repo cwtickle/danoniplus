@@ -4068,6 +4068,32 @@ const createSettingsDisplayWindow = _sprite => {
 		unitName: g_lblNameObj.pixel,
 		addRFunc: () => updatePreviewHitPositionLine(g_stateObj.hitPosition),
 	});
+
+	if (hasRingNotes()) {
+		// ---------------------------------------------------
+		// リングノートの速度 (RingSpeed)
+		// 縦位置: 9.8
+		g_settings.ringSpeedNum = Math.max(g_settings.ringSpeeds.indexOf(g_stateObj.ringSpeed), 0);
+		g_stateObj.ringSpeed = g_settings.ringSpeeds[g_settings.ringSpeedNum];
+		createGeneralSetting(spriteList.ringSpeed, `ringSpeed`, { skipTerms: g_settings.ringSpeedTerms, unitName: ` ${g_lblNameObj.multi}` });
+
+		// ---------------------------------------------------
+		// リングノートのガイド表示 (RingGuide)
+		// 縦位置: 10.8
+		g_settings.ringGuideNum = Math.max(g_settings.ringGuides.indexOf(g_stateObj.ringGuide), 0);
+		g_stateObj.ringGuide = g_settings.ringGuides[g_settings.ringGuideNum];
+		createGeneralSetting(spriteList.ringGuide, `ringGuide`);
+	}
+};
+
+/**
+ * 選択中の譜面にリングノートが含まれるか
+ * - 譜面データの ring_data (ring2_data ...) の有無で判定する
+ * @returns {boolean}
+ */
+const hasRingNotes = () => {
+	const scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg, false);
+	return hasVal(g_rootObj[`ring${scoreIdHeader}_data`]);
 };
 
 /**
