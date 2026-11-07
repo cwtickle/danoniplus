@@ -236,6 +236,7 @@ let g_cxtDeleteFlg = {};
 const g_detailObj = {
 	arrowCnt: [],
 	frzCnt: [],
+	ringCnt: [],
 	maxDensity: [],
 	maxDensity2Push: [],
 	maxDensity3Push: [],

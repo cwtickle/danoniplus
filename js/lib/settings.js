@@ -625,6 +625,9 @@ const drawDensityGraph = _scoreId => {
 	updateScoreDetailLabel(`Density`, `Arrow`, obj.arrowCnts, 3, g_lblNameObj.s_arrow);
 	updateScoreDetailLabel(`Density`, `Frz`, obj.frzCnts, 4,
 		`${g_lblNameObj.s_frz}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">(2x)</span>' : ''}`);
+	if (hasRingNotes()) {
+		updateScoreDetailLabel(`Density`, `Ring`, g_detailObj.ringCnt[_scoreId], 5, g_lblNameObj.s_ring);
+	}
 };
 
 /**
@@ -787,9 +790,10 @@ const makeDifInfo = _scoreId => {
 	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`)
 		.join(`${makeDedupliArray(g_detailObj.toolDif[_scoreId].push3).length} /cnt:${g_detailObj.toolDif[_scoreId].push3cnt}`);
 	dataArrowInfo.innerHTML =
-		`${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1)} ` +
+		`${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1) + (hasRingNotes() ? g_detailObj.ringCnt[_scoreId] : 0)} ` +
 		`<span style="font-size:${wUnit(g_limitObj.difSelectorSiz)};">` +
-		`(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''})` +
+		`(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''}` +
+		`${hasRingNotes() ? ` + ${g_detailObj.ringCnt[_scoreId]}` : ''})` +
 		`</span>`;
 
 	const makeArrowCntsView = (_cntlist) => {
@@ -3088,7 +3092,8 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	let rcvText = round2(_rcv), dmgText = round2(_dmg);
 	let realRcv = _rcv, realDmg = _dmg;
 	const allCnt = sumData(g_detailObj.arrowCnt[g_stateObj.scoreId]) +
-		(g_headerObj.frzStartjdgUse ? 2 : 1) * sumData(g_detailObj.frzCnt[g_stateObj.scoreId]);
+		(g_headerObj.frzStartjdgUse ? 2 : 1) * sumData(g_detailObj.frzCnt[g_stateObj.scoreId]) +
+		g_detailObj.ringCnt[g_stateObj.scoreId];
 
 	// ゲージ設定が矢印数依存の場合、実際の値に変換して表示する
 	// 表示上、計算した値は小数第二位までの表示とする（それ以外はそのまま）
@@ -4087,14 +4092,10 @@ const createSettingsDisplayWindow = _sprite => {
 };
 
 /**
- * 選択中の譜面にリングノートが含まれるか
- * - 譜面データの ring_data (ring2_data ...) の有無で判定する
+ * 選択中の譜面にリングノートが含まれるかをチェック
  * @returns {boolean}
  */
-const hasRingNotes = () => {
-	const scoreIdHeader = setScoreIdHeader(g_stateObj.scoreId, g_stateObj.scoreLockFlg, false);
-	return hasVal(g_rootObj[`ring${scoreIdHeader}_data`]);
-};
+const hasRingNotes = () => (g_detailObj.ringCnt[g_stateObj.scoreId] ?? 0) > 0;
 
 /**
  * Displayボタンを切り替えたときに連動して切り替えるボタンの設定

@@ -502,6 +502,7 @@ const loadLocalStorage = (_musicId = ``) => {
 	checkLocalParam(`appearance`);
 	checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
 	checkLocalParam(`hitPosition`, C_TYP_FLOAT, g_settings.hitPositionNum);
+	checkLocalParam(`ringGuide`);
 
 	// ハイスコア取得準備
 	if (g_localStorage.highscores === undefined) {
@@ -725,6 +726,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 
 	g_detailObj.arrowCnt[_scoreId] = noteCnt.arrow.concat();
 	g_detailObj.frzCnt[_scoreId] = noteCnt.frz.map((val, k) => _scoreObj.frzData[k].length % 2 === 0 ? val : val - 0.5);
+	g_detailObj.ringCnt[_scoreId] = Math.floor((_scoreObj.ringData?.length ?? 0) / g_ringObj.cols);
 	g_detailObj.startFrame[_scoreId] = startFrame;
 	g_detailObj.playingFrame[_scoreId] = playingFrame;
 	g_detailObj.playingFrameWithBlank[_scoreId] = lastFrame - startFrame;

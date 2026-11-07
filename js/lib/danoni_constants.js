@@ -1518,7 +1518,7 @@ const g_settings = {
     ringSpeedNum: 2,
     ringSpeedTerms: [5],
 
-    ringGuides: [`All`, `Next`],
+    ringGuides: [`Next`, `All`],
     ringGuideNum: 0,
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
@@ -2439,7 +2439,7 @@ let g_displays = [`stepZone`, `judgment`, `lifeGauge`, `score`, `musicInfo`, `fi
     `velocity`, `color`, `background`, `arrowEffect`, `special`];
 
 // ローカルストレージ保存対象
-let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`, `ringSpeed`, `ringGuide`];
+let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`, `ringGuide`];
 
 // 廃棄対象のリスト(過去の登録対象をリスト化。ここに乗せるとローカルストレージから自動消去される)
 let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
@@ -4794,6 +4794,7 @@ const g_lblNameObj = {
     s_time: `Time`,
     s_arrow: `Arrow`,
     s_frz: `Frz`,
+    s_ring: `Ring`,
 
     s_rev: `MapScroll`,
 
