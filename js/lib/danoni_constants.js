@@ -1466,7 +1466,7 @@ const g_settings = {
         customKey: 0,
         others: 0,
     },
-    environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`,
+    environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`, `ringSpeed`, `ringGuide`,
         `arrowJdgX`, `arrowJdgY`, `frzJdgX`, `frzJdgY`, `shortcutX`, `shortcutY`],
     keyStorages: [`reverse`, `keyCtrl`, `keyCtrlPtn`, `shuffle`, `color`, `stepRtn`, `shortcut`],
     colorStorages: [`setColor`, `setShadowColor`, `frzColor`, `frzShadowColor`],
@@ -2445,7 +2445,7 @@ let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosi
 let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
     `d_score`, `d_musicinfo`, `d_filterline`];
 
-let g_canDisabledSettings = [`speed`, `motion`, `scroll`, `reverse`, `shuffle`, `autoPlay`, `gauge`,
+let g_canDisabledSettings = [`speed`, `motion`, `scroll`, `reverse`, `shuffle`, `autoPlay`, `gauge`, `ringSpeed`, `ringGuide`,
     `excessive`, `appearance`, `playWindow`, `stepArea`, `frzReturn`, `shaking`, `effect`, `camoufrage`, `camoufrageType`,
     `swapping`, `judgRange`, `autoRetry`];
 
