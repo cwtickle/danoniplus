@@ -651,7 +651,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${_keyCtrlPtn}`].length;
 
 	// 譜面密度グラフ用のデータ作成
-	const noteCnt = { arrow: [], frz: [] };
+	const noteCnt = { arrow: [], frz: [], ring: Math.floor((_scoreObj.ringData?.length ?? 0) / g_ringObj.cols) };
 	const densityData = fillArray(g_limitObj.densityDivision);
 	let allData = 0;
 
@@ -675,6 +675,20 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 				}
 			}));
 		fullData = fullData.concat(..._scoreObj.arrowData[j], ...tmpFrzData);
+	}
+	if (_scoreObj.ringData !== undefined) {
+		const ringData = _scoreObj.ringData.filter((data, k) => k % g_ringObj.cols === 0);
+		ringData.forEach(note => {
+			if (isNaN(parseFloat(note))) {
+				return;
+			}
+			const point = Math.floor((note - firstArrowFrame) / playingFrame * g_limitObj.densityDivision);
+			if (point >= 0) {
+				densityData[point]++;
+				allData++;
+			}
+		});
+		fullData = fullData.concat(ringData ?? []);
 	}
 
 	fullData = fullData.filter(val => !isNaN(parseFloat(val))).sort((a, b) => a - b);
@@ -726,7 +740,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 
 	g_detailObj.arrowCnt[_scoreId] = noteCnt.arrow.concat();
 	g_detailObj.frzCnt[_scoreId] = noteCnt.frz.map((val, k) => _scoreObj.frzData[k].length % 2 === 0 ? val : val - 0.5);
-	g_detailObj.ringCnt[_scoreId] = Math.floor((_scoreObj.ringData?.length ?? 0) / g_ringObj.cols);
+	g_detailObj.ringCnt[_scoreId] = noteCnt.ring;
 	g_detailObj.startFrame[_scoreId] = startFrame;
 	g_detailObj.playingFrame[_scoreId] = playingFrame;
 	g_detailObj.playingFrameWithBlank[_scoreId] = lastFrame - startFrame;

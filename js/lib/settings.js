@@ -625,9 +625,7 @@ const drawDensityGraph = _scoreId => {
 	updateScoreDetailLabel(`Density`, `Arrow`, obj.arrowCnts, 3, g_lblNameObj.s_arrow);
 	updateScoreDetailLabel(`Density`, `Frz`, obj.frzCnts, 4,
 		`${g_lblNameObj.s_frz}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">(2x)</span>' : ''}`);
-	if (hasRingNotes()) {
-		updateScoreDetailLabel(`Density`, `Ring`, g_detailObj.ringCnt[_scoreId], 5, g_lblNameObj.s_ring);
-	}
+	updateScoreDetailLabel(`Density`, `Ring`, g_detailObj.ringCnt[_scoreId], 5, g_lblNameObj.s_ring);
 };
 
 /**
@@ -737,11 +735,13 @@ const makeDifInfoLabels = _scoreId => {
 			// 縦連
 			`${g_detailObj.toolDif[j].tate}\t` +
 			// 総矢印数
-			`${(obj.arrowCnts + obj.frzCnts)}\t` +
+			`${(obj.arrowCnts + obj.frzCnts + g_detailObj.ringCnt[j])}\t` +
 			// 矢印
 			`${obj.arrowCnts}\t` +
 			// フリーズアロー
 			`${obj.frzCnts}\t` +
+			// リングノート
+			`${g_detailObj.ringCnt[j]}\t` +
 			// APM
 			`${obj.apm}\t` +
 			// 時間(分秒)
@@ -790,7 +790,7 @@ const makeDifInfo = _scoreId => {
 	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`)
 		.join(`${makeDedupliArray(g_detailObj.toolDif[_scoreId].push3).length} /cnt:${g_detailObj.toolDif[_scoreId].push3cnt}`);
 	dataArrowInfo.innerHTML =
-		`${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1) + (hasRingNotes() ? g_detailObj.ringCnt[_scoreId] : 0)} ` +
+		`${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1) + g_detailObj.ringCnt[_scoreId]} ` +
 		`<span style="font-size:${wUnit(g_limitObj.difSelectorSiz)};">` +
 		`(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''}` +
 		`${hasRingNotes() ? ` + ${g_detailObj.ringCnt[_scoreId]}` : ''})` +
