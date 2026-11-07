@@ -1480,6 +1480,7 @@ const mainInit = () => {
 		};
 		const guide = createEmptySprite(ringSprite, `ringGuide${no}`, {
 			...base, border: `solid ${g_ringObj.lineWidth}px ${g_ringObj.guideColor}`,
+			visibility: g_stateObj.ringGuide === `Hidden` ? `hidden` : `visible`,
 		});
 		const body = createEmptySprite(ringSprite, `ringBody${no}`, {
 			...base, border: `solid ${g_ringObj.lineWidth}px ${_data.color}`,

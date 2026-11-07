@@ -116,9 +116,9 @@ const g_settingPos = {
         shuffle: { heightPos: 5.5 },
         autoPlay: { heightPos: 6.5 },
         gauge: { heightPos: 7.5 },
-        adjustment: { heightPos: 10.5 },
-        fadein: { heightPos: 11.5 },
-        volume: { heightPos: 12.5 },
+        adjustment: { heightPos: 10.6 },
+        fadein: { heightPos: 11.6 },
+        volume: { heightPos: 12.6 },
     },
     settingsDisplay: {
         appearance: { heightPos: 5.8, y: 10 },
@@ -1515,10 +1515,10 @@ const g_settings = {
     hitPositionTerms: [50, 10],
 
     ringSpeeds: makeSpeedList(0.5, 3),
-    ringSpeedNum: 2,
+    ringSpeedNum: 0,
     ringSpeedTerms: [5],
 
-    ringGuides: [`Next`, `All`],
+    ringGuides: [`Next`, `ALL`, `Hidden`],
     ringGuideNum: 0,
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
@@ -2439,7 +2439,7 @@ let g_displays = [`stepZone`, `judgment`, `lifeGauge`, `score`, `musicInfo`, `fi
     `velocity`, `color`, `background`, `arrowEffect`, `special`];
 
 // ローカルストレージ保存対象
-let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`, `ringGuide`];
+let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`, `ringSpeed`, `ringGuide`];
 
 // 廃棄対象のリスト(過去の登録対象をリスト化。ここに乗せるとローカルストレージから自動消去される)
 let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
@@ -5283,8 +5283,6 @@ const g_lang_msgObj = {
         judgRange: `判定の許容範囲を設定します。\n[Normal] 通常、[Narrow/Hard] 辛判定、[ExHard] 激辛判定`,
         autoRetry: `自動リトライの条件を設定します。\n[Miss] ミス時、[Matari] マターリ時、[Shakin] シャキン時、[FS] Fast/Slow発生時`,
 
-        ringGuide: `リングのガイド表示 [All] 出現中すべて / [Next] 次に判定するリングのみ`,
-
         lnkSpeedG: `譜面の進行別の速度変化状況を表示`,
         lnkDensityG: `譜面の密度状況を表示`,
         lnkToolDifG: `譜面の難易度、矢印・フリーズアローの分布状況を表示`,
@@ -5304,7 +5302,13 @@ const g_lang_msgObj = {
             `[Hid&Sud+] Hidden+とSudden+を組み合わせて表示します。` +
             `初期値を0%～50%の間で設定できます。「Lock」ボタンで可視範囲の調整を不可にします。`,
         opacity: `判定キャラクタ、コンボ数、Fast/Slowの透明度を設定します。`,
-        hitPosition: `判定位置にズレを感じる場合、\n数値を変えることで判定の中央位置を1px単位(プラス:手前, マイナス:奥側)で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
+        hitPosition: `判定位置にズレを感じる場合、数値を変えることで判定の中央位置を1px単位(プラス:手前, マイナス:奥側)で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
+        ringSpeed: `リングノートの表示速度を設定します。`,
+        ringGuide: `リングノートに対するガイド表示の設定です。\n` +
+            `[Next] 次に判定するリングのみ表示します。\n` +
+            `[ALL] 出現中すべてのリングノートに対するガイドを表示します。\n` +
+            `[Hidden] すべてのガイド表示を非表示にします。`,
+
         displayPreview: `プレイ画面上のオブジェクトの表示状態をプレビューします。\n判定キャラクタ部分をドラッグで移動するとその位置に補正されます。`,
         displayPreviewResetConfirm: `プレイ画面上のオブジェクトの位置を初期状態に戻します。よろしいですか？`,
 
@@ -5458,8 +5462,6 @@ const g_lang_msgObj = {
             `[Shakin(Great)] When great\n` +
             `[Fast/Slow] When Fast/Slow occurs`,
 
-        ringGuide: `Ring guide display [All] all rings on screen / [Next] only the next ring to judge`,
-
         lnkSpeedG: `Displays the velocity change status by progression of the chart.`,
         lnkDensityG: `Displays the density status of the chart.`,
         lnkToolDifG: `Displays the difficulty level of the chart and the distribution of arrows and freeze arrows.`,
@@ -5482,6 +5484,12 @@ const g_lang_msgObj = {
         opacity: `Set the transparency of some objects such as judgment, combo counts, fast and slow`,
         hitPosition: `If you feel a discrepancy in the judgment position, you can adjust the center position of the judgment in 1px increments (plus: in front, minus: at the back) by changing the numerical value. \n` +
             `Use this function when there is a tendency to push too fast or too slow.`,
+        ringSpeed: `Set the display speed of the ring notes.`,
+        ringGuide: `Settings for guide display on ring-bound notebooks. \n` +
+            `[Next] Display only the next ring to be judged.\n` +
+            `[ALL] Display guides for all ring notes that are currently appearing.\n` +
+            `[Hidden] Hide all guide displays.`,
+
         displayPreview: `Preview the display status of objects on the play screen.\nDragging the judgment character section will adjust it to that position.`,
         displayPreviewResetConfirm: `Reset the position of objects on the play screen to the initial state. Is it OK?`,
 

@@ -502,6 +502,7 @@ const loadLocalStorage = (_musicId = ``) => {
 	checkLocalParam(`appearance`);
 	checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
 	checkLocalParam(`hitPosition`, C_TYP_FLOAT, g_settings.hitPositionNum);
+	checkLocalParam(`ringSpeed`, C_TYP_FLOAT, Math.max(g_settings.ringSpeeds.indexOf(g_stateObj.ringSpeed), 0));
 	checkLocalParam(`ringGuide`);
 
 	// ハイスコア取得準備
@@ -646,7 +647,7 @@ const getFullMusicUrl = (_musicUrl = ``) => {
 const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 	const lastFrame = getLastFrame(_scoreObj, _keyCtrlPtn) + 1;
 	const startFrame = getStartFrame(lastFrame, 0, _scoreId);
-	const firstArrowFrame = getFirstArrowFrame(_scoreObj, _keyCtrlPtn);
+	const firstArrowFrame = getFirstArrowFrame(_scoreObj, _keyCtrlPtn, true);
 	const playingFrame = lastFrame - firstArrowFrame;
 	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${_keyCtrlPtn}`].length;
 
@@ -756,11 +757,13 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 			timeMargin: 35,
 			mmWidthBase: (g_sWidth - 500) / 2 + 290,
 			mmMarginY: 2,
+			// リングノート用の帯 (リングがある譜面のみ。余白4px + 帯28px)
+			ringBandWidth: noteCnt.ring > 0 ? 32 : 0,
 			get laneWidth() {
-				return Math.min((this.mmWidthBase - this.timeMargin) / keyNum, 40);
+				return Math.min((this.mmWidthBase - this.timeMargin - this.ringBandWidth) / keyNum, 40);
 			},
 			get logicalWidth() {
-				const logicalWidth = this.timeMargin + (this.laneWidth * keyNum);
+				const logicalWidth = this.timeMargin + (this.laneWidth * keyNum) + this.ringBandWidth;
 				return Math.ceil(logicalWidth * g_dpr) / g_dpr;
 			}
 		},

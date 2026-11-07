@@ -1035,9 +1035,11 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 
 	const params = g_detailObj.miniMapParams[_scoreId];
 	const kPtn = params._keyCtrlPtn;
-	if (!g_detailObj.scoreMinimapHeader[kPtn]) {
-		// ヘッダーはキー種ごとに共通なので、未作成の場合のみ生成してキャッシュ
-		g_detailObj.scoreMinimapHeader[kPtn] = createMinimapHeader(params.config, kPtn, params._keyNum);
+	// リング帯の有無で幅が変わるため、キー種 + リング帯有無でキャッシュする
+	const headerKey = params.config.ringBandWidth > 0 ? `${kPtn}_ring` : kPtn;
+	if (!g_detailObj.scoreMinimapHeader[headerKey]) {
+		// ヘッダーはキー種(+リング帯有無)ごとに共通なので、未作成の場合のみ生成してキャッシュ
+		g_detailObj.scoreMinimapHeader[headerKey] = createMinimapHeader(params.config, kPtn, params._keyNum);
 	}
 	if (!savedCanvases) {
 		// 未作成の場合のみミニマップを生成（Lazy Generation）
@@ -1054,7 +1056,7 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 	// --- ヘッダー部分 ---
 	const detailMiniMapHeader = createEmptySprite(detailMiniMap, `detailMiniMapHeader`, g_windowObj.detailMiniMapHeader);
 	$id(`detailMiniMapHeader`).top = wUnit(g_stateObj.miniMapRevFlg ? 230 + g_sHeight - 500 : 0);
-	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[kPtn]);
+	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[headerKey]);
 
 	// --- メイン（譜面）部分 ---
 	const detailMiniMapSub = createEmptySprite(detailMiniMap, `detailMiniMapSub`, g_windowObj.detailMiniMapSub);
@@ -1132,7 +1134,7 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
  * @return {HTMLCanvasElement} ヘッダー用のキャンバス要素
  */
 const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
-	const { timeMargin, laneWidth, logicalWidth } = _config;
+	const { timeMargin, laneWidth, logicalWidth, ringBandWidth = 0 } = _config;
 	const headerHeight = 15; // ヘッダーの固定高
 
 	const canvas = createCanvas(null, { w: logicalWidth, h: headerHeight, position: null });
@@ -1146,6 +1148,12 @@ const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
 
 		// 視覚的な中央調整で +2px
 		fillCanvasText(ctx, keyText, x, headerHeight / 2 + 2, { siz: 10, color: '#999', align: C_ALIGN_CENTER, baseline: `middle` });
+	}
+	// リングノート帯の見出し
+	if (ringBandWidth > 0) {
+		const bandX = timeMargin + laneWidth * _keyNum + 4;
+		fillCanvasText(ctx, `Ring`, bandX + (ringBandWidth - 4) / 2, headerHeight / 2 + 2,
+			{ siz: 10, color: '#999', align: C_ALIGN_CENTER, baseline: `middle` });
 	}
 
 	return canvas;
@@ -1170,7 +1178,7 @@ const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
  */
 const generateMinimapData = (_params, _isReverse) => {
 	const { _scoreObj, _keyNum, _playingFrame, _firstArrowFrame, _keyCtrlPtn, config } = _params;
-	const { scale, timeMargin, laneWidth, logicalWidth, mmMarginY } = config;
+	const { scale, timeMargin, laneWidth, logicalWidth, mmMarginY, ringBandWidth = 0 } = config;
 
 	const mmHeightTotal = _playingFrame * scale + mmMarginY * 2;
 	const canvases = createSplitCanvases(logicalWidth, mmHeightTotal);
@@ -1236,6 +1244,46 @@ const generateMinimapData = (_params, _isReverse) => {
 				ctx.fillRect(timeMargin + j * laneWidth + 1, y - 1.5, laneWidth - 1, 3);
 			});
 		});
+	}
+
+	// 4. リングノート (レーンを持たないため、右側の専用帯に出現フレームのみ表示)
+	//    座標は使わない。同一フレームに複数ある場合は帯内で横に散らして重なりを避ける
+	if (ringBandWidth > 0 && _scoreObj.ringData !== undefined) {
+		const bandX = timeMargin + laneWidth * _keyNum + 4;
+		const bandW = ringBandWidth - 6;
+		const cols = g_ringObj.cols;
+
+		// 帯の背景
+		distributeDrawing(canvases, 0, mmHeightTotal, g_dpr, (ctx) => {
+			ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+			ctx.fillRect(bandX, 0, bandW, mmHeightTotal);
+		});
+
+		// フレーム毎の出現数
+		const frameCnts = new Map();
+		for (let k = 0; k < _scoreObj.ringData.length; k += cols) {
+			const frame = parseFloat(_scoreObj.ringData[k]);
+			if (!isNaN(frame)) {
+				frameCnts.set(frame, (frameCnts.get(frame) ?? 0) + 1);
+			}
+		}
+
+		const seen = new Map();
+		for (let k = 0; k < _scoreObj.ringData.length; k += cols) {
+			const frame = parseFloat(_scoreObj.ringData[k]);
+			if (isNaN(frame)) continue;
+
+			const idx = seen.get(frame) ?? 0;
+			seen.set(frame, idx + 1);
+			const x = bandX + bandW * (idx + 1) / (frameCnts.get(frame) + 1);
+			const y = getY(frame);
+			distributeDrawing(canvases, y - 4, 8, g_dpr, (ctx) => {
+				ctx.fillStyle = 'rgba(255, 170, 60, 0.8)';
+				ctx.beginPath();
+				ctx.arc(x, y, 3, 0, Math.PI * 2);
+				ctx.fill();
+			});
+		}
 	}
 
 	return canvases.map(item => item.canvas);
@@ -1832,7 +1880,7 @@ const createOptionWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
-	// 縦位置: 10.5  短縮ショートカットあり
+	// 縦位置: 10.6  短縮ショートカットあり
 	createGeneralSetting(spriteList.adjustment, `adjustment`, {
 		skipTerms: g_settings.adjustmentTerms, hiddenBtn: true, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
 		unitName: g_lblNameObj.frame, addRFunc: () => viewAdjustment(),
@@ -1861,7 +1909,7 @@ const createOptionWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
-	// 縦位置: 11.5 スライダーあり
+	// 縦位置: 11.6 スライダーあり
 	spriteList.fadein.appendChild(createLblSetting(`Fadein`));
 
 	const lnkFadein = createDivCss2Label(`lnkFadein`, `${g_stateObj.fadein}${g_lblNameObj.percent}`,
@@ -1897,7 +1945,7 @@ const createOptionWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
-	// 縦位置: 12.5
+	// 縦位置: 12.6
 	createGeneralSetting(spriteList.volume, `volume`, { unitName: g_lblNameObj.percent });
 
 	// 譜面番号の再取得

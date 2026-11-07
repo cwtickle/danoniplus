@@ -574,6 +574,8 @@ const prepareScoreData = (_retryFlg = false) => {
 		const ringLead = getRingLeadFrame(g_scoreObj);
 		if (arrowLead > 0 || ringLead > 0) {
 			preblankFrame = Math.max(arrowLead, ringLead);
+			console.log(firstArrowFrame, arrivalFrame, g_limitObj.adjustment, arrowLead, ringLead, preblankFrame)
+			console.log(arrowLead)
 
 			// 譜面データの再読み込み
 			const noteExistObj = {
@@ -1554,9 +1556,10 @@ const getLastFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj
  * 最初の矢印フレームの取得
  * @param {object} _dataObj 
  * @param {string} [_keyCtrlPtn]
+ * @param {boolean} [_includeRing=false] リングノートも含めるか
  * @returns {number}
  */
-const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`) => {
+const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`, _includeRing = false) => {
 
 	let tmpFirstNum = Infinity;
 	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${_keyCtrlPtn}`].length;
@@ -1575,7 +1578,16 @@ const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
 			}
 		});
 	}
-	return (tmpFirstNum === Infinity ? 0 : tmpFirstNum);
+	if (_includeRing) {
+		const ringData = _dataObj.ringData ?? [];
+		for (let k = 0; k + g_ringObj.cols <= ringData.length; k += g_ringObj.cols) {
+			const frame = ringData[k];
+			if (Number.isFinite(frame)) {
+				tmpFirstNum = Math.min(tmpFirstNum, frame);
+			}
+		}
+	}
+	return (tmpFirstNum === Infinity ? g_headerObj.blankFrame : tmpFirstNum);
 };
 
 /**
