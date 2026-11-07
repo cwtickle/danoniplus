@@ -398,12 +398,14 @@ const makeDefaultRingSound = _def => {
 };
 
 /**
- * リング効果音のURL解決 (既定は sound フォルダ)
- * - http(s):// や ../ で始まる場合はそのまま使用
+ * リングノート用効果音の実際のパスを取得
+ * @param {string} _soundUrl
+ * @returns {string}
  */
-const getRingSoundUrl = _name =>
-	/^(https?:)?\/\//.test(_name) || _name.startsWith(`../`) ? _name : `${C_DIR_SOUND}${_name}`;
-
+const getRingSoundUrl = (_soundUrl = ``) => {
+	const [soundFile, soundPath] = getFilePath(_soundUrl, C_DIR_SOUND);
+	return `${soundPath}${soundFile}`;
+};
 
 /**
  * リングノート用効果音の読込
