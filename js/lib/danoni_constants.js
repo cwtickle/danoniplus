@@ -1516,7 +1516,7 @@ const g_settings = {
 
     ringSpeeds: makeSpeedList(0.5, 3),
     ringSpeedNum: 0,
-    ringSpeedTerms: [5],
+    ringSpeedTerms: [20, 5],
 
     ringGuides: [`Next`, `ALL`, `Hidden`],
     ringGuideNum: 0,
