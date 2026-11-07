@@ -2348,6 +2348,8 @@ const makeBgCanvas = (_ctx, { w = g_sWidth, h = g_sHeight } = {}) => {
 const clearWindow = (_customDisplayName = ``) => {
 	if (g_currentPage === `main`) {
 		stopRingKeepAlive();
+		g_ringTouchCleanup?.();
+		g_ringTouchCleanup = null;
 	}
 	closeDisplayPreview();
 	resetKeyControl();

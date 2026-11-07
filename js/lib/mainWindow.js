@@ -52,15 +52,16 @@ const mainInit = () => {
 		`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
 
 	// リングノート用スプライト (mainSpriteの外: PlayWindow/Shaking等の影響を受けない)
-	bindRingPointer(divRoot);
+	let ringSprite = null;
 	if ((g_scoreObj.ringData?.length ?? 0) > 0) {
+		bindRingPointer(divRoot);
 		startRingKeepAlive();
+		ringSprite = createEmptySprite(divRoot, `ringSprite`, mainCommonPos);
+		addTransform(`ringSprite`, `main`,
+			`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
 	} else {
 		stopRingKeepAlive();
 	}
-	const ringSprite = createEmptySprite(divRoot, `ringSprite`, mainCommonPos);
-	addTransform(`ringSprite`, `main`,
-		`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
 
 	// 判定系スプライトを作成（メインスプライトより上位）
 	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, mainCommonPos);
@@ -1546,11 +1547,30 @@ const mainInit = () => {
 	};
 
 	/**
+	  * ライフ制＆ライフ0の場合の途中終了
+	  */
+	const isLifeZero = () => g_workObj.lifeVal === 0 && g_workObj.lifeBorder === 0;
+	const finishByLifeZero = () => {
+		g_audio.pause();
+		g_timerHandler.clearTimeout(g_timeoutEvtId);
+		g_gameOverFlg = true;
+		g_finishFlg = false;
+		resultInit();
+	};
+
+	/**
 	 * フレーム処理(譜面台)
 	 */
 	const flowTimeline = () => {
-		if (g_audio instanceof AudioPlayer && g_audioClockSync &&
+		const terminalFrame = g_scoreObj.frameNum >= fullFrame;
+		if (!terminalFrame && g_audio instanceof AudioPlayer && g_audioClockSync &&
 			musicStartCtxTime !== undefined && g_audio.contextState !== `running`) {
+			// 停止中でも、ライフ0の途中終了は待たずに行う
+			// (最終フレームは上の terminalFrame で本体へ通し、そちらの判定を優先する)
+			if (isLifeZero()) {
+				finishByLifeZero();
+				return;
+			}
 			getSharedAudioContext(); // suspended時はresumeを試行
 			g_timeoutEvtId = g_timerHandler.setTimeout(flowTimeline, g_maxFrameWait);
 			return;
@@ -1734,14 +1754,10 @@ const mainInit = () => {
 			g_workObj.mainEndTime = thisTime;
 			resultInit();
 
-		} else if (g_workObj.lifeVal === 0 && g_workObj.lifeBorder === 0) {
+		} else if (isLifeZero()) {
 
 			// ライフ制＆ライフ０の場合は途中終了
-			g_audio.pause();
-			g_timerHandler.clearTimeout(g_timeoutEvtId);
-			g_gameOverFlg = true;
-			g_finishFlg = false;
-			resultInit();
+			finishByLifeZero();
 
 		} else {
 
@@ -1958,6 +1974,7 @@ const g_pointer = { x: 0, y: 0, valid: false, type: null, id: null };
 
 // 接触中のタッチ位置
 const g_touchPointers = new Map();
+let g_ringTouchCleanup = null;
 
 /** デバイス待機防止用の維持音 */
 let g_ringKeepAlive = null;
@@ -2029,9 +2046,65 @@ const bindRingMouse = () => {
 	}, true);
 };
 
+// タッチを document で追跡し、子要素のクリック先を変更しない。
+const bindRingTouchTracking = _root => {
+	const ignoreSelector = [
+		`.button_common`,
+		`button`, `input`, `select`, `textarea`, `a[href]`,
+		`[role="button"]`, `[data-ring-ignore]`,
+	].join(`,`);
+
+	const onDown = evt => {
+		if (evt.pointerType !== `touch` ||
+			!(evt.target instanceof Element) || !_root.contains(evt.target)) {
+			return;
+		}
+
+		// 除外したコントロールでも、古いマウス・ペン位置は無効にする。
+		g_pointer.valid = false;
+		if (evt.target.closest(ignoreSelector)) {
+			return;
+		}
+
+		g_touchPointers.set(evt.pointerId, {
+			x: evt.clientX,
+			y: evt.clientY,
+			startTarget: evt.target,
+		});
+	};
+
+	const onMove = evt => {
+		const pointer = g_touchPointers.get(evt.pointerId);
+		if (!pointer) return;
+		if (!_root.contains(pointer.startTarget)) {
+			g_touchPointers.delete(evt.pointerId);
+			return;
+		}
+		pointer.x = evt.clientX;
+		pointer.y = evt.clientY;
+	};
+
+	const onEnd = evt => {
+		g_touchPointers.delete(evt.pointerId);
+	};
+
+	const listenerIds = [
+		g_handler.addListener(document, `pointerdown`, onDown, true),
+		g_handler.addListener(document, `pointermove`, onMove, true),
+		...[`pointerup`, `pointercancel`, `lostpointercapture`].map(type =>
+			g_handler.addListener(document, type, onEnd, true)),
+	];
+
+	return () => {
+		listenerIds.forEach(id => g_handler.removeListener(id));
+		g_touchPointers.clear();
+	};
+};
+
 // mainInit のたびに登録する。
 // clearWindow は _root のリスナーを解除する。
 const bindRingPointer = _root => {
+	g_ringTouchCleanup?.();
 	g_touchPointers.clear();
 
 	// マウスの位置だけをリトライ後も保持する。
@@ -2039,23 +2112,11 @@ const bindRingPointer = _root => {
 		g_pointer.valid = false;
 	}
 
+	g_ringTouchCleanup = bindRingTouchTracking(_root);
+
 	const update = evt => {
-		if (evt.pointerType === `touch`) {
-			if (evt.type === `pointerdown`) {
-				// 古いマウス・ペン位置による判定を防ぐ。
-				g_pointer.valid = false;
-				g_touchPointers.set(evt.pointerId, { x: evt.clientX, y: evt.clientY });
-
-				// 開始位置の子要素が削除されても終了イベントを受け取る。
-				_root.setPointerCapture(evt.pointerId);
-			} else if (g_touchPointers.has(evt.pointerId)) {
-				g_touchPointers.set(evt.pointerId, { x: evt.clientX, y: evt.clientY });
-			}
-			return;
-		}
-
-		// マウスは document 側で追跡する。
-		if (evt.pointerType === `mouse`) {
+		// マウスとタッチは document 側で追跡する。
+		if (evt.pointerType === `mouse` || evt.pointerType === `touch`) {
 			return;
 		}
 		g_pointer.x = evt.clientX;
@@ -2075,9 +2136,7 @@ const bindRingPointer = _root => {
 	};
 
 	const leave = evt => {
-		if (evt.pointerType === `touch`) {
-			g_touchPointers.delete(evt.pointerId);
-		} else if (evt.pointerType !== `mouse` &&
+		if (evt.pointerType !== `touch` && evt.type === `pointercancel` &&
 			g_pointer.type === evt.pointerType && g_pointer.id === evt.pointerId) {
 			g_pointer.valid = false;
 		}
@@ -2088,11 +2147,6 @@ const bindRingPointer = _root => {
 	g_handler.addListener(_root, `pointerup`, release);
 	g_handler.addListener(_root, `pointercancel`, release);
 	g_handler.addListener(_root, `pointerleave`, leave);
-	g_handler.addListener(_root, `lostpointercapture`, evt => {
-		if (evt.pointerType === `touch`) {
-			g_touchPointers.delete(evt.pointerId);
-		}
-	});
 };
 
 /**
@@ -2137,7 +2191,13 @@ const isPointerInside = _el => {
 	if (g_pointer.valid && inside(g_pointer)) {
 		return true;
 	}
-	for (const pointer of g_touchPointers.values()) {
+	const root = document.getElementById(`divRoot`);
+	for (const [id, pointer] of g_touchPointers) {
+		// 開始要素が削除されたタッチは、古い座標で判定しない。
+		if (!root?.contains(pointer.startTarget)) {
+			g_touchPointers.delete(id);
+			continue;
+		}
 		if (inside(pointer)) {
 			return true;
 		}
