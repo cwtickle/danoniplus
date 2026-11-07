@@ -1359,6 +1359,9 @@ const g_stateObj = {
 
     // リング速度オプション (将来用。現状は常に1。大きいほど出現～到達が短くなる)
     ringSpeed: 1,
+
+    // リングのガイド表示 (All: 出現中のすべて / Next: 次に判定するリングのみ)
+    ringGuide: `Next`,
 };
 
 const C_VAL_MAXLIFE = 1000;

@@ -1891,6 +1891,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 	// - 開始フレーム前に到達済みのものは除外
 	// - 出現が開始フレーム前のもの(フェードイン時)は、開始フレームから途中の大きさで出現させる
 	g_workObj.mkRing = [];
+	g_workObj.ringArrivals = []; // 通し番号 -> 到達フレーム (到達順)
 	const ringData = _dataObj.ringData ?? [];
 	const cols = g_ringObj.cols;
 	for (let k = 0; k < ringData.length; k += cols) {
@@ -1900,7 +1901,11 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 		}
 		const total = getRingDuration(_dataObj.ringSpeedData, arrival, frames);
 		const appear = Math.max(arrival - total, g_scoreObj.frameNum);
-		(g_workObj.mkRing[appear] ??= []).push({ x, y, radius, color, sound, total, arrivalFrame: arrival - appear });
+		(g_workObj.mkRing[appear] ??= []).push({
+			x, y, radius, color, sound, total, arrivalFrame: arrival - appear,
+			arrival, seq: g_workObj.ringArrivals.length,
+		});
+		g_workObj.ringArrivals.push(arrival);
 	}
 
 	/**

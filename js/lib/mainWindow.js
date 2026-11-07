@@ -1483,10 +1483,14 @@ const mainInit = () => {
 		const body = createEmptySprite(ringSprite, `ringBody${no}`, {
 			...base, border: `solid ${g_ringObj.lineWidth}px ${_data.color}`,
 		});
-		rings.push({ ..._data, cnt: _data.arrivalFrame + 1, guide, body });
+		rings.push({ ..._data, cnt: _data.arrivalFrame + 1, guide, body, guideVisible: true });
 	};
 
+	const ringDone = new Set(); // 判定済み(削除済み)リングの通し番号
+	let ringNextSeq = 0;        // 未判定のうち最小の通し番号
+
 	const removeRing = _i => {
+		ringDone.add(rings[_i].seq);
 		rings[_i].guide.remove();
 		rings[_i].body.remove();
 		rings.splice(_i, 1);
@@ -1519,14 +1523,25 @@ const mainInit = () => {
 			if (hit) {
 				// 判定の選択には正の遅れ、フックには符号付きのカウントを渡す
 				checkJudgment(-ring.cnt)[0](ring.cnt, -1);
-
-				if (!autoPlay) {
-					displayDiff(ring.cnt);
-				}
-
 				playRingSound(ring.sound);
 				removeRing(i);
 			}
+		}
+
+		// ガイドを「次に判定するリング」だけに絞る
+		// - 次 = 未判定(未出現を含む)のうち到達が最も早いリング。出現順ではなく譜面上の到達順で決める
+		if (g_stateObj.ringGuide === `Next`) {
+			while (ringDone.has(ringNextSeq)) {
+				ringNextSeq++;
+			}
+			const nextArrival = g_workObj.ringArrivals[ringNextSeq];
+			rings.forEach(ring => {
+				const visible = ring.cnt <= 0 || ring.arrival === nextArrival;
+				if (ring.guideVisible !== visible) {
+					ring.guide.style.visibility = visible ? `visible` : `hidden`;
+					ring.guideVisible = visible;
+				}
+			});
 		}
 	};
 
