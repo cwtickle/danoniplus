@@ -3135,13 +3135,21 @@ class AudioPlayer {
 }
 
 // グローバルで1つだけ保持(遅延生成)
+let g_sharedAudioResumePending = false;
+let g_sharedAudioResumeNextAt = 0;
 const getSharedAudioContext = () => {
 	if (!g_sharedAudioContext) {
 		g_sharedAudioContext = new AudioContext();
 	}
-	// タブのバックグラウンド化等でsuspendedになることがあるため念のためresume
-	if (g_sharedAudioContext.state === `suspended`) {
-		g_sharedAudioContext.resume();
+	// 復帰待ちのPromiseは重複させず、失敗時の再試行は1秒以上空ける。
+	const now = performance.now();
+	if ((g_sharedAudioContext.state === `suspended` || g_sharedAudioContext.state === `interrupted`) &&
+		!g_sharedAudioResumePending && now >= g_sharedAudioResumeNextAt) {
+		g_sharedAudioResumePending = true;
+		g_sharedAudioResumeNextAt = now + 1000;
+		g_sharedAudioContext.resume().catch(() => { }).finally(() => {
+			g_sharedAudioResumePending = false;
+		});
 	}
 	return g_sharedAudioContext;
 };
