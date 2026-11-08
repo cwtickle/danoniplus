@@ -58,7 +58,7 @@ const mainInit = () => {
 		startRingKeepAlive();
 		ringSprite = createEmptySprite(divRoot, `ringSprite`, mainCommonPos);
 		addTransform(`ringSprite`, `main`,
-			`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
+			`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.shift);
 	} else {
 		stopRingKeepAlive();
 	}
@@ -178,9 +178,8 @@ const mainInit = () => {
 
 	// mainSpriteのtransform追加処理
 	addTransform(`mainSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)(), g_transPriority.playWindow);
-	if (document.getElementById(`ringSprite`) !== null) {
-		addTransform(`ringSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)(), g_transPriority.playWindow);
-	}
+	// リングノートにもPlayWindowを適用 (ringSpriteが無い場合は逆行列のみ破棄)
+	applyRingPlayWindow(ringSprite);
 
 	// EffectのArrowEffect追加処理
 	g_effectFunc.get(g_stateObj.effect)();
@@ -1477,18 +1476,27 @@ const mainInit = () => {
 	const makeRing = _data => {
 		const no = ++ringCnt;
 		const diameter = _data.radius * 2;
-		const base = {
-			x: _data.x - _data.radius, y: _data.y - _data.radius, w: diameter, h: diameter,
-			borderRadius: `50%`, boxSizing: `border-box`,
-		};
+		const pos = { x: _data.x - _data.radius, y: _data.y - _data.radius, w: diameter, h: diameter };
+		const circle = { borderRadius: `50%`, boxSizing: `border-box` };
+
+		// ガイド (判定対象のため、エフェクトは掛けない)
 		const guide = createEmptySprite(ringSprite, `ringGuide${no}`, {
-			...base, border: `solid ${g_ringObj.lineWidth}px ${g_ringObj.guideColor}`,
+			...pos, ...circle, border: `solid ${g_ringObj.lineWidth}px ${g_ringObj.guideColor}`,
 			visibility: g_stateObj.ringGuide === `Hidden` ? `hidden` : `visible`,
 		});
-		const body = createEmptySprite(ringSprite, `ringBody${no}`, {
-			...base, border: `solid ${g_ringObj.lineWidth}px ${_data.color}`,
+
+		// リング本体: 外側(エフェクト用)と内側(拡大用)に分ける
+		// - CSSアニメーションのtransformが、拡大のtransformを上書きしてしまうのを避けるため
+		const root = createEmptySprite(ringSprite, `ringEffect${no}`, pos);
+		const body = createEmptySprite(root, `ringBody${no}`, {
+			x: 0, y: 0, w: diameter, h: diameter, ...circle,
+			border: `solid ${g_ringObj.lineWidth}px ${_data.color}`,
 		});
-		rings.push({ ..._data, cnt: _data.arrivalFrame + 1, guide, body, guideVisible: true });
+		if (g_workObj.ringCssMotion !== `` && _data.arrivalFrame > 0) {
+			root.classList.add(g_workObj.ringCssMotion);
+			root.style.animationDuration = `${_data.arrivalFrame / g_fps}s`;
+		}
+		rings.push({ ..._data, cnt: _data.arrivalFrame + 1, guide, body, root, guideVisible: true });
 	};
 
 	const ringDone = new Set(); // 判定済み(削除済み)リングの通し番号
@@ -1497,7 +1505,7 @@ const mainInit = () => {
 	const removeRing = _i => {
 		ringDone.add(rings[_i].seq);
 		rings[_i].guide.remove();
-		rings[_i].body.remove();
+		rings[_i].root.remove();
 		rings.splice(_i, 1);
 	};
 
@@ -2191,20 +2199,44 @@ const playRingSound = _no => {
 	source.start();
 };
 
+// ringSpriteの変形の逆行列 (判定用。null: 変形なし)
+let g_ringInv = null;
+
+/**
+ * リングノートへのPlayWindow適用と、判定用の逆行列の保持
+ * @param {HTMLDivElement|null} _ringSprite
+ */
+const applyRingPlayWindow = _ringSprite => {
+	g_ringInv = null;
+	if (_ringSprite === null) {
+		return;
+	}
+	addTransform(`ringSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)(), g_transPriority.playWindow);
+
+	const m = new DOMMatrix(getComputedStyle(_ringSprite).transform);
+	const det = m.a * m.d - m.b * m.c;
+	if (Math.abs(det) > 1e-6) {
+		g_ringInv = { a: m.d / det, b: -m.b / det, c: -m.c / det, d: m.a / det };
+	}
+};
+
 /**
  * 要素(ガイド円)の内側にポインタがあるか
  * - 画面の拡縮・transform後の実座標で判定するため getBoundingClientRect を使用
  */
 const isPointerInside = _el => {
 	const rect = _el.getBoundingClientRect();
-	const radius = rect.width / 2;
-	const centerX = rect.left + radius;
+	const centerX = rect.left + rect.width / 2;
 	const centerY = rect.top + rect.height / 2;
+	const radius = _el.offsetWidth / 2; // 変形前の半径
 
 	const inside = pointer => {
 		const dx = pointer.x - centerX;
 		const dy = pointer.y - centerY;
-		return dx * dx + dy * dy <= radius * radius;
+		// ringSpriteの変形(回転・スキュー)を逆変換して、元の円との距離で判定
+		const lx = g_ringInv ? g_ringInv.a * dx + g_ringInv.c * dy : dx;
+		const ly = g_ringInv ? g_ringInv.b * dx + g_ringInv.d * dy : dy;
+		return lx * lx + ly * ly <= radius * radius;
 	};
 
 	if (g_pointer.valid && inside(g_pointer)) {

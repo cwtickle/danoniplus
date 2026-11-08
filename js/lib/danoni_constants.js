@@ -2416,6 +2416,8 @@ const g_setEffect = (_arrowEffect, _frzEffect = ``, _frzArrowEffect = _arrowEffe
             g_workObj.frzArrowCssMotions[j] = _frzArrowEffect;
         }
     }
+    // リングノートには矢印用のエフェクトを適用
+    g_workObj.ringCssMotion = _arrowEffect;
 };
 /**
  * Effect定義関数
