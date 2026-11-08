@@ -1171,9 +1171,9 @@ const g_ringObj = {
     radius: 50,                 // ガイド半径の既定値(px)
     minRadius: 5,               // ガイド半径の最小値(px)
     startRate: 0.1,             // 出現時のリング半径(ガイド半径に対する比)
-    color: `#ffffff`,           // リング色の既定値
+    color: `#ffffff`,           // リング色の既定値（暗背景時）
     colorLight: `#000000`,      // リング色の既定値（明背景時）
-    guideColor: `#00ff00`,      // ガイド色
+    guideColor: `#00ff00`,      // ガイド色（暗背景時）
     guideColorLight: `#009900`, // ガイド色（明背景時）
     lineWidth: 2,               // 線の太さ(px)
     sound: 1,                   // 音番号の既定値 (0: 無音)
