@@ -2179,19 +2179,31 @@ const getShakingDist = () => (Math.abs((g_scoreObj.baseFrame / 2) % 100 - 50) - 
 const g_shakingFunc = new Map([
     ['OFF', () => true],
     ['Horizontal', (_multi = 1) => {
-        addTransform(`mainSprite`, `shakingX_base`, `translateX(${wUnit(getShakingDist() * _multi)})`, g_transPriority.shakingX)
+        addTransform(`mainSprite`, `shakingX_base`, `translateX(${wUnit(getShakingDist() * _multi)})`, g_transPriority.shakingX);
+        if (document.getElementById(`ringSprite`) !== null) {
+            addTransform(`ringSprite`, `shakingX_base`, `translateX(${wUnit(getShakingDist() * _multi)})`, g_transPriority.shakingX);
+        }
     }],
     ['Vertical', (_multi = 1) => {
-        addTransform(`mainSprite`, `shakingY_base`, `translateY(${wUnit(getShakingDist() / 2 * _multi)})`, g_transPriority.shakingY)
+        addTransform(`mainSprite`, `shakingY_base`, `translateY(${wUnit(getShakingDist() / 2 * _multi)})`, g_transPriority.shakingY);
+        if (document.getElementById(`ringSprite`) !== null) {
+            addTransform(`ringSprite`, `shakingY_base`, `translateY(${wUnit(getShakingDist() / 2 * _multi)})`, g_transPriority.shakingY);
+        }
     }],
     ['X-Horizontal', (_multi = 1) => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
             addTransform(`mainSprite${j}`, `shakingX_layer`, `translateX(${wUnit(getDirFromLayer(j) * (4 / 3) * getShakingDist() * _multi)})`, g_transPriority.shakingX);
         }
+        if (document.getElementById(`ringSprite`) !== null) {
+            addTransform(`ringSprite`, `shakingX_layer`, `translateX(${wUnit((4 / 3) * getShakingDist() * _multi)})`, g_transPriority.shakingX);
+        }
     }],
     ['X-Vertical', (_multi = 1) => {
         for (let j = 0; j < g_stateObj.layerNum; j++) {
             addTransform(`mainSprite${j}`, `shakingY_layer`, `translateY(${wUnit(getDirFromLayer(j) * getShakingDist() * _multi)})`, g_transPriority.shakingY);
+        }
+        if (document.getElementById(`ringSprite`) !== null) {
+            addTransform(`ringSprite`, `shakingY_layer`, `translateY(${wUnit(getShakingDist() * _multi)})`, g_transPriority.shakingY);
         }
     }],
     ['Drunk', (_multi = 1) => {
@@ -2201,12 +2213,18 @@ const g_shakingFunc = new Map([
             addTransform(`mainSprite`, `shakingX_drunk`, `translateX(${wUnit(deltaX)})`, g_transPriority.shakingX);
             addTransform(`infoSprite`, `shakingX_drunk`, `translateX(${wUnit(deltaX)})`, g_transPriority.shakingX);
             addTransform(`judgeSprite`, `shakingX_drunk`, `translateX(${wUnit(deltaX)})`, g_transPriority.shakingX);
+            if (document.getElementById(`ringSprite`) !== null) {
+                addTransform(`ringSprite`, `shakingX_drunk`, `translateX(${wUnit(deltaX)})`, g_transPriority.shakingX);
+            }
         }
         if (g_workObj.drunkYFlg) {
             const deltaY = dist / 2 * _multi;
             addTransform(`mainSprite`, `shakingY_drunk`, `translateY(${wUnit(deltaY)})`, g_transPriority.shakingY);
             addTransform(`infoSprite`, `shakingY_drunk`, `translateY(${wUnit(deltaY)})`, g_transPriority.shakingY);
             addTransform(`judgeSprite`, `shakingY_drunk`, `translateY(${wUnit(deltaY)})`, g_transPriority.shakingY);
+            if (document.getElementById(`ringSprite`) !== null) {
+                addTransform(`ringSprite`, `shakingY_drunk`, `translateY(${wUnit(deltaY)})`, g_transPriority.shakingY);
+            }
         }
         // 補正がゼロになったときに軸の移動方法をランダムで決定
         if (dist === 0) {

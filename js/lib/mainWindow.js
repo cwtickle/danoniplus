@@ -178,6 +178,9 @@ const mainInit = () => {
 
 	// mainSpriteのtransform追加処理
 	addTransform(`mainSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)(), g_transPriority.playWindow);
+	if (document.getElementById(`ringSprite`) !== null) {
+		addTransform(`ringSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)(), g_transPriority.playWindow);
+	}
 
 	// EffectのArrowEffect追加処理
 	g_effectFunc.get(g_stateObj.effect)();
