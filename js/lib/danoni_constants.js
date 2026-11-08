@@ -48,7 +48,7 @@ const g_limitObj = {
     // 設定画面用のボタンの位置、幅、高さ、フォントサイズ
     setLblLeft: 160,
     setLblWidth: 210,
-    setLblHeight: 22,
+    setLblHeight: 21,
     setLblSiz: 17,
 
     setLblLeftShort: 250,
@@ -116,14 +116,16 @@ const g_settingPos = {
         shuffle: { heightPos: 5.5 },
         autoPlay: { heightPos: 6.5 },
         gauge: { heightPos: 7.5 },
-        adjustment: { heightPos: 10.5 },
-        fadein: { heightPos: 11.5 },
-        volume: { heightPos: 12.5 },
+        adjustment: { heightPos: 10.6 },
+        fadein: { heightPos: 11.6 },
+        volume: { heightPos: 12.6 },
     },
     settingsDisplay: {
         appearance: { heightPos: 5.8, y: 10 },
         opacity: { heightPos: 7.4, y: 10 },
         hitPosition: { heightPos: 8.4, y: 10 },
+        ringSpeed: { heightPos: 9.8, y: 10 },
+        ringGuide: { heightPos: 10.8, y: 10 },
     },
     exSetting: {
         playWindow: { heightPos: 0 },
@@ -566,6 +568,16 @@ const updateWindowSiz = () => {
         btnDisplayReset: {
             x: g_btnX() + g_btnWidth() - 80, y: 3, w: 80, h: 18, siz: 11,
         },
+        lblRingSetting: {
+            x: g_sWidth / 2 - 100, y: 0, w: 200, h: 20, siz: 24,
+        },
+        btnRingSetting: {
+            x: g_btnX() + Math.floor((g_btnWidth() - 80) / 2), y: 3, w: 80, h: 18, siz: 11,
+            title: g_msgObj.ringSetting,
+        },
+        btnRingClose: {
+            x: g_btnX() + g_btnWidth() - 80, y: 3, w: 80, h: 18, siz: 11,
+        },
         lblDisplayPreviewMsg: {
             x: g_btnX(), y: g_sHeight - 40, w: g_btnWidth(), h: 20, siz: 14,
         },
@@ -839,6 +851,7 @@ const C_JSF_BLANK = `danoni_blank.js`;
 const C_DIR_JS = `../js/`;
 const C_DIR_CSS = `../css/`;
 const C_DIR_MUSIC = `../music/`;
+const C_DIR_SOUND = `../sound/`;
 const C_DIR_SKIN = `../skin/`;
 
 // カレントディレクトリマーク
@@ -1152,6 +1165,43 @@ const g_judgPosObj = {
     ii: 0, shakin: 1, matari: 2, shobon: 3, uwan: 4,
     kita: 0, sfsf: 1, iknai: 2,
 };
+/** リングノートの共通設定 */
+const g_ringObj = {
+    baseFrame: 60,          // リング速度1のときの出現～到達フレーム数
+    radius: 50,             // ガイド半径の既定値(px)
+    minRadius: 5,          // ガイド半径の最小値(px)
+    startRate: 0.1,         // 出現時のリング半径(ガイド半径に対する比)
+    color: `#ffffff`,       // リング色の既定値
+    colorLight: `#000000`,  // リング色の既定値（明背景時）
+    guideColor: `#00ff00`,  // ガイド色
+    lineWidth: 2,           // 線の太さ(px)
+    sound: 1,               // 音番号の既定値 (0: 無音)
+    cols: 7,                // 内部の列数 [到達フレーム, X, Y, 音番号, 半径, 色, 出現～到達フレーム数(0:未指定)]
+};
+
+/** リングノートのデフォルト音 (音番号1～。外部ファイル不要でコード生成する) */
+const g_ringDefaultSounds = [
+    // 0: 無音
+    // 1: 従来のサリングのデフォルト音に近い音色
+    {
+        dur: 0.32, attack: 0.012, level: 0.5, lowpass: 10200, lpPasses: 4, bands: [
+            { f: 6935, q: 18, gain: 0.99, tau: 0.024, tau2: 0.09, mix2: 0.18 },
+            { f: 9150, q: 58, gain: 0.62, tau: 0.057, tau2: 0.089, mix2: 0.18 },
+            { f: 6000, q: 5.5, gain: 0.03, tau: 0.053, tau2: 0.145, mix2: 0.24 },
+            { f: 8400, q: 9.8, gain: 0.3, tau: 0.034, tau2: 0.072, mix2: 0.26 },
+            { f: 3500, q: 2, gain: 0.02, tau: 0.03, tau2: 0.04, mix2: 0.5 },
+        ]
+    },
+    // 2: パーン
+    { wave: `sine`, freq: 1800, freqEnd: 250, sweep: 0.025, noise: 0.6, dur: 0.28, decay: 9 },
+    // 3: パン(短め・乾いた音)
+    { wave: `sine`, freq: 2400, freqEnd: 400, sweep: 0.015, noise: 0.85, dur: 0.12, decay: 14 },
+    { wave: `sine`, freq: 880, dur: 0.12 },       // 4
+    { wave: `sine`, freq: 1320, dur: 0.12 },      // 5
+    { wave: `triangle`, freq: 660, dur: 0.12 },   // 6
+    { wave: `square`, freq: 440, dur: 0.15 },     // 7
+];
+
 const g_judgRanges = {
     'Normal': [[2, 4, 6, 8, 16], [2, 4, 8]],
     'Narrow': [[2, 3, 4, 8, 16], [2, 4, 8]],
@@ -1318,6 +1368,12 @@ const g_stateObj = {
 
     layerNum: 2,    // オプションを加味した実際のレイヤー数
     layerNumDf: 2,  // 基準レイヤー数
+
+    // リング速度オプション (将来用。現状は常に1。大きいほど出現～到達が短くなる)
+    ringSpeed: 1,
+
+    // リングのガイド表示 (All: 出現中のすべて / Next: 次に判定するリングのみ)
+    ringGuide: `Next`,
 };
 
 const C_VAL_MAXLIFE = 1000;
@@ -1410,7 +1466,7 @@ const g_settings = {
         customKey: 0,
         others: 0,
     },
-    environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`,
+    environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`, `ringSpeed`, `ringGuide`,
         `arrowJdgX`, `arrowJdgY`, `frzJdgX`, `frzJdgY`, `shortcutX`, `shortcutY`],
     keyStorages: [`reverse`, `keyCtrl`, `keyCtrlPtn`, `shuffle`, `color`, `stepRtn`, `shortcut`],
     colorStorages: [`setColor`, `setShadowColor`, `frzColor`, `frzShadowColor`],
@@ -1457,6 +1513,13 @@ const g_settings = {
     hitPositions: [...Array(g_limitObj.hitPosition * 20 + 1).keys()].map(i => (i - g_limitObj.hitPosition * 10) / 10),
     hitPositionNum: g_limitObj.hitPosition * 10,
     hitPositionTerms: [50, 10],
+
+    ringSpeeds: makeSpeedList(0.5, 3),
+    ringSpeedNum: 0,
+    ringSpeedTerms: [20, 5],
+
+    ringGuides: [`Next`, `ALL`, `Hidden`],
+    ringGuideNum: 0,
 
     volumes: [0, 0.5, 1, 2, 5, 10, 25, 50, 75, 100],
     volumeNum: 0,
@@ -2376,13 +2439,13 @@ let g_displays = [`stepZone`, `judgment`, `lifeGauge`, `score`, `musicInfo`, `fi
     `velocity`, `color`, `background`, `arrowEffect`, `special`];
 
 // ローカルストレージ保存対象
-let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`];
+let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`, `ringSpeed`, `ringGuide`];
 
 // 廃棄対象のリスト(過去の登録対象をリスト化。ここに乗せるとローカルストレージから自動消去される)
 let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
     `d_score`, `d_musicinfo`, `d_filterline`];
 
-let g_canDisabledSettings = [`speed`, `motion`, `scroll`, `reverse`, `shuffle`, `autoPlay`, `gauge`,
+let g_canDisabledSettings = [`speed`, `motion`, `scroll`, `reverse`, `shuffle`, `autoPlay`, `gauge`, `ringSpeed`, `ringGuide`,
     `excessive`, `appearance`, `playWindow`, `stepArea`, `frzReturn`, `shaking`, `effect`, `camoufrage`, `camoufrageType`,
     `swapping`, `judgRange`, `autoRetry`];
 
@@ -3033,6 +3096,13 @@ const g_shortcutObj = {
         ShiftLeft_KeyT: { id: `lnkHitPositionL` },
         ShiftRight_KeyT: { id: `lnkHitPositionL` },
         KeyT: { id: `lnkHitPositionLL` },
+
+        ShiftLeft_KeyS: { id: `lnkRingSpeedL` },
+        ShiftRight_KeyS: { id: `lnkRingSpeedL` },
+        KeyS: { id: `lnkRingSpeedR` },
+        ShiftLeft_KeyG: { id: `lnkRingGuideL` },
+        ShiftRight_KeyG: { id: `lnkRingGuideL` },
+        KeyG: { id: `lnkRingGuideR` },
 
         ShiftLeft_Digit1: { id: `lnkstepZoneR` },
         ShiftRight_Digit1: { id: `lnkstepZoneR` },
@@ -4349,6 +4419,8 @@ const g_dataMinObj = {
     mask: 1,
     back: 1,
     style: 1,
+    ring: g_ringObj.cols,
+    ringSpeed: 2,
 };
 
 /**
@@ -4722,6 +4794,7 @@ const g_lblNameObj = {
     s_time: `Time`,
     s_arrow: `Arrow`,
     s_frz: `Frz`,
+    s_ring: `Ring`,
 
     s_rev: `MapScroll`,
 
@@ -4752,6 +4825,9 @@ const g_lblNameObj = {
     Swapping: `Swapping`,
     JudgRange: `JudgRange`,
     AutoRetry: `AutoRetry`,
+
+    RingSpeed: `RingSpeed`,
+    RingGuide: `RingGuide`,
 
     'u_x': `x`,
     'u_%': `%`,
@@ -4959,7 +5035,7 @@ const g_lang_lblNameObj = {
         s_result: `CopyResult`,
         s_resetResult: `Reset`,
         s_printTitle: `Dancing☆Onigiri レベル計算ツール+++`,
-        s_printHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tAPM\t時間`,
+        s_printHeader: `難易度\t同時\t縦連\t総数\t矢印\t氷矢印\tリング\tAPM\t時間`,
 
         'u_60deg': `60°`,
         'u_120deg': `120°`,
@@ -5025,7 +5101,7 @@ const g_lang_lblNameObj = {
         s_result: `CopyResult`,
         s_resetResult: `Reset`,
         s_printTitle: `Dancing☆Onigiri Level Calculator+++`,
-        s_printHeader: `Level\tChords\tJack\tAll\tArrow\tFrz\tAPM\tTime`,
+        s_printHeader: `Level\tChords\tJack\tAll\tArrow\tFrz\tRing\tAPM\tTime`,
 
         'u_60deg': `60deg`,
         'u_120deg': `120deg`,
@@ -5226,7 +5302,14 @@ const g_lang_msgObj = {
             `[Hid&Sud+] Hidden+とSudden+を組み合わせて表示します。` +
             `初期値を0%～50%の間で設定できます。「Lock」ボタンで可視範囲の調整を不可にします。`,
         opacity: `判定キャラクタ、コンボ数、Fast/Slowの透明度を設定します。`,
-        hitPosition: `判定位置にズレを感じる場合、\n数値を変えることで判定の中央位置を1px単位(プラス:手前, マイナス:奥側)で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
+        hitPosition: `判定位置にズレを感じる場合、数値を変えることで判定の中央位置を1px単位(プラス:手前, マイナス:奥側)で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
+        ringSpeed: `リングノートの表示速度を設定します。\n` +
+            `0.5x ～ 3.0xの間で設定できます。初期値は1.0xです。`,
+        ringGuide: `リングノートに対するガイド表示の設定です。\n` +
+            `[Next] 次に判定するリングのみ表示します。\n` +
+            `[ALL] 出現中すべてのリングノートに対するガイドを表示します。\n` +
+            `[Hidden] すべてのガイド表示を非表示にします。`,
+
         displayPreview: `プレイ画面上のオブジェクトの表示状態をプレビューします。\n判定キャラクタ部分をドラッグで移動するとその位置に補正されます。`,
         displayPreviewResetConfirm: `プレイ画面上のオブジェクトの位置を初期状態に戻します。よろしいですか？`,
 
@@ -5402,6 +5485,13 @@ const g_lang_msgObj = {
         opacity: `Set the transparency of some objects such as judgment, combo counts, fast and slow`,
         hitPosition: `If you feel a discrepancy in the judgment position, you can adjust the center position of the judgment in 1px increments (plus: in front, minus: at the back) by changing the numerical value. \n` +
             `Use this function when there is a tendency to push too fast or too slow.`,
+        ringSpeed: `Set the display speed of the ring notes.\n` +
+            `You can set it between 0.5x and 3.0x. The initial value is 1.0x.`,
+        ringGuide: `Settings for guide display on ring-bound notebooks. \n` +
+            `[Next] Display only the next ring to be judged.\n` +
+            `[ALL] Display guides for all ring notes that are currently appearing.\n` +
+            `[Hidden] Hide all guide displays.`,
+
         displayPreview: `Preview the display status of objects on the play screen.\nDragging the judgment character section will adjust it to that position.`,
         displayPreviewResetConfirm: `Reset the position of objects on the play screen to the initial state. Is it OK?`,
 
@@ -5486,6 +5576,13 @@ const g_customJsObj = {
 
     judg_frzHit: [],
     judg_dummyFrzHit: [],
+
+    // リングノート用 (第2引数は常に-1)
+    judg_ring_ii: [],
+    judg_ring_shakin: [],
+    judg_ring_matari: [],
+    judg_ring_shobon: [],
+    judg_ring_uwan: [],
 
     mainEnterFrame: [],
     mainBeforeFrameTimer: [],

@@ -133,7 +133,12 @@ const waitUntilLoaded = () => {
 	initialControl();
 
 	// プレイ画面(g_currentPage === `main`)でのみ有効化される、タブ非表示検知(常時1個だけ登録)
+	bindRingMouse();
 	g_handler.addListener(document, `visibilitychange`, () => {
+		// ポインタ状態は画面や譜面の位置に関係なくクリアする。
+		if (document.hidden) {
+			resetRingPointers();
+		}
 		if (g_currentPage !== `main`) return;
 		if (g_scoreObj.baseFrame > g_scoreObj.lastFrame) return;
 		document.hidden ? g_timelineHooks.pause() : g_timelineHooks.resume();
@@ -231,6 +236,7 @@ let g_cxtDeleteFlg = {};
 const g_detailObj = {
 	arrowCnt: [],
 	frzCnt: [],
+	ringCnt: [],
 	maxDensity: [],
 	maxDensity2Push: [],
 	maxDensity3Push: [],
@@ -2341,6 +2347,11 @@ const makeBgCanvas = (_ctx, { w = g_sWidth, h = g_sHeight } = {}) => {
  * @param {string} [_customDisplayName=''] 画面名(メイン画面: 'Main', それ以外: 空)
  */
 const clearWindow = (_customDisplayName = ``) => {
+	if (g_currentPage === `main`) {
+		stopRingKeepAlive();
+		g_ringTouchCleanup?.();
+		g_ringTouchCleanup = null;
+	}
 	closeDisplayPreview();
 	resetKeyControl();
 	resetTransform();

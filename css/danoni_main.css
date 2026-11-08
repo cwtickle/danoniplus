@@ -29,6 +29,11 @@
 	animation-play-state: paused !important;
 }
 
+/* ringSpriteがある場合のみ、touch-actionを無効にする */
+#divRoot:has(> #ringSprite) {
+	touch-action: none;
+}
+
 input[type="range"] {
 	appearance: none;
 	background: transparent;
@@ -656,6 +661,14 @@ input[type="color"] {
 	color: var(--settings-hitPosition-x, #ff99ff);
 }
 
+.settings_RingSpeed::first-letter {
+	color: var(--settings-ringSpeed-x, #ff99cc);
+}
+
+.settings_RingGuide::first-letter {
+	color: var(--settings-ringGuide-x, #ff9999);
+}
+
 .settings_DifSelector {
 	background: var(--settings-difSelector, #111111);
 }
@@ -718,6 +731,8 @@ input[type="color"] {
 .settings_Appearance:hover,
 .settings_Opacity:hover,
 .settings_HitPosition:hover,
+.settings_RingSpeed:hover,
+.settings_RingGuide:hover,
 .settings_PlayWindow:hover,
 .settings_StepArea:hover,
 .settings_FrzReturn:hover,
