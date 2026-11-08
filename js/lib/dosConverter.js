@@ -1389,6 +1389,11 @@ const headerConvert = _dosObj => {
 	// カラーコードのゼロパディング有無設定
 	obj.colorCdPaddingUse = setBoolVal(_dosObj.colorCdPaddingUse);
 
+	// 明背景の場合はガイドリング色を明背景用に切り替える
+	if (obj.baseBrightFlg) {
+		g_ringObj.guideColor = g_ringObj.guideColorLight;
+	}
+
 	// 最大ライフ
 	obj.maxLifeVal = setVal(_dosObj.maxLifeVal, C_VAL_MAXLIFE, C_TYP_FLOAT);
 	if (obj.maxLifeVal <= 0) {
