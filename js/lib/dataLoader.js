@@ -573,7 +573,7 @@ const prepareScoreData = (_retryFlg = false) => {
 		// 矢印・リングノートそれぞれについて、出現が開始前になる場合の補完フレーム数を求め、大きい方を採用
 		const arrowLead = firstArrowFrame - g_limitObj.adjustment < arrivalFrame
 			? arrivalFrame - firstArrowFrame + g_limitObj.adjustment : 0;
-		const ringLead = getRingLeadFrame(g_scoreObj);
+		const ringLead = getRingLeadFrame(g_scoreObj, lastFrame);
 		if (arrowLead > 0 || ringLead > 0) {
 			preblankFrame = Math.max(arrowLead, ringLead);
 
@@ -1411,7 +1411,8 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	}
 
 	// リングノート・リング速度変化の分解 (速度変化は既存のsetSpeedDataを流用)
-	obj.ringSpeedData = setSpeedData(`ringspeed`, scoreIdHeader);
+	obj.ringSpeedData = setSpeedData(`ring_boost`, scoreIdHeader);
+	obj.ringSpeedAllData = setSpeedData(`ring_speed`, scoreIdHeader);
 	obj.ringData = setRingData(scoreIdHeader);
 
 	if (_scoreAnalyzeFlg) {
@@ -1906,6 +1907,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 	// - 出現が開始フレーム前のもの(フェードイン時)は、開始フレームから途中の大きさで出現させる
 	g_workObj.mkRing = [];
 	g_workObj.ringArrivals = []; // 通し番号 -> 到達フレーム (到達順)
+	g_workObj.ringSpeedOnFrame = setRingSpeedOnFrame(_dataObj.ringSpeedAllData, _speedOnFrame.length - 1);
 	const ringData = _dataObj.ringData ?? [];
 	const cols = g_ringObj.cols;
 	for (let k = 0; k < ringData.length; k += cols) {
@@ -1913,10 +1915,12 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 		if (arrival < g_scoreObj.frameNum) {
 			continue;
 		}
-		const total = getRingDuration(_dataObj.ringSpeedData, arrival, frames);
-		const appear = Math.max(arrival - total, g_scoreObj.frameNum);
+		// 到達フレームから速度を遡って積算し、出現フレームと出現時の進行度を求める
+		// (開始フレーム前に出現するものは、開始フレームから途中の進行度で出現)
+		const step = getRingBaseStep(_dataObj.ringSpeedData, arrival, frames);
+		const { appear, init } = getRingAppear(arrival, step, g_workObj.ringSpeedOnFrame, g_scoreObj.frameNum);
 		(g_workObj.mkRing[appear] ??= []).push({
-			x, y, radius, color, sound, total, arrivalFrame: arrival - appear,
+			x, y, radius, color, sound, step, progress: init, arrivalFrame: arrival - appear,
 			arrival, seq: g_workObj.ringArrivals.length,
 		});
 		g_workObj.ringArrivals.push(arrival);
@@ -2153,27 +2157,85 @@ const getRingSpeed = (_ringSpeedData, _frame) => {
 };
 
 /**
- * リングの出現～到達フレーム数
- * - 個別指定(_frames > 0)があればそれを優先、なければ到達フレーム時点のリング速度に反比例
+ * リングの基本進行量 (速度1のときの1フレーム当たりの進行度。到達で合計1)
+ * - 個別指定(_frames > 0)があればそれを優先、なければ到達フレーム時点の個別加速(ringBoost_data)に反比例
  * - リング速度オプション(g_stateObj.ringSpeed)はどちらにも掛かる
+ * @param {number[]} _ringSpeedData
+ * @param {number} _arrivalFrame
+ * @param {number} [_frames=0]
+ * @returns {number}
  */
-const getRingDuration = (_ringSpeedData, _arrivalFrame, _frames = 0) => {
+const getRingBaseStep = (_ringSpeedData, _arrivalFrame, _frames = 0) => {
 	const base = _frames > 0 ? _frames : g_ringObj.baseFrame / getRingSpeed(_ringSpeedData, _arrivalFrame);
-	return Math.max(Math.round(base / g_stateObj.ringSpeed), 1);
+	return g_stateObj.ringSpeed / Math.max(base, 1);
+};
+
+/**
+ * フレームごとのリング全体速度(ringSpeed_data)を格納
+ * - 0でストップ、負数で逆走。d_velocity(Extreme/Soft)は矢印と同様に反映
+ * @param {number[]} _speedData [フレーム数, 速度, ...] (フレーム昇順)
+ * @param {number} _lastFrame
+ * @returns {number[]}
+ */
+const setRingSpeedOnFrame = (_speedData, _lastFrame) => {
+	const speedOnFrame = [];
+	let currentSpeed = 1;
+	for (let frm = 0, s = 0; frm <= _lastFrame; frm++) {
+		while (frm >= _speedData?.[s]) {
+			currentSpeed = getSpeedFactor(_speedData[s + 1]);
+			s += 2;
+		}
+		speedOnFrame[frm] = currentSpeed;
+	}
+	return speedOnFrame;
+};
+
+/**
+ * 指定フレームのリング全体速度の取得 (範囲外は端の値)
+ * @param {number[]} _speedOnFrame
+ * @param {number} _frame
+ * @returns {number}
+ */
+const getRingSpeedAt = (_speedOnFrame, _frame) =>
+	_speedOnFrame[Math.min(Math.max(_frame, 0), _speedOnFrame.length - 1)] ?? 1;
+
+/**
+ * 到達フレームから遡り、リングの出現フレームと出現時の進行度を求める
+ * - 各フレームで progress += step * 全体速度 とし、到達フレームで合計が1になる
+ * - _lower までに合計が1に届かない場合は _lower から出現し、途中の進行度(init > 0)で開始
+ * @param {number} _arrival 到達フレーム
+ * @param {number} _step 基本進行量
+ * @param {number[]} _speedOnFrame
+ * @param {number} _lower 遡る下限フレーム
+ * @returns {{appear: number, init: number}}
+ */
+const getRingAppear = (_arrival, _step, _speedOnFrame, _lower) => {
+	let acc = 0;
+	let appear = _arrival;
+	for (let n = _arrival; n >= _lower; n--) {
+		acc += _step * getRingSpeedAt(_speedOnFrame, n);
+		appear = n;
+		if (acc >= 1) {
+			break;
+		}
+	}
+	return { appear, init: 1 - acc };
 };
 
 /**
  * リングを0フレーム以降に出現させるために必要な補完フレーム数
  * (矢印のプレブランク計算と同様、Adjustment分の余裕を含める)
  */
-const getRingLeadFrame = _dataObj => {
+const getRingLeadFrame = (_dataObj, _lastFrame) => {
 	const ringData = _dataObj.ringData ?? [];
-	let lead = 0;
 	const cols = g_ringObj.cols;
+	const speedOnFrame = setRingSpeedOnFrame(_dataObj.ringSpeedAllData, _lastFrame);
+	let lead = 0;
 	for (let k = 0; k < ringData.length; k += cols) {
-		const duration = getRingDuration(_dataObj.ringSpeedData, ringData[k], ringData[k + cols - 1]);
-		if (ringData[k] - g_limitObj.adjustment < duration) {
-			lead = Math.max(lead, duration - ringData[k] + g_limitObj.adjustment);
+		const step = getRingBaseStep(_dataObj.ringSpeedData, ringData[k], ringData[k + cols - 1]);
+		const { appear } = getRingAppear(ringData[k], step, speedOnFrame, ringData[k] - g_ringObj.maxSearchFrame);
+		if (appear < g_limitObj.adjustment) {
+			lead = Math.max(lead, g_limitObj.adjustment - appear);
 		}
 	}
 	return lead;

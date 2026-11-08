@@ -1498,14 +1498,16 @@ const mainInit = () => {
 		rings.splice(_i, 1);
 	};
 
-	const updateRings = () => {
+	const updateRings = _frame => {
+		const ringSpeed = getRingSpeedAt(g_workObj.ringSpeedOnFrame, _frame);
 		for (let i = rings.length - 1; i >= 0; i--) {
 			const ring = rings[i];
 			ring.cnt--;
 
 			// リング本体の大きさ (cnt === 0 でガイドと一致)
-			const t = Math.min(Math.max(1 - ring.cnt / ring.total, 0), 1);
-			ring.body.style.transform = `scale(${g_ringObj.startRate + (1 - g_ringObj.startRate) * t})`;
+			// 進行度は全体速度(ストップ・逆走含む)に従って増減し、Motionは表示にのみ適用
+			ring.progress += ring.step * ringSpeed;
+			ring.body.style.transform = `scale(${getRingScale(ring.progress)})`;
 
 			// ガイド到達前は判定しない
 			if (ring.cnt > 0) {
@@ -1722,7 +1724,7 @@ const mainInit = () => {
 
 		// リングノート生成・更新
 		g_workObj.mkRing?.[currentFrame]?.forEach(data => makeRing(data));
-		updateRings();
+		updateRings(currentFrame);
 
 		// 歌詞表示
 		g_scoreObj.wordData[currentFrame]?.forEach(wordData => updateWord(wordData, currentFrame));
@@ -2148,6 +2150,19 @@ const bindRingPointer = _root => {
 	g_handler.addListener(_root, `pointerup`, release);
 	g_handler.addListener(_root, `pointercancel`, release);
 	g_handler.addListener(_root, `pointerleave`, leave);
+};
+
+/**
+ * リング本体の拡大率 (進行度 -> 表示倍率)
+ * - 進行度が0未満の間は最小、1を超える場合は超過分を線形に加算 (逆走・折り返し用)
+ * - Motionは0～1の範囲にのみ適用し、p=1で必ず1に戻る
+ * @param {number} _p 進行度
+ * @returns {number}
+ */
+const getRingScale = _p => {
+	const q = Math.min(Math.max(_p, 0), 1);
+	const disp = g_ringMotionFunc.get(g_stateObj.motion)(q) + Math.max(_p - 1, 0);
+	return Math.max(g_ringObj.startRate + (1 - g_ringObj.startRate) * disp, 0);
 };
 
 /**

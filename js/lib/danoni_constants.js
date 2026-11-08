@@ -1178,6 +1178,7 @@ const g_ringObj = {
     lineWidth: 2,               // 線の太さ(px)
     sound: 1,                   // 音番号の既定値 (0: 無音)
     cols: 7,                    // 内部の列数 [到達フレーム, X, Y, 音番号, 半径, 色, 出現～到達フレーム数(0:未指定)]
+    maxSearchFrame: 3600,       // 出現フレームを遡って探索する上限フレーム数 (ストップ中の無限ループ防止)
 };
 
 /** リングノートのデフォルト音 (音番号1～。外部ファイル不要でコード生成する) */
@@ -1976,6 +1977,21 @@ const g_motionAlphaFunc = new Map([
     ['Compress', () => ``],
     ['Fountain', (_obj, _property) => motionAlphaToggle(_obj, _property)],
     ['Magnet', (_obj, _property) => motionAlphaToggle(_obj, _property)],
+]);
+
+/**
+ * リングノート用Motion適用関数 (進行度 0～1 -> 表示用の進行度)
+ * - 到達時(p=1)は必ず1に戻るため、判定タイミングには影響しない
+ * - 対応するキー名: g_settings.motions
+ */
+const g_ringMotionFunc = new Map([
+    ['OFF', _p => _p],
+    ['Boost', _p => _p ** 2],
+    ['Hi-Boost', _p => _p ** 3],
+    ['Brake', _p => 1 - (1 - _p) ** 2],
+    ['Compress', _p => 1 - (1 - _p) ** 3],
+    ['Fountain', _p => _p + 0.6 * Math.sin(Math.PI * _p)],
+    ['Magnet', _p => _p + 1 * Math.sin(Math.PI * _p)],
 ]);
 
 const motionAlphaToggle = (_obj, _property) => {
@@ -4422,6 +4438,7 @@ const g_dataMinObj = {
     style: 1,
     ring: g_ringObj.cols,
     ringSpeed: 2,
+    ringSpeedAll: 2,
 };
 
 /**
