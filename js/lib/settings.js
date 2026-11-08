@@ -931,15 +931,15 @@ const makeHighScore = _scoreId => {
 			`Cleared: ` + (g_localStorage.highscores?.[scoreName]?.clearLamps?.join(', ') ?? C_FLG_HYPHEN),
 			{ yPos: 13, overflow: C_DIS_AUTO, w: g_sWidth / 2 + 40, h: 37 }),
 
-		createScoreLabel(`shuffle`,
+		createScoreLabel(`shuffleS`,
 			g_stateObj.shuffle.indexOf(`Mirror`) < 0
 				? `` : `Shuffle: <span class="common_shuffle">${g_stateObj.shuffle}</span>`,
 			{ yPos: 11.5, dx: -130 }),
-		createScoreLabel(`assist`,
+		createScoreLabel(`assistS`,
 			g_autoPlaysBase.includes(g_stateObj.autoPlay)
 				? `` : `Assist: <span class="common_assist">${g_stateObj.autoPlay}</span>`,
 			{ yPos: 12.5, dx: -130 }),
-		createScoreLabel(`another`,
+		createScoreLabel(`anotherS`,
 			!hasVal(g_keyObj[`transKey${keyCtrlPtn}`])
 				? `` : `A.Keymode: <span class="common_another">${g_keyObj[`transKey${keyCtrlPtn}`]}</span>`,
 			{ yPos: 13.5, dx: -130 }),
