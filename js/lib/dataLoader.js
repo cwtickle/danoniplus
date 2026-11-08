@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/10/20 (v51.4.1)
+ * Revised : 2026/11/08 (v52.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -35,10 +35,13 @@ const loadMusic = async () => {
 	// 譜面データ読込・変換処理Promise(g_audioに依存しない部分)
 	const chartReadyPromise = loadChartFile().then(() => prepareScoreData());
 
+	// リングノート用の効果音 (失敗しても譜面進行は止めない)
+	const ringSoundPromise = loadRingSounds();
+
 	// 両方の完了を待つ
 	let loadSucceeded = true;
 	try {
-		await Promise.all([audioReadyPromise, chartReadyPromise]);
+		await Promise.all([audioReadyPromise, chartReadyPromise, ringSoundPromise]);
 	} catch (e) {
 		console.warn(`Loading error: ${e}`);
 		loadSucceeded = false;
@@ -279,6 +282,190 @@ const base64ToUint8Array = (_base64Str) => {
 	return array;
 };
 
+const g_ringSoundBuffers = new Map(); // 音番号 -> AudioBuffer (現在の作品)
+const g_ringSoundCache = new Map();   // URL -> AudioBuffer (リトライ・再プレイ用)
+
+/**
+ * 帯域ノイズ型の効果音を合成 (_def.bands を持つデフォルト音用)
+ * 白色ノイズを帯域ごとの共鳴フィルタ(バイクアッド)に通し、帯域ごとの2段減衰エンベロープを掛けて足し合わせる
+ * @param {object} _def
+ * @param {number} _rate サンプルレート
+ * @returns {Float32Array}
+ */
+const synthRingBands = (_def, _rate) => {
+	const len = Math.max(Math.floor(_rate * _def.dur), 1);
+	const out = new Float32Array(len);
+	const attack = Math.max(Math.floor(_rate * (_def.attack ?? 0.008)), 1);
+
+	// 種付き乱数 (毎回同じ音になる)
+	let seed = 12345;
+	const rnd = () => {
+		seed = (seed + 0x6D2B79F5) >>> 0;
+		let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+		t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+		return (((t ^ (t >>> 14)) >>> 0) / 4294967296) * 2 - 1;
+	};
+	const noise = new Float32Array(len).map(() => rnd());
+
+	_def.bands.forEach(b => {
+		const w0 = 2 * Math.PI * b.f / _rate;
+		const alpha = Math.sin(w0) / (2 * b.q);
+		const a0 = 1 + alpha;
+		const b0 = alpha / a0, b2 = -alpha / a0;
+		const a1 = -2 * Math.cos(w0) / a0, a2 = (1 - alpha) / a0;
+		const norm = 1 / Math.max(alpha / a0 * Math.sqrt(b.q) * 4, 1e-6);
+		const mix2 = b.mix2 ?? 0, tau2 = b.tau2 ?? b.tau;
+		let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+		for (let i = 0; i < len; i++) {
+			const x = noise[i];
+			const y = b0 * x + b2 * x2 - a1 * y1 - a2 * y2;
+			x2 = x1; x1 = x; y2 = y1; y1 = y;
+			const t = i / _rate;
+			const env = (1 - mix2) * Math.exp(-t / b.tau) + mix2 * Math.exp(-t / tau2);
+			out[i] += y * norm * b.gain * env * Math.min(1, (i + 1) / attack);
+		}
+	});
+
+	// 高域カット (2次ローパスを lpPasses 段)
+	if (_def.lowpass) {
+		const w0 = 2 * Math.PI * _def.lowpass / _rate;
+		const alpha = Math.sin(w0) / (2 * Math.SQRT1_2);
+		const a0 = 1 + alpha, cs = Math.cos(w0);
+		const b0 = (1 - cs) / 2 / a0, b1 = (1 - cs) / a0, a1 = -2 * cs / a0, a2 = (1 - alpha) / a0;
+		for (let pass = 0; pass < (_def.lpPasses ?? 2); pass++) {
+			let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+			for (let i = 0; i < len; i++) {
+				const x = out[i];
+				const y = b0 * x + b1 * x1 + b0 * x2 - a1 * y1 - a2 * y2;
+				x2 = x1; x1 = x; y2 = y1; y1 = y; out[i] = y;
+			}
+		}
+	}
+
+	// 末尾2msをフェードアウト (クリック防止) + ピーク正規化
+	const fade = Math.floor(_rate * 0.002);
+	for (let i = 0; i < fade; i++) {
+		out[len - 1 - i] *= i / fade;
+	}
+	const peak = out.reduce((max, v) => Math.max(max, Math.abs(v)), 0) || 1;
+	return out.map(v => v * (_def.level ?? 0.5) / peak);
+};
+
+/**
+ * デフォルト音の生成 (外部ファイル不要)
+ * @param {{wave: string, freq: number, dur: number}} _def
+ * @returns {AudioBuffer}
+ */
+const makeDefaultRingSound = _def => {
+	const ctx = getSharedAudioContext();
+	const rate = ctx.sampleRate;
+	const len = Math.max(Math.floor(rate * _def.dur), 1);
+	const buffer = ctx.createBuffer(1, len, rate);
+	const data = buffer.getChannelData(0);
+
+	// 帯域ノイズ型 (bands を持つ定義)
+	if (_def.bands) {
+		data.set(synthRingBands(_def, rate));
+		return buffer;
+	}
+	const waves = {
+		sine: p => Math.sin(2 * Math.PI * p),
+		triangle: p => 2 * Math.abs(2 * (p - Math.floor(p + 0.5))) - 1,
+		square: p => (p % 1 < 0.5 ? 1 : -1) * 0.6,
+	};
+	const wave = waves[_def.wave] ?? waves.sine;
+	const noiseMix = _def.noise ?? 0;
+	const decay = _def.decay ?? 6;
+	const freqEnd = _def.freqEnd ?? _def.freq;
+	const sweepRate = rate * (_def.sweep ?? 0.03);
+	let phase = 0;
+	let prevNoise = 0;
+	for (let i = 0; i < len; i++) {
+		// ピッチは freq から freqEnd へ指数的に収束 (freqEnd 未指定なら一定)
+		const freq = freqEnd + (_def.freq - freqEnd) * Math.exp(-i / sweepRate);
+		phase += freq / rate;
+
+		// ノイズは1次差分で高域寄りにする (破裂音の「パ」成分)
+		const n = Math.random() * 2 - 1;
+		const highNoise = (n - prevNoise) * 0.5;
+		prevNoise = n;
+
+		// 立ち上がり2ms + 指数減衰 (クリックノイズ防止)
+		const env = Math.min(1, i / (rate * 0.002)) * Math.exp(-decay * i / len);
+		data[i] = 0.5 * env * ((1 - noiseMix) * wave(phase) + noiseMix * highNoise);
+	}
+	return buffer;
+};
+
+/**
+ * リングノート用効果音の実際のパスを取得
+ * @param {string} _soundUrl
+ * @returns {string}
+ */
+const getRingSoundUrl = (_soundUrl = ``) => {
+	const [soundFile, soundPath] = getFilePath(_soundUrl, C_DIR_SOUND);
+	return `${soundPath}${soundFile}`;
+};
+
+/**
+ * リングノート用効果音の読込
+ * - |ringSound=a.mp3,b.mp3| の並び順が音番号 (1始まり)。0は無音
+ * - 読込失敗時は該当の音のみ無音とし、例外は投げない
+ * @returns {Promise<void>}
+ */
+const loadRingSounds = async () => {
+	g_ringSoundBuffers.clear();
+	// デフォルト音 (音番号1～)
+	g_ringDefaultSounds.forEach((def, i) => {
+		const key = `default:${i + 1}`;
+		if (!g_ringSoundCache.has(key)) {
+			g_ringSoundCache.set(key, makeDefaultRingSound(def));
+		}
+		g_ringSoundBuffers.set(i + 1, g_ringSoundCache.get(key));
+	});
+
+	// |ringSound=| の指定でデフォルト音を上書き (空欄はデフォルトのまま)
+	const names = g_headerObj.ringSound.split(`,`).map(val => trimStr(val));
+	if (names.every(name => !hasVal(name))) {
+		return;
+	}
+	if (g_isFile) {
+		console.warn(`ringSound: file scheme is not supported (default sounds are used)`);
+		return;
+	}
+	await Promise.all(names.map(async (name, i) => {
+		if (!hasVal(name)) {
+			return;
+		}
+		const url = getRingSoundUrl(name);
+		try {
+			let buffer = g_ringSoundCache.get(url);
+			if (buffer === undefined) {
+				const controller = new AbortController();
+				const timer = setTimeout(() => controller.abort(), 30000);
+				let arrayBuffer;
+
+				try {
+					const response = await fetch(url, { signal: controller.signal });
+					if (!response.ok) {
+						throw new Error(`HTTP ${response.status}`);
+					}
+					arrayBuffer = await response.arrayBuffer();
+				} finally {
+					clearTimeout(timer);
+				}
+
+				buffer = await getSharedAudioContext().decodeAudioData(arrayBuffer);
+				g_ringSoundCache.set(url, buffer);
+			}
+			g_ringSoundBuffers.set(i + 1, buffer);
+		} catch (e) {
+			g_ringSoundBuffers.delete(i + 1);
+			console.warn(`ringSound load error (${name}): ${e}`);
+		}
+	}));
+};
+
 /**
  * 音源の再生準備完了を待つ
  * - g_audio が Audio要素の場合は canplaythrough/error イベントの発火を待つ
@@ -383,8 +570,14 @@ const prepareScoreData = (_retryFlg = false) => {
 	// フレーム・曲開始位置調整
 	let preblankFrame = 0;
 	if (g_scoreObj.frameNum === 0) {
-		if (firstArrowFrame - g_limitObj.adjustment < arrivalFrame) {
-			preblankFrame = arrivalFrame - firstArrowFrame + g_limitObj.adjustment;
+		// 矢印・リングノートそれぞれについて、出現が開始前になる場合の補完フレーム数を求め、大きい方を採用
+		const arrowLead = firstArrowFrame - g_limitObj.adjustment < arrivalFrame
+			? arrivalFrame - firstArrowFrame + g_limitObj.adjustment : 0;
+		const ringLead = getRingLeadFrame(g_scoreObj);
+		if (arrowLead > 0 || ringLead > 0) {
+			preblankFrame = Math.max(arrowLead, ringLead);
+			console.log(firstArrowFrame, arrivalFrame, g_limitObj.adjustment, arrowLead, ringLead, preblankFrame)
+			console.log(arrowLead)
 
 			// 譜面データの再読み込み
 			const noteExistObj = {
@@ -447,6 +640,8 @@ const prepareScoreData = (_retryFlg = false) => {
 	g_allFrz = 0;
 	g_scoreObj.arrowData.forEach(data => g_allArrow += data.length);
 	g_scoreObj.frzData.forEach(data => g_allFrz += Math.floor(data.length / 2) * 2);
+	// リングノート数を矢印数に加算 (ライフ回復量・パーフェクト判定等の母数に含める)
+	g_allArrow += Math.floor((g_scoreObj.ringData?.length ?? 0) / g_ringObj.cols);
 
 	// ライフ回復・ダメージ量の計算
 	// フリーズ始点でも通常判定させる場合は総矢印数を水増しする
@@ -979,6 +1174,42 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	};
 
 	/**
+	 * リングノートデータの分解 (1行1ノート)
+	 * 入力: 到達フレーム, X, Y, [音番号], [半径], [色], [出現～到達フレーム数]
+	 * 出力: g_ringObj.cols 個で1セットの単純配列
+	 *       [到達フレーム, X, Y, 音番号, 半径, 色, 出現～到達フレーム数(0:未指定)]
+	 * @param {string} _scoreNo
+	 * @returns {any[]}
+	 */
+	const setRingData = _scoreNo => {
+		const dosRingData = getRefData(`ring`, `${_scoreNo}_data`);
+		if (!hasVal(dosRingData)) {
+			return [];
+		}
+		const ringData = [];
+		const getNum = (_val, _default, _condition = true, _default2 = _default) =>
+			hasVal(_val) && !isNaN(parseFloat(_val))
+				? (_condition ? parseFloat(_val) : _default2)
+				: _default;
+
+		splitLF(dosRingData).filter(data => hasVal(data)).forEach(tmpData => {
+			const t = tmpData.split(`,`).map(val => trimStr(val));
+			if ([0, 1, 2].some(k => isNaN(parseFloat(t[k])))) {
+				console.warn(`ring_data: 到達フレーム,X,Y は必須です: ${tmpData}`);
+				return;
+			}
+			ringData.push([
+				calcFrame(t[0]), parseFloat(t[1]), parseFloat(t[2]),
+				getNum(t[3], g_ringObj.sound),
+				getNum(t[4], g_ringObj.radius, t[4] >= g_ringObj.minRadius, g_ringObj.minRadius),
+				hasVal(t[5]) ? t[5] : (g_headerObj.baseBrightFlg ? g_ringObj.colorLight : g_ringObj.color),
+				getNum(t[6], 0),
+			]);
+		});
+		return ringData.sort((_a, _b) => _a[0] - _b[0]).flat();
+	};
+
+	/**
 	 * 譜面データに別の関連名が含まれていた場合、関連名の変数を返す
 	 * 例) |backA2_data=back_data| -> back_dataで定義された値を使用
 	 * @param {string} _header 
@@ -1181,6 +1412,10 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		obj.ncolorDummyData = setColor2Data(`ncolor`, _dummyNo);
 	}
 
+	// リングノート・リング速度変化の分解 (速度変化は既存のsetSpeedDataを流用)
+	obj.ringSpeedData = setSpeedData(`ringspeed`, scoreIdHeader);
+	obj.ringData = setRingData(scoreIdHeader);
+
 	if (_scoreAnalyzeFlg) {
 		return obj;
 	}
@@ -1310,6 +1545,12 @@ const getLastFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj
 			}
 		});
 	}
+
+	// リングノートの最終到達フレーム (到達フレーム昇順・6要素1セット)
+	const ringData = _dataObj.ringData ?? [];
+	if (ringData.length >= g_ringObj.cols) {
+		tmpLastNum = Math.max(tmpLastNum, ringData[ringData.length - g_ringObj.cols]);
+	}
 	return tmpLastNum;
 };
 
@@ -1317,9 +1558,10 @@ const getLastFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj
  * 最初の矢印フレームの取得
  * @param {object} _dataObj 
  * @param {string} [_keyCtrlPtn]
+ * @param {boolean} [_includeRing=false] リングノートも含めるか
  * @returns {number}
  */
-const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`) => {
+const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_keyObj.currentPtn}`, _includeRing = false) => {
 
 	let tmpFirstNum = Infinity;
 	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${_keyCtrlPtn}`].length;
@@ -1338,7 +1580,16 @@ const getFirstArrowFrame = (_dataObj, _keyCtrlPtn = `${g_keyObj.currentKey}_${g_
 			}
 		});
 	}
-	return (tmpFirstNum === Infinity ? 0 : tmpFirstNum);
+	if (_includeRing) {
+		const ringData = _dataObj.ringData ?? [];
+		for (let k = 0; k + g_ringObj.cols <= ringData.length; k += g_ringObj.cols) {
+			const frame = ringData[k];
+			if (Number.isFinite(frame)) {
+				tmpFirstNum = Math.min(tmpFirstNum, frame);
+			}
+		}
+	}
+	return (tmpFirstNum === Infinity ? g_headerObj.blankFrame : tmpFirstNum);
 };
 
 /**
@@ -1652,6 +1903,27 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 		calcNotes(j, _dataObj.dummyFrzData[j], `dummyFrz`, true);
 	}
 
+	// リングノートの出現フレーム別格納 (矢印とは独立のため速度計算は不要)
+	// - 開始フレーム前に到達済みのものは除外
+	// - 出現が開始フレーム前のもの(フェードイン時)は、開始フレームから途中の大きさで出現させる
+	g_workObj.mkRing = [];
+	g_workObj.ringArrivals = []; // 通し番号 -> 到達フレーム (到達順)
+	const ringData = _dataObj.ringData ?? [];
+	const cols = g_ringObj.cols;
+	for (let k = 0; k < ringData.length; k += cols) {
+		const [arrival, x, y, sound, radius, color, frames] = ringData.slice(k, k + cols);
+		if (arrival < g_scoreObj.frameNum) {
+			continue;
+		}
+		const total = getRingDuration(_dataObj.ringSpeedData, arrival, frames);
+		const appear = Math.max(arrival - total, g_scoreObj.frameNum);
+		(g_workObj.mkRing[appear] ??= []).push({
+			x, y, radius, color, sound, total, arrivalFrame: arrival - appear,
+			arrival, seq: g_workObj.ringArrivals.length,
+		});
+		g_workObj.ringArrivals.push(arrival);
+	}
+
 	/**
 	 * 色変化・モーションデータ・スクロール反転データのタイミング更新
 	 * - この関数を使用する場合、配列グループの先頭2つが「フレーム数、矢印番号」となっていないと動作しない
@@ -1863,6 +2135,50 @@ const getFrzLength = (_speedOnFrame, _startFrame, _endFrame) => {
 		frzLength += _speedOnFrame[frm];
 	}
 	return frzLength;
+};
+
+/**
+ * 指定フレーム時点で有効なリング速度の取得
+ * @param {number[]} _ringSpeedData [フレーム数, 速度, ...] (フレーム昇順)
+ * @param {number} _frame
+ * @returns {number}
+ */
+const getRingSpeed = (_ringSpeedData, _frame) => {
+	let speed = 1;
+	for (let k = 0; k < (_ringSpeedData?.length ?? 0); k += 2) {
+		if (_ringSpeedData[k] > _frame) {
+			break;
+		}
+		speed = _ringSpeedData[k + 1];
+	}
+	return speed > 0 ? speed : 1;
+};
+
+/**
+ * リングの出現～到達フレーム数
+ * - 個別指定(_frames > 0)があればそれを優先、なければ到達フレーム時点のリング速度に反比例
+ * - リング速度オプション(g_stateObj.ringSpeed)はどちらにも掛かる
+ */
+const getRingDuration = (_ringSpeedData, _arrivalFrame, _frames = 0) => {
+	const base = _frames > 0 ? _frames : g_ringObj.baseFrame / getRingSpeed(_ringSpeedData, _arrivalFrame);
+	return Math.max(Math.round(base / g_stateObj.ringSpeed), 1);
+};
+
+/**
+ * リングを0フレーム以降に出現させるために必要な補完フレーム数
+ * (矢印のプレブランク計算と同様、Adjustment分の余裕を含める)
+ */
+const getRingLeadFrame = _dataObj => {
+	const ringData = _dataObj.ringData ?? [];
+	let lead = 0;
+	const cols = g_ringObj.cols;
+	for (let k = 0; k < ringData.length; k += cols) {
+		const duration = getRingDuration(_dataObj.ringSpeedData, ringData[k], ringData[k + cols - 1]);
+		if (ringData[k] - g_limitObj.adjustment < duration) {
+			lead = Math.max(lead, duration - ringData[k] + g_limitObj.adjustment);
+		}
+	}
+	return lead;
 };
 
 /**
@@ -2835,13 +3151,21 @@ class AudioPlayer {
 }
 
 // グローバルで1つだけ保持(遅延生成)
+let g_sharedAudioResumePending = false;
+let g_sharedAudioResumeNextAt = 0;
 const getSharedAudioContext = () => {
 	if (!g_sharedAudioContext) {
 		g_sharedAudioContext = new AudioContext();
 	}
-	// タブのバックグラウンド化等でsuspendedになることがあるため念のためresume
-	if (g_sharedAudioContext.state === `suspended`) {
-		g_sharedAudioContext.resume();
+	// 復帰待ちのPromiseは重複させず、失敗時の再試行は1秒以上空ける。
+	const now = performance.now();
+	if ((g_sharedAudioContext.state === `suspended` || g_sharedAudioContext.state === `interrupted`) &&
+		!g_sharedAudioResumePending && now >= g_sharedAudioResumeNextAt) {
+		g_sharedAudioResumePending = true;
+		g_sharedAudioResumeNextAt = now + 1000;
+		g_sharedAudioContext.resume().catch(() => { }).finally(() => {
+			g_sharedAudioResumePending = false;
+		});
 	}
 	return g_sharedAudioContext;
 };

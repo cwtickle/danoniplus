@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/10/25 (v51.4.3)
+ * Revised : 2026/11/08 (v52.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -50,6 +50,18 @@ const mainInit = () => {
 	const infoSprite = createEmptySprite(divRoot, `infoSprite`, mainCommonPos);
 	addTransform(`infoSprite`, `main`,
 		`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
+
+	// リングノート用スプライト (mainSpriteの外: PlayWindow/Shaking等の影響を受けない)
+	let ringSprite = null;
+	if ((g_scoreObj.ringData?.length ?? 0) > 0) {
+		bindRingPointer(divRoot);
+		startRingKeepAlive();
+		ringSprite = createEmptySprite(divRoot, `ringSprite`, mainCommonPos);
+		addTransform(`ringSprite`, `main`,
+			`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
+	} else {
+		stopRingKeepAlive();
+	}
 
 	// 判定系スプライトを作成（メインスプライトより上位）
 	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, mainCommonPos);
@@ -1451,9 +1463,119 @@ const mainInit = () => {
 	};
 
 	/**
+	 * リングノート
+	 * - 状態は mainInit ローカルのため、リトライ時は自然に初期化される
+	 * - cnt === 0 がガイドと一致するフレーム。判定は cnt <= 0 の間のみ行い、
+	 *   最初にポインタがガイド内にあったフレームの遅れ (-cnt) で判定する
+	 */
+	const rings = [];
+	let ringCnt = 0;
+
+	const makeRing = _data => {
+		const no = ++ringCnt;
+		const diameter = _data.radius * 2;
+		const base = {
+			x: _data.x - _data.radius, y: _data.y - _data.radius, w: diameter, h: diameter,
+			borderRadius: `50%`, boxSizing: `border-box`,
+		};
+		const guide = createEmptySprite(ringSprite, `ringGuide${no}`, {
+			...base, border: `solid ${g_ringObj.lineWidth}px ${g_ringObj.guideColor}`,
+			visibility: g_stateObj.ringGuide === `Hidden` ? `hidden` : `visible`,
+		});
+		const body = createEmptySprite(ringSprite, `ringBody${no}`, {
+			...base, border: `solid ${g_ringObj.lineWidth}px ${_data.color}`,
+		});
+		rings.push({ ..._data, cnt: _data.arrivalFrame + 1, guide, body, guideVisible: true });
+	};
+
+	const ringDone = new Set(); // 判定済み(削除済み)リングの通し番号
+	let ringNextSeq = 0;        // 未判定のうち最小の通し番号
+
+	const removeRing = _i => {
+		ringDone.add(rings[_i].seq);
+		rings[_i].guide.remove();
+		rings[_i].body.remove();
+		rings.splice(_i, 1);
+	};
+
+	const updateRings = () => {
+		for (let i = rings.length - 1; i >= 0; i--) {
+			const ring = rings[i];
+			ring.cnt--;
+
+			// リング本体の大きさ (cnt === 0 でガイドと一致)
+			const t = Math.min(Math.max(1 - ring.cnt / ring.total, 0), 1);
+			ring.body.style.transform = `scale(${g_ringObj.startRate + (1 - g_ringObj.startRate) * t})`;
+
+			// ガイド到達前は判定しない
+			if (ring.cnt > 0) {
+				continue;
+			}
+
+			// 判定範囲外は、ポインタ位置に関係なくミスにする
+			if (ring.cnt < -g_judgObj.arrowJ[g_judgPosObj.shobon]) {
+				judgeUwan(ring.cnt, -1);
+				removeRing(i);
+				continue;
+			}
+
+			const autoPlay = g_stateObj.autoAll === C_FLG_ON;
+			const hit = autoPlay ? ring.cnt === 0 : isPointerInside(ring.guide);
+
+			if (hit) {
+				// 判定の選択には正の遅れ、フックには符号付きのカウントを渡す
+				checkJudgment(-ring.cnt)[0](ring.cnt, -1);
+				playRingSound(ring.sound);
+				removeRing(i);
+			}
+		}
+
+		// ガイドを「次に判定するリング」だけに絞る
+		// - 次 = 未判定(未出現を含む)のうち到達が最も早いリング。出現順ではなく譜面上の到達順で決める
+		if (g_stateObj.ringGuide === `Next`) {
+			while (ringDone.has(ringNextSeq)) {
+				ringNextSeq++;
+			}
+			const nextArrival = g_workObj.ringArrivals[ringNextSeq];
+			rings.forEach(ring => {
+				const visible = ring.cnt <= 0 || ring.arrival === nextArrival;
+				if (ring.guideVisible !== visible) {
+					ring.guide.style.visibility = visible ? `visible` : `hidden`;
+					ring.guideVisible = visible;
+				}
+			});
+		}
+	};
+
+	/**
+	  * ライフ制＆ライフ0の場合の途中終了
+	  */
+	const isLifeZero = () => g_workObj.lifeVal === 0 && g_workObj.lifeBorder === 0;
+	const finishByLifeZero = () => {
+		g_audio.pause();
+		g_timerHandler.clearTimeout(g_timeoutEvtId);
+		g_gameOverFlg = true;
+		g_finishFlg = false;
+		resultInit();
+	};
+
+	/**
 	 * フレーム処理(譜面台)
 	 */
 	const flowTimeline = () => {
+		const terminalFrame = g_scoreObj.frameNum >= fullFrame;
+		if (!terminalFrame && g_audio instanceof AudioPlayer && g_audioClockSync &&
+			musicStartCtxTime !== undefined && g_audio.contextState !== `running`) {
+			// 停止中でも、ライフ0の途中終了は待たずに行う
+			// (最終フレームは上の terminalFrame で本体へ通し、そちらの判定を優先する)
+			if (isLifeZero()) {
+				finishByLifeZero();
+				return;
+			}
+			getSharedAudioContext(); // suspended時はresumeを試行
+			g_timeoutEvtId = g_timerHandler.setTimeout(flowTimeline, g_maxFrameWait);
+			return;
+		}
 
 		const currentFrame = g_scoreObj.frameNum;
 		lblframe.textContent = g_scoreObj.baseFrame;
@@ -1598,6 +1720,10 @@ const mainInit = () => {
 			}
 		}
 
+		// リングノート生成・更新
+		g_workObj.mkRing?.[currentFrame]?.forEach(data => makeRing(data));
+		updateRings();
+
 		// 歌詞表示
 		g_scoreObj.wordData[currentFrame]?.forEach(wordData => updateWord(wordData, currentFrame));
 
@@ -1629,14 +1755,10 @@ const mainInit = () => {
 			g_workObj.mainEndTime = thisTime;
 			resultInit();
 
-		} else if (g_workObj.lifeVal === 0 && g_workObj.lifeBorder === 0) {
+		} else if (isLifeZero()) {
 
 			// ライフ制＆ライフ０の場合は途中終了
-			g_audio.pause();
-			g_timerHandler.clearTimeout(g_timeoutEvtId);
-			g_gameOverFlg = true;
-			g_finishFlg = false;
-			resultInit();
+			finishByLifeZero();
 
 		} else {
 
@@ -1653,27 +1775,20 @@ const mainInit = () => {
 			//   再生開始時のオフセットずれやsuspend/resumeによるずれを吸収できない
 			thisTime = performance.now();
 			buffTime = 0;
-			let holdFrame = false;
 
 			if (g_audio instanceof AudioPlayer && g_audioClockSync && musicStartCtxTime !== undefined) {
-				if (g_audio.contextState === `running`) {
-					buffTime = (g_audio.contextTime - musicStartCtxTime) * 1000
-						- (currentFrame - musicStartFrame) * 1000 / g_fps;
-				} else {
-					// AudioContext停止中は音源も止まっているため、フレーム進行も止めて復帰を待つ
-					getSharedAudioContext(); // suspended時はresumeを試行
-					holdFrame = true;
-				}
+				buffTime = (g_audio.contextTime - musicStartCtxTime) * 1000
+					- (currentFrame - musicStartFrame) * 1000 / g_fps;
 			} else if (g_audio instanceof AudioPlayer || currentFrame >= musicStartFrame) {
-				buffTime = (thisTime - musicStartTime - (currentFrame - musicStartFrame) * 1000 / g_fps);
+				buffTime = thisTime - musicStartTime - (currentFrame - musicStartFrame) * 1000 / g_fps;
 			}
 
-			if (!holdFrame) {
-				g_scoreObj.frameNum++;
-				g_scoreObj.baseFrame++;
-			}
-			g_timeoutEvtId = g_timerHandler.setTimeout(flowTimeline, holdFrame ? g_maxFrameWait :
-				Math.min(Math.max(1000 / g_fps - buffTime, 0), g_maxFrameWait));
+			g_scoreObj.frameNum++;
+			g_scoreObj.baseFrame++;
+			g_timeoutEvtId = g_timerHandler.setTimeout(
+				flowTimeline,
+				Math.min(Math.max(1000 / g_fps - buffTime, 0), g_maxFrameWait)
+			);
 		}
 	};
 
@@ -1853,6 +1968,242 @@ const mainInit = () => {
 	} else {
 		g_timeoutEvtId = g_timerHandler.setTimeout(flowTimeline, 1000 / g_fps);
 	}
+};
+
+/** マウス/タッチ位置 (リングノートの判定用) */
+const g_pointer = { x: 0, y: 0, valid: false, type: null, id: null };
+
+// 接触中のタッチ位置
+const g_touchPointers = new Map();
+let g_ringTouchCleanup = null;
+
+/** デバイス待機防止用の維持音 */
+let g_ringKeepAlive = null;
+
+/**
+ * リングノートの効果音が欠けないよう、聞こえないレベルのノイズを鳴らし続ける
+ * - 完全な無音だとデバイスが省電力に入り、その直後の短い効果音が欠けることがある
+ * - 振幅1e-4は16bitで約3LSB(約-80dBFS)で、聞こえない
+ */
+const startRingKeepAlive = () => {
+	stopRingKeepAlive();
+	const ctx = getSharedAudioContext();
+	const buffer = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+	const data = buffer.getChannelData(0);
+	for (let i = 0; i < data.length; i++) {
+		data[i] = (Math.random() * 2 - 1) * 1e-4;
+	}
+	const source = ctx.createBufferSource();
+	source.buffer = buffer;
+	source.loop = true;
+	source.connect(ctx.destination);
+	source.start();
+	g_ringKeepAlive = source;
+};
+
+const stopRingKeepAlive = () => {
+	if (g_ringKeepAlive) {
+		try {
+			g_ringKeepAlive.stop();
+		} catch (e) { /* 既に停止済み */ }
+		g_ringKeepAlive.disconnect();
+		g_ringKeepAlive = null;
+	}
+};
+
+// ポインタ状態をクリア
+const resetRingPointers = () => {
+	g_pointer.valid = false;
+	g_touchPointers.clear();
+};
+
+// プレイ開始前に一度だけ登録する。
+// document のリスナーは clearWindow では解除されない。
+const bindRingMouse = () => {
+	const update = evt => {
+		if (evt.pointerType !== `mouse`) {
+			return;
+		}
+		g_pointer.x = evt.clientX;
+		g_pointer.y = evt.clientY;
+		g_pointer.type = `mouse`;
+		g_pointer.id = evt.pointerId;
+		g_pointer.valid = true;
+	};
+
+	g_handler.addListener(document, `pointermove`, update, true);
+	g_handler.addListener(document, `pointerdown`, update, true);
+	g_handler.addListener(document, `pointerover`, evt => {
+		// 文書外から入った場合だけ更新する。
+		if (evt.relatedTarget === null) {
+			update(evt);
+		}
+	}, true);
+	g_handler.addListener(document, `pointerout`, evt => {
+		if (evt.pointerType === `mouse` && evt.relatedTarget === null &&
+			g_pointer.type === `mouse`) {
+			g_pointer.valid = false;
+		}
+	}, true);
+};
+
+// タッチを document で追跡し、子要素のクリック先を変更しない。
+const bindRingTouchTracking = _root => {
+	const ignoreSelector = [
+		`.button_common`,
+		`button`, `input`, `select`, `textarea`, `a[href]`,
+		`[role="button"]`, `[data-ring-ignore]`,
+	].join(`,`);
+
+	const onDown = evt => {
+		if (evt.pointerType !== `touch` ||
+			!(evt.target instanceof Element) || !_root.contains(evt.target)) {
+			return;
+		}
+
+		// 除外したコントロールでも、古いマウス・ペン位置は無効にする。
+		g_pointer.valid = false;
+		if (evt.target.closest(ignoreSelector)) {
+			return;
+		}
+
+		g_touchPointers.set(evt.pointerId, {
+			x: evt.clientX,
+			y: evt.clientY,
+			startTarget: evt.target,
+		});
+	};
+
+	const onMove = evt => {
+		const pointer = g_touchPointers.get(evt.pointerId);
+		if (!pointer) return;
+		if (!_root.contains(pointer.startTarget)) {
+			g_touchPointers.delete(evt.pointerId);
+			return;
+		}
+		pointer.x = evt.clientX;
+		pointer.y = evt.clientY;
+	};
+
+	const onEnd = evt => {
+		g_touchPointers.delete(evt.pointerId);
+	};
+
+	const listenerIds = [
+		g_handler.addListener(document, `pointerdown`, onDown, true),
+		g_handler.addListener(document, `pointermove`, onMove, true),
+		...[`pointerup`, `pointercancel`, `lostpointercapture`].map(type =>
+			g_handler.addListener(document, type, onEnd, true)),
+	];
+
+	return () => {
+		listenerIds.forEach(id => g_handler.removeListener(id));
+		g_touchPointers.clear();
+	};
+};
+
+// mainInit のたびに登録する。
+// clearWindow は _root のリスナーを解除する。
+const bindRingPointer = _root => {
+	g_ringTouchCleanup?.();
+	g_touchPointers.clear();
+
+	// マウスの位置だけをリトライ後も保持する。
+	if (g_pointer.type !== `mouse`) {
+		g_pointer.valid = false;
+	}
+
+	g_ringTouchCleanup = bindRingTouchTracking(_root);
+
+	const update = evt => {
+		// マウスとタッチは document 側で追跡する。
+		if (evt.pointerType === `mouse` || evt.pointerType === `touch`) {
+			return;
+		}
+		g_pointer.x = evt.clientX;
+		g_pointer.y = evt.clientY;
+		g_pointer.type = evt.pointerType;
+		g_pointer.id = evt.pointerId;
+		g_pointer.valid = true;
+	};
+
+	const release = evt => {
+		if (evt.pointerType === `touch`) {
+			g_touchPointers.delete(evt.pointerId);
+		} else if (evt.type === `pointercancel` &&
+			g_pointer.type === evt.pointerType && g_pointer.id === evt.pointerId) {
+			g_pointer.valid = false;
+		}
+	};
+
+	const leave = evt => {
+		if (evt.pointerType !== `touch` && evt.type === `pointercancel` &&
+			g_pointer.type === evt.pointerType && g_pointer.id === evt.pointerId) {
+			g_pointer.valid = false;
+		}
+	};
+
+	g_handler.addListener(_root, `pointermove`, update);
+	g_handler.addListener(_root, `pointerdown`, update);
+	g_handler.addListener(_root, `pointerup`, release);
+	g_handler.addListener(_root, `pointercancel`, release);
+	g_handler.addListener(_root, `pointerleave`, leave);
+};
+
+/**
+ * リングノート用効果音の再生
+ * @param {number} _no 音番号 (0: 無音)
+ */
+const playRingSound = _no => {
+	const buffer = g_ringSoundBuffers.get(_no);
+	if (_no <= 0 || buffer === undefined) {
+		return;
+	}
+	const ctx = getSharedAudioContext();
+	const source = ctx.createBufferSource();
+	const gain = ctx.createGain();
+	source.buffer = buffer;
+	gain.gain.value = g_stateObj.volume / 100;
+	source.connect(gain);
+	gain.connect(ctx.destination);
+	source.onended = () => {
+		source.disconnect();
+		gain.disconnect();
+	};
+	source.start();
+};
+
+/**
+ * 要素(ガイド円)の内側にポインタがあるか
+ * - 画面の拡縮・transform後の実座標で判定するため getBoundingClientRect を使用
+ */
+const isPointerInside = _el => {
+	const rect = _el.getBoundingClientRect();
+	const radius = rect.width / 2;
+	const centerX = rect.left + radius;
+	const centerY = rect.top + rect.height / 2;
+
+	const inside = pointer => {
+		const dx = pointer.x - centerX;
+		const dy = pointer.y - centerY;
+		return dx * dx + dy * dy <= radius * radius;
+	};
+
+	if (g_pointer.valid && inside(g_pointer)) {
+		return true;
+	}
+	const root = document.getElementById(`divRoot`);
+	for (const [id, pointer] of g_touchPointers) {
+		// 開始要素が削除されたタッチは、古い座標で判定しない。
+		if (!root?.contains(pointer.startTarget)) {
+			g_touchPointers.delete(id);
+			continue;
+		}
+		if (inside(pointer)) {
+			return true;
+		}
+	}
+	return false;
 };
 
 /**
@@ -2610,6 +2961,11 @@ const changeLifeColor = (_state = ``) => {
 };
 
 /**
+ * 判定カスタムフック名 (リングノートは _j = -1 で専用フックへ)
+ */
+const judgHookName = (_name, _j) => _j < 0 ? `judg_ring_${_name}` : `judg_${_name}`;
+
+/**
  * ゲージ回復処理
  */
 const lifeRecovery = () => {
@@ -2693,7 +3049,7 @@ const judgeRecovery = (_name, _difFrame, _j) => {
 	if (_name === `shakin`) {
 		quickRetry(`Shakin(Great)`);
 	}
-	safeExecuteCustomHooks(`g_customJsObj.judg_${_name}`, g_customJsObj[`judg_${_name}`], _difFrame, _j);
+	safeExecuteCustomHooks(`g_customJsObj.${judgHookName(_name, _j)}`, g_customJsObj[judgHookName(_name, _j)], _difFrame, _j);
 };
 
 /**
@@ -2708,7 +3064,7 @@ const judgeDamage = (_name, _difFrame, _j) => {
 	comboJ.textContent = ``;
 	diffJ.textContent = ``;
 	lifeDamage();
-	safeExecuteCustomHooks(`g_customJsObj.judg_${_name}`, g_customJsObj[`judg_${_name}`], _difFrame, _j);
+	safeExecuteCustomHooks(`g_customJsObj.${judgHookName(_name, _j)}`, g_customJsObj[judgHookName(_name, _j)], _difFrame, _j);
 };
 
 /**
@@ -2736,7 +3092,7 @@ const judgeMatari = (_difFrame, _j) => {
 	finishViewing();
 	quickRetry(`Matari(Good)`);
 
-	safeExecuteCustomHooks(`g_customJsObj.judg_matari`, g_customJsObj.judg_matari, _difFrame, _j);
+	safeExecuteCustomHooks(`g_customJsObj.${judgHookName(`matari`, _j)}`, g_customJsObj[judgHookName(`matari`, _j)], _difFrame, _j);
 };
 
 /**

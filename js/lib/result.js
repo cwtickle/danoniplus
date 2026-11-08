@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/09/23 (v51.0.0)
+ * Revised : 2026/11/08 (v52.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -867,6 +867,8 @@ const getSelectedSettingList = (_orgShuffleFlg) => {
 		withOptions(g_stateObj.swapping, C_FLG_OFF,
 			`Swap:${getStgDetailName(g_stateObj.swapping)}${!_orgShuffleFlg && !g_stateObj.swapping.endsWith(`+`) ? getStgDetailName(`(S)`) : ``}`),
 		withOptions(g_stateObj.judgRange, `Normal`, `Judg:${getStgDetailName(g_stateObj.judgRange)}`),
+		hasRingNotes() ? withOptions(g_stateObj.ringSpeed, 1, `RingSpd:${getStgDetailName(g_stateObj.ringSpeed)}`) : ``,
+		hasRingNotes() ? withOptions(g_stateObj.ringGuide, `Next`, `Guide:${getStgDetailName(g_stateObj.ringGuide)}`) : ``,
 	].filter(value => value !== ``).join(`, `);
 
 	// Display設定の組み立て処理 (Ex: Step : FlatBar, Judge, Life : OFF)

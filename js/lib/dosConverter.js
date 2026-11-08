@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/10/12 (v51.4.0)
+ * Revised : 2026/11/08 (v52.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -502,6 +502,8 @@ const loadLocalStorage = (_musicId = ``) => {
 	checkLocalParam(`appearance`);
 	checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
 	checkLocalParam(`hitPosition`, C_TYP_FLOAT, g_settings.hitPositionNum);
+	checkLocalParam(`ringSpeed`, C_TYP_FLOAT, Math.max(g_settings.ringSpeeds.indexOf(g_stateObj.ringSpeed), 0));
+	checkLocalParam(`ringGuide`);
 
 	// ハイスコア取得準備
 	if (g_localStorage.highscores === undefined) {
@@ -645,12 +647,12 @@ const getFullMusicUrl = (_musicUrl = ``) => {
 const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 	const lastFrame = getLastFrame(_scoreObj, _keyCtrlPtn) + 1;
 	const startFrame = getStartFrame(lastFrame, 0, _scoreId);
-	const firstArrowFrame = getFirstArrowFrame(_scoreObj, _keyCtrlPtn);
+	const firstArrowFrame = getFirstArrowFrame(_scoreObj, _keyCtrlPtn, true);
 	const playingFrame = lastFrame - firstArrowFrame;
 	const keyNum = g_keyObj[`${g_keyObj.defaultProp}${_keyCtrlPtn}`].length;
 
 	// 譜面密度グラフ用のデータ作成
-	const noteCnt = { arrow: [], frz: [] };
+	const noteCnt = { arrow: [], frz: [], ring: Math.floor((_scoreObj.ringData?.length ?? 0) / g_ringObj.cols) };
 	const densityData = fillArray(g_limitObj.densityDivision);
 	let allData = 0;
 
@@ -674,6 +676,20 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 				}
 			}));
 		fullData = fullData.concat(..._scoreObj.arrowData[j], ...tmpFrzData);
+	}
+	if (_scoreObj.ringData !== undefined) {
+		const ringData = _scoreObj.ringData.filter((data, k) => k % g_ringObj.cols === 0);
+		ringData.forEach(note => {
+			if (isNaN(parseFloat(note))) {
+				return;
+			}
+			const point = Math.floor((note - firstArrowFrame) / playingFrame * g_limitObj.densityDivision);
+			if (point >= 0) {
+				densityData[point]++;
+				allData++;
+			}
+		});
+		fullData = fullData.concat(ringData ?? []);
 	}
 
 	fullData = fullData.filter(val => !isNaN(parseFloat(val))).sort((a, b) => a - b);
@@ -725,6 +741,7 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 
 	g_detailObj.arrowCnt[_scoreId] = noteCnt.arrow.concat();
 	g_detailObj.frzCnt[_scoreId] = noteCnt.frz.map((val, k) => _scoreObj.frzData[k].length % 2 === 0 ? val : val - 0.5);
+	g_detailObj.ringCnt[_scoreId] = noteCnt.ring;
 	g_detailObj.startFrame[_scoreId] = startFrame;
 	g_detailObj.playingFrame[_scoreId] = playingFrame;
 	g_detailObj.playingFrameWithBlank[_scoreId] = lastFrame - startFrame;
@@ -740,11 +757,13 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 			timeMargin: 35,
 			mmWidthBase: (g_sWidth - 500) / 2 + 290,
 			mmMarginY: 2,
+			// リングノート用の帯 (リングがある譜面のみ。余白4px + 帯28px)
+			ringBandWidth: noteCnt.ring > 0 ? 32 : 0,
 			get laneWidth() {
-				return Math.min((this.mmWidthBase - this.timeMargin) / keyNum, 40);
+				return Math.min((this.mmWidthBase - this.timeMargin - this.ringBandWidth) / keyNum, 40);
 			},
 			get logicalWidth() {
-				const logicalWidth = this.timeMargin + (this.laneWidth * keyNum);
+				const logicalWidth = this.timeMargin + (this.laneWidth * keyNum) + this.ringBandWidth;
 				return Math.ceil(logicalWidth * g_dpr) / g_dpr;
 			}
 		},
@@ -1370,6 +1389,11 @@ const headerConvert = _dosObj => {
 	// カラーコードのゼロパディング有無設定
 	obj.colorCdPaddingUse = setBoolVal(_dosObj.colorCdPaddingUse);
 
+	// 明背景の場合はガイドリング色を明背景用に切り替える
+	if (obj.baseBrightFlg) {
+		g_ringObj.guideColor = g_ringObj.guideColorLight;
+	}
+
 	// 最大ライフ
 	obj.maxLifeVal = setVal(_dosObj.maxLifeVal, C_VAL_MAXLIFE, C_TYP_FLOAT);
 	if (obj.maxLifeVal <= 0) {
@@ -1520,6 +1544,9 @@ const headerConvert = _dosObj => {
 	} else {
 		makeWarningWindow(g_msgInfoObj.E_0031);
 	}
+
+	// リング音の設定
+	obj.ringSound = _dosObj.ringSound ?? ``;
 
 	// ハッシュタグ
 	obj.hashTag = _dosObj.hashTag ?? ``;

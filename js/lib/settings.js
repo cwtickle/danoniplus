@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/11/03 (v52.1.0)
+ * Revised : 2026/11/08 (v52.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -625,6 +625,7 @@ const drawDensityGraph = _scoreId => {
 	updateScoreDetailLabel(`Density`, `Arrow`, obj.arrowCnts, 3, g_lblNameObj.s_arrow);
 	updateScoreDetailLabel(`Density`, `Frz`, obj.frzCnts, 4,
 		`${g_lblNameObj.s_frz}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">(2x)</span>' : ''}`);
+	updateScoreDetailLabel(`Density`, `Ring`, g_detailObj.ringCnt[_scoreId], 5, g_lblNameObj.s_ring);
 };
 
 /**
@@ -734,11 +735,13 @@ const makeDifInfoLabels = _scoreId => {
 			// 縦連
 			`${g_detailObj.toolDif[j].tate}\t` +
 			// 総矢印数
-			`${(obj.arrowCnts + obj.frzCnts)}\t` +
+			`${(obj.arrowCnts + obj.frzCnts + g_detailObj.ringCnt[j])}\t` +
 			// 矢印
 			`${obj.arrowCnts}\t` +
 			// フリーズアロー
 			`${obj.frzCnts}\t` +
+			// リングノート
+			`${g_detailObj.ringCnt[j]}\t` +
 			// APM
 			`${obj.apm}\t` +
 			// 時間(分秒)
@@ -787,9 +790,10 @@ const makeDifInfo = _scoreId => {
 	lblArrowInfo2.innerHTML = g_lblNameObj.s_linecnts.split(`{0}`)
 		.join(`${makeDedupliArray(g_detailObj.toolDif[_scoreId].push3).length} /cnt:${g_detailObj.toolDif[_scoreId].push3cnt}`);
 	dataArrowInfo.innerHTML =
-		`${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1)} ` +
+		`${arrowCnts + frzCnts * (g_headerObj.frzStartjdgUse ? 2 : 1) + g_detailObj.ringCnt[_scoreId]} ` +
 		`<span style="font-size:${wUnit(g_limitObj.difSelectorSiz)};">` +
-		`(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''})` +
+		`(${arrowCnts} + ${frzCnts}${g_headerObj.frzStartjdgUse ? ' <span class="common_bold">x 2</span>' : ''}` +
+		`${hasRingNotes() ? ` + ${g_detailObj.ringCnt[_scoreId]}` : ''})` +
 		`</span>`;
 
 	const makeArrowCntsView = (_cntlist) => {
@@ -917,25 +921,25 @@ const makeHighScore = _scoreId => {
 			color: g_localStorage.highscores?.[scoreName]?.rankColor ?? `#666666`,
 			fontFamily: getBasicFont(`"Bookman Old Style"`),
 		}),
-		createScoreLabel(`lblHDateTime`, g_localStorage.highscores?.[scoreName]?.dateTime ?? `----/--/-- --:--`, { yPos: 12 }),
-		createScoreLabel(`lblHMarks`,
+		createScoreLabel(`dateTime`, g_localStorage.highscores?.[scoreName]?.dateTime ?? `----/--/-- --:--`, { yPos: 12 }),
+		createScoreLabel(`marks`,
 			`${g_localStorage.highscores?.[scoreName]?.fullCombo ?? '' ? '<span class="result_FullCombo">◆</span>' : ''}` +
 			`${g_localStorage.highscores?.[scoreName]?.perfect ?? '' ? '<span class="result_Perfect">◆</span>' : ''}` +
 			`${g_localStorage.highscores?.[scoreName]?.allPerfect ?? '' ? '<span class="result_AllPerfect">◆</span>' : ''}`,
 			{ xPos: 1, dx: 20, yPos: 12, w: 100, align: C_ALIGN_CENTER }),
-		createScoreLabel(`lblHClearLamps`,
+		createScoreLabel(`clearLamps`,
 			`Cleared: ` + (g_localStorage.highscores?.[scoreName]?.clearLamps?.join(', ') ?? C_FLG_HYPHEN),
 			{ yPos: 13, overflow: C_DIS_AUTO, w: g_sWidth / 2 + 40, h: 37 }),
 
-		createScoreLabel(`lblHShuffle`,
+		createScoreLabel(`shuffleS`,
 			g_stateObj.shuffle.indexOf(`Mirror`) < 0
 				? `` : `Shuffle: <span class="common_shuffle">${g_stateObj.shuffle}</span>`,
 			{ yPos: 11.5, dx: -130 }),
-		createScoreLabel(`lblHAssist`,
+		createScoreLabel(`assistS`,
 			g_autoPlaysBase.includes(g_stateObj.autoPlay)
 				? `` : `Assist: <span class="common_assist">${g_stateObj.autoPlay}</span>`,
 			{ yPos: 12.5, dx: -130 }),
-		createScoreLabel(`lblHAnother`,
+		createScoreLabel(`anotherS`,
 			!hasVal(g_keyObj[`transKey${keyCtrlPtn}`])
 				? `` : `A.Keymode: <span class="common_another">${g_keyObj[`transKey${keyCtrlPtn}`]}</span>`,
 			{ yPos: 13.5, dx: -130 }),
@@ -1031,9 +1035,11 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 
 	const params = g_detailObj.miniMapParams[_scoreId];
 	const kPtn = params._keyCtrlPtn;
-	if (!g_detailObj.scoreMinimapHeader[kPtn]) {
-		// ヘッダーはキー種ごとに共通なので、未作成の場合のみ生成してキャッシュ
-		g_detailObj.scoreMinimapHeader[kPtn] = createMinimapHeader(params.config, kPtn, params._keyNum);
+	// リング帯の有無で幅が変わるため、キー種 + リング帯有無でキャッシュする
+	const headerKey = params.config.ringBandWidth > 0 ? `${kPtn}_ring` : kPtn;
+	if (!g_detailObj.scoreMinimapHeader[headerKey]) {
+		// ヘッダーはキー種(+リング帯有無)ごとに共通なので、未作成の場合のみ生成してキャッシュ
+		g_detailObj.scoreMinimapHeader[headerKey] = createMinimapHeader(params.config, kPtn, params._keyNum);
 	}
 	if (!savedCanvases) {
 		// 未作成の場合のみミニマップを生成（Lazy Generation）
@@ -1050,7 +1056,7 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
 	// --- ヘッダー部分 ---
 	const detailMiniMapHeader = createEmptySprite(detailMiniMap, `detailMiniMapHeader`, g_windowObj.detailMiniMapHeader);
 	$id(`detailMiniMapHeader`).top = wUnit(g_stateObj.miniMapRevFlg ? 230 + g_sHeight - 500 : 0);
-	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[kPtn]);
+	detailMiniMapHeader.appendChild(g_detailObj.scoreMinimapHeader[headerKey]);
 
 	// --- メイン（譜面）部分 ---
 	const detailMiniMapSub = createEmptySprite(detailMiniMap, `detailMiniMapSub`, g_windowObj.detailMiniMapSub);
@@ -1128,7 +1134,7 @@ const drawMinimap = (_scoreId, { _initFlg = false, _fadeinFlg = false } = {}) =>
  * @return {HTMLCanvasElement} ヘッダー用のキャンバス要素
  */
 const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
-	const { timeMargin, laneWidth, logicalWidth } = _config;
+	const { timeMargin, laneWidth, logicalWidth, ringBandWidth = 0 } = _config;
 	const headerHeight = 15; // ヘッダーの固定高
 
 	const canvas = createCanvas(null, { w: logicalWidth, h: headerHeight, position: null });
@@ -1142,6 +1148,12 @@ const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
 
 		// 視覚的な中央調整で +2px
 		fillCanvasText(ctx, keyText, x, headerHeight / 2 + 2, { siz: 10, color: '#999', align: C_ALIGN_CENTER, baseline: `middle` });
+	}
+	// リングノート帯の見出し
+	if (ringBandWidth > 0) {
+		const bandX = timeMargin + laneWidth * _keyNum + 4;
+		fillCanvasText(ctx, `Ring`, bandX + (ringBandWidth - 4) / 2, headerHeight / 2 + 2,
+			{ siz: 10, color: '#999', align: C_ALIGN_CENTER, baseline: `middle` });
 	}
 
 	return canvas;
@@ -1166,7 +1178,7 @@ const createMinimapHeader = (_config, _keyCtrlPtn, _keyNum) => {
  */
 const generateMinimapData = (_params, _isReverse) => {
 	const { _scoreObj, _keyNum, _playingFrame, _firstArrowFrame, _keyCtrlPtn, config } = _params;
-	const { scale, timeMargin, laneWidth, logicalWidth, mmMarginY } = config;
+	const { scale, timeMargin, laneWidth, logicalWidth, mmMarginY, ringBandWidth = 0 } = config;
 
 	const mmHeightTotal = _playingFrame * scale + mmMarginY * 2;
 	const canvases = createSplitCanvases(logicalWidth, mmHeightTotal);
@@ -1232,6 +1244,46 @@ const generateMinimapData = (_params, _isReverse) => {
 				ctx.fillRect(timeMargin + j * laneWidth + 1, y - 1.5, laneWidth - 1, 3);
 			});
 		});
+	}
+
+	// 4. リングノート (レーンを持たないため、右側の専用帯に出現フレームのみ表示)
+	//    座標は使わない。同一フレームに複数ある場合は帯内で横に散らして重なりを避ける
+	if (ringBandWidth > 0 && _scoreObj.ringData !== undefined) {
+		const bandX = timeMargin + laneWidth * _keyNum + 4;
+		const bandW = ringBandWidth - 6;
+		const cols = g_ringObj.cols;
+
+		// 帯の背景
+		distributeDrawing(canvases, 0, mmHeightTotal, g_dpr, (ctx) => {
+			ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+			ctx.fillRect(bandX, 0, bandW, mmHeightTotal);
+		});
+
+		// フレーム毎の出現数
+		const frameCnts = new Map();
+		for (let k = 0; k < _scoreObj.ringData.length; k += cols) {
+			const frame = parseFloat(_scoreObj.ringData[k]);
+			if (!isNaN(frame)) {
+				frameCnts.set(frame, (frameCnts.get(frame) ?? 0) + 1);
+			}
+		}
+
+		const seen = new Map();
+		for (let k = 0; k < _scoreObj.ringData.length; k += cols) {
+			const frame = parseFloat(_scoreObj.ringData[k]);
+			if (isNaN(frame)) continue;
+
+			const idx = seen.get(frame) ?? 0;
+			seen.set(frame, idx + 1);
+			const x = bandX + bandW * (idx + 1) / (frameCnts.get(frame) + 1);
+			const y = getY(frame);
+			distributeDrawing(canvases, y - 4, 8, g_dpr, (ctx) => {
+				ctx.fillStyle = 'rgba(255, 170, 60, 0.8)';
+				ctx.beginPath();
+				ctx.arc(x, y, 3, 0, Math.PI * 2);
+				ctx.fill();
+			});
+		}
 	}
 
 	return canvases.map(item => item.canvas);
@@ -1828,7 +1880,7 @@ const createOptionWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// タイミング調整 (Adjustment)
-	// 縦位置: 10.5  短縮ショートカットあり
+	// 縦位置: 10.6  短縮ショートカットあり
 	createGeneralSetting(spriteList.adjustment, `adjustment`, {
 		skipTerms: g_settings.adjustmentTerms, hiddenBtn: true, scLabel: g_lblNameObj.sc_adjustment, roundNum: 5,
 		unitName: g_lblNameObj.frame, addRFunc: () => viewAdjustment(),
@@ -1857,7 +1909,7 @@ const createOptionWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// フェードイン (Fadein)
-	// 縦位置: 11.5 スライダーあり
+	// 縦位置: 11.6 スライダーあり
 	spriteList.fadein.appendChild(createLblSetting(`Fadein`));
 
 	const lnkFadein = createDivCss2Label(`lnkFadein`, `${g_stateObj.fadein}${g_lblNameObj.percent}`,
@@ -1893,7 +1945,7 @@ const createOptionWindow = _sprite => {
 
 	// ---------------------------------------------------
 	// ボリューム (Volume) 
-	// 縦位置: 12.5
+	// 縦位置: 12.6
 	createGeneralSetting(spriteList.volume, `volume`, { unitName: g_lblNameObj.percent });
 
 	// 譜面番号の再取得
@@ -2168,7 +2220,14 @@ const openHelpOverlay = (_title, _msg, _stateKey) => {
 	);
 	createScText(btnHelpClose, `HelpClose`, { displayName: `helpOverlay`, targetLabel: `btnHelpClose`, x: -5 });
 	if (previewH > 0) {
-		makeHelpPreview(overlay, _stateKey, g_sHeight - 30 - previewH, previewH);
+		const def = g_helpPreviewDefs[_stateKey];
+		let func;
+		if (def?.ring) {
+			func = makeRingHelpPreview;
+		} else {
+			func = makeHelpPreview;
+		}
+		func(overlay, _stateKey, g_sHeight - 30 - previewH, previewH);
 	}
 	// ユーザカスタムイベント(ヘルプ表示)
 	safeExecuteCustomHooks(`g_customJsObj.helpOverlay`, g_customJsObj.helpOverlay);
@@ -2218,6 +2277,7 @@ const isLongHelp = _msg =>
  *               (StepArea, Swappingは実際のキーには非対応)
  * - frzUse    : サンプルでフリーズアローを使用するかどうか
  * - sub       : 派生する設定 (Typeなど)。選択肢の列を2列目に追加する
+ * - ring      : リングのプレビューを出す
  */
 const g_helpPreviewDefs = {
 	motion: {},
@@ -2229,6 +2289,8 @@ const g_helpPreviewDefs = {
 	frzReturn: { sub: `frzReturnType` },
 	effect: { frzUse: true, splitLayer: true },
 	swapping: { frzUse: true },
+	ringSpeed: { ring: true },
+	ringGuide: { ring: true },
 };
 
 /**
@@ -2938,6 +3000,227 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 };
 
 /**
+ * リングノート設定 (RingSpeed / RingGuide) 用の詳細ヘルプ内プレビュー
+ * - ゲーム側 makeRing/updateRings と同じ構成 (ガイド円 + 収束する本体円) を縮小表示する
+ * - 判定はオートプレイ相当 (到達フレームで判定済み扱い)。ポインタ判定は再現しない
+ * - RingSpeed: 現在の倍率での出現～到達フレーム数で収束させる
+ * - RingGuide: ガイドの違いが分かるよう、複数のリングが同時に出る固定の速さで表示する
+ * @param {HTMLDivElement} _parent オーバーレイ
+ * @param {string} _key ringSpeed / ringGuide
+ * @param {number} _top 配置Y座標
+ * @param {number} _height 領域の高さ
+ */
+const makeRingHelpPreview = (_parent, _key, _top, _height) => {
+	if (document.getElementById(`pvRingFrame`) !== null) {
+		return;
+	}
+	const isSpeed = _key === `ringSpeed`;
+	const optList = g_settings[`${_key}s`];
+	const round2 = _val => Math.round(_val * 100) / 100;
+	const sameVal = (_a, _b) => (isSpeed ? round2(_a) === round2(_b) : _a === _b);
+
+	// チップに出す選択肢 (RingSpeedは数が多いため 0.5x 刻みの代表値のみ)
+	const chipList = isSpeed ? optList.filter(val => Math.round(val * 100) % 50 === 0) : optList;
+
+	const playW = g_headerObj.playingWidth || g_sWidth;
+	const playH = g_headerObj.playingHeight || g_sHeight;
+	const chipW = 100;
+	const areaW = g_sWidth - 60;
+	const rate = Math.min(g_limitObj.helpPreviewMaxRate, _height / playH, (areaW - chipW - 15) / playW);
+	const viewW = Math.round(playW * rate);
+	const baseX = Math.max(Math.round((areaW - viewW - chipW - 15) / 2), 0);
+
+	// 領域内のクリックでオーバーレイが閉じないようにする
+	const area = createEmptySprite(_parent, `helpPreview`, {
+		x: 30, y: _top, w: areaW, h: _height, pointerEvents: C_DIS_AUTO,
+	});
+	g_handler.addListener(area, `click`, evt => evt.stopPropagation());
+
+	// ---------------------------------------------------
+	// ミニプレイ画面 (縮小表示)
+	const scaler = createEmptySprite(area, `pvRingScale`, {
+		x: baseX, y: 0, w: playW, h: playH, transform: `scale(${rate})`, transformOrigin: `top left`,
+	});
+	const pvFrame = createEmptySprite(scaler, `pvRingFrame`, {
+		w: playW, h: playH, background: g_headerObj.baseBrightFlg ? `#eeeeee` : `#111111`,
+		border: `1px solid #444444`, boxSizing: `border-box`, overflow: `hidden`,
+	});
+	const ringSprite = createEmptySprite(pvFrame, `pvRingSprite`, { w: playW, h: playH });
+
+	// ---------------------------------------------------
+	// プレビュー状態
+	const radius = g_ringObj.radius;
+	const ringColor = g_headerObj.baseBrightFlg ? g_ringObj.colorLight : g_ringObj.color;
+	const spots = [[0.3, 0.3], [0.65, 0.4], [0.45, 0.62], [0.75, 0.72], [0.25, 0.68], [0.55, 0.25]];
+	const holdFrames = 6;                           // 到達後に残すフレーム数 (判定の瞬間を見せる)
+	const guideDuration = 90, guideInterval = 28;   // RingGuide用 (同時に3個前後出る)
+	const speedInterval = 45;                       // RingSpeed用
+
+	let selected = isSpeed
+		? (optList.find(val => sameVal(val, g_stateObj.ringSpeed)) ?? optList[0])
+		: (optList.includes(g_stateObj.ringGuide) ? g_stateObj.ringGuide : optList[0]);
+	let rings = [];
+	let frameCnt = 0;
+	let noteCnt = 0;
+	let autoCnt = 0;
+	let timerId = null;
+
+	// ゲーム側 getRingDuration (ringSpeedData なし) と同じ式
+	const getTotal = () => isSpeed ? Math.max(Math.round(g_ringObj.baseFrame / selected), 1) : guideDuration;
+	const getInterval = () => isSpeed ? speedInterval : guideInterval;
+	const guideMode = () => isSpeed ? `ALL` : selected;
+
+	const clearRings = () => {
+		rings.forEach(ring => {
+			ring.guide.remove();
+			ring.body.remove();
+		});
+		rings = [];
+	};
+
+	const spawn = () => {
+		const [rx, ry] = spots[noteCnt % spots.length];
+		const no = ++noteCnt;
+		const base = {
+			x: Math.round(playW * rx) - radius, y: Math.round(playH * ry) - radius,
+			w: radius * 2, h: radius * 2, borderRadius: `50%`, boxSizing: `border-box`,
+		};
+		const guide = createEmptySprite(ringSprite, `pvRingGuide${no}`, {
+			...base, border: `solid ${g_ringObj.lineWidth}px ${g_ringObj.guideColor}`,
+			visibility: guideMode() === `Hidden` ? `hidden` : `visible`,
+		});
+		const body = createEmptySprite(ringSprite, `pvRingBody${no}`, {
+			...base, border: `solid ${g_ringObj.lineWidth}px ${ringColor}`,
+			transform: `scale(${g_ringObj.startRate})`,
+		});
+		const total = getTotal();
+		rings.push({ guide, body, total, cnt: total + 1, guideVisible: guideMode() !== `Hidden` });
+	};
+
+	const updateRings = () => {
+		rings = rings.filter(ring => {
+			ring.cnt--;
+			if (ring.cnt < -holdFrames) {
+				ring.guide.remove();
+				ring.body.remove();
+				return false;
+			}
+			// 本体の大きさ (cnt === 0 でガイドと一致)
+			const t = Math.min(Math.max(1 - ring.cnt / ring.total, 0), 1);
+			ring.body.style.transform = `scale(${g_ringObj.startRate + (1 - g_ringObj.startRate) * t})`;
+			ring.body.style.opacity = ring.cnt > 0 ? 1 : Math.max((holdFrames + ring.cnt) / holdFrames, 0);
+			return true;
+		});
+
+		// ガイド表示 (ゲーム側 updateRings と同じ条件。Next: 到達済み or 次に判定するリングのみ)
+		const mode = guideMode();
+		const nextRing = rings.find(ring => ring.cnt > 0);
+		rings.forEach(ring => {
+			const visible = mode === `Hidden` ? false
+				: mode === `Next` ? (ring.cnt <= 0 || ring === nextRing) : true;
+			if (ring.guideVisible !== visible) {
+				ring.guide.style.visibility = visible ? `visible` : `hidden`;
+				ring.guideVisible = visible;
+			}
+		});
+	};
+
+	// ---------------------------------------------------
+	// 選択肢ボタン
+	const colMain = createEmptySprite(area, `pvColMain`, { x: baseX + viewW + 15, y: 0, w: chipW, h: _height });
+	const chipH = Math.min(20, Math.floor(_height / (chipList.length + 2)));
+	const getChipName = opt => isSpeed ? `${opt} ${g_lblNameObj.multi}` : getStgDetailName(opt);
+	const chips = chipList.map((opt, i) =>
+		createCss2Button(`pvRingChip${i}`, getChipName(opt), () => selectOption(opt), {
+			x: 0, y: i * chipH, w: chipW, h: chipH - 2, siz: 12,
+		}, g_cssObj.button_Default));
+	multiAppend(colMain, ...chips);
+
+	// RingSpeed: 現在の倍率と出現～到達フレーム数
+	const lblInfo = createDivCss2Label(`pvRingInfo`, ``, {
+		x: 0, y: chipList.length * chipH + 4, w: chipW, h: 32, siz: 12, align: C_ALIGN_LEFT,
+	});
+	colMain.appendChild(lblInfo);
+
+	const markChips = () => {
+		chips.forEach((chip, i) => {
+			chip.classList.remove(g_cssObj.button_Default, g_cssObj.button_Setting);
+			chip.classList.add(sameVal(chipList[i], selected) ? g_cssObj.button_Setting : g_cssObj.button_Default);
+		});
+		lblInfo.textContent = isSpeed ? `${round2(selected)} ${g_lblNameObj.multi} (${getTotal()}f)` : ``;
+		g_helpSelectHook([selected], 0);
+		safeExecuteCustomHooks(`g_customJsObj.helpPreview`, g_customJsObj.helpPreview, _key, selected,
+			{ pvFrame, ringSprite, playW, playH });
+	};
+
+	const applyOption = opt => {
+		selected = opt;
+		clearRings();
+		frameCnt = 0;
+		spawn();
+	};
+	const selectOption = opt => {
+		autoCnt = -g_limitObj.helpPreviewAutoFrames;
+		applyOption(opt);
+		markChips();
+	};
+
+	// 上下キー: RingSpeedは内側ボタンと同じ5つ刻み (0.25x)、RingGuideは1つずつ
+	const moveOption = _step => {
+		const idx = Math.max(optList.findIndex(val => sameVal(val, selected)), 0);
+		applyOption(optList[nextPos(idx, _step, optList.length)]);
+		markChips();
+	};
+	// 自動切替: RingSpeedは代表値 (チップ) を順に巡回
+	const autoOption = () => {
+		if (!isSpeed) {
+			moveOption(1);
+			return;
+		}
+		const next = chipList.find(val => round2(val) > round2(selected));
+		applyOption(next ?? chipList[0]);
+		markChips();
+	};
+
+	const stop = () => {
+		if (timerId !== null) {
+			g_timerHandler.clearTimeout(timerId);
+		}
+		timerId = null;
+		g_helpPreviewStop = () => true;
+		g_helpPreviewMove = _dir => true;
+		g_helpPreviewColumn = _dir => true;
+	};
+	g_helpPreviewStop = stop;
+	g_helpPreviewMove = _dir => {
+		autoCnt = -g_limitObj.helpPreviewAutoFrames;
+		moveOption(_dir * (isSpeed ? g_settings.ringSpeedTerms[1] : 1));
+	};
+
+	const tick = () => {
+		if (document.getElementById(`pvRingFrame`) === null) {
+			stop();
+			return;
+		}
+		frameCnt++;
+		if (g_limitObj.helpPreviewAutoFrames > 0 && ++autoCnt >= g_limitObj.helpPreviewAutoFrames) {
+			autoCnt = 0;
+			autoOption();
+		}
+		if (frameCnt % getInterval() === 0) {
+			spawn();
+		}
+		updateRings();
+		timerId = g_timerHandler.setTimeout(tick, 1000 / g_fps);
+	};
+
+	// 初期表示: 現在の設定値
+	applyOption(selected);
+	markChips();
+	timerId = g_timerHandler.setTimeout(tick, 1000 / g_fps);
+};
+
+/**
  * 設定名の置き換え処理（未指定時は原則g_lblNameObjの値を使用、明示的な指定がある場合のみ元の名前を返却）
  * @param {string} _name 
  * @returns {string}
@@ -3088,7 +3371,8 @@ const gaugeFormat = (_mode, _border, _rcv, _dmg, _init, _lifeValFlg) => {
 	let rcvText = round2(_rcv), dmgText = round2(_dmg);
 	let realRcv = _rcv, realDmg = _dmg;
 	const allCnt = sumData(g_detailObj.arrowCnt[g_stateObj.scoreId]) +
-		(g_headerObj.frzStartjdgUse ? 2 : 1) * sumData(g_detailObj.frzCnt[g_stateObj.scoreId]);
+		(g_headerObj.frzStartjdgUse ? 2 : 1) * sumData(g_detailObj.frzCnt[g_stateObj.scoreId]) +
+		g_detailObj.ringCnt[g_stateObj.scoreId];
 
 	// ゲージ設定が矢印数依存の場合、実際の値に変換して表示する
 	// 表示上、計算した値は小数第二位までの表示とする（それ以外はそのまま）
@@ -4068,7 +4352,29 @@ const createSettingsDisplayWindow = _sprite => {
 		unitName: g_lblNameObj.pixel,
 		addRFunc: () => updatePreviewHitPositionLine(g_stateObj.hitPosition),
 	});
+
+	if (hasRingNotes()) {
+		// ---------------------------------------------------
+		// リングノートの速度 (RingSpeed)
+		// 縦位置: 9.8
+		g_settings.ringSpeedNum = Math.max(g_settings.ringSpeeds.indexOf(g_stateObj.ringSpeed), 0);
+		g_stateObj.ringSpeed = g_settings.ringSpeeds[g_settings.ringSpeedNum];
+		createGeneralSetting(spriteList.ringSpeed, `ringSpeed`, { skipTerms: g_settings.ringSpeedTerms, unitName: ` ${g_lblNameObj.multi}` });
+
+		// ---------------------------------------------------
+		// リングノートのガイド表示 (RingGuide)
+		// 縦位置: 10.8
+		g_settings.ringGuideNum = Math.max(g_settings.ringGuides.indexOf(g_stateObj.ringGuide), 0);
+		g_stateObj.ringGuide = g_settings.ringGuides[g_settings.ringGuideNum];
+		createGeneralSetting(spriteList.ringGuide, `ringGuide`);
+	}
 };
+
+/**
+ * 選択中の譜面にリングノートが含まれるかをチェック
+ * @returns {boolean}
+ */
+const hasRingNotes = () => (g_detailObj.ringCnt[g_stateObj.scoreId] ?? 0) > 0;
 
 /**
  * Displayボタンを切り替えたときに連動して切り替えるボタンの設定
