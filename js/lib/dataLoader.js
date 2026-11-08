@@ -576,8 +576,6 @@ const prepareScoreData = (_retryFlg = false) => {
 		const ringLead = getRingLeadFrame(g_scoreObj);
 		if (arrowLead > 0 || ringLead > 0) {
 			preblankFrame = Math.max(arrowLead, ringLead);
-			console.log(firstArrowFrame, arrivalFrame, g_limitObj.adjustment, arrowLead, ringLead, preblankFrame)
-			console.log(arrowLead)
 
 			// 譜面データの再読み込み
 			const noteExistObj = {
