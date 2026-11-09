@@ -146,7 +146,7 @@ const initialControl = async () => {
 	}
 	const minRingWidth = Math.min(g_headerObj.playingWidth, 600);
 	g_headerObj.ringWidth = setIntVal(g_headerObj.ringWidth, setIntVal(g_presetObj.ringWidth, minRingWidth));
-	g_headerObj.ringWidth = Math.max(g_headerObj.ringWidth, minRingWidth);
+	g_headerObj.ringWidth = Math.min(Math.max(g_headerObj.ringWidth, minRingWidth), g_sWidth);
 
 	// 可変ウィンドウサイズを更新
 	updateWindowSiz();
