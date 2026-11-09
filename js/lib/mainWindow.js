@@ -56,9 +56,11 @@ const mainInit = () => {
 	if ((g_scoreObj.ringData?.length ?? 0) > 0) {
 		bindRingPointer(divRoot);
 		startRingKeepAlive();
-		ringSprite = createEmptySprite(divRoot, `ringSprite`, mainCommonPos);
+		const ringOffsetX = (g_headerObj.playingWidth - g_headerObj.ringWidth) / 2;
+		ringSprite = createEmptySprite(divRoot, `ringSprite`, { ...mainCommonPos, w: g_headerObj.ringWidth });
 		addTransform(`ringSprite`, `main`,
-			`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.shift);
+			`translateX(${wUnit(g_workObj.playingX + ringOffsetX)}) translateY(${wUnit(g_headerObj.playingY)})`,
+			g_transPriority.shift);
 	} else {
 		stopRingKeepAlive();
 	}
@@ -2225,14 +2227,22 @@ const applyRingPlayWindow = _ringSprite => {
  * - 画面の拡縮・transform後の実座標で判定するため getBoundingClientRect を使用
  */
 const isPointerInside = _el => {
+	const root = document.getElementById(`divRoot`);
 	const rect = _el.getBoundingClientRect();
 	const centerX = rect.left + rect.width / 2;
 	const centerY = rect.top + rect.height / 2;
 	const radius = _el.offsetWidth / 2; // 変形前の半径
 
+	// 祖先(divRoot自身を含む)による拡縮: 画面上のサイズ ÷ レイアウトサイズ
+	// (ringSpriteの変形は含まない。祖先の回転は想定しない)
+	const rootRect = root.getBoundingClientRect();
+	const sx = root.offsetWidth > 0 && rootRect.width > 0 ? rootRect.width / root.offsetWidth : 1;
+	const sy = root.offsetHeight > 0 && rootRect.height > 0 ? rootRect.height / root.offsetHeight : 1;
+
 	const inside = pointer => {
-		const dx = pointer.x - centerX;
-		const dy = pointer.y - centerY;
+		// 画面座標の差分を、祖先の拡縮を除いたdivRoot内の座標へ戻す
+		const dx = (pointer.x - centerX) / sx;
+		const dy = (pointer.y - centerY) / sy;
 		// ringSpriteの変形(回転・スキュー)を逆変換して、元の円との距離で判定
 		const lx = g_ringInv ? g_ringInv.a * dx + g_ringInv.c * dy : dx;
 		const ly = g_ringInv ? g_ringInv.b * dx + g_ringInv.d * dy : dy;
@@ -2242,7 +2252,6 @@ const isPointerInside = _el => {
 	if (g_pointer.valid && inside(g_pointer)) {
 		return true;
 	}
-	const root = document.getElementById(`divRoot`);
 	for (const [id, pointer] of g_touchPointers) {
 		// 開始要素が削除されたタッチは、古い座標で判定しない。
 		if (!root?.contains(pointer.startTarget)) {
