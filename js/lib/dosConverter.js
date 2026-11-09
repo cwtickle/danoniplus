@@ -144,7 +144,9 @@ const initialControl = async () => {
 	if (g_headerObj.playingWidth === `default`) {
 		g_headerObj.playingWidth = g_sWidth;
 	}
-	g_headerObj.ringWidth = setIntVal(g_headerObj.ringWidth, setIntVal(g_presetObj.ringWidth, Math.min(g_headerObj.playingWidth, 600)));
+	const minRingWidth = Math.min(g_headerObj.playingWidth, 600);
+	g_headerObj.ringWidth = setIntVal(g_headerObj.ringWidth, setIntVal(g_presetObj.ringWidth, minRingWidth));
+	g_headerObj.ringWidth = Math.max(g_headerObj.ringWidth, minRingWidth);
 
 	// 可変ウィンドウサイズを更新
 	updateWindowSiz();
