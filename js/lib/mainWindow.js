@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/11/08 (v52.2.1)
+ * Revised : 2026/11/09 (v52.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -56,9 +56,11 @@ const mainInit = () => {
 	if ((g_scoreObj.ringData?.length ?? 0) > 0) {
 		bindRingPointer(divRoot);
 		startRingKeepAlive();
-		ringSprite = createEmptySprite(divRoot, `ringSprite`, mainCommonPos);
+		const ringOffsetX = (g_headerObj.playingWidth - g_headerObj.ringWidth) / 2;
+		ringSprite = createEmptySprite(divRoot, `ringSprite`, { ...mainCommonPos, w: g_headerObj.ringWidth });
 		addTransform(`ringSprite`, `main`,
-			`translateX(${wUnit(g_workObj.playingX)}) translateY(${wUnit(g_headerObj.playingY)})`, g_transPriority.base);
+			`translateX(${wUnit(g_workObj.playingX + ringOffsetX)}) translateY(${wUnit(g_headerObj.playingY)})`,
+			g_transPriority.shift);
 	} else {
 		stopRingKeepAlive();
 	}
@@ -178,6 +180,8 @@ const mainInit = () => {
 
 	// mainSpriteのtransform追加処理
 	addTransform(`mainSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)(), g_transPriority.playWindow);
+	// リングノートにもPlayWindowを適用 (ringSpriteが無い場合は逆行列のみ破棄)
+	applyRingPlayWindow(ringSprite);
 
 	// EffectのArrowEffect追加処理
 	g_effectFunc.get(g_stateObj.effect)();
@@ -1474,18 +1478,27 @@ const mainInit = () => {
 	const makeRing = _data => {
 		const no = ++ringCnt;
 		const diameter = _data.radius * 2;
-		const base = {
-			x: _data.x - _data.radius, y: _data.y - _data.radius, w: diameter, h: diameter,
-			borderRadius: `50%`, boxSizing: `border-box`,
-		};
+		const pos = { x: _data.x - _data.radius, y: _data.y - _data.radius, w: diameter, h: diameter };
+		const circle = { borderRadius: `50%`, boxSizing: `border-box` };
+
+		// ガイド (判定対象のため、エフェクトは掛けない)
 		const guide = createEmptySprite(ringSprite, `ringGuide${no}`, {
-			...base, border: `solid ${g_ringObj.lineWidth}px ${g_ringObj.guideColor}`,
+			...pos, ...circle, border: `solid ${g_ringObj.lineWidth}px ${g_ringObj.guideColor}`,
 			visibility: g_stateObj.ringGuide === `Hidden` ? `hidden` : `visible`,
 		});
-		const body = createEmptySprite(ringSprite, `ringBody${no}`, {
-			...base, border: `solid ${g_ringObj.lineWidth}px ${_data.color}`,
+
+		// リング本体: 外側(エフェクト用)と内側(拡大用)に分ける
+		// - CSSアニメーションのtransformが、拡大のtransformを上書きしてしまうのを避けるため
+		const root = createEmptySprite(ringSprite, `ringEffect${no}`, pos);
+		const body = createEmptySprite(root, `ringBody${no}`, {
+			x: 0, y: 0, w: diameter, h: diameter, ...circle,
+			border: `solid ${g_ringObj.lineWidth}px ${_data.color}`,
 		});
-		rings.push({ ..._data, cnt: _data.arrivalFrame + 1, guide, body, guideVisible: true });
+		if (g_workObj.ringCssMotion !== `` && _data.arrivalFrame > 0) {
+			root.classList.add(g_workObj.ringCssMotion);
+			root.style.animationDuration = `${_data.arrivalFrame / g_fps}s`;
+		}
+		rings.push({ ..._data, cnt: _data.arrivalFrame + 1, guide, body, root, guideVisible: true });
 	};
 
 	const ringDone = new Set(); // 判定済み(削除済み)リングの通し番号
@@ -1494,18 +1507,20 @@ const mainInit = () => {
 	const removeRing = _i => {
 		ringDone.add(rings[_i].seq);
 		rings[_i].guide.remove();
-		rings[_i].body.remove();
+		rings[_i].root.remove();
 		rings.splice(_i, 1);
 	};
 
-	const updateRings = () => {
+	const updateRings = _frame => {
+		const ringSpeed = getRingSpeedAt(g_workObj.ringSpeedOnFrame, _frame);
 		for (let i = rings.length - 1; i >= 0; i--) {
 			const ring = rings[i];
 			ring.cnt--;
 
 			// リング本体の大きさ (cnt === 0 でガイドと一致)
-			const t = Math.min(Math.max(1 - ring.cnt / ring.total, 0), 1);
-			ring.body.style.transform = `scale(${g_ringObj.startRate + (1 - g_ringObj.startRate) * t})`;
+			// 進行度は全体速度(ストップ・逆走含む)に従って増減し、Motionは表示にのみ適用
+			ring.progress += ring.step * ringSpeed;
+			ring.body.style.transform = `scale(${getRingScale(ring.progress)})`;
 
 			// ガイド到達前は判定しない
 			if (ring.cnt > 0) {
@@ -1722,7 +1737,7 @@ const mainInit = () => {
 
 		// リングノート生成・更新
 		g_workObj.mkRing?.[currentFrame]?.forEach(data => makeRing(data));
-		updateRings();
+		updateRings(currentFrame);
 
 		// 歌詞表示
 		g_scoreObj.wordData[currentFrame]?.forEach(wordData => updateWord(wordData, currentFrame));
@@ -2151,6 +2166,19 @@ const bindRingPointer = _root => {
 };
 
 /**
+ * リング本体の拡大率 (進行度 -> 表示倍率)
+ * - 進行度が0未満の間は最小、1を超える場合は超過分を線形に加算 (逆走・折り返し用)
+ * - Motionは0～1の範囲にのみ適用し、p=1で必ず1に戻る
+ * @param {number} _p 進行度
+ * @returns {number}
+ */
+const getRingScale = _p => {
+	const q = Math.min(Math.max(_p, 0), 1);
+	const disp = g_ringMotionFunc.get(g_stateObj.motion)(q) + Math.max(_p - 1, 0);
+	return Math.max(g_ringObj.startRate + (1 - g_ringObj.startRate) * disp, 0);
+};
+
+/**
  * リングノート用効果音の再生
  * @param {number} _no 音番号 (0: 無音)
  */
@@ -2173,26 +2201,57 @@ const playRingSound = _no => {
 	source.start();
 };
 
+// ringSpriteの変形の逆行列 (判定用。null: 変形なし)
+let g_ringInv = null;
+
+/**
+ * リングノートへのPlayWindow適用と、判定用の逆行列の保持
+ * @param {HTMLDivElement|null} _ringSprite
+ */
+const applyRingPlayWindow = _ringSprite => {
+	g_ringInv = null;
+	if (_ringSprite === null) {
+		return;
+	}
+	addTransform(`ringSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)(), g_transPriority.playWindow);
+
+	const m = new DOMMatrix(getComputedStyle(_ringSprite).transform);
+	const det = m.a * m.d - m.b * m.c;
+	if (Math.abs(det) > 1e-6) {
+		g_ringInv = { a: m.d / det, b: -m.b / det, c: -m.c / det, d: m.a / det };
+	}
+};
+
 /**
  * 要素(ガイド円)の内側にポインタがあるか
  * - 画面の拡縮・transform後の実座標で判定するため getBoundingClientRect を使用
  */
 const isPointerInside = _el => {
+	const root = document.getElementById(`divRoot`);
 	const rect = _el.getBoundingClientRect();
-	const radius = rect.width / 2;
-	const centerX = rect.left + radius;
+	const centerX = rect.left + rect.width / 2;
 	const centerY = rect.top + rect.height / 2;
+	const radius = _el.offsetWidth / 2; // 変形前の半径
+
+	// 祖先(divRoot自身を含む)による拡縮: 画面上のサイズ ÷ レイアウトサイズ
+	// (ringSpriteの変形は含まない。祖先の回転は想定しない)
+	const rootRect = root.getBoundingClientRect();
+	const sx = root.offsetWidth > 0 && rootRect.width > 0 ? rootRect.width / root.offsetWidth : 1;
+	const sy = root.offsetHeight > 0 && rootRect.height > 0 ? rootRect.height / root.offsetHeight : 1;
 
 	const inside = pointer => {
-		const dx = pointer.x - centerX;
-		const dy = pointer.y - centerY;
-		return dx * dx + dy * dy <= radius * radius;
+		// 画面座標の差分を、祖先の拡縮を除いたdivRoot内の座標へ戻す
+		const dx = (pointer.x - centerX) / sx;
+		const dy = (pointer.y - centerY) / sy;
+		// ringSpriteの変形(回転・スキュー)を逆変換して、元の円との距離で判定
+		const lx = g_ringInv ? g_ringInv.a * dx + g_ringInv.c * dy : dx;
+		const ly = g_ringInv ? g_ringInv.b * dx + g_ringInv.d * dy : dy;
+		return lx * lx + ly * ly <= radius * radius;
 	};
 
 	if (g_pointer.valid && inside(g_pointer)) {
 		return true;
 	}
-	const root = document.getElementById(`divRoot`);
 	for (const [id, pointer] of g_touchPointers) {
 		// 開始要素が削除されたタッチは、古い座標で判定しない。
 		if (!root?.contains(pointer.startTarget)) {

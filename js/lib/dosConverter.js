@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/11/08 (v52.2.1)
+ * Revised : 2026/11/09 (v52.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -144,6 +144,9 @@ const initialControl = async () => {
 	if (g_headerObj.playingWidth === `default`) {
 		g_headerObj.playingWidth = g_sWidth;
 	}
+	const minRingWidth = Math.min(g_headerObj.playingWidth, 600);
+	g_headerObj.ringWidth = setIntVal(g_headerObj.ringWidth, setIntVal(g_presetObj.ringWidth, minRingWidth));
+	g_headerObj.ringWidth = Math.min(Math.max(g_headerObj.ringWidth, minRingWidth), g_sWidth);
 
 	// 可変ウィンドウサイズを更新
 	updateWindowSiz();
@@ -1481,6 +1484,9 @@ const headerConvert = _dosObj => {
 	const tmpPlayingHeight = setIntVal(_dosObj.playingHeight, g_presetObj.playingHeight ?? g_sHeight);
 	obj.playingHeight = Math.max(obj.heightVariable ?
 		setIntVal(getQueryParamVal(`h`) - (g_sHeight - tmpPlayingHeight), tmpPlayingHeight) : tmpPlayingHeight, 400);
+
+	// リングノートのプレイサイズ（実際のサイズはplayingWidth決定後とするためここでは値代入のみ）
+	obj.ringWidth = _dosObj.ringWidth;
 
 	// プレイ左上位置(X座標, Y座標)
 	obj.playingX = setIntVal(_dosObj.playingX, g_presetObj.playingX ?? 0);
