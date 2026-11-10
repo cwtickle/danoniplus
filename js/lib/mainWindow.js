@@ -1486,8 +1486,6 @@ const mainInit = () => {
 	const rings = [];
 	let ringCnt = 0;
 	const ringFxs = [];
-	const ringFxFrames = 12;
-	const ringFxMask = `radial-gradient(circle, transparent 62%, #000 64%)`;
 
 	/**
 	 * ヒット・ミス時のエフェクト円
@@ -1501,7 +1499,7 @@ const mainInit = () => {
 		const cls = g_cssObj[`main_step${_jdg}`];
 		const el = createEmptySprite(ringSprite, `ringFx${_ring.seq}`, {
 			x: _ring.x - _ring.radius, y: _ring.y - _ring.radius, w: d, h: d,
-			borderRadius: `50%`, maskImage: ringFxMask, webkitMaskImage: ringFxMask,
+			borderRadius: `50%`, maskImage: g_ringObj.fxMask, webkitMaskImage: g_ringObj.fxMask,
 			opacity: 0.75, ...(cls === undefined ? { background: `#cc6666` } : {}),
 		}, ...(cls === undefined ? [] : [cls]));
 		ringFxs.push({ el, cnt: 0 });
@@ -1596,13 +1594,13 @@ const mainInit = () => {
 		}
 		for (let i = ringFxs.length - 1; i >= 0; i--) {
 			const fx = ringFxs[i];
-			const t = ++fx.cnt / ringFxFrames;
+			const t = ++fx.cnt / g_ringObj.fxFrames;
 			if (t >= 1) {
 				fx.el.remove();
 				ringFxs.splice(i, 1);
 				continue;
 			}
-			fx.el.style.transform = `scale(${1 + 0.5 * t})`;
+			fx.el.style.transform = `scale(${1 + g_ringObj.fxScale * t})`;
 			fx.el.style.opacity = 0.75 * (1 - t);
 		}
 	};

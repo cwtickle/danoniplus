@@ -3060,8 +3060,10 @@ const makeRingHelpPreview = (_parent, _key, _top, _height) => {
 		? (optList.find(val => sameVal(val, g_stateObj.ringSpeed)) ?? optList[0])
 		: (optList.includes(g_stateObj.ringGuide) ? g_stateObj.ringGuide : optList[0]);
 	let rings = [];
+	let fxs = [];
 	let frameCnt = 0;
 	let noteCnt = 0;
+	let fxNo = 0;
 	let autoCnt = 0;
 	let timerId = null;
 
@@ -3076,6 +3078,8 @@ const makeRingHelpPreview = (_parent, _key, _top, _height) => {
 			ring.body.remove();
 		});
 		rings = [];
+		fxs.forEach(fx => fx.el.remove());
+		fxs = [];
 	};
 
 	const spawn = () => {
@@ -3094,12 +3098,28 @@ const makeRingHelpPreview = (_parent, _key, _top, _height) => {
 			transform: `scale(${g_ringObj.startRate})`,
 		});
 		const total = getTotal();
-		rings.push({ guide, body, total, cnt: total + 1, guideVisible: guideMode() !== `Hidden` });
+		rings.push({
+			guide, body, total, cnt: total + 1, guideVisible: guideMode() !== `Hidden`,
+			x: base.x, y: base.y, d: base.w, fxDone: false,
+		});
 	};
 
+	/** 到達時のヒットモーション (プレビューは常にイイ判定の見た目) */
+	const addFx = ring => {
+		const el = createEmptySprite(ringSprite, `pvRingFx${++fxNo}`, {
+			x: ring.x, y: ring.y, w: ring.d, h: ring.d,
+			borderRadius: `50%`, maskImage: g_ringObj.fxMask, webkitMaskImage: g_ringObj.fxMask,
+			opacity: 0.75,
+		}, g_cssObj.main_stepIi);
+		fxs.push({ el, cnt: 0 });
+	};
 	const updateRings = () => {
 		rings = rings.filter(ring => {
 			ring.cnt--;
+			if (ring.cnt <= 0 && !ring.fxDone) {
+				ring.fxDone = true;
+				addFx(ring);
+			}
 			if (ring.cnt < -holdFrames) {
 				ring.guide.remove();
 				ring.body.remove();
@@ -3122,6 +3142,18 @@ const makeRingHelpPreview = (_parent, _key, _top, _height) => {
 				ring.guide.style.visibility = visible ? `visible` : `hidden`;
 				ring.guideVisible = visible;
 			}
+		});
+
+		// ヒットモーションの進行
+		fxs = fxs.filter(fx => {
+			const t = ++fx.cnt / g_ringObj.fxFrames;
+			if (t >= 1) {
+				fx.el.remove();
+				return false;
+			}
+			fx.el.style.transform = `scale(${1 + g_ringObj.fxScale * t})`;
+			fx.el.style.opacity = 0.75 * (1 - t);
+			return true;
 		});
 	};
 
