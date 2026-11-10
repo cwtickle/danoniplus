@@ -1179,16 +1179,6 @@ const g_ringObj = {
     sound: 1,                   // 音番号の既定値 (0: 無音)
     cols: 7,                    // 内部の列数 [到達フレーム, X, Y, 音番号, 半径, 色, 出現～到達フレーム数(0:未指定)]
     maxSearchFrame: 3600,       // 出現フレームを遡って探索する上限フレーム数 (ストップ中の無限ループ防止)
-
-    // 開始時のヒント用アイコン (マウスカーソル + リング)。色は文字色(currentColor)に追従
-    hintIcon:
-        `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="48" viewBox="0 0 64 48" ` +
-        `style="vertical-align:middle;margin-right:12px">` +
-        `<circle cx="22" cy="24" r="16" fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.8"/>` +
-        `<circle cx="22" cy="24" r="6" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"/>` +
-        `<path d="M30 20 L30 44 L36 38 L41 47 L45 45 L40 36 L48 36 Z" ` +
-        `fill="currentColor" stroke="#888" stroke-width="1" stroke-linejoin="round"/>` +
-        `</svg>`,
 };
 
 /** リングノートのデフォルト音 (音番号1～。外部ファイル不要でコード生成する) */
@@ -5073,7 +5063,6 @@ const g_lang_lblNameObj = {
         frzJdgUpdate: `フリーズアロー判定の座標を更新`,
         shortcutUpdate: `ショートカット表示の座標を更新`,
         resultImageDesc: `画像を右クリックしてコピーできます`,
-        ringHint: `リングはマウス・タッチで触れます`,
 
         s_level: `Level`,
         s_douji: `同時補正`,
@@ -5140,7 +5129,6 @@ const g_lang_lblNameObj = {
         frzJdgUpdate: `Update the coordinates (freeze)`,
         shortcutUpdate: `Update the coordinates (shortcut)`,
         resultImageDesc: `You can copy the image by right-clicking on it.`,
-        ringHint: `Move the mouse (or touch) over the rings`,
 
         s_level: `Level`,
         s_douji: `Chords`,
