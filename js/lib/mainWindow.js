@@ -456,16 +456,27 @@ const mainInit = () => {
 		const readyHtml = g_headerObj.readyHtml ||
 			`<span style='color:${readyColor};font-size:${wUnit(60)};'>R</span>EADY<span style='font-size:${wUnit(50)};'>?</span>`;
 
+		const baseStyle = {
+			x: g_workObj.playingX + (g_headerObj.playingWidth - g_sWidth) / 2,
+			y: g_headerObj.playingY + (g_headerObj.playingHeight + g_posObj.stepYR) / 2 - 75,
+			w: g_sWidth, h: 50, siz: 40,
+			animationDuration: `${g_headerObj.readyAnimationFrame / g_fps}s`,
+			animationName: g_headerObj.readyAnimationName,
+			animationDelay: `${readyDelayFrame / g_fps}s`, opacity: 0,
+		};
 		divRoot.appendChild(
-			createDivCss2Label(`lblReady`, readyHtml, {
-				x: g_workObj.playingX + (g_headerObj.playingWidth - g_sWidth) / 2,
-				y: g_headerObj.playingY + (g_headerObj.playingHeight + g_posObj.stepYR) / 2 - 75,
-				w: g_sWidth, h: 50, siz: 40,
-				animationDuration: `${g_headerObj.readyAnimationFrame / g_fps}s`,
-				animationName: g_headerObj.readyAnimationName,
-				animationDelay: `${readyDelayFrame / g_fps}s`, opacity: 0,
-			})
+			createDivCss2Label(`lblReady`, readyHtml, baseStyle)
 		);
+
+		// リングノートがある譜面では、マウス操作が必要なことを Ready? と同じタイミングで案内
+		if (ringSprite !== null) {
+			divRoot.appendChild(
+				createDivCss2Label(`lblRingHint`, `${g_ringObj.hintIcon}<span>${g_lblNameObj.ringHint}</span>`, {
+					...baseStyle, siz: 18,
+					y: g_headerObj.playingY + (g_headerObj.playingHeight + g_posObj.stepYR) / 2 - 10,
+				})
+			);
+		}
 	}
 
 	const msg = [];
