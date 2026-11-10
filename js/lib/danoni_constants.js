@@ -1526,7 +1526,7 @@ const g_settings = {
     hitPositionNum: g_limitObj.hitPosition * 10,
     hitPositionTerms: [50, 10],
 
-    ringSpeeds: makeSpeedList(0.5, 3),
+    ringSpeeds: makeSpeedList(0.5, 5),
     ringSpeedNum: 0,
     ringSpeedTerms: [20, 5],
 
@@ -1664,6 +1664,7 @@ const g_transPriority = {
     shakingR: 130,
     shakingX: 140,
     shakingY: 150,
+    ringReverse: 160,
     scale: 200,
     shift: 210,
 };
