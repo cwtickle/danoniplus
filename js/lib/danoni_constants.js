@@ -102,6 +102,9 @@ const g_limitObj = {
     helpPreviewRate: 0.44,     // 詳細ヘルプ内プレビューの高さ (画面高に対する割合)
     helpPreviewMaxRate: 0.5,   // プレビュー内プレイ画面の最大縮小率
     helpPreviewAutoFrames: 500, // 次の選択肢へ自動で切り替えるまでのフレーム数 (0で無効)
+
+    minRingSpeed: 0.5,
+    maxRingSpeed: 5,
 };
 
 /** 設定項目の位置 */
@@ -1529,7 +1532,7 @@ const g_settings = {
     hitPositionNum: g_limitObj.hitPosition * 10,
     hitPositionTerms: [50, 10],
 
-    ringSpeeds: makeSpeedList(0.5, 5),
+    ringSpeeds: makeSpeedList(g_limitObj.minRingSpeed, g_limitObj.maxRingSpeed),
     ringSpeedNum: 0,
     ringSpeedTerms: [20, 5],
 
@@ -5358,7 +5361,7 @@ const g_lang_msgObj = {
         opacity: `判定キャラクタ、コンボ数、Fast/Slowの透明度を設定します。`,
         hitPosition: `判定位置にズレを感じる場合、数値を変えることで判定の中央位置を1px単位(プラス:手前, マイナス:奥側)で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
         ringSpeed: `リングノートの表示速度を設定します。\n` +
-            `0.5x ～ 3.0xの間で設定できます。初期値は1.0xです。`,
+            `${g_limitObj.minRingSpeed.toFixed(1)}x ～ ${g_limitObj.maxRingSpeed.toFixed(1)}xの間で設定できます。初期値は1.0xです。`,
         ringGuide: `リングノートに対するガイド表示の設定です。\n` +
             `[Next] 次に判定するリングのみ表示します。\n` +
             `[ALL] 出現中すべてのリングノートに対するガイドを表示します。\n` +
@@ -5540,7 +5543,7 @@ const g_lang_msgObj = {
         hitPosition: `If you feel a discrepancy in the judgment position, you can adjust the center position of the judgment in 1px increments (plus: in front, minus: at the back) by changing the numerical value. \n` +
             `Use this function when there is a tendency to push too fast or too slow.`,
         ringSpeed: `Set the display speed of the ring notes.\n` +
-            `You can set it between 0.5x and 3.0x. The initial value is 1.0x.`,
+            `You can set it between ${g_limitObj.minRingSpeed.toFixed(1)}x and ${g_limitObj.maxRingSpeed.toFixed(1)}x. The initial value is 1.0x.`,
         ringGuide: `Settings for guide display on ring-bound notebooks. \n` +
             `[Next] Display only the next ring to be judged.\n` +
             `[ALL] Display guides for all ring notes that are currently appearing.\n` +
