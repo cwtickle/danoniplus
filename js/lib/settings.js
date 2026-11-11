@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/11/08 (v52.2.1)
+ * Revised : 2026/11/11 (v52.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2278,16 +2278,17 @@ const isLongHelp = _msg =>
  * - frzUse    : サンプルでフリーズアローを使用するかどうか
  * - sub       : 派生する設定 (Typeなど)。選択肢の列を2列目に追加する
  * - ring      : リングのプレビューを出す
+ * - withRing  : リングノートがある譜面では、矢印のプレビューにリングも重ねて表示する
  */
 const g_helpPreviewDefs = {
-	motion: {},
+	motion: { withRing: true },
 	scroll: { currentKey: true },
 	appearance: { splitLayer: true },
-	playWindow: { sub: `playWindowType` },
+	playWindow: { sub: `playWindowType`, withRing: true },
 	stepArea: {},
-	shaking: { splitLayer: true },
+	shaking: { splitLayer: true, withRing: true },
 	frzReturn: { sub: `frzReturnType` },
-	effect: { frzUse: true, splitLayer: true },
+	effect: { frzUse: true, splitLayer: true, withRing: true },
 	swapping: { frzUse: true },
 	ringSpeed: { ring: true },
 	ringGuide: { ring: true },
@@ -2417,6 +2418,14 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		spriteIds.push(`mainSprite${j}`, `stepSprite${j}`, `arrowSprite${j}`, `frzHitSprite${j}`);
 	}
 	const infoSprite = createEmptySprite(pvFrame, `infoSprite`, { w: playW, h: playH });
+
+	// リングノート (リングがある譜面のみ。ゲーム側と同様に mainSprite の外に置く)
+	// - g_shakingFunc が `ringSprite` の id を決め打ちで参照するため、同じ id で作る
+	const ringUse = def.withRing === true && hasRingNotes();
+	const ringSprite = ringUse ? createEmptySprite(pvFrame, `ringSprite`, { w: playW, h: playH }) : null;
+	if (ringUse) {
+		spriteIds.push(`ringSprite`);
+	}
 	const judgeSprite = createEmptySprite(pvFrame, `judgeSprite`, { w: playW, h: playH });
 	if (_key === `frzReturn`) {
 		mainSprite.style.transformOrigin = `center 55%`;
@@ -2525,7 +2534,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	let notes = [];
 	let dist = [];
 	let bStart = 0;
-	let effectCls = { arrow: ``, frz: ``, frzArrow: `` };
+	let effectCls = { arrow: ``, frz: ``, frzArrow: ``, ring: `` };
 	let filterElms = [];   // Appearanceのフィルターバー・ラベル
 	const frzLen = 90;   // Effectプレビュー用フリーズアローの長さ(px)
 	const work = { drunkXFlg: true, drunkYFlg: true, drunkAxisFlg: false, drunkRotateFlg: false };
@@ -2565,28 +2574,42 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		frzHitCnts[j] = frzHitFrames;
 	};
 
+	// ---------------------------------------------------
+	// リングノート (ringUse 時のみ。生成・更新は共通処理を使用)
+	const ringInterval = 70;    // リングの出現間隔 (矢印より控えめにする)
+	const ringPv = ringUse ? makeRingPreviewCore(ringSprite, playW, playH, {
+		// Motionは、Motionのヘルプを開いているときだけ選択中の値を反映 (g_ringMotionFunc は getRingScale と同じ)
+		getScale: _t => Math.max(g_ringObj.startRate + (1 - g_ringObj.startRate) *
+			g_ringMotionFunc.get(_key === `motion` ? selected : C_FLG_OFF)(_t), 0),
+		getEffectClass: () => effectCls.ring,
+	}) : null;
+
 	/**
 	 * Effectのクラス名取得
-	 * - g_effectFunc は g_workObj.*CssMotions へ書き込むため、呼び出し中だけ空配列へ差し替え、
+	 * - g_effectFunc は g_workObj.*CssMotions / ringCssMotion へ書き込むため、呼び出し中だけ空へ差し替え、
 	 *   ユーザ個別指定のモーションを排除したうえで元に戻す
 	 */
 	const getEffectClasses = opt => {
 		const keys = [`arrowCssMotions`, `frzCssMotions`, `frzArrowCssMotions`];
 		const org = {};
-		const result = { arrow: ``, frz: ``, frzArrow: `` };
+		const orgRing = g_workObj.ringCssMotion;
+		const result = { arrow: ``, frz: ``, frzArrow: ``, ring: `` };
 		keys.forEach(key => {
 			org[key] = g_workObj[key];
 			g_workObj[key] = [];
 		});
+		g_workObj.ringCssMotion = ``;
 		try {
 			g_effectFunc.get(opt)();
 			result.arrow = g_workObj.arrowCssMotions[0] ?? ``;
 			result.frz = g_workObj.frzCssMotions[0] ?? ``;
 			result.frzArrow = g_workObj.frzArrowCssMotions[0] ?? ``;
+			result.ring = g_workObj.ringCssMotion ?? ``;
 		} catch (e) {
 			console.warn(`Effect preview error: ${e}`);
 		} finally {
 			keys.forEach(key => g_workObj[key] = org[key]);
+			g_workObj.ringCssMotion = orgRing;
 		}
 		return result;
 	};
@@ -2705,7 +2728,8 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		selected = opt;
 		resetTransforms();
 		clearNotes();
-		effectCls = _key === `effect` ? getEffectClasses(opt) : { arrow: ``, frz: ``, frzArrow: `` };
+		ringPv?.clear();
+		effectCls = _key === `effect` ? getEffectClasses(opt) : { arrow: ``, frz: ``, frzArrow: ``, ring: `` };
 
 		assignSwapping(_key === `swapping` ? opt : null);
 		// レーンのレイヤー配置 (StepAreaは選択肢ごと、Shakingは右半分を逆スクロール側へ)
@@ -2751,6 +2775,16 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		}
 		if (_key === `playWindow`) {
 			addTransform(`mainSprite`, `playWindow`, withSub(() => g_playWindowFunc.get(opt)()), g_transPriority.playWindow);
+		}
+		if (ringUse) {
+			// ゲーム側 applyRingPlayWindow と同様に、Reverse時の180度回転とPlayWindowをringSpriteへ適用
+			if (g_stateObj.reverse === C_FLG_ON) {
+				addTransform(`ringSprite`, `ringReverse`, `rotate(180deg)`, g_transPriority.ringReverse);
+			}
+			if (_key === `playWindow`) {
+				addTransform(`ringSprite`, `playWindow`, withSub(() => g_playWindowFunc.get(opt)()), g_transPriority.playWindow);
+			}
+			ringPv.spawn();
 		}
 		if (_key === `shaking`) {
 			Object.assign(work, { drunkXFlg: true, drunkYFlg: true, drunkAxisFlg: false, drunkRotateFlg: false });
@@ -2886,6 +2920,14 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 			return true;
 		});
 
+		// リングの出現・更新
+		if (ringUse) {
+			if (frameCnt % ringInterval === 0) {
+				ringPv.spawn();
+			}
+			ringPv.update();
+		}
+
 		// ヒットモーションの消去 (一定フレームで非表示)
 		hitCnts.forEach((cnt, j) => {
 			if (cnt > 0 && --hitCnts[j] === 0) {
@@ -3000,6 +3042,130 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 };
 
 /**
+ * 詳細ヘルプ内リングプレビューの共通処理 (リング本体・ガイド・ヒットモーションの生成と更新)
+ * - makeHelpPreview (矢印プレビューへの重ね表示) と makeRingHelpPreview (リング専用) で共用
+ * - 判定はオートプレイ相当 (到達フレームで判定済み扱い。ポインタ判定は再現しない)
+ * @param {HTMLDivElement} _sprite リングを配置するスプライト
+ * @param {number} _playW プレイ画面の幅
+ * @param {number} _playH プレイ画面の高さ
+ * @param {object} [object]
+ * @param {() => number} [object.getTotal] 出現～到達フレーム数
+ * @param {(t: number) => number} [object.getScale] 進行度(0～1) -> 本体の拡大率
+ * @param {() => string} [object.getGuideMode] ガイド表示 (ALL / Next / Hidden)
+ * @param {() => string} [object.getEffectClass] リング外側に付与するEffectのclass名
+ * @returns {{ spawn: Function, update: Function, clear: Function }}
+ */
+const makeRingPreviewCore = (_sprite, _playW, _playH, {
+	getTotal = () => Math.max(Math.round(g_ringObj.baseFrame / g_stateObj.ringSpeed), 1),
+	getScale = _t => g_ringObj.startRate + (1 - g_ringObj.startRate) * _t,
+	getGuideMode = () => `ALL`,
+	getEffectClass = () => ``,
+} = {}) => {
+	const radius = g_ringObj.radius;
+	const color = g_headerObj.baseBrightFlg ? g_ringObj.colorLight : g_ringObj.color;
+	const spots = [[0.3, 0.3], [0.65, 0.4], [0.45, 0.62], [0.75, 0.72], [0.25, 0.68], [0.55, 0.25]];
+	const holdFrames = 6;   // 到達後に残すフレーム数 (判定の瞬間を見せる)
+	let rings = [];
+	let fxs = [];
+	let ringNo = 0;
+	let fxNo = 0;
+
+	const clear = () => {
+		rings.forEach(ring => {
+			ring.guide.remove();
+			ring.root.remove();
+		});
+		rings = [];
+		fxs.forEach(fx => fx.el.remove());
+		fxs = [];
+	};
+
+	const spawn = () => {
+		const [rx, ry] = spots[ringNo % spots.length];
+		const no = ++ringNo;
+		const d = radius * 2;
+		const pos = { x: Math.round(_playW * rx) - radius, y: Math.round(_playH * ry) - radius, w: d, h: d };
+		const circle = { borderRadius: `50%`, boxSizing: `border-box` };
+		const total = getTotal();
+		const guideVisible = getGuideMode() !== `Hidden`;
+
+		// ガイド / リング本体 (外側: Effect用、内側: 拡大用。ゲーム側 makeRing と同じ構成)
+		const guide = createEmptySprite(_sprite, `pvRingGuide${no}`, {
+			...pos, ...circle, border: `solid ${g_ringObj.lineWidth}px ${g_ringObj.guideColor}`,
+			visibility: guideVisible ? `visible` : `hidden`,
+		});
+		const root = createEmptySprite(_sprite, `pvRingRoot${no}`, pos);
+		const body = createEmptySprite(root, `pvRingBody${no}`, {
+			x: 0, y: 0, w: d, h: d, ...circle,
+			border: `solid ${g_ringObj.lineWidth}px ${color}`,
+			transform: `scale(${g_ringObj.startRate})`,
+		});
+		const effectCls = getEffectClass();
+		if (effectCls !== ``) {
+			root.classList.add(effectCls);
+			root.style.animationDuration = `${total / g_fps}s`;
+		}
+		rings.push({ guide, root, body, total, cnt: total + 1, guideVisible, x: pos.x, y: pos.y, d, fxDone: false });
+	};
+
+	/** 到達時のヒットモーション (プレビューは常にイイ判定の見た目) */
+	const addFx = ring => {
+		const el = createEmptySprite(_sprite, `pvRingFx${++fxNo}`, {
+			x: ring.x, y: ring.y, w: ring.d, h: ring.d,
+			borderRadius: `50%`, maskImage: g_ringObj.fxMask, webkitMaskImage: g_ringObj.fxMask,
+			opacity: 0.75,
+		}, g_cssObj.main_stepIi);
+		fxs.push({ el, cnt: 0 });
+	};
+
+	const update = () => {
+		rings = rings.filter(ring => {
+			ring.cnt--;
+			if (ring.cnt <= 0 && !ring.fxDone) {
+				ring.fxDone = true;
+				addFx(ring);
+			}
+			if (ring.cnt < -holdFrames) {
+				ring.guide.remove();
+				ring.root.remove();
+				return false;
+			}
+			// 本体の大きさ (cnt === 0 でガイドと一致)
+			const t = Math.min(Math.max(1 - ring.cnt / ring.total, 0), 1);
+			ring.body.style.transform = `scale(${getScale(t)})`;
+			ring.body.style.opacity = ring.cnt > 0 ? 1 : Math.max((holdFrames + ring.cnt) / holdFrames, 0);
+			return true;
+		});
+
+		// ガイド表示 (ゲーム側 updateRings と同じ条件。Next: 到達済み or 次に判定するリングのみ)
+		const mode = getGuideMode();
+		const nextRing = rings.find(ring => ring.cnt > 0);
+		rings.forEach(ring => {
+			const visible = mode === `Hidden` ? false
+				: mode === `Next` ? (ring.cnt <= 0 || ring === nextRing) : true;
+			if (ring.guideVisible !== visible) {
+				ring.guide.style.visibility = visible ? `visible` : `hidden`;
+				ring.guideVisible = visible;
+			}
+		});
+
+		// ヒットモーションの進行
+		fxs = fxs.filter(fx => {
+			const t = ++fx.cnt / g_ringObj.fxFrames;
+			if (t >= 1) {
+				fx.el.remove();
+				return false;
+			}
+			fx.el.style.transform = `scale(${1 + g_ringObj.fxScale * t})`;
+			fx.el.style.opacity = 0.75 * (1 - t);
+			return true;
+		});
+	};
+
+	return { spawn, update, clear };
+};
+
+/**
  * リングノート設定 (RingSpeed / RingGuide) 用の詳細ヘルプ内プレビュー
  * - ゲーム側 makeRing/updateRings と同じ構成 (ガイド円 + 収束する本体円) を縮小表示する
  * - 判定はオートプレイ相当 (到達フレームで判定済み扱い)。ポインタ判定は再現しない
@@ -3049,19 +3215,13 @@ const makeRingHelpPreview = (_parent, _key, _top, _height) => {
 
 	// ---------------------------------------------------
 	// プレビュー状態
-	const radius = g_ringObj.radius;
-	const ringColor = g_headerObj.baseBrightFlg ? g_ringObj.colorLight : g_ringObj.color;
-	const spots = [[0.3, 0.3], [0.65, 0.4], [0.45, 0.62], [0.75, 0.72], [0.25, 0.68], [0.55, 0.25]];
-	const holdFrames = 6;                           // 到達後に残すフレーム数 (判定の瞬間を見せる)
 	const guideDuration = 90, guideInterval = 28;   // RingGuide用 (同時に3個前後出る)
 	const speedInterval = 45;                       // RingSpeed用
 
 	let selected = isSpeed
 		? (optList.find(val => sameVal(val, g_stateObj.ringSpeed)) ?? optList[0])
 		: (optList.includes(g_stateObj.ringGuide) ? g_stateObj.ringGuide : optList[0]);
-	let rings = [];
 	let frameCnt = 0;
-	let noteCnt = 0;
 	let autoCnt = 0;
 	let timerId = null;
 
@@ -3070,60 +3230,7 @@ const makeRingHelpPreview = (_parent, _key, _top, _height) => {
 	const getInterval = () => isSpeed ? speedInterval : guideInterval;
 	const guideMode = () => isSpeed ? `ALL` : selected;
 
-	const clearRings = () => {
-		rings.forEach(ring => {
-			ring.guide.remove();
-			ring.body.remove();
-		});
-		rings = [];
-	};
-
-	const spawn = () => {
-		const [rx, ry] = spots[noteCnt % spots.length];
-		const no = ++noteCnt;
-		const base = {
-			x: Math.round(playW * rx) - radius, y: Math.round(playH * ry) - radius,
-			w: radius * 2, h: radius * 2, borderRadius: `50%`, boxSizing: `border-box`,
-		};
-		const guide = createEmptySprite(ringSprite, `pvRingGuide${no}`, {
-			...base, border: `solid ${g_ringObj.lineWidth}px ${g_ringObj.guideColor}`,
-			visibility: guideMode() === `Hidden` ? `hidden` : `visible`,
-		});
-		const body = createEmptySprite(ringSprite, `pvRingBody${no}`, {
-			...base, border: `solid ${g_ringObj.lineWidth}px ${ringColor}`,
-			transform: `scale(${g_ringObj.startRate})`,
-		});
-		const total = getTotal();
-		rings.push({ guide, body, total, cnt: total + 1, guideVisible: guideMode() !== `Hidden` });
-	};
-
-	const updateRings = () => {
-		rings = rings.filter(ring => {
-			ring.cnt--;
-			if (ring.cnt < -holdFrames) {
-				ring.guide.remove();
-				ring.body.remove();
-				return false;
-			}
-			// 本体の大きさ (cnt === 0 でガイドと一致)
-			const t = Math.min(Math.max(1 - ring.cnt / ring.total, 0), 1);
-			ring.body.style.transform = `scale(${g_ringObj.startRate + (1 - g_ringObj.startRate) * t})`;
-			ring.body.style.opacity = ring.cnt > 0 ? 1 : Math.max((holdFrames + ring.cnt) / holdFrames, 0);
-			return true;
-		});
-
-		// ガイド表示 (ゲーム側 updateRings と同じ条件。Next: 到達済み or 次に判定するリングのみ)
-		const mode = guideMode();
-		const nextRing = rings.find(ring => ring.cnt > 0);
-		rings.forEach(ring => {
-			const visible = mode === `Hidden` ? false
-				: mode === `Next` ? (ring.cnt <= 0 || ring === nextRing) : true;
-			if (ring.guideVisible !== visible) {
-				ring.guide.style.visibility = visible ? `visible` : `hidden`;
-				ring.guideVisible = visible;
-			}
-		});
-	};
+	const core = makeRingPreviewCore(ringSprite, playW, playH, { getTotal, getGuideMode: guideMode });
 
 	// ---------------------------------------------------
 	// 選択肢ボタン
@@ -3155,9 +3262,9 @@ const makeRingHelpPreview = (_parent, _key, _top, _height) => {
 
 	const applyOption = opt => {
 		selected = opt;
-		clearRings();
+		core.clear();
 		frameCnt = 0;
-		spawn();
+		core.spawn();
 	};
 	const selectOption = opt => {
 		autoCnt = -g_limitObj.helpPreviewAutoFrames;
@@ -3208,9 +3315,9 @@ const makeRingHelpPreview = (_parent, _key, _top, _height) => {
 			autoOption();
 		}
 		if (frameCnt % getInterval() === 0) {
-			spawn();
+			core.spawn();
 		}
-		updateRings();
+		core.update();
 		timerId = g_timerHandler.setTimeout(tick, 1000 / g_fps);
 	};
 

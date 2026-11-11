@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2019/11/19
- * Revised : 2026/11/09 (v52.3.0)
+ * Revised : 2026/11/11 (v52.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -102,6 +102,9 @@ const g_limitObj = {
     helpPreviewRate: 0.44,     // 詳細ヘルプ内プレビューの高さ (画面高に対する割合)
     helpPreviewMaxRate: 0.5,   // プレビュー内プレイ画面の最大縮小率
     helpPreviewAutoFrames: 500, // 次の選択肢へ自動で切り替えるまでのフレーム数 (0で無効)
+
+    minRingSpeed: 0.5,
+    maxRingSpeed: 5,
 };
 
 /** 設定項目の位置 */
@@ -1179,6 +1182,19 @@ const g_ringObj = {
     sound: 1,                   // 音番号の既定値 (0: 無音)
     cols: 7,                    // 内部の列数 [到達フレーム, X, Y, 音番号, 半径, 色, 出現～到達フレーム数(0:未指定)]
     maxSearchFrame: 3600,       // 出現フレームを遡って探索する上限フレーム数 (ストップ中の無限ループ防止)
+    fxFrames: 12,               // ヒットモーションの長さ(フレーム)
+    fxMask: `radial-gradient(circle, transparent 62%, #000 64%)`,  // ヒットモーションの輪のマスク
+    fxScale: 0.5,               // ヒットモーションの広がり幅
+
+    // 開始時のヒント用アイコン (マウスカーソル + リング)。色は文字色(currentColor)に追従
+    hintIcon:
+        `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="48" viewBox="0 0 64 48" ` +
+        `style="vertical-align:middle;margin-right:12px">` +
+        `<circle cx="22" cy="24" r="16" fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.8"/>` +
+        `<circle cx="22" cy="24" r="6" fill="none" stroke="currentColor" stroke-width="2" opacity="0.5"/>` +
+        `<path d="M30 20 L30 44 L36 38 L41 47 L45 45 L40 36 L48 36 Z" ` +
+        `fill="currentColor" stroke="#888" stroke-width="1" stroke-linejoin="round"/>` +
+        `</svg>`,
 };
 
 /** リングノートのデフォルト音 (音番号1～。外部ファイル不要でコード生成する) */
@@ -1516,7 +1532,7 @@ const g_settings = {
     hitPositionNum: g_limitObj.hitPosition * 10,
     hitPositionTerms: [50, 10],
 
-    ringSpeeds: makeSpeedList(0.5, 3),
+    ringSpeeds: makeSpeedList(g_limitObj.minRingSpeed, g_limitObj.maxRingSpeed),
     ringSpeedNum: 0,
     ringSpeedTerms: [20, 5],
 
@@ -1654,6 +1670,7 @@ const g_transPriority = {
     shakingR: 130,
     shakingX: 140,
     shakingY: 150,
+    ringReverse: 160,
     scale: 200,
     shift: 210,
 };
@@ -5063,6 +5080,7 @@ const g_lang_lblNameObj = {
         frzJdgUpdate: `フリーズアロー判定の座標を更新`,
         shortcutUpdate: `ショートカット表示の座標を更新`,
         resultImageDesc: `画像を右クリックしてコピーできます`,
+        ringHint: `リングはマウス・タッチで触れます`,
 
         s_level: `Level`,
         s_douji: `同時補正`,
@@ -5129,6 +5147,7 @@ const g_lang_lblNameObj = {
         frzJdgUpdate: `Update the coordinates (freeze)`,
         shortcutUpdate: `Update the coordinates (shortcut)`,
         resultImageDesc: `You can copy the image by right-clicking on it.`,
+        ringHint: `Move the mouse (or touch) over the rings`,
 
         s_level: `Level`,
         s_douji: `Chords`,
@@ -5342,7 +5361,7 @@ const g_lang_msgObj = {
         opacity: `判定キャラクタ、コンボ数、Fast/Slowの透明度を設定します。`,
         hitPosition: `判定位置にズレを感じる場合、数値を変えることで判定の中央位置を1px単位(プラス:手前, マイナス:奥側)で調整することができます。\n早押し・遅押し傾向にある場合に使用します。`,
         ringSpeed: `リングノートの表示速度を設定します。\n` +
-            `0.5x ～ 3.0xの間で設定できます。初期値は1.0xです。`,
+            `${g_limitObj.minRingSpeed.toFixed(1)}x ～ ${g_limitObj.maxRingSpeed.toFixed(1)}xの間で設定できます。初期値は1.0xです。`,
         ringGuide: `リングノートに対するガイド表示の設定です。\n` +
             `[Next] 次に判定するリングのみ表示します。\n` +
             `[ALL] 出現中すべてのリングノートに対するガイドを表示します。\n` +
@@ -5524,7 +5543,7 @@ const g_lang_msgObj = {
         hitPosition: `If you feel a discrepancy in the judgment position, you can adjust the center position of the judgment in 1px increments (plus: in front, minus: at the back) by changing the numerical value. \n` +
             `Use this function when there is a tendency to push too fast or too slow.`,
         ringSpeed: `Set the display speed of the ring notes.\n` +
-            `You can set it between 0.5x and 3.0x. The initial value is 1.0x.`,
+            `You can set it between ${g_limitObj.minRingSpeed.toFixed(1)}x and ${g_limitObj.maxRingSpeed.toFixed(1)}x. The initial value is 1.0x.`,
         ringGuide: `Settings for guide display on ring-bound notebooks. \n` +
             `[Next] Display only the next ring to be judged.\n` +
             `[ALL] Display guides for all ring notes that are currently appearing.\n` +
