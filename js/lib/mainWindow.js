@@ -1485,6 +1485,25 @@ const mainInit = () => {
 	 */
 	const rings = [];
 	let ringCnt = 0;
+	const ringFxs = [];
+
+	/**
+	 * ヒット・ミス時のエフェクト円
+	 * - 矢印のヒットモーションと同じCSSクラス(main_step{判定名})で色を決める
+	 * - 対応するクラスが無い判定(ウワァン)は赤
+	 * @param {object} _ring
+	 * @param {string} _jdg Ii / Shakin / Matari / Shobon / Uwan
+	 */
+	const addRingFx = (_ring, _jdg) => {
+		const d = _ring.radius * 2;
+		const cls = g_cssObj[`main_step${_jdg}`];
+		const el = createEmptySprite(ringSprite, `ringFx${_ring.seq}`, {
+			x: _ring.x - _ring.radius, y: _ring.y - _ring.radius, w: d, h: d,
+			borderRadius: `50%`, maskImage: g_ringObj.fxMask, webkitMaskImage: g_ringObj.fxMask,
+			opacity: 0.75, ...(cls === undefined ? { background: `#cc6666` } : {}),
+		}, ...(cls === undefined ? [] : [cls]));
+		ringFxs.push({ el, cnt: 0 });
+	};
 
 	const makeRing = _data => {
 		const no = ++ringCnt;
@@ -1515,8 +1534,9 @@ const mainInit = () => {
 	const ringDone = new Set(); // 判定済み(削除済み)リングの通し番号
 	let ringNextSeq = 0;        // 未判定のうち最小の通し番号
 
-	const removeRing = _i => {
+	const removeRing = (_i, _fxJdg) => {
 		ringDone.add(rings[_i].seq);
+		if (_fxJdg !== undefined) addRingFx(rings[_i], _fxJdg);
 		rings[_i].guide.remove();
 		rings[_i].root.remove();
 		rings.splice(_i, 1);
@@ -1541,7 +1561,7 @@ const mainInit = () => {
 			// 判定範囲外は、ポインタ位置に関係なくミスにする
 			if (ring.cnt < -g_judgObj.arrowJ[g_judgPosObj.shobon]) {
 				judgeUwan(ring.cnt, -1);
-				removeRing(i);
+				removeRing(i, `Uwan`);
 				continue;
 			}
 
@@ -1550,9 +1570,10 @@ const mainInit = () => {
 
 			if (hit) {
 				// 判定の選択には正の遅れ、フックには符号付きのカウントを渡す
-				checkJudgment(-ring.cnt)[0](ring.cnt, -1);
+				const [resultFunc, resultJdg] = checkJudgment(-ring.cnt);
+				resultFunc(ring.cnt, -1);
 				playRingSound(ring.sound);
-				removeRing(i);
+				removeRing(i, resultJdg);
 			}
 		}
 
@@ -1570,6 +1591,17 @@ const mainInit = () => {
 					ring.guideVisible = visible;
 				}
 			});
+		}
+		for (let i = ringFxs.length - 1; i >= 0; i--) {
+			const fx = ringFxs[i];
+			const t = ++fx.cnt / g_ringObj.fxFrames;
+			if (t >= 1) {
+				fx.el.remove();
+				ringFxs.splice(i, 1);
+				continue;
+			}
+			fx.el.style.transform = `scale(${1 + g_ringObj.fxScale * t})`;
+			fx.el.style.opacity = 0.75 * (1 - t);
 		}
 	};
 
@@ -2223,6 +2255,9 @@ const applyRingPlayWindow = _ringSprite => {
 	g_ringInv = null;
 	if (_ringSprite === null) {
 		return;
+	}
+	if (g_stateObj.reverse === C_FLG_ON) {
+		addTransform(`ringSprite`, `ringReverse`, `rotate(180deg)`, g_transPriority.ringReverse);
 	}
 	addTransform(`ringSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)(), g_transPriority.playWindow);
 
