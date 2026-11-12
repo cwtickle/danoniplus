@@ -57,7 +57,7 @@ const mainInit = () => {
 		bindRingPointer(divRoot);
 		startRingKeepAlive();
 		const ringOffsetX = (g_headerObj.playingWidth - g_headerObj.ringWidth) / 2;
-		ringSprite = createEmptySprite(divRoot, `ringSprite`, { ...mainCommonPos, w: g_headerObj.ringWidth });
+		ringSprite = createEmptySprite(divRoot, `ringSprite`, { ...mainCommonPos, w: g_headerObj.ringWidth, h: g_headerObj.playingHeight });
 		addTransform(`ringSprite`, `main`,
 			`translateX(${wUnit(g_workObj.playingX + ringOffsetX)}) translateY(${wUnit(g_headerObj.playingY)})`,
 			g_transPriority.shift);
