@@ -2965,15 +2965,15 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const colMain = createEmptySprite(area, `pvColMain`, { x: chipX, y: 0, w: colW, h: _height });
 	const colSub = subUse ? createEmptySprite(area, `pvColSub`, { x: chipX + colW + 6, y: 0, w: colW, h: _height }) : null;
 
-	const makeChips = (_list, _prefix, _onSelect, _title = ``) => {
+	const makeChips = (_list, _prefix, _onSelect) => {
 		const chipH = Math.min(20, Math.floor(_height / _list.length));
 		return _list.map((opt, i) =>
 			createCss2Button(`${_prefix}${i}`, getStgDetailName(opt), () => _onSelect(opt), {
-				x: 0, y: i * chipH, w: colW, h: chipH - 2, siz: 12, title: _title,
+				x: 0, y: i * chipH, w: colW, h: chipH - 2, siz: 12,
 			}, g_cssObj.button_Default));
 	};
 	const chips = makeChips(optList, `pvChip`, opt => selectMain(opt));
-	const subChips = subUse ? makeChips(subList, `pvSubChip`, opt => selectSub(opt), g_msgObj[def.sub] ?? ``) : [];
+	const subChips = subUse ? makeChips(subList, `pvSubChip`, opt => selectSub(opt)) : [];
 	multiAppend(colMain, ...chips);
 	if (subUse) {
 		multiAppend(colSub, ...subChips);
