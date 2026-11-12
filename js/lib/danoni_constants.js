@@ -1664,13 +1664,13 @@ const g_posYs = {};
 const g_transPriority = {
     base: 0,
     layer: 10,
+    ringReverse: 90,   // playWindow(100)より内側で先に適用し、矢印側(レイヤー反転)と合成順を揃える
     playWindow: 100,
     stepArea: 110,
     frzReturn: 120,
     shakingR: 130,
     shakingX: 140,
     shakingY: 150,
-    ringReverse: 160,
     scale: 200,
     shift: 210,
 };
