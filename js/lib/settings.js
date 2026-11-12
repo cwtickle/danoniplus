@@ -3225,7 +3225,6 @@ const makeRingHelpPreview = (_parent, _key, _top, _height) => {
 	let autoCnt = 0;
 	let timerId = null;
 
-	// ゲーム側 getRingDuration (ringSpeedData なし) と同じ式
 	const getTotal = () => isSpeed ? Math.max(Math.round(g_ringObj.baseFrame / selected), 1) : guideDuration;
 	const getInterval = () => isSpeed ? speedInterval : guideInterval;
 	const guideMode = () => isSpeed ? `ALL` : selected;

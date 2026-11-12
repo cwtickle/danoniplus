@@ -1411,7 +1411,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	}
 
 	// リングノート・リング速度変化の分解 (速度変化は既存のsetSpeedDataを流用)
-	obj.ringSpeedData = setSpeedData(`ring_boost`, scoreIdHeader);
+	obj.ringBoostData = setSpeedData(`ring_boost`, scoreIdHeader);
 	obj.ringSpeedAllData = setSpeedData(`ring_speed`, scoreIdHeader);
 	obj.ringData = setRingData(scoreIdHeader);
 
@@ -1918,7 +1918,7 @@ const pushArrows = (_dataObj, _speedOnFrame, _firstArrivalFrame) => {
 		}
 		// 到達フレームから速度を遡って積算し、出現フレームと出現時の進行度を求める
 		// (開始フレーム前に出現するものは、開始フレームから途中の進行度で出現)
-		const step = getRingBaseStep(_dataObj.ringSpeedData, arrival, frames);
+		const step = getRingBaseStep(_dataObj.ringBoostData, arrival, frames);
 		const { appear, init } = getRingAppear(arrival, step, ringSpeedSegs, g_scoreObj.frameNum);
 		(g_workObj.mkRing[appear] ??= []).push({
 			x, y, radius, color, sound, step, progress: init, arrivalFrame: arrival - appear,
@@ -2142,32 +2142,32 @@ const getFrzLength = (_speedOnFrame, _startFrame, _endFrame) => {
 
 /**
  * 指定フレーム時点で有効なリング速度の取得
- * @param {number[]} _ringSpeedData [フレーム数, 速度, ...] (フレーム昇順)
+ * @param {number[]} _ringBoostData [フレーム数, 速度, ...] (フレーム昇順)
  * @param {number} _frame
  * @returns {number}
  */
-const getRingSpeed = (_ringSpeedData, _frame) => {
+const getRingSpeed = (_ringBoostData, _frame) => {
 	let speed = 1;
-	for (let k = 0; k < (_ringSpeedData?.length ?? 0); k += 2) {
-		if (_ringSpeedData[k] > _frame) {
+	for (let k = 0; k < (_ringBoostData?.length ?? 0); k += 2) {
+		if (_ringBoostData[k] > _frame) {
 			break;
 		}
-		speed = _ringSpeedData[k + 1];
+		speed = _ringBoostData[k + 1];
 	}
 	return speed > 0 ? speed : 1;
 };
 
 /**
  * リングの基本進行量 (速度1のときの1フレーム当たりの進行度。到達で合計1)
- * - 個別指定(_frames > 0)があればそれを優先、なければ到達フレーム時点の個別加速(ringBoost_data)に反比例
+ * - 個別指定(_frames > 0)があればそれを優先、なければ到達フレーム時点の個別加速(ring_boost_data)に反比例
  * - リング速度オプション(g_stateObj.ringSpeed)はどちらにも掛かる
- * @param {number[]} _ringSpeedData
+ * @param {number[]} _ringBoostData
  * @param {number} _arrivalFrame
  * @param {number} [_frames=0]
  * @returns {number}
  */
-const getRingBaseStep = (_ringSpeedData, _arrivalFrame, _frames = 0) => {
-	const base = _frames > 0 ? _frames : g_ringObj.baseFrame / getRingSpeed(_ringSpeedData, _arrivalFrame);
+const getRingBaseStep = (_ringBoostData, _arrivalFrame, _frames = 0) => {
+	const base = _frames > 0 ? _frames : g_ringObj.baseFrame / getRingSpeed(_ringBoostData, _arrivalFrame);
 	return g_stateObj.ringSpeed / Math.max(base, 1);
 };
 
@@ -2294,7 +2294,7 @@ const getRingLeadFrame = _dataObj => {
 	const segs = makeRingSpeedSegments(_dataObj.ringSpeedAllData);
 	let lead = 0;
 	for (let k = 0; k < ringData.length; k += cols) {
-		const step = getRingBaseStep(_dataObj.ringSpeedData, ringData[k], ringData[k + cols - 1]);
+		const step = getRingBaseStep(_dataObj.ringBoostData, ringData[k], ringData[k + cols - 1]);
 		const { appear } = getRingAppear(ringData[k], step, segs, ringData[k] - g_ringObj.maxSearchFrame);
 		if (appear < g_limitObj.adjustment) {
 			lead = Math.max(lead, g_limitObj.adjustment - appear);
