@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/11/11 (v52.4.0)
+ * Revised : 2026/11/12 (v52.4.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -57,7 +57,7 @@ const mainInit = () => {
 		bindRingPointer(divRoot);
 		startRingKeepAlive();
 		const ringOffsetX = (g_headerObj.playingWidth - g_headerObj.ringWidth) / 2;
-		ringSprite = createEmptySprite(divRoot, `ringSprite`, { ...mainCommonPos, w: g_headerObj.ringWidth });
+		ringSprite = createEmptySprite(divRoot, `ringSprite`, { ...mainCommonPos, w: g_headerObj.ringWidth, h: g_headerObj.playingHeight });
 		addTransform(`ringSprite`, `main`,
 			`translateX(${wUnit(g_workObj.playingX + ringOffsetX)}) translateY(${wUnit(g_headerObj.playingY)})`,
 			g_transPriority.shift);
@@ -2257,7 +2257,7 @@ const applyRingPlayWindow = _ringSprite => {
 		return;
 	}
 	if (g_stateObj.reverse === C_FLG_ON) {
-		addTransform(`ringSprite`, `ringReverse`, `rotate(180deg)`, g_transPriority.ringReverse);
+		addTransform(`ringSprite`, `ringReverse`, `scaleY(-1)`, g_transPriority.ringReverse);
 	}
 	addTransform(`ringSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)(), g_transPriority.playWindow);
 

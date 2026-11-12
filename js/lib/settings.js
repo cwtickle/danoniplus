@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/11/11 (v52.4.0)
+ * Revised : 2026/11/12 (v52.4.1)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2779,7 +2779,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		if (ringUse) {
 			// ゲーム側 applyRingPlayWindow と同様に、Reverse時の180度回転とPlayWindowをringSpriteへ適用
 			if (g_stateObj.reverse === C_FLG_ON) {
-				addTransform(`ringSprite`, `ringReverse`, `rotate(180deg)`, g_transPriority.ringReverse);
+				addTransform(`ringSprite`, `ringReverse`, `scaleY(-1)`, g_transPriority.ringReverse);
 			}
 			if (_key === `playWindow`) {
 				addTransform(`ringSprite`, `playWindow`, withSub(() => g_playWindowFunc.get(opt)()), g_transPriority.playWindow);
