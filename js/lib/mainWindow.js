@@ -2257,7 +2257,7 @@ const applyRingPlayWindow = _ringSprite => {
 		return;
 	}
 	if (g_stateObj.reverse === C_FLG_ON) {
-		addTransform(`ringSprite`, `ringReverse`, `rotate(180deg)`, g_transPriority.ringReverse);
+		addTransform(`ringSprite`, `ringReverse`, `scaleY(-1)`, g_transPriority.ringReverse);
 	}
 	addTransform(`ringSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)(), g_transPriority.playWindow);
 
