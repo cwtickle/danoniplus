@@ -540,6 +540,9 @@ const updateWindowSiz = () => {
         btnSpdCursorR: {
             x: 100, y: 190, w: 15, h: 20, siz: 12,
         },
+        lnkSpeedTarget: {
+            x: 0, y: 107, w: g_limitObj.difCoverWidth, h: 20, siz: 14, btnStyle: `Tweet`,
+        },
         lnkMiniMapRev: {
             w: g_limitObj.difCoverWidth, h: 20, borderStyle: `solid`,
         },
@@ -1392,6 +1395,9 @@ const g_stateObj = {
 
     // リングのガイド表示 (All: 出現中のすべて / Next: 次に判定するリングのみ)
     ringGuide: `Next`,
+
+    // Velocityグラフの表示対象 (Arrow: 矢印・フリーズアロー / Ring: リングノート。リング無し譜面では常にArrow扱い)
+    speedGraphTarget: `Arrow`,
 };
 
 const C_VAL_MAXLIFE = 1000;
@@ -3119,6 +3125,7 @@ const g_shortcutObj = {
         KeyQ: { id: `lnkDensityG` },
         KeyP: { id: `lnkDifInfo` },
         KeyX: { id: `lnkMiniMapRev` },
+        KeyT: { id: `lnkSpeedTarget` },
         ControlLeft_KeyC: { id: `` },
         ControlRight_KeyC: { id: `` },
         KeyC: { id: `lnkHighScore`, reset: true },
@@ -4474,7 +4481,7 @@ const g_dataMinObj = {
     back: 1,
     style: 1,
     ring: g_ringObj.cols,
-    ringSpeed: 2,
+    ringBoost: 2,
     ringSpeedAll: 2,
 };
 
@@ -4483,7 +4490,7 @@ const g_dataMinObj = {
  * - セット数: 対象の配列名の組で記述
  */
 const g_dataSetObj = {
-    2: [`speedData`, `boostData`],
+    2: [`speedData`, `boostData`, `ringBoostData`, `ringSpeedAllData`],
     4: [`colorData`],
     5: [`ncolorData`, `scrollchData`],
     6: [`arrowCssMotionData`, `frzCssMotionData`,
@@ -5341,6 +5348,7 @@ const g_lang_msgObj = {
         autoRetry: `自動リトライの条件を設定します。\n[Miss] ミス時、[Matari] マターリ時、[Shakin] シャキン時、[FS] Fast/Slow発生時`,
 
         lnkSpeedG: `譜面の進行別の速度変化状況を表示`,
+        lnkSpeedTarget: `速度変化の表示対象を、矢印・フリーズアローとリングノートで切り替えます。`,
         lnkDensityG: `譜面の密度状況を表示`,
         lnkToolDifG: `譜面の難易度、矢印・フリーズアローの分布状況を表示`,
         lnkHighScoreG: `譜面のハイスコアを表示`,
@@ -5521,6 +5529,7 @@ const g_lang_msgObj = {
             `[Fast/Slow] When Fast/Slow occurs`,
 
         lnkSpeedG: `Displays the velocity change status by progression of the chart.`,
+        lnkSpeedTarget: `Switches the velocity graph between arrows/freeze arrows and ring notes.`,
         lnkDensityG: `Displays the density status of the chart.`,
         lnkToolDifG: `Displays the difficulty level of the chart and the distribution of arrows and freeze arrows.`,
         lnkHighScoreG: `Displays the high score of the chart.`,

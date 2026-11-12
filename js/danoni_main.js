@@ -251,6 +251,8 @@ const g_detailObj = {
 	playingFrameWithBlank: [],
 	speedData: [],
 	boostData: [],
+	ringSpeedAllData: [],
+	ringBoostData: [],
 	toolDif: [],
 	miniMapParams: {},
 	scoreMinimap: {},
