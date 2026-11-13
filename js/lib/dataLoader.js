@@ -692,15 +692,32 @@ const setDosIdHeader = (_scoreId = 0, _scoreLockFlg = false) => {
 };
 
 /**
+ * 並べ替え用の配列を作成
+ * - index[i]番目のキーの譜面がi番目のキーに流れるようになります
+ * - 詳細ヘルプ内プレビューからも使用
+ * @param {number} _keyNum
+ * @param {number[][]} _shuffleGroup
+ * @param {number[][]} _style
+ * @returns {number[]}
+ */
+const getShuffleIndex = (_keyNum, _shuffleGroup, _style) => {
+	const index = [...Array(_keyNum).keys()];
+	for (let i = 0; i < _shuffleGroup.length; i++) {
+		for (let j = 0; j < _shuffleGroup[i].length; j++) {
+			index[_shuffleGroup[i][j]] = _style[i][j];
+		}
+	}
+	return index;
+};
+
+/**
  * Mirror,Randomの適用
  * @param {number} _keyNum
  * @param {number[][]} _shuffleGroup
  * @param {number[][]} _style
  */
 const applyShuffle = (_keyNum, _shuffleGroup, _style) => {
-	// 並べ替え用の配列を作成
-	// index[i]番目のキーの譜面がi番目のキーに流れるようになります
-	const index = [...Array(_keyNum).keys()];
+	const index = getShuffleIndex(_keyNum, _shuffleGroup, _style);
 	for (let i = 0; i < _shuffleGroup.length; i++) {
 		for (let j = 0; j < _shuffleGroup[i].length; j++) {
 			index[_shuffleGroup[i][j]] = _style[i][j];
@@ -736,13 +753,13 @@ const swapGroupNums = (_style, _group, _i, _divideNum) => {
 	return _style;
 };
 
-/**
- * Mirrorの適用
- * @param {number} _keyNum
+/** 
+ * Mirrorの並べ替え結果の作成 (副作用なし)
  * @param {number[][]} _shuffleGroup
  * @param {boolean} [_swapFlg=false]
+ * @returns {[number[][], boolean]} [style, 通常のMirrorと異なる結果になったか]
  */
-const applyMirror = (_keyNum, _shuffleGroup, _swapFlg = false) => {
+const getMirrorStyle = (_shuffleGroup, _swapFlg = false) => {
 
 	// シャッフルグループごとにミラー
 	const style = structuredClone(_shuffleGroup).map(_group => _group.reverse());
@@ -754,20 +771,36 @@ const applyMirror = (_keyNum, _shuffleGroup, _swapFlg = false) => {
 				swapGroupNums(style, group, i, val);
 			});
 		});
-		let swapUseFlg = false;
-		style.forEach((_group, j) => {
-			_group.forEach((val, k) => {
-				if (style[j][k] !== mirStyle[j][k]) {
-					swapUseFlg = true;
-					return;
-				}
-			});
-		});
-		if (!swapUseFlg) {
-			g_stateObj.shuffle = `Mirror`;
-		}
+	}
+	const swapUseFlg = style.some((_group, j) => _group.some((val, k) => val !== mirStyle[j][k]));
+	return [style, swapUseFlg];
+};
+
+/**
+ * Mirrorの適用
+ * @param {number} _keyNum
+ * @param {number[][]} _shuffleGroup
+ * @param {boolean} [_swapFlg=false]
+ */
+const applyMirror = (_keyNum, _shuffleGroup, _swapFlg = false) => {
+	const [style, swapUseFlg] = getMirrorStyle(_shuffleGroup, _swapFlg);
+	if (_swapFlg && !swapUseFlg) {
+		g_stateObj.shuffle = `Mirror`;
 	}
 	applyShuffle(_keyNum, _shuffleGroup, style);
+};
+
+/**
+ * Turningの並べ替え結果の作成
+ * @param {number[][]} _shuffleGroup
+ * @returns {number[][]} 
+ */
+const getTurningStyle = _shuffleGroup => {
+	const mirrorOrNot = _array => Math.random() >= 0.5 ? _array.reverse() : _array;
+	return structuredClone(_shuffleGroup).map(_group => {
+		const startNum = Math.floor(Math.random() * (_group.length - 1)) + 1;
+		return mirrorOrNot(makeDedupliArray(_group.slice(startNum), _group.slice(0, startNum)));
+	});
 };
 
 /**
@@ -776,13 +809,23 @@ const applyMirror = (_keyNum, _shuffleGroup, _swapFlg = false) => {
  * @param {number[][]} _shuffleGroup 
  */
 const applyTurning = (_keyNum, _shuffleGroup) => {
-	const mirrorOrNot = _array => Math.random() >= 0.5 ? _array.reverse() : _array;
-	const style = structuredClone(_shuffleGroup).map(_group => {
-		const startNum = Math.floor(Math.random() * (_group.length - 1)) + 1;
-		return mirrorOrNot(makeDedupliArray(_group.slice(startNum), _group.slice(0, startNum)));
-	});
-	applyShuffle(_keyNum, _shuffleGroup, style);
+	applyShuffle(_keyNum, _shuffleGroup, getTurningStyle(_shuffleGroup));
 };
+
+/**
+ * Randomの並べ替え結果の作成
+ * @param {number[][]} _shuffleGroup
+ * @returns {number[][]}
+ */
+const getRandomStyle = _shuffleGroup =>
+	// シャッフルグループごとにシャッフル(Fisher-Yates)
+	structuredClone(_shuffleGroup).map(_group => {
+		for (let i = _group.length - 1; i > 0; i--) {
+			const random = Math.floor(Math.random() * (i + 1));
+			[_group[i], _group[random]] = [_group[random], _group[i]];
+		}
+		return _group;
+	});
 
 /**
  * Randomの適用
@@ -790,15 +833,7 @@ const applyTurning = (_keyNum, _shuffleGroup) => {
  * @param {number[][]} _shuffleGroup
  */
 const applyRandom = (_keyNum, _shuffleGroup) => {
-	// シャッフルグループごとにシャッフル(Fisher-Yates)
-	const style = structuredClone(_shuffleGroup).map(_group => {
-		for (let i = _group.length - 1; i > 0; i--) {
-			const random = Math.floor(Math.random() * (i + 1));
-			[_group[i], _group[random]] = [_group[random], _group[i]];
-		}
-		return _group;
-	});
-	applyShuffle(_keyNum, _shuffleGroup, style);
+	applyShuffle(_keyNum, _shuffleGroup, getRandomStyle(_shuffleGroup));
 };
 
 /**

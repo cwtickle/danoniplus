@@ -2322,6 +2322,8 @@ const isLongHelp = _msg =>
  * - splitLayer: 右半分のレーンを逆スクロール(レイヤー1)側に配置する
  * - currentKey: サンプルキーではなく実際のキーに合わせてマッピングする
  *               (StepArea, Swappingは実際のキーには非対応)
+ * - allLanes  : キースイッチがあるキーでも全レーンを表示する (Shuffleはグループが分断されないようにするため)
+ * - shuffle   : 選択中のキーのシャッフルグループを使い、元レーンの流れ込み先を表示する
  * - frzUse    : サンプルでフリーズアローを使用するかどうか
  * - sub       : 派生する設定 (Typeなど)。選択肢の列を2列目に追加する
  * - ring      : リングのプレビューを出す
@@ -2330,6 +2332,7 @@ const isLongHelp = _msg =>
 const g_helpPreviewDefs = {
 	motion: { withRing: true },
 	scroll: { currentKey: true },
+	shuffle: { currentKey: true, allLanes: true, shuffle: true },
 	appearance: { splitLayer: true },
 	playWindow: { sub: `playWindowType`, withRing: true },
 	stepArea: {},
@@ -2409,12 +2412,23 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		: [];
 	const activeGroup = configKeyGroupList[g_keycons.keySwitchNum] ?? configKeyGroupList[0];
 	const laneVisible = [...Array(laneNum).keys()].map(j =>
-		!useKey || configKeyGroupList.length <= 1 || (tkObj.keyGroupMaps[j]?.includes(activeGroup) ?? true));
+		!useKey || def.allLanes === true || configKeyGroupList.length <= 1 || (tkObj.keyGroupMaps[j]?.includes(activeGroup) ?? true));
 	const visibleLanes = [...Array(laneNum).keys()].filter(j => laneVisible[j]);
 	if (visibleLanes.length === 0) {
 		visibleLanes.push(...Array(laneNum).keys());   // 該当レーンが無い場合は全て表示
 		laneVisible.fill(true);
 	}
+
+	// Shuffle: 選択中のキー・パターンのシャッフルグループ (prepareScoreData の g_workObj.shuffleGroupMap と同じ作り方)
+	const shuffleFlg = def.shuffle === true;
+	const shuffleVals = shuffleFlg ? (g_keyObj[`shuffle${keyCtrlPtn}`] ?? fillArray(laneNum)) : [];
+	const shuffleMap = {};
+	shuffleVals.forEach((val, j) => (shuffleMap[val] ??= []).push(j));
+	const shuffleGroupList = Object.values(shuffleMap);
+	const shuffleGroupNo = [];
+	shuffleGroupList.forEach((group, gi) => group.forEach(j => shuffleGroupNo[j] = gi));
+	const groupColors = [0, 4, 1, 3, 5, 6, 7, 8, 9, 2].map(k => g_dfColorObj.setColorType1[k]);
+	const getGroupColor = j => groupColors[shuffleGroupNo[j] % groupColors.length];
 
 	// 段 (下段: pos が divideCnt を超えるレーン) と、中央からのX座標差分
 	// prepareScoreData の stdPos と同じ式。下段は既定で逆スクロールになる
@@ -2565,6 +2579,29 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		createDivCss2Label(`pvCombo`, `5 Combo!!`, { ...jdgPos, x: Math.round(playW / 2 - 50) }, g_cssObj.common_comboJ),
 	);
 
+	/** Scroll: 選択中のキー・パターンのスクロール方向 (1: 通常、-1: 逆) をレイヤー番号 (0, 1) へ変換 */
+	const getScrollLayout = opt => {
+		const dirs = g_keyObj[`scrollDir${keyCtrlPtn}`]?.[opt] ?? Array(laneNum).fill(1);
+		return [...Array(laneNum).keys()].map(j => (baseLayers[j] || 0) * 2 +
+			((laneLower[j] ? 1 : 0) + (dirs[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2);
+	};
+
+	// Shuffle: 元レーンの見出し (キーコンフィグと同様にグループ番号を表示)。ノーツ出現時に該当レーンを光らせる
+	const srcFlash = fillArray(laneNum);
+	const scrollDir = getScrollLayout(g_stateObj.scroll);
+	const srcElms = shuffleFlg ? [...Array(laneNum).keys()].map(j => {
+		const color = getGroupColor(j);
+		return createDivCss2Label(`pvSrc${j}`, `${shuffleVals[j]}`, {
+			x: laneX(j), y: scrollDir[j] % 2 === 0 ? 20 : playH - 40, w: C_ARW_WIDTH, h: 22, siz: 16, opacity: 0.4,
+			color, border: `1px solid ${color}`, boxSizing: `border-box`, lineHeight: `20px`,
+		});
+	}) : [];
+	multiAppend(infoSprite, ...srcElms);
+	const flashSrc = j => {
+		srcElms[j].style.opacity = 1;
+		srcFlash[j] = 12;
+	};
+
 	// ---------------------------------------------------
 	// プレビュー状態
 	const noteInterval = Math.max(8, Math.round(24 * 4 / visibleLanes.length));
@@ -2583,6 +2620,8 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	let bStart = 0;
 	let effectCls = { arrow: ``, frz: ``, frzArrow: ``, ring: `` };
 	let filterElms = [];   // Appearanceのフィルターバー・ラベル
+	let shuffleDest = [...Array(laneNum).keys()];   // Shuffle: 元レーン -> 流れ込み先レーン
+	let recentLanes = [];                           // Shuffle(Scatter系): 直近の着地レーン
 	const frzLen = 90;   // Effectプレビュー用フリーズアローの長さ(px)
 	const work = { drunkXFlg: true, drunkYFlg: true, drunkAxisFlg: false, drunkRotateFlg: false };
 	const frz = { seq: null, seqNo: 0, axes: [], start: 0, next: 0 };
@@ -2725,11 +2764,47 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		filterElms.push(view);
 	};
 
-	/** Scroll: 選択中のキー・パターンのスクロール方向 (1: 通常、-1: 逆) をレイヤー番号 (0, 1) へ変換 */
-	const getScrollLayout = opt => {
-		const dirs = g_keyObj[`scrollDir${keyCtrlPtn}`]?.[opt] ?? Array(laneNum).fill(1);
-		return [...Array(laneNum).keys()].map(j => (baseLayers[j] || 0) * 2 +
-			((laneLower[j] ? 1 : 0) + (dirs[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2);
+	/**
+	 * Shuffle: 元レーン -> 流れ込み先レーン の対応表を作成
+	 * - 並べ替えの決め方は dataLoader.js の get*Style (ゲーム側と共通) を使用
+	 * - S-Random/Scatter系は矢印単位で決まるため対応表にならず、ここでは恒等とする (pickShuffleLane で矢印ごとに決定)
+	 */
+	const makeShuffleDest = opt => {
+		const keys = [...Array(laneNum).keys()];
+		let groups = shuffleGroupList;
+		let style;
+		if (opt === `Mirror`) {
+			style = getMirrorStyle(groups)[0];
+		} else if (opt === `X-Mirror`) {
+			style = getMirrorStyle(groups, true)[0];
+		} else if (opt === `Turning`) {
+			style = getTurningStyle(groups);
+		} else if (opt === `Random`) {
+			style = getRandomStyle(groups);
+		} else if (opt === `Random+`) {
+			groups = [keys];
+			style = getRandomStyle(groups);
+		} else {
+			return keys;
+		}
+		const dest = [];
+		getShuffleIndex(laneNum, groups, style).forEach((src, i) => dest[src] = i);
+		return dest;
+	};
+
+	/** Shuffle: ノーツ1つ分の着地レーンを決定 (S-Random/Scatter系は矢印ごとに群内 (+は全体) からランダム) */
+	const pickShuffleLane = src => {
+		const randomFlg = selected.startsWith(`S-Random`) || selected.startsWith(`Scatter`);
+		if (!randomFlg) {
+			return shuffleDest[src];
+		}
+		const pool = selected.endsWith(`+`) ? [...Array(laneNum).keys()] : shuffleGroupList.find(group => group.includes(src));
+		// Scatter系は直近2矢印と同じレーンを避ける
+		const cands = selected.startsWith(`Scatter`) ? pool.filter(j => !recentLanes.includes(j)) : pool;
+		const list = cands.length > 0 ? cands : pool;
+		const j = list[Math.floor(Math.random() * list.length)];
+		recentLanes = [...recentLanes, j].slice(-2);
+		return j;
 	};
 
 	/** Flat系のスクロール: ステップゾーンを帯状 (横線2本) に切り替える */
@@ -2776,11 +2851,16 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		resetTransforms();
 		clearNotes();
 		ringPv?.clear();
+		if (shuffleFlg) {
+			shuffleDest = makeShuffleDest(opt);
+			recentLanes = [];
+			noteCnt = 0;   // 元レーンの掃引を先頭から始める
+		}
 		effectCls = _key === `effect` ? getEffectClasses(opt) : { arrow: ``, frz: ``, frzArrow: ``, ring: `` };
 
 		assignSwapping(_key === `swapping` ? opt : null);
 		// レーンのレイヤー配置 (StepAreaは選択肢ごと、Shakingは右半分を逆スクロール側へ)
-		assignLanes((g_helpPreviewDefs[_key]?.currentKey ? getScrollLayout(opt) : null)
+		assignLanes((g_helpPreviewDefs[_key]?.currentKey ? getScrollLayout(_key === `scroll` ? opt : g_stateObj.scroll) : null)
 			?? (_key === `stepArea` ? g_helpStepAreaLayouts[opt] : null)
 			?? (def.splitLayer ? [0, 0, 1, 1] : [0, 0, 0, 0])
 				.map(val => g_stateObj.reverse === C_FLG_OFF ? val : val ^ 1));
@@ -2844,7 +2924,17 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	};
 
 	const spawnNote = () => {
-		const j = visibleLanes[(noteCnt * stride) % visibleLanes.length];
+		// Shuffle: 元レーンを順に (0, 1, 2, ...) 流し、並べ替え後の着地レーンを求める
+		const srcNo = shuffleFlg ? noteCnt % visibleLanes.length : (noteCnt * stride) % visibleLanes.length;
+		const src = visibleLanes[srcNo];
+		if (shuffleFlg && srcNo === 0 && [`Turning`, `Random`, `Random+`].includes(selected)) {
+			// 1周ごとに再抽選し、毎回違う並びになる様子を見せる
+			shuffleDest = makeShuffleDest(selected);
+		}
+		const j = shuffleFlg ? pickShuffleLane(src) : src;
+		if (shuffleFlg) {
+			flashSrc(src);
+		}
 		const lane = laneInfo[j];
 		const frzFlg = g_helpPreviewDefs[_key]?.frzUse && noteCnt % 4 === 2;
 		const len = frzFlg ? frzLen : 0;
@@ -2865,7 +2955,10 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		};
 
 		if (!frzFlg) {
-			sub.appendChild(createColorObject2(`pvNoteTop${noteCnt}`, { background: colors[j], rotate: getRtn(j) }));
+			// Shuffle: 色は元レーンのグループ色 (どのグループから来たかを見せる)、矢印の向きは着地レーン側 (ゲームと同じ)
+			sub.appendChild(createColorObject2(`pvNoteTop${noteCnt}`, {
+				background: shuffleFlg ? getGroupColor(src) : colors[j], rotate: getRtn(j),
+			}));
 			addEffect(sub, effectCls.arrow);
 		} else {
 			const [normalColor, barColor] = g_dfColorObj.frzColorType1[0];
@@ -2984,6 +3077,11 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		frzHitCnts.forEach((cnt, j) => {
 			if (cnt > 0 && --frzHitCnts[j] === 0) {
 				frzHitElms[j].style.opacity = 0;
+			}
+		});
+		srcFlash.forEach((cnt, j) => {
+			if (cnt > 0 && --srcFlash[j] === 0) {
+				srcElms[j].style.opacity = 0.4;
 			}
 		});
 		if (_key === `shaking` && frameCnt % 2 === 0) {
