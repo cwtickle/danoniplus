@@ -719,6 +719,8 @@ const storeBaseData = (_scoreId, _scoreObj, _keyCtrlPtn) => {
 	g_detailObj.toolDif[_scoreId] = calcLevel(_scoreObj);
 	g_detailObj.speedData[_scoreId] = _scoreObj.speedData.concat();
 	g_detailObj.boostData[_scoreId] = _scoreObj.boostData.concat();
+	g_detailObj.ringSpeedAllData[_scoreId] = (_scoreObj.ringSpeedAllData ?? []).concat();
+	g_detailObj.ringBoostData[_scoreId] = (_scoreObj.ringBoostData ?? []).concat();
 
 	const storeDensity = _densityData => {
 		const dataList = [];
