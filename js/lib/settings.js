@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/11/12 (v52.4.1)
+ * Revised : 2026/11/13 (v52.5.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -408,12 +408,54 @@ const getScoreBaseData = _scoreId => {
 };
 
 /**
+ * Velocityグラフの実効表示対象 (リング無し譜面では常に Arrow)
+ * - g_stateObj.speedGraphTarget は「ユーザーが選んだ希望」として保持し、書き換えない
+ * @param {number} [_scoreId]
+ * @returns {string} Arrow / Ring
+ */
+const getSpeedGraphTarget = (_scoreId = g_stateObj.scoreId) =>
+	(g_detailObj.ringCnt[_scoreId] ?? 0) > 0 && g_stateObj.speedGraphTarget === `Ring` ? `Ring` : `Arrow`;
+
+/**
+ * Velocityグラフの表示対象切替
+ */
+const changeSpeedGraphTarget = () => {
+	g_stateObj.speedGraphTarget = g_stateObj.speedGraphTarget === `Ring` ? `Arrow` : `Ring`;
+	drawSpeedGraph(g_stateObj.scoreId);
+};
+
+/**
  * 速度変化グラフの描画
  * @param {number} _scoreId
  */
 const drawSpeedGraph = _scoreId => {
 	const startFrame = g_detailObj.startFrame[_scoreId];
 	const playingFrame = g_detailObj.playingFrameWithBlank[_scoreId];
+
+	// 表示対象 (Arrow: speed_data/boost_data, Ring: ring_speed_data/ring_boost_data)
+	// - ring_speed は矢印と同様に getSpeedFactor を適用
+	// - ring_boost は getRingSpeed と同じく生値を使い、0以下は1扱い
+	const ringFlg = getSpeedGraphTarget(_scoreId) === `Ring`;
+	const dataNames = ringFlg
+		? { speed: `ringSpeedAllData`, boost: `ringBoostData` }
+		: { speed: `speedData`, boost: `boostData` };
+	const convFuncs = ringFlg
+		? { speed: getSpeedFactor, boost: _val => _val > 0 ? _val : 1 }
+		: { speed: getSpeedFactor, boost: getSpeedFactor };
+
+	// 切替ボタンはリング有り譜面のみ表示
+	const targetBtn = document.getElementById(`lnkSpeedTarget`);
+	if ((g_detailObj.ringCnt[_scoreId] ?? 0) > 0 && targetBtn === null) {
+		multiAppend(detailSpeed,
+			makeDifLblCssButton(`lnkSpeedTarget`, g_lblNameObj.s_arrow, 0,
+				() => changeSpeedGraphTarget(), g_lblPosObj.lnkSpeedTarget),
+		);
+	}
+	if (targetBtn !== null) {
+		targetBtn.style.display = (g_detailObj.ringCnt[_scoreId] ?? 0) > 0 ? C_DIS_INHERIT : C_DIS_NONE;
+		targetBtn.textContent = ringFlg ? g_lblNameObj.s_ring : g_lblNameObj.s_arrow;
+	}
+
 	const speedObj = {
 		speed: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.speed },
 		boost: { frame: [0], speed: [1], cnt: 0, strokeColor: g_graphColorObj.boost }
@@ -423,12 +465,12 @@ const drawSpeedGraph = _scoreId => {
 	Object.keys(speedObj).forEach(speedType => {
 		const frame = speedObj[speedType].frame;
 		const speed = speedObj[speedType].speed;
-		const speedData = g_detailObj[`${speedType}Data`][_scoreId];
+		const speedData = g_detailObj[dataNames[speedType]][_scoreId];
 
 		for (let i = 0; i < speedData?.length; i += 2) {
 			if (speedData[i] >= startFrame) {
 				frame.push(speedData[i] - startFrame);
-				speed.push(getSpeedFactor(speedData[i + 1]));
+				speed.push(convFuncs[speedType](speedData[i + 1]));
 				tmpSpeedPoint.push(speedData[i] - startFrame);
 			}
 			speedObj[speedType].cnt++;
@@ -554,6 +596,9 @@ const drawSpeedGraph = _scoreId => {
 		createCss2Button(`btnSpdCursorR`, `>`, () => changeSpdCursor(),
 			g_lblPosObj.btnSpdCursorR, g_cssObj.button_Mini),
 	);
+	if (document.getElementById(`lnkSpeedTarget`) !== null) {
+		createScText(lnkSpeedTarget, `SpeedTarget`, { displayName: `scoreDetail`, targetLabel: `lnkSpeedTarget`, x: -10 });
+	}
 	movePointer(0);
 };
 
@@ -577,8 +622,10 @@ const calculateTotalSpeed = (_speed = null, _boost = null, _frame = 0) => {
 		speed = Number(lblSpdOverall.textContent.slice(1));
 		boost = Number(lblSpdBoost.textContent.slice(1));
 	}
-	lblSpdBase.textContent = `${g_stateObj.speed.toFixed(2)}`;
-	lblSpdTotal.textContent = `=${(g_stateObj.speed * speed * boost).toFixed(2)}`;
+	// Ringは矢印の初期倍速ではなく、Displayで設定するRingSpeedを基準にする
+	const baseSpeed = getSpeedGraphTarget() === `Ring` ? g_stateObj.ringSpeed : g_stateObj.speed;
+	lblSpdBase.textContent = `${baseSpeed.toFixed(2)}`;
+	lblSpdTotal.textContent = `=${(baseSpeed * speed * boost).toFixed(2)}`;
 	lblSpdFrame.textContent = `[${transFrameToTimer(_frame + g_detailObj.startFrame[g_stateObj.scoreId])}]`;
 };
 
@@ -2965,15 +3012,15 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const colMain = createEmptySprite(area, `pvColMain`, { x: chipX, y: 0, w: colW, h: _height });
 	const colSub = subUse ? createEmptySprite(area, `pvColSub`, { x: chipX + colW + 6, y: 0, w: colW, h: _height }) : null;
 
-	const makeChips = (_list, _prefix, _onSelect, _title = ``) => {
+	const makeChips = (_list, _prefix, _onSelect) => {
 		const chipH = Math.min(20, Math.floor(_height / _list.length));
 		return _list.map((opt, i) =>
 			createCss2Button(`${_prefix}${i}`, getStgDetailName(opt), () => _onSelect(opt), {
-				x: 0, y: i * chipH, w: colW, h: chipH - 2, siz: 12, title: _title,
+				x: 0, y: i * chipH, w: colW, h: chipH - 2, siz: 12,
 			}, g_cssObj.button_Default));
 	};
 	const chips = makeChips(optList, `pvChip`, opt => selectMain(opt));
-	const subChips = subUse ? makeChips(subList, `pvSubChip`, opt => selectSub(opt), g_msgObj[def.sub] ?? ``) : [];
+	const subChips = subUse ? makeChips(subList, `pvSubChip`, opt => selectSub(opt)) : [];
 	multiAppend(colMain, ...chips);
 	if (subUse) {
 		multiAppend(colSub, ...subChips);
@@ -3225,7 +3272,6 @@ const makeRingHelpPreview = (_parent, _key, _top, _height) => {
 	let autoCnt = 0;
 	let timerId = null;
 
-	// ゲーム側 getRingDuration (ringSpeedData なし) と同じ式
 	const getTotal = () => isSpeed ? Math.max(Math.round(g_ringObj.baseFrame / selected), 1) : guideDuration;
 	const getInterval = () => isSpeed ? speedInterval : guideInterval;
 	const guideMode = () => isSpeed ? `ALL` : selected;
