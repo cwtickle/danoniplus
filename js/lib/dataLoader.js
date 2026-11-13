@@ -1173,7 +1173,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 
 	/**
 	 * リングノートデータの分解 (1行1ノート)
-	 * 入力: 到達フレーム, X, Y, [音番号], [半径], [色], [出現～到達フレーム数]
+	 * 入力: 到達フレーム, X, Y, [音番号], [半径], [色], [出現～到達フレーム数 (ring_boost 1倍時の基準値)]
 	 * 出力: g_ringObj.cols 個で1セットの単純配列
 	 *       [到達フレーム, X, Y, 音番号, 半径, 色, 出現～到達フレーム数(0:未指定)]
 	 * @param {string} _scoreNo
@@ -2159,15 +2159,17 @@ const getRingSpeed = (_ringBoostData, _frame) => {
 
 /**
  * リングの基本進行量 (速度1のときの1フレーム当たりの進行度。到達で合計1)
- * - 個別指定(_frames > 0)があればそれを優先、なければ到達フレーム時点の個別加速(ring_boost_data)に反比例
- * - リング速度オプション(g_stateObj.ringSpeed)はどちらにも掛かる
+ * - 出現～到達フレーム数は、個別指定(_frames > 0)があればそれを、なければ g_ringObj.baseFrame を
+ *   個別加速(ring_boost_data)が1倍のときの基準とし、到達フレーム時点の個別加速に反比例させる
+ * - リング速度オプション(g_stateObj.ringSpeed)にも反比例して掛かる
  * @param {number[]} _ringBoostData
  * @param {number} _arrivalFrame
  * @param {number} [_frames=0]
  * @returns {number}
  */
 const getRingBaseStep = (_ringBoostData, _arrivalFrame, _frames = 0) => {
-	const base = _frames > 0 ? _frames : g_ringObj.baseFrame / getRingSpeed(_ringBoostData, _arrivalFrame);
+	const baseFrames = _frames > 0 ? _frames : g_ringObj.baseFrame;
+	const base = baseFrames / getRingSpeed(_ringBoostData, _arrivalFrame);
 	return g_stateObj.ringSpeed / Math.max(base, 1);
 };
 

@@ -445,6 +445,12 @@ const drawSpeedGraph = _scoreId => {
 
 	// 切替ボタンはリング有り譜面のみ表示
 	const targetBtn = document.getElementById(`lnkSpeedTarget`);
+	if ((g_detailObj.ringCnt[_scoreId] ?? 0) > 0 && targetBtn === null) {
+		multiAppend(detailSpeed,
+			makeDifLblCssButton(`lnkSpeedTarget`, g_lblNameObj.s_arrow, 0,
+				() => changeSpeedGraphTarget(), g_lblPosObj.lnkSpeedTarget),
+		);
+	}
 	if (targetBtn !== null) {
 		targetBtn.style.display = (g_detailObj.ringCnt[_scoreId] ?? 0) > 0 ? C_DIS_INHERIT : C_DIS_NONE;
 		targetBtn.textContent = ringFlg ? g_lblNameObj.s_ring : g_lblNameObj.s_arrow;
@@ -583,12 +589,6 @@ const drawSpeedGraph = _scoreId => {
 			createDivCss2Label(`lblSpdTotal`, ``, g_lblPosObj.lblSpdTotal),
 			createDivCss2Label(`lblSpdFrame`, ``, g_lblPosObj.lblSpdFrame),
 		);
-		if ((g_detailObj.ringCnt[_scoreId] ?? 0) > 0) {
-			multiAppend(detailSpeed,
-				makeDifLblCssButton(`lnkSpeedTarget`, g_lblNameObj.s_arrow, 0,
-					() => changeSpeedGraphTarget(), g_lblPosObj.lnkSpeedTarget),
-			);
-		}
 	}
 	multiAppend(detailSpeed,
 		createCss2Button(`btnSpdCursorL`, `<`, () => changeSpdCursor(-1),
