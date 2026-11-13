@@ -2621,6 +2621,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	let effectCls = { arrow: ``, frz: ``, frzArrow: ``, ring: `` };
 	let filterElms = [];   // Appearanceのフィルターバー・ラベル
 	let shuffleDest = [...Array(laneNum).keys()];   // Shuffle: 元レーン -> 流れ込み先レーン
+	let shuffleCnt = 0;
 	let recentLanes = [];                           // Shuffle(Scatter系): 直近の着地レーン
 	const frzLen = 90;   // Effectプレビュー用フリーズアローの長さ(px)
 	const work = { drunkXFlg: true, drunkYFlg: true, drunkAxisFlg: false, drunkRotateFlg: false };
@@ -2927,14 +2928,14 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		// Shuffle: 元レーンを順に (0, 1, 2, ...) 流し、並べ替え後の着地レーンを求める
 		const srcNo = shuffleFlg ? noteCnt % visibleLanes.length : (noteCnt * stride) % visibleLanes.length;
 		const src = visibleLanes[srcNo];
-		if (shuffleFlg && srcNo === 0 && [`Turning`, `Random`, `Random+`].includes(selected)) {
+		if (shuffleFlg && srcNo === 0 && shuffleCnt % 2 === 0 && [`Turning`, `Random`, `Random+`].includes(selected)) {
 			// 1周ごとに再抽選し、毎回違う並びになる様子を見せる
 			shuffleDest = makeShuffleDest(selected);
 		}
-		const j = shuffleFlg ? pickShuffleLane(src) : src;
-		if (shuffleFlg) {
-			flashSrc(src);
+		if (srcNo === 0) {
+			shuffleCnt++;
 		}
+		const j = shuffleFlg ? pickShuffleLane(src) : src;
 		const lane = laneInfo[j];
 		const frzFlg = g_helpPreviewDefs[_key]?.frzUse && noteCnt % 4 === 2;
 		const len = frzFlg ? frzLen : 0;
@@ -2976,7 +2977,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 			makeArrowRoot(`Btm`, lane.dir === 1 ? len : -len);
 			addEffect(sub, effectCls.frz);
 		}
-		const note = { el, lane, j, frzFlg, b: bStart };
+		const note = { el, lane, j, src, frzFlg, b: bStart };
 		placeNote(note);
 		notes.push(note);
 	};
@@ -3052,6 +3053,9 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 					hitFrz(note.j);
 				} else {
 					hitArrow(note.j);
+				}
+				if (shuffleFlg) {
+					flashSrc(note.src);
 				}
 				note.el.remove();
 				return false;
@@ -3160,6 +3164,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 
 	// 上下キー: 操作対象の列の選択肢を前後に動かす (端では反対側へ循環)
 	const moveOption = _dir => {
+		shuffleCnt = 0;
 		applyOption(optList[nextPos(optList.indexOf(selected), _dir, optList.length)]);
 		markChips();
 	};
