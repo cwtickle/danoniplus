@@ -2591,7 +2591,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const scrollDir = getScrollLayout(g_stateObj.scroll);
 	const srcElms = shuffleFlg ? [...Array(laneNum).keys()].map(j => {
 		const color = getGroupColor(j);
-		return createDivCss2Label(`pvSrc${j}`, `${shuffleVals[j]}`, {
+		return createDivCss2Label(`pvSrc${j}`, `${shuffleVals[j] + 1}`, {
 			x: laneX(j), y: scrollDir[j] % 2 === 0 ? 20 : playH - 40, w: C_ARW_WIDTH, h: 22, siz: 16, opacity: 0.4,
 			color, border: `1px solid ${color}`, boxSizing: `border-box`, lineHeight: `20px`,
 		});
