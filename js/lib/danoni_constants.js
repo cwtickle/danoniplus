@@ -5266,7 +5266,14 @@ const g_lang_msgObj = {
         autoPlay: `オートプレイや一部キーを自動で打たせる設定を行います。\nオートプレイ時はハイスコアを保存しません。`,
         gauge: `クリア条件を設定します。\n表にある表記は次の通りです。\n` +
             `- Start) ゲージ初期値\n- Border) クリア条件(ハイフン時は0)\n` +
-            `- Recovery) 回復量\n- Damage) ダメージ量\n- Accuracy) クリアに必要な正確率、許容ミス数`,
+            `- Recovery) 回復量\n- Damage) ダメージ量\n- Accuracy) クリアに必要な正確率、許容ミス数\n\n` +
+            `標準設定での説明です。譜面によって設定が異なるため、実際の値は表をご確認ください。\n` +
+            `[Original/Normal] デフォルトの回復・ダメージ量のゲージです。\n` +
+            `[Light/Easy] Original/Normalより回復量が多いゲージです。\n` +
+            `[Heavy/Hard] Original/Normalより回復量が少なくダメージ量が多いゲージです。\n` +
+            `[NoRecovery] ゲージが最初からMAXからスタートしますが、回復がゼロです。\n` +
+            `[SuddenDeath] 1ミスで終了するモードです。\n` +
+            `[Practice] ゲージの変動が無いモードです。通常、クリア扱いになりません。`,
         excessive: `空押し判定を行うか設定します。`,
         adjustment: `曲とのタイミングにズレを感じる場合、数値を変えることでフレーム単位のズレを直すことができます。\n` +
             `外側のボタンは5f刻み、真ん中は1f刻み、内側は0.5f刻みで調整できます。`,
@@ -5451,7 +5458,14 @@ const g_lang_msgObj = {
         gauge: `Set the clear condition.\n` +
             `The notation used in the table is as follows.\n` +
             `- Start) initial value\n- Border) borderline value (hyphen means zero)\n` +
-            `- Recovery) recovery amount\n- Damage) damage amount\n- Accuracy) accuracy required to clear and the number of allowed mistakes`,
+            `- Recovery) recovery amount\n- Damage) damage amount\n- Accuracy) accuracy required to clear and the number of allowed mistakes\n\n` +
+            `The following descriptions apply to default settings. Values may vary by chart; check the table for actual values.\n` +
+            `[Original/Normal] The default gauge for recovery and damage amounts. \n` +
+            `[Light/Easy] A gauge with higher recovery amounts than Original/Normal. \n` +
+            `[Heavy/Hard] A gauge with lower recovery amounts and higher damage amounts than Original/Normal. \n` +
+            `[NoRecovery] The gauge starts at MAX from the beginning, but recovery is zero. \n` +
+            `[SuddenDeath] A mode where the game ends after just one mistake.\n` +
+            `[Practice] A mode where the gauge does not fluctuate. Typically, this is not counted as a clear.`,
         excessive: `Set whether to use excessive miss judgment.`,
         adjustment: `If you feel that the timing is out of sync with the music, you can correct the shift in frame units by changing the value.\n` +
             `The outer button can be adjusted in 5 frame increments, the middle in 1 frame increments, and the inner button in 0.5 frame increments.`,
