@@ -2587,18 +2587,21 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	};
 
 	// Shuffle: 元レーンの見出し (キーコンフィグと同様にグループ番号を表示)。ノーツ出現時に該当レーンを光らせる
+	const srcIdleOpacity = 0.5;
 	const srcFlash = fillArray(laneNum);
 	const scrollDir = getScrollLayout(g_stateObj.scroll);
 	const srcElms = shuffleFlg ? [...Array(laneNum).keys()].map(j => {
 		const color = getGroupColor(j);
 		return createDivCss2Label(`pvSrc${j}`, `${shuffleVals[j] + 1}`, {
-			x: laneX(j), y: scrollDir[j] % 2 === 0 ? 20 : playH - 40, w: C_ARW_WIDTH, h: 28, siz: 24, opacity: 0.4,
+			x: laneX(j), y: scrollDir[j] % 2 === 0 ? 20 : playH - 40, w: C_ARW_WIDTH, h: 28, siz: 24, opacity: srcIdleOpacity,
 			color, border: `2px solid ${color}`, boxSizing: `border-box`, lineHeight: `20px`, fontWeight: `bold`,
 		});
 	}) : [];
 	multiAppend(infoSprite, ...srcElms);
 	const flashSrc = j => {
 		srcElms[j].style.opacity = 1;
+		srcElms[j].style.backgroundColor =
+			`color-mix(in srgb, ${getGroupColor(j)} 30%, transparent)`;
 		srcFlash[j] = 12;
 	};
 
@@ -3085,7 +3088,8 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		});
 		srcFlash.forEach((cnt, j) => {
 			if (cnt > 0 && --srcFlash[j] === 0) {
-				srcElms[j].style.opacity = 0.4;
+				srcElms[j].style.opacity = srcIdleOpacity;
+				srcElms[j].style.backgroundColor = `transparent`;
 			}
 		});
 		if (_key === `shaking` && frameCnt % 2 === 0) {
