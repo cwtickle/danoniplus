@@ -1220,7 +1220,7 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		obj.ringSpecificFlg = false;
 		let dosRingData;
 		for (const header of getPriorityHeader()) {
-			const data = getRefData(`ring`, `${header}${setScoreIdHeader(_scoreNo, g_stateObj.scoreLockFlg)}_data`);
+			const data = getRefData(`ring`, `${header}${_scoreNo}_data`);
 			if (hasVal(data)) {
 				dosRingData = data;
 				obj.ringSpecificFlg = header !== ``;
