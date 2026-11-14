@@ -5267,6 +5267,7 @@ const g_lang_msgObj = {
         gauge: `クリア条件を設定します。\n表にある表記は次の通りです。\n` +
             `- Start) ゲージ初期値\n- Border) クリア条件(ハイフン時は0)\n` +
             `- Recovery) 回復量\n- Damage) ダメージ量\n- Accuracy) クリアに必要な正確率、許容ミス数\n\n` +
+            `標準設定での説明です。譜面によって設定が異なるため、実際の値は表をご確認ください。\n` +
             `[Original/Normal] デフォルトの回復・ダメージ量のゲージです。\n` +
             `[Light/Easy] Original/Normalより回復量が多いゲージです。\n` +
             `[Heavy/Hard] Original/Normalより回復量が少なくダメージ量が多いゲージです。\n` +
@@ -5458,6 +5459,7 @@ const g_lang_msgObj = {
             `The notation used in the table is as follows.\n` +
             `- Start) initial value\n- Border) borderline value (hyphen means zero)\n` +
             `- Recovery) recovery amount\n- Damage) damage amount\n- Accuracy) accuracy required to clear and the number of allowed mistakes\n\n` +
+            `The following descriptions apply to default settings. Values may vary by chart; check the table for actual values.\n` +
             `[Original/Normal] The default gauge for recovery and damage amounts. \n` +
             `[Light/Easy] A gauge with higher recovery amounts than Original/Normal. \n` +
             `[Heavy/Hard] A gauge with lower recovery amounts and higher damage amounts than Original/Normal. \n` +
