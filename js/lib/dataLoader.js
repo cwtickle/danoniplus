@@ -1215,14 +1215,15 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @returns {any[]}
 	 */
 	const setRingData = _scoreNo => {
-		// 特定条件(ringRev_data等)のデータが採用されたかどうか (true時はReverseでの自動反転を行わない)
+		// 優先順に探索 (ringRev[1]_data, ringRev_data, ring_data の順など)
+		// 見出し付き(ringRev等)のデータが採用された場合は、Reverseでの自動反転を行わない
 		obj.ringSpecificFlg = false;
 		let dosRingData;
-		for (const { name, specific } of getRingPriorityVal(_scoreNo)) {
-			const data = getRefData(`ring`, name);
+		for (const header of getPriorityHeader()) {
+			const data = getRefData(`ring`, `${header}${setScoreIdHeader(_scoreNo, g_stateObj.scoreLockFlg)}_data`);
 			if (hasVal(data)) {
 				dosRingData = data;
-				obj.ringSpecificFlg = specific;
+				obj.ringSpecificFlg = header !== ``;
 				break;
 			}
 		}
@@ -1309,23 +1310,6 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 		list.push(g_stateObj.scroll, type, ``);
 
 		return makeDedupliArray(list);
-	};
-
-	/**
-	 * リングノート用の優先順データ名リスト
-	 * - getPriorityValとは別定義。ring_data / ring2_data は独立しているため、
-	 *   番号なし(`_data`)やロケール付きへのフォールバックは行わない
-	 * - Rev / Alt / スクロール名など、特定条件の見出しのみを候補とする (素の [1], <7>, A は除外)
-	 * - 最後に素の ring{N}_data を置く (specific: false)
-	 * @param {string} _scoreNo
-	 * @returns {{name: string, specific: boolean}[]}
-	 */
-	const getRingPriorityVal = _scoreNo => {
-		const plainHeaders = [``, `A`, C_FLG_HYPHEN, `${C_FLG_HYPHEN}A`];
-		const specifics = getPriorityHeader()
-			.filter(header => !plainHeaders.includes(header.replace(/\[[^\]]*\]|<[^>]*>/g, ``)))
-			.map(header => ({ name: `${header}${_scoreNo}_data`, specific: true }));
-		return [...specifics, { name: `${_scoreNo}_data`, specific: false }];
 	};
 
 	/**
