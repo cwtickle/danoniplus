@@ -1185,7 +1185,7 @@ const g_ringObj = {
     sound: 1,                   // 音番号の既定値 (0: 無音)
     cols: 7,                    // 内部の列数 [到達フレーム, X, Y, 音番号, 半径, 色, 出現～到達フレーム数(ring_boost 1倍時の基準値)]
     maxSearchFrame: 3600,       // 出現フレームを遡って探索する上限フレーム数 (ストップ中の無限ループ防止)
-    fxFrames: 12,               // ヒットモーションの長さ(フレーム)
+    fxFrames: 8,                // ヒットモーションの長さ(フレーム)
     fxMask: `radial-gradient(circle, transparent 62%, #000 64%)`,  // ヒットモーションの輪のマスク
     fxScale: 0.5,               // ヒットモーションの広がり幅
 
