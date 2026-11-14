@@ -129,6 +129,7 @@ const waitUntilLoaded = () => {
 	await loadScript2(`${g_rootPath}../js/lib/mainWindow.js?${g_versionForUrl}`);
 	await loadScript2(`${g_rootPath}../js/lib/result.js?${g_versionForUrl}`);
 	await loadScript2(`${g_rootPath}../js/lib/danoni_constants.js?${g_versionForUrl}`);
+	await loadScript2(`${g_rootPath}../js/lib/pseudoFullscreen.js?${g_versionForUrl}`);
 	await loadScript2(`${g_rootPath}../js/lib/legacy_functions.js?${g_versionForUrl.split(`.`)[0]}`, false);
 	initialControl();
 
@@ -1794,8 +1795,9 @@ const dragDiv = (_divName, { minX = 0, minY = 0, maxX = g_sWidth, maxY = g_sHeig
 	const div = document.getElementById(_divName);
 	div.onpointermove = evt => {
 		if (evt.buttons) {
-			const nextX = div.offsetLeft + evt.movementX;
-			const nextY = div.offsetTop + evt.movementY;
+			const fullscreenScale = getPseudoFullscreenScale();
+			const nextX = div.offsetLeft + evt.movementX / fullscreenScale;
+			const nextY = div.offsetTop + evt.movementY / fullscreenScale;
 			const clampMaxX = (maxX === minX) ? maxX : (maxX - div.offsetWidth);
 			const clampMaxY = (maxY === minY) ? maxY : (maxY - div.offsetHeight);
 			div.style.left = wUnit(Math.min(Math.max(nextX, minX), clampMaxX));
@@ -2232,7 +2234,8 @@ const g_handler = (() => {
 		 */
 		removeByContainer: _container => {
 			Object.entries(events).forEach(([k, e]) => {
-				if (_container.contains(e.target)) {
+				// WindowやVisualViewportなど、Node以外を対象にしたリスナーは対象外
+				if (e.target instanceof Node && _container.contains(e.target)) {
 					e.target.removeEventListener(e.type, e.listener, e.options);
 					delete events[k];
 				}
@@ -2427,6 +2430,9 @@ const clearWindow = (_customDisplayName = ``) => {
 
 	Object.keys(g_headerObj).filter(val => val.startsWith(`--`) && hasVal(g_headerObj[val])).forEach(prop =>
 		document.documentElement.style.setProperty(prop, getCssCustomProperty(prop, g_headerObj[prop])));
+
+	// 疑似フルスクリーン表示中は#canvas-frameの幅変更に追従
+	fitPseudoFullscreen();
 };
 
 /**

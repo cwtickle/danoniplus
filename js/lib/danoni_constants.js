@@ -245,6 +245,9 @@ const updateWindowSiz = () => {
         btnReload: {
             x: 10 + g_btnX(), y: 10, w: 30, h: 30, siz: 20, title: g_msgObj.reload,
         },
+        btnFullscreen: {
+            x: g_btnX() + 50, y: 10, w: 30, h: 30, siz: 20, title: g_msgObj.fullscreen,
+        },
         btnHelp: {
             x: g_btnX(), y: g_sHeight - 150, w: 40, h: 40, siz: 30, title: g_msgObj.howto,
         },
@@ -1103,6 +1106,7 @@ const g_emojiObj = {
     camera: `&#x1f4f7;`,      // カメラ (camera)
     locked: `&#x1f512;`,      // 鍵 (locked)
     unlocked: `&#x1f513;`,    // 鍵開 (unlocked)
+    expand: `&#x26f6;`,       // 全画面 (fullscreen)
 };
 
 /** 設定・オプション画面用共通 */
@@ -4810,6 +4814,8 @@ const g_lblNameObj = {
     b_gitter: `Discord`,
     b_retry: `Retry`,
     b_close: `Close`,
+    b_fullscreen: `Full Screen`,
+    b_exitFullscreen: `Exit Full Screen`,
     b_cReset: `Reset`,
     b_precond: `Precondition`,
     b_keyLock: `KeyLock`,
@@ -5069,6 +5075,9 @@ const g_lang_lblNameObj = {
         dataDeleteOFFDesc: `消去したいデータの種類を選んで「Reset」を押してください`,
         dataDeleteONDesc: `セーフモード適用中はデータ消去は行えません。変更するにはセーフモードを解除してください`,
 
+        b_fullscreen: `全画面`,
+        b_exitFullscreen: `全画面解除`,
+
         kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
         kcNonDesc: `キー割り当て無効化中です。解除するには「KeyLock」を押してください`,
         kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを変更`,
@@ -5135,6 +5144,9 @@ const g_lang_lblNameObj = {
     En: {
         dataDeleteOFFDesc: `Select the type of data you wish to delete and press "Reset".`,
         dataDeleteONDesc: `Data erasure cannot be performed while safe mode is applied. <br>Please deactivate the safe mode to change the data.`,
+
+        b_fullscreen: `Full Screen`,
+        b_exitFullscreen: `Exit Full Screen`,
 
         kcDesc: `[{0}:Skip / {1}:Key invalidation (Alternate keys only)]`,
         kcNonDesc: `Key assignments are currently disabled. Press "KeyLock" to disable this setting.`,
@@ -5215,6 +5227,7 @@ const g_lang_msgObj = {
 
     Ja: {
         howto: `ゲーム画面の見方や設定の詳細についてのページへ移動します（GitHub Wiki）。`,
+        fullscreen: `画面いっぱいに表示します（疑似フルスクリーン）。`,
         dataReset: `この作品で保存されているハイスコアや\nAdjustment情報等をリセットします。`,
         github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
         security: `Dancing☆Onigiri (CW Edition)のサポート情報ページへ移動します。`,
@@ -5405,6 +5418,7 @@ const g_lang_msgObj = {
 
     En: {
         howto: `Go to the page about the game screen and settings at GitHub Wiki.`,
+        fullscreen: `Display the game in pseudo full screen.`,
         dataReset: `Resets the high score, adjustment information, etc. saved in this game.`,
         github: `Go to the GitHub page of Dancing Onigiri "CW Edition".`,
         security: `Go to the support information page for Dancing Onigiri "CW Edition".`,

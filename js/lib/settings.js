@@ -4365,8 +4365,10 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 		const mouseDy = _evt.clientY - dragStartY;
 
 		// 2. 【最重要】スケール逆算して、縮小空間内の移動量に変換
-		const dx = mouseDx / scale;
-		const dy = mouseDy / scale;
+		//    疑似フルスクリーン時は祖先要素の拡縮率も加味する
+		const totalScale = scale * getPseudoFullscreenScale();
+		const dx = mouseDx / totalScale;
+		const dy = mouseDy / totalScale;
 
 		// 3. 境界値制限
 		const minX = g_headerObj.playingLayout ? -g_headerObj.scAreaWidth : 0;

@@ -332,6 +332,11 @@ const titleInit = (_initFlg = false) => {
 			},
 		}, g_cssObj.button_Start),
 
+		// 疑似フルスクリーン
+		createCss2Button(`btnFullscreen`, g_emojiObj.expand, () => {
+			togglePseudoFullscreen();
+		}, g_lblPosObj.btnFullscreen, g_cssObj.button_Start),
+
 		// ヘルプ
 		createCss2Button(`btnHelp`, `?`, () => true, {
 			...g_lblPosObj.btnHelp,
