@@ -2256,7 +2256,8 @@ const applyRingPlayWindow = _ringSprite => {
 	if (_ringSprite === null) {
 		return;
 	}
-	if (g_stateObj.reverse === C_FLG_ON) {
+	// ringRev_data等の特定条件データを使う場合は、作者の配置をそのまま使うため反転しない
+	if (g_stateObj.reverse === C_FLG_ON && !g_scoreObj.ringSpecificFlg) {
 		addTransform(`ringSprite`, `ringReverse`, `scaleY(-1)`, g_transPriority.ringReverse);
 	}
 	addTransform(`ringSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)(), g_transPriority.playWindow);
