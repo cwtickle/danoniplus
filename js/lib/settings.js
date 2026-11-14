@@ -2322,7 +2322,6 @@ const isLongHelp = _msg =>
  * - splitLayer: 右半分のレーンを逆スクロール(レイヤー1)側に配置する
  * - currentKey: サンプルキーではなく実際のキーに合わせてマッピングする
  *               (StepArea, Swappingは実際のキーには非対応)
- * - allLanes  : キースイッチがあるキーでも全レーンを表示する (Shuffleはグループが分断されないようにするため)
  * - shuffle   : 選択中のキーのシャッフルグループを使い、元レーンの流れ込み先を表示する
  * - frzUse    : サンプルでフリーズアローを使用するかどうか
  * - sub       : 派生する設定 (Typeなど)。選択肢の列を2列目に追加する
@@ -2332,7 +2331,7 @@ const isLongHelp = _msg =>
 const g_helpPreviewDefs = {
 	motion: { withRing: true },
 	scroll: { currentKey: true },
-	shuffle: { currentKey: true, allLanes: true, shuffle: true },
+	shuffle: { currentKey: true, shuffle: true },
 	appearance: { splitLayer: true },
 	playWindow: { sub: `playWindowType`, withRing: true },
 	stepArea: {},
@@ -2412,7 +2411,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		: [];
 	const activeGroup = configKeyGroupList[g_keycons.keySwitchNum] ?? configKeyGroupList[0];
 	const laneVisible = [...Array(laneNum).keys()].map(j =>
-		!useKey || def.allLanes === true || configKeyGroupList.length <= 1 || (tkObj.keyGroupMaps[j]?.includes(activeGroup) ?? true));
+		!useKey || configKeyGroupList.length <= 1 || (tkObj.keyGroupMaps[j]?.includes(activeGroup) ?? true));
 	const visibleLanes = [...Array(laneNum).keys()].filter(j => laneVisible[j]);
 	if (visibleLanes.length === 0) {
 		visibleLanes.push(...Array(laneNum).keys());   // 該当レーンが無い場合は全て表示
@@ -2423,7 +2422,8 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const shuffleFlg = def.shuffle === true;
 	const shuffleVals = shuffleFlg ? (g_keyObj[`shuffle${keyCtrlPtn}`] ?? fillArray(laneNum)) : [];
 	const shuffleMap = {};
-	shuffleVals.forEach((val, j) => (shuffleMap[val] ??= []).push(j));
+	// 非表示レーン(キースイッチで選択外)は、着地しても見えないためグループから除外する
+	shuffleVals.forEach((val, j) => laneVisible[j] && (shuffleMap[val] ??= []).push(j));
 	const shuffleGroupList = Object.values(shuffleMap);
 	const shuffleGroupNo = [];
 	shuffleGroupList.forEach((group, gi) => group.forEach(j => shuffleGroupNo[j] = gi));
@@ -2595,6 +2595,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		return createDivCss2Label(`pvSrc${j}`, `${shuffleVals[j] + 1}`, {
 			x: laneX(j), y: scrollDir[j] % 2 === 0 ? 20 : playH - 40, w: C_ARW_WIDTH, h: 28, siz: 24, opacity: srcIdleOpacity,
 			color, border: `2px solid ${color}`, boxSizing: `border-box`, lineHeight: `20px`, fontWeight: `bold`,
+			visibility: laneVisible[j] ? `visible` : `hidden`,
 		});
 	}) : [];
 	multiAppend(infoSprite, ...srcElms);
@@ -2774,7 +2775,6 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	 * - S-Random/Scatter系は矢印単位で決まるため対応表にならず、ここでは恒等とする (pickShuffleLane で矢印ごとに決定)
 	 */
 	const makeShuffleDest = opt => {
-		const keys = [...Array(laneNum).keys()];
 		let groups = shuffleGroupList;
 		let style;
 		if (opt === `Mirror`) {
@@ -2786,10 +2786,10 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		} else if (opt === `Random`) {
 			style = getRandomStyle(groups);
 		} else if (opt === `Random+`) {
-			groups = [keys];
+			groups = [visibleLanes];
 			style = getRandomStyle(groups);
 		} else {
-			return keys;
+			return [...Array(laneNum).keys()];
 		}
 		const dest = [];
 		getShuffleIndex(laneNum, groups, style).forEach((src, i) => dest[src] = i);
@@ -2802,7 +2802,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		if (!randomFlg) {
 			return shuffleDest[src];
 		}
-		const pool = selected.endsWith(`+`) ? [...Array(laneNum).keys()] : shuffleGroupList.find(group => group.includes(src));
+		const pool = selected.endsWith(`+`) ? visibleLanes : shuffleGroupList.find(group => group.includes(src));
 		// Scatter系は直近2矢印と同じレーンを避ける
 		const cands = selected.startsWith(`Scatter`) ? pool.filter(j => !recentLanes.includes(j)) : pool;
 		const list = cands.length > 0 ? cands : pool;
