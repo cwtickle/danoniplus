@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/11/12 (v52.4.1)
+ * Revised : 2026/11/14 (v52.6.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2256,7 +2256,8 @@ const applyRingPlayWindow = _ringSprite => {
 	if (_ringSprite === null) {
 		return;
 	}
-	if (g_stateObj.reverse === C_FLG_ON) {
+	// ringRev_data等の特定条件データを使う場合は、作者の配置をそのまま使うため反転しない
+	if (g_stateObj.reverse === C_FLG_ON && !g_scoreObj.ringSpecificFlg) {
 		addTransform(`ringSprite`, `ringReverse`, `scaleY(-1)`, g_transPriority.ringReverse);
 	}
 	addTransform(`ringSprite`, `playWindow`, g_playWindowFunc.get(g_stateObj.playWindow)(), g_transPriority.playWindow);
