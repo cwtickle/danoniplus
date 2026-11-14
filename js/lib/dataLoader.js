@@ -1215,7 +1215,18 @@ const scoreConvert = (_dosObj, _scoreId, _preblankFrame, _dummyNo = ``,
 	 * @returns {any[]}
 	 */
 	const setRingData = _scoreNo => {
-		const dosRingData = getRefData(`ring`, `${_scoreNo}_data`);
+		// 優先順に探索 (ringRev[1]_data, ringRev_data, ring_data の順など)
+		// 見出し付き(ringRev等)のデータが採用された場合は、Reverseでの自動反転を行わない
+		obj.ringSpecificFlg = false;
+		let dosRingData;
+		for (const header of getPriorityHeader()) {
+			const data = getRefData(`ring`, `${header}${_scoreNo}_data`);
+			if (hasVal(data)) {
+				dosRingData = data;
+				obj.ringSpecificFlg = header !== ``;
+				break;
+			}
+		}
 		if (!hasVal(dosRingData)) {
 			return [];
 		}
