@@ -2427,7 +2427,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const shuffleGroupList = Object.values(shuffleMap);
 	const shuffleGroupNo = [];
 	shuffleGroupList.forEach((group, gi) => group.forEach(j => shuffleGroupNo[j] = gi));
-	const groupColors = [0, 4, 1, 3, 5, 6, 7, 8, 9, 2].map(k => g_dfColorObj.setColorType1[k]);
+	const groupColors = [...Array(10).keys()].map(k => g_dfColorObj.setColorType2[k]);
 	const getGroupColor = j => groupColors[shuffleGroupNo[j] % groupColors.length];
 
 	// 段 (下段: pos が divideCnt を超えるレーン) と、中央からのX座標差分
@@ -2592,8 +2592,8 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const srcElms = shuffleFlg ? [...Array(laneNum).keys()].map(j => {
 		const color = getGroupColor(j);
 		return createDivCss2Label(`pvSrc${j}`, `${shuffleVals[j] + 1}`, {
-			x: laneX(j), y: scrollDir[j] % 2 === 0 ? 20 : playH - 40, w: C_ARW_WIDTH, h: 22, siz: 16, opacity: 0.4,
-			color, border: `1px solid ${color}`, boxSizing: `border-box`, lineHeight: `20px`,
+			x: laneX(j), y: scrollDir[j] % 2 === 0 ? 20 : playH - 40, w: C_ARW_WIDTH, h: 28, siz: 24, opacity: 0.4,
+			color, border: `2px solid ${color}`, boxSizing: `border-box`, lineHeight: `20px`, fontWeight: `bold`,
 		});
 	}) : [];
 	multiAppend(infoSprite, ...srcElms);
