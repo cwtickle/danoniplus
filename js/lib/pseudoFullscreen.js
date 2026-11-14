@@ -35,6 +35,9 @@ let g_pseudoFullscreenSavedScroll = null;
 /** 疑似フルスクリーンの再計算待ちID */
 let g_pseudoFullscreenRafId = null;
 
+/** 疑似フルスクリーン時のプレイ用ボタン */
+let g_pseudoFullscreenControls = null;
+
 /**
  * 疑似フルスクリーンの表示倍率を取得
  * @returns {number}
@@ -53,6 +56,98 @@ const getPseudoFullscreenViewport = () => {
 		width: vv?.width ?? window.innerWidth,
 		height: vv?.height ?? window.innerHeight,
 	};
+};
+
+/**
+ * 疑似フルスクリーン時のプレイ用ボタンの位置を更新
+ * - 画面右下に配置し、ゲーム領域との余白が足りない場合はゲーム画面に重ねる
+ */
+const positionPseudoFullscreenControls = () => {
+	if (g_pseudoFullscreenControls === null ||
+		g_pseudoFullscreenControls.style.display === `none`) {
+		return;
+	}
+
+	const viewport = getPseudoFullscreenViewport();
+	const uiScale = 1 / (window.visualViewport?.scale || 1);
+	const buttonW = 72 * uiScale;
+	const buttonH = 36 * uiScale;
+	const gap = 8 * uiScale;
+	const margin = 12 * uiScale;
+
+	Array.from(g_pseudoFullscreenControls.querySelectorAll(`button`)).forEach(btn => {
+		btn.style.width = wUnit(buttonW);
+		btn.style.height = wUnit(buttonH);
+		btn.style.fontSize = wUnit(14 * uiScale);
+	});
+	g_pseudoFullscreenControls.style.gap = wUnit(gap);
+
+	const totalH = buttonH * 2 + gap;
+	g_pseudoFullscreenControls.style.left = wUnit(Math.max(
+		viewport.left + margin,
+		viewport.left + viewport.width - buttonW - margin
+	));
+	g_pseudoFullscreenControls.style.top = wUnit(Math.max(
+		viewport.top + margin,
+		viewport.top + viewport.height - totalH - margin
+	));
+};
+
+/**
+ * 疑似フルスクリーン時のプレイ用ボタンの表示/非表示を更新
+ * @param {boolean} [_isMain=g_currentPage === `main`]
+ */
+const updatePseudoFullscreenControls = (_isMain = g_currentPage === `main`) => {
+	if (!g_pseudoFullscreen || g_pseudoFullscreenControls === null) return;
+
+	g_pseudoFullscreenControls.style.display = _isMain ? `flex` : `none`;
+	if (_isMain) {
+		positionPseudoFullscreenControls();
+	}
+};
+
+/**
+ * 疑似フルスクリーン時のプレイ用ボタンを作成
+ */
+const createPseudoFullscreenControls = () => {
+	if (g_pseudoFullscreenControls !== null) return;
+
+	const controls = document.createElement(`div`);
+	controls.id = `danoniPseudoFullscreenControls`;
+
+	const backBtn = document.createElement(`button`);
+	backBtn.id = `danoniPseudoFullscreenBack`;
+	backBtn.type = `button`;
+	backBtn.textContent = g_lblNameObj.b_back;
+	backBtn.title = g_lblNameObj.l_titleBack;
+	backBtn.onclick = () => {
+		if (!g_pseudoFullscreen || g_currentPage !== `main` || g_retryInProgress) return;
+		g_audio.pause();
+		g_timerHandler.clearTimeout(g_timeoutEvtId);
+		titleInit();
+	};
+
+	const retryBtn = document.createElement(`button`);
+	retryBtn.id = `danoniPseudoFullscreenRetry`;
+	retryBtn.type = `button`;
+	retryBtn.textContent = g_lblNameObj.b_retry;
+	retryBtn.title = g_lblNameObj.l_retry;
+	retryBtn.onclick = async () => {
+		if (!g_pseudoFullscreen || g_currentPage !== `main` || g_retryInProgress) return;
+		retryBtn.disabled = true;
+		try {
+			await executeRetry(`Retry`);
+		} finally {
+			retryBtn.disabled = false;
+		}
+	};
+
+	controls.appendChild(backBtn);
+	controls.appendChild(retryBtn);
+	document.body.appendChild(controls);
+	g_pseudoFullscreenControls = controls;
+
+	updatePseudoFullscreenControls();
 };
 
 /**
@@ -91,6 +186,8 @@ const fitPseudoFullscreen = () => {
 		exitBtn.style.left = wUnit(viewport.left + viewport.width - btnSize - margin);
 		exitBtn.style.top = wUnit(viewport.top + margin);
 	}
+
+	positionPseudoFullscreenControls();
 };
 
 /**
@@ -172,6 +269,8 @@ const enterPseudoFullscreen = () => {
 	exitBtn.onclick = () => exitPseudoFullscreen();
 	document.body.appendChild(exitBtn);
 
+	createPseudoFullscreenControls();
+
 	bindPseudoFullscreenEvents(frame);
 	fitPseudoFullscreen();
 
@@ -205,6 +304,8 @@ const exitPseudoFullscreen = () => {
 	document.documentElement.classList.remove(`danoni-pseudo-fullscreen`);
 	document.getElementById(`danoniPseudoFullscreenBackdrop`)?.remove();
 	document.getElementById(`danoniPseudoFullscreenExit`)?.remove();
+	g_pseudoFullscreenControls?.remove();
+	g_pseudoFullscreenControls = null;
 
 	if (g_pseudoFullscreenSavedScroll !== null) {
 		window.scrollTo(g_pseudoFullscreenSavedScroll.x, g_pseudoFullscreenSavedScroll.y);

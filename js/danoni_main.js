@@ -2433,6 +2433,7 @@ const clearWindow = (_customDisplayName = ``) => {
 
 	// 疑似フルスクリーン表示中は#canvas-frameの幅変更に追従
 	fitPseudoFullscreen();
+	updatePseudoFullscreenControls(_customDisplayName === `Main`);
 };
 
 /**
