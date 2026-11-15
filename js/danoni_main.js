@@ -139,6 +139,7 @@ const waitUntilLoaded = () => {
 		// ポインタ状態は画面や譜面の位置に関係なくクリアする。
 		if (document.hidden) {
 			resetRingPointers();
+			resetLaneTouch();
 		}
 		if (g_currentPage !== `main`) return;
 		if (g_scoreObj.baseFrame > g_scoreObj.lastFrame) return;
@@ -184,6 +185,10 @@ const g_preloadFiles = {
 
 // 矢印サイズ
 const C_ARW_WIDTH = 50;
+
+// タッチ判定の拡張幅 (見た目より広く判定する)
+const C_TOUCH_JUDGE_MARGIN_X = 50;
+const C_TOUCH_JUDGE_MARGIN_Y = 100;
 
 // ON/OFFスイッチ
 const C_FLG_ON = `ON`;
@@ -2357,6 +2362,9 @@ const clearWindow = (_customDisplayName = ``) => {
 		g_ringTouchCleanup?.();
 		g_ringTouchCleanup = null;
 	}
+	g_laneTouchCleanup?.();
+	g_laneTouchCleanup = null;
+	resetLaneTouch();
 	closeDisplayPreview();
 	resetKeyControl();
 	resetTransform();

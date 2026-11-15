@@ -65,6 +65,9 @@ const mainInit = () => {
 		stopRingKeepAlive();
 	}
 
+	// ステップゾーン周辺のタッチ判定
+	g_laneTouchCleanup = bindLaneTouch(divRoot);
+
 	// 判定系スプライトを作成（メインスプライトより上位）
 	const judgeSprite = createEmptySprite(divRoot, `judgeSprite`, mainCommonPos);
 	addTransform(`judgeSprite`, `main`,
@@ -587,7 +590,8 @@ const mainInit = () => {
 
 		OFF: () => {
 			for (let j = 0; j < keyNum; j++) {
-				if (g_workObj.keyCtrlN[j].find(key => keyIsDown(key)) === undefined) {
+				if (!g_touchLanes.has(j) &&
+					g_workObj.keyCtrlN[j].find(key => keyIsDown(key)) === undefined) {
 					$id(`stepDiv${j}`).display = C_DIS_NONE;
 				}
 			}
@@ -1638,10 +1642,11 @@ const mainInit = () => {
 		const currentFrame = g_scoreObj.frameNum;
 		lblframe.textContent = g_scoreObj.baseFrame;
 
-		// キーの押下状態を取得
+		// キー・タッチの押下状態を取得
 		for (let j = 0; j < keyNum; j++) {
+			const touchHold = g_touchLanes.has(j);
 			for (let m = 0; m < g_workObj.keyCtrlN[j].length; m++) {
-				g_workObj.keyHitFlg[j][m] = keyIsDown(g_workObj.keyCtrlN[j][m]);
+				g_workObj.keyHitFlg[j][m] = keyIsDown(g_workObj.keyCtrlN[j][m]) || touchHold;
 			}
 		}
 
@@ -2035,6 +2040,15 @@ const g_pointer = { x: 0, y: 0, valid: false, type: null, id: null };
 const g_touchPointers = new Map();
 let g_ringTouchCleanup = null;
 
+/** タッチ判定中のレーン */
+const g_touchLanes = new Set();
+
+/** タッチ判定用のポインタ状態 */
+const g_laneTouchPointers = new Map();
+
+/** タッチ判定リスナーの解除関数 */
+let g_laneTouchCleanup = null;
+
 /** デバイス待機防止用の維持音 */
 let g_ringKeepAlive = null;
 
@@ -2073,6 +2087,12 @@ const stopRingKeepAlive = () => {
 const resetRingPointers = () => {
 	g_pointer.valid = false;
 	g_touchPointers.clear();
+};
+
+// タッチ判定状態をクリア
+const resetLaneTouch = () => {
+	g_laneTouchPointers.clear();
+	g_touchLanes.clear();
 };
 
 // プレイ開始前に一度だけ登録する。
@@ -2206,6 +2226,113 @@ const bindRingPointer = _root => {
 	g_handler.addListener(_root, `pointerup`, release);
 	g_handler.addListener(_root, `pointercancel`, release);
 	g_handler.addListener(_root, `pointerleave`, leave);
+};
+
+/**
+ * ステップゾーン周辺のタッチ判定を登録
+ * - 見た目より広い範囲をタップ判定とする
+ * - 複数タッチに対応し、フリーズアローの押しっぱなしも扱う
+ * @param {HTMLDivElement} _root
+ * @returns {Function} 解除関数
+ */
+const bindLaneTouch = _root => {
+
+	/**
+	 * タップ位置に最も近いレーンを取得
+	 * @param {number} _x
+	 * @param {number} _y
+	 * @returns {number} レーン番号 (該当なしは-1)
+	 */
+	const getLaneAt = (_x, _y) => {
+		let targetLane = -1;
+		let minDist = Infinity;
+
+		for (let j = 0; j < g_workObj.keyCtrlN.length; j++) {
+			const stepRoot = document.getElementById(`stepRoot${j}`);
+			if (stepRoot === null) continue;
+
+			const rect = stepRoot.getBoundingClientRect();
+			if (rect.width <= 0 || rect.height <= 0) continue;
+
+			const halfW = rect.width / 2 + C_TOUCH_JUDGE_MARGIN_X;
+			const halfH = rect.height / 2 + C_TOUCH_JUDGE_MARGIN_Y;
+			const dx = _x - (rect.left + rect.width / 2);
+			const dy = _y - (rect.top + rect.height / 2);
+
+			if (Math.abs(dx) <= halfW && Math.abs(dy) <= halfH) {
+				const dist = (dx * dx) / (halfW * halfW) + (dy * dy) / (halfH * halfH);
+				if (dist < minDist) {
+					minDist = dist;
+					targetLane = j;
+				}
+			}
+		}
+		return targetLane;
+	};
+
+	/**
+	 * キーボード・タッチともに押されていない場合に空押し表示を消す
+	 * @param {number} _j
+	 */
+	const hideStepDiv = _j => {
+		if (g_touchLanes.has(_j) ||
+			g_workObj.keyCtrlN[_j]?.find(key => keyIsDown(key)) !== undefined) {
+			return;
+		}
+		const stepDiv = document.getElementById(`stepDiv${_j}`);
+		if (stepDiv !== null) {
+			stepDiv.style.display = C_DIS_NONE;
+		}
+	};
+
+	const onDown = evt => {
+		if (evt.pointerType !== `touch` && evt.pointerType !== `pen`) return;
+		if (g_currentPage !== `main` || g_stateObj.autoAll !== C_FLG_OFF) return;
+		if (_root.classList.contains(`gamePaused`)) return;
+		if (g_laneTouchPointers.has(evt.pointerId)) return;
+		if (!(evt.target instanceof Element) || !_root.contains(evt.target) ||
+			evt.target.closest(`.button_common, button, input, select, textarea, a[href], [role="button"]`)) {
+			return;
+		}
+
+		const lane = getLaneAt(evt.clientX, evt.clientY);
+		if (lane < 0) return;
+
+		evt.preventDefault();
+		g_laneTouchPointers.set(evt.pointerId, lane);
+		g_touchLanes.add(lane);
+
+		if (!g_judgObj.lockFlgs[lane]) {
+			g_judgObj.lockFlgs[lane] = true;
+			judgeArrow(lane);
+			g_judgObj.lockFlgs[lane] = false;
+		}
+	};
+
+	const onEnd = evt => {
+		const lane = g_laneTouchPointers.get(evt.pointerId);
+		if (lane === undefined) return;
+
+		g_laneTouchPointers.delete(evt.pointerId);
+		if (!Array.from(g_laneTouchPointers.values()).includes(lane)) {
+			g_touchLanes.delete(lane);
+			hideStepDiv(lane);
+		}
+	};
+
+	const listenerIds = [
+		g_handler.addListener(_root, `pointerdown`, onDown, { passive: false }),
+		g_handler.addListener(document, `pointerup`, onEnd, true),
+		g_handler.addListener(document, `pointercancel`, onEnd, true),
+		g_handler.addListener(document, `lostpointercapture`, onEnd, true),
+	];
+	_root.style.touchAction = `none`;
+
+	return () => {
+		listenerIds.forEach(id => g_handler.removeListener(id));
+		resetLaneTouch();
+		_root.style.touchAction = ``;
+	};
 };
 
 /**
