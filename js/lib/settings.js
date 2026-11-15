@@ -4366,7 +4366,7 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 
 		// 2. 【最重要】スケール逆算して、縮小空間内の移動量に変換
 		//    疑似フルスクリーン時は祖先要素の拡縮率も加味する
-		const totalScale = scale * getPseudoFullscreenScale();
+		const totalScale = scale * g_pseudoFullscreen.getScale();
 		const dx = mouseDx / totalScale;
 		const dy = mouseDy / totalScale;
 

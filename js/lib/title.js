@@ -334,7 +334,7 @@ const titleInit = (_initFlg = false) => {
 
 		// 疑似フルスクリーン
 		createCss2Button(`btnFullscreen`, g_emojiObj.expand, () => {
-			togglePseudoFullscreen();
+			g_pseudoFullscreen.toggle();
 		}, g_lblPosObj.btnFullscreen, g_cssObj.button_Start),
 
 		// ヘルプ
