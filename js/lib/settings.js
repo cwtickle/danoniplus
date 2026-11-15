@@ -2320,11 +2320,11 @@ const isLongHelp = _msg =>
  * 詳細ヘルプ内でプレビューを出す設定
  * - キー名は g_stateObj のキー名 (選択肢は g_settings[`${key}s`] を使用)
  * - splitLayer: 右半分のレーンを逆スクロール(レイヤー1)側に配置する
- * - currentKey: サンプルキーではなく実際のキーに合わせてマッピングする
- *               (StepArea, Swappingは実際のキーには非対応)
+ * - currentKey: サンプルキーではなく実際のキーに合わせてマッピングする (StepAreaは実際のキーには非対応)
  * - shuffle   : 選択中のキーのシャッフルグループを使い、元レーンの流れ込み先を表示する
  * - frzUse    : サンプルでフリーズアローを使用するかどうか
  * - sub       : 派生する設定 (Typeなど)。選択肢の列を2列目に追加する
+ * - keyLabel  : 対応するキーの表示（実際のキー限定）
  * - ring      : リングのプレビューを出す
  * - withRing  : リングノートがある譜面では、矢印のプレビューにリングも重ねて表示する
  */
@@ -2338,7 +2338,8 @@ const g_helpPreviewDefs = {
 	shaking: { splitLayer: true, withRing: true },
 	frzReturn: { sub: `frzReturnType` },
 	effect: { frzUse: true, splitLayer: true, withRing: true },
-	swapping: { frzUse: true },
+	camoufrage: { currentKey: true, frzUse: true, sub: `camoufrageType`, keyLabel: true },
+	swapping: { currentKey: true, frzUse: true, keyLabel: true },
 	ringSpeed: { ring: true },
 	ringGuide: { ring: true },
 };
@@ -2355,17 +2356,6 @@ const g_helpStepAreaLayouts = {
 	'R-Mismatched': [0, 0, 1, 1],
 	'X-Flower': [0, 0, 2, 2],
 	'Alt-Crossing': [0, 2, 0, 2],
-};
-
-/**
- * Swappingプレビュー用のレーン配置
- */
-const g_helpSwappingLayouts = {
-	OFF: [0, 1, 2, 3],
-	InnerSwap: [0, 2, 1, 3],
-	OuterSwap: [3, 1, 2, 0],
-	Mirror: [3, 2, 1, 0],
-	'Mirror+': [3, 2, 1, 0],
 };
 
 /** プレビューの停止処理 (プレビュー表示中のみ差し替わる) */
@@ -2417,6 +2407,11 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		visibleLanes.push(...Array(laneNum).keys());   // 該当レーンが無い場合は全て表示
 		laneVisible.fill(true);
 	}
+
+	// Swapping: ゲーム側と同じく、キースイッチで非表示のレーンも含めたシャッフルグループ
+	const swapMap = {};
+	(g_keyObj[`shuffle${keyCtrlPtn}`] ?? fillArray(laneNum)).forEach((val, j) => (swapMap[val] ??= []).push(j));
+	const swapGroups = Object.values(swapMap);
 
 	// Shuffle: 選択中のキー・パターンのシャッフルグループ (prepareScoreData の g_workObj.shuffleGroupMap と同じ作り方)
 	const shuffleFlg = def.shuffle === true;
@@ -2503,18 +2498,50 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		? (g_keyObj[`stepRtn${keyCtrlPtn}`] ?? Array(laneNum).fill(0))
 		: [0, -90, 90, 180];
 	let rtnOffset = 0;   // SideScroll時はゲーム側と同様に矢印を90度回転する
-	// 矢印名 (onigiri等の文字列) は加算しない
-	const getRtn = j => rtnOffset === 0 ? baseRtns[j] : baseRtns[j] + rtnOffset;
-	const colors = useKey
-		? (g_keyObj[`color${keyCtrlPtn}`] ?? []).map(c => g_headerObj.setColor?.[c] ?? g_dfColorObj.setColorType1[c] ?? `#ffffff`)
-		: [0, 1, 3, 4].map(j => g_dfColorObj.setColorType1[j]);
+	// 数値は加算、AA名("onigiri" や "giko:90")は :角度 として加算 (ゲーム側 rotateBy と同じ)
+	const addRtn = (val, delta) => {
+		if (delta === 0) return val;
+		if (Number.isFinite(Number(val))) return Number(val) + delta;
+		const [type, deg = `0`] = String(val).split(`:`);
+		return `${type}:${Number(deg) + delta}`;
+	};
+	const getRtn = (j, delta = 0) => addRtn(baseRtns[j], rtnOffset + delta);
+	const colorIdx = useKey ? (g_keyObj[`color${keyCtrlPtn}`] ?? []) : [0, 1, 3, 4];
+	const colors = colorIdx.map(c => useKey
+		? (g_headerObj.setColor?.[c] ?? g_dfColorObj.setColorType1[c] ?? `#ffffff`)
+		: g_dfColorObj.setColorType1[c]);
+
+	// Camoufrage: 位置 j に見せる元レーン (ゲーム側 randArray と同じ向き)。選択肢ごとに再抽選
+	const camoUse = _key === `camoufrage`;
+	let camoMode = C_FLG_OFF;
+	let camoPerm = [...Array(laneNum).keys()];
+	const makeCamoPerm = () => {
+		const perm = [...Array(laneNum).keys()];
+		if (visibleLanes.length < 2) return perm;
+		let tries = 0;
+		do {
+			const arr = visibleLanes.concat();
+			for (let i = arr.length - 1; i > 0; i--) {
+				const r = Math.floor(Math.random() * (i + 1));
+				[arr[i], arr[r]] = [arr[r], arr[i]];
+			}
+			visibleLanes.forEach((lane, i) => perm[lane] = arr[i]);
+		} while (visibleLanes.every(lane => perm[lane] === lane) && ++tries < 10);
+		return perm;
+	};
+	const camoOn = type => camoUse && camoMode !== C_FLG_OFF && camoMode.includes(type);
+	const stepSrc = j => camoOn(`Step`) ? camoPerm[j] : j;
+	const arrowSrc = j => camoOn(`Arrow`) ? camoPerm[j] : j;
+	const colorSrc = j => camoOn(`Color`) ? camoPerm[j] : j;
+	const frzColorOf = j => (camoUse || _key === `swapping`)
+		? (g_dfColorObj.frzColorType1[colorIdx[colorSrc(j)]] ?? g_dfColorObj.frzColorType1[0])
+		: g_dfColorObj.frzColorType1[0];
 	const laneX = j => Math.round(laneOffsets[j] + (playW - C_ARW_WIDTH) / 2);
-	const getLaneInfo = laneIdxs => laneIdxs.map(j => ({ x: laneX(j), layer: 0, dir: 1, stepTop: stepY }));
+	const getLaneInfo = xs => xs.map(x => ({ x, layer: 0, dir: 1, stepTop: stepY }));
 
 	// レーンの配置 (layer / dir / stepTop は assignLanes で設定)
-	let laneInfo = getLaneInfo([...Array(laneNum).keys()]);
-	let stepElms = laneInfo.map((lane, j) =>
-		createColorObject2(`pvStep${j}`, { x: lane.x, y: stepY, rotate: getRtn(j) }, g_cssObj.main_stepDefault));
+	let laneInfo = getLaneInfo([...Array(laneNum).keys()].map(laneX));
+	let stepElms = [];
 
 	// ヒットモーション用の要素 (ゲーム側の stepHit と同じ位置・大きさ)
 	const hitPos = g_lblPosObj.stepHit;
@@ -2522,7 +2549,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const makeHitElms = () => laneInfo.map((lane, j) => createColorObject2(`pvStepHit${j}`, {
 		...hitPos, x: lane.x + hitPos.x, y: stepY + hitPos.y, rotate: getRtn(j), styleName: `StepHit`, opacity: 0,
 	}, g_cssObj.main_stepDefault));
-	let hitElms = makeHitElms();
+	let hitElms = [];   // applyOption → assignSwapping で生成
 
 	// フリーズアローのヒット表示 (ゲーム側の frzHit と同じ構成。先頭の矢印位置のみ光らせる)
 	const frzHitFrames = 20;
@@ -2532,29 +2559,32 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		const root = createEmptySprite(frzHitSprites[0], `pvFrzHit${j}`, {
 			x: lane.x, y: stepY, w: C_ARW_WIDTH, h: C_ARW_WIDTH, opacity: 0,
 		});
-		if (isNaN(parseFloat(baseRtns[j]))) {
+		if (isNaN(parseFloat(baseRtns[arrowSrc(j)]))) {
 			multiAppend(root,
-				createColorObject2(`pvFrzHitShadow${j}`, { rotate: getRtn(j), styleName: `Shadow` }, g_cssObj.main_objShadow),
-				createColorObject2(`pvFrzHitTop${j}`, { background: frzHitColor, rotate: getRtn(j) }),
+				createColorObject2(`pvFrzHitShadow${j}`, { rotate: getRtn(arrowSrc(j)), styleName: `Shadow` }, g_cssObj.main_objShadow),
+				createColorObject2(`pvFrzHitTop${j}`, { background: frzHitColor, rotate: getRtn(arrowSrc(j)) }),
 			);
 		} else {
 			root.appendChild(createColorObject2(`pvFrzHitTop${j}`, {
-				...g_lblPosObj.frzHitTop, rotate: getRtn(j), styleName: `Shadow`,
+				...g_lblPosObj.frzHitTop, rotate: getRtn(arrowSrc(j)), styleName: `Shadow`,
 			}, g_cssObj.main_frzHitTop));
 		}
 		return root;
 	});
-	let frzHitElms = makeFrzHitElms();
+	let frzHitElms = [];
 
-	const assignSwapping = _option => {
-		laneInfo = getLaneInfo(g_helpSwappingLayouts[_option] ?? [...Array(laneNum).keys()]);
+	const assignSwapping = (_xs, _swapOpt = C_FLG_OFF) => {
+		laneInfo = getLaneInfo(_xs);
 		laneInfo.forEach((lane, j) => {
 			document.getElementById(`pvStep${j}`)?.remove();
 			document.getElementById(`pvStepHit${j}`)?.remove();
 			document.getElementById(`pvFrzHit${j}`)?.remove();
 		});
-		stepElms = laneInfo.map((lane, j) =>
-			createColorObject2(`pvStep${j}`, { x: lane.x, y: stepY, rotate: getRtn(j) }, g_cssObj.main_stepDefault));
+		// 位置が入れ替わったステップゾーンは、ゲーム側と同じ配色 (Mirror+: Shobon, それ以外: Matari)
+		stepElms = laneInfo.map((lane, j) => {
+			const cls = lane.x === laneX(j) ? `Default` : (_swapOpt === `Mirror+` ? `Shobon` : `Matari`);
+			return createColorObject2(`pvStep${j}`, { x: lane.x, y: stepY, rotate: getRtn(stepSrc(j)) }, g_cssObj[`main_step${cls}`]);
+		});
 		hitElms = makeHitElms();
 		frzHitElms = makeFrzHitElms();
 	};
@@ -2589,6 +2619,43 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 			((laneLower[j] ? 1 : 0) + (dirs[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)) % 2);
 	};
 
+	/** 各レーンのステップゾーンX座標 (Swapping: getSwappingStyle で入れ替え、Mirror+: 全体を左右反転) */
+	const getLaneXs = opt => {
+		const base = [...Array(laneNum).keys()].map(laneX);
+		if (opt === `Mirror+`) {
+			return base.map(x => playW - C_ARW_WIDTH - x);
+		}
+		if (!g_settings.swappingSubs.includes(opt)) {
+			return base;
+		}
+		const [styleDf, styleTrans] = getSwappingStyle(swapGroups, getScrollLayout(g_stateObj.scroll), opt);
+		const xs = base.concat();
+		styleTrans.forEach((group, i) => group.forEach((lane, k) => xs[lane] = base[styleDf[i][k]]));
+		return xs;
+	};
+
+	/**
+	 * 各ステップゾーン付近のキー名 (Swapping/Camoufrage: どのキーを押すかを示す)
+	 * - レーンのレイヤーに置くので、layerTrans や StepArea の移動・回転にも追従する
+	 * - 矢印はステップゾーンの手前側 (出現側) から来るため、その反対側に置く
+	 */
+	let keyLblElms = [];
+	const makeKeyLabels = () => {
+		keyLblElms.forEach(elm => elm.remove());
+		keyLblElms = [];
+		if (!def.keyLabel) return;
+		laneInfo.forEach((lane, j) => {
+			if (!laneVisible[j]) return;
+			const keyName = (g_kCd[g_keyObj[`keyCtrl${keyCtrlPtn}`]?.[j]?.[0]] ?? ``).split(` `).join(``);
+			const lbl = createDivCss2Label(`pvKey${j}`, keyName, {
+				x: lane.x, y: lane.dir === 1 ? lane.stepTop - 16 : lane.stepTop + C_ARW_WIDTH + 2,
+				w: C_ARW_WIDTH, h: 14, siz: 16, opacity: 0.85,
+			});
+			layerSprites[lane.layer].appendChild(lbl);
+			keyLblElms.push(lbl);
+		});
+	};
+
 	// Shuffle: 元レーンの見出し (キーコンフィグと同様にグループ番号を表示)。ノーツ出現時に該当レーンを光らせる
 	const srcIdleOpacity = 0.5;
 	const srcFlash = fillArray(laneNum);
@@ -2599,7 +2666,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		return createDivCss2Label(`pvSrc${j}`, `${shuffleVals[j] + 1}`, {
 			x: laneX(j), y: (g_stateObj.scroll.endsWith(`Flat`) && scrollDir[j] !== orgScrollDir[j] ? 28 : 0) +
 				(scrollDir[j] % 2 === 0 ? 10 : playH - 60),
-			w: C_ARW_WIDTH, h: 24, siz: 24, opacity: srcIdleOpacity,
+			w: C_ARW_WIDTH, h: 24, siz: 20, opacity: srcIdleOpacity,
 			color, border: `2px solid ${color}`, boxSizing: `border-box`, lineHeight: `20px`, fontWeight: `bold`,
 			visibility: laneVisible[j] ? `visible` : `hidden`,
 		});
@@ -2639,12 +2706,14 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const frz = { seq: null, seqNo: 0, axes: [], start: 0, next: 0 };
 
 	/** layerTrans: ゲーム側 mainInit / getArrowSettings と同じ添字・Reverse反転でレイヤーへ適用 */
-	const applyLayerTrans = () => {
+	const applyLayerTrans = opt => {
 		if (layerTransList.length === 0) return;
 		const revFlg = g_stateObj.reverse === C_FLG_ON;
-		const list = revFlg
-			? layerTransList.map(val => invertSpecificTransforms(val, [`translateX`]))
-			: layerTransList;
+		const mirrorY = _key === `swapping` && opt === `Mirror+`;
+		const list = layerTransList.map(val => {
+			let v = revFlg ? invertSpecificTransforms(val, [`translateX`]) : val;
+			return mirrorY ? invertSpecificTransforms(v, [`translateY`]) : v;
+		});
 		for (let j = 0; j < layerCnt; j++) {
 			const transj = j % layerNumDf;
 			const trans = list[Math.floor(transj / 2) * 2 + (transj + Number(revFlg)) % 2];
@@ -2876,7 +2945,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const applyOption = opt => {
 		selected = opt;
 		resetTransforms();
-		applyLayerTrans();
+		applyLayerTrans(opt);
 		clearNotes();
 		ringPv?.clear();
 		if (shuffleFlg) {
@@ -2884,36 +2953,29 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 			recentLanes = [];
 			noteCnt = 0;   // 元レーンの掃引を先頭から始める
 		}
+		camoMode = camoUse ? opt : C_FLG_OFF;
+		if (camoUse) {
+			camoPerm = makeCamoPerm();
+		}
 		effectCls = _key === `effect` ? getEffectClasses(opt) : { arrow: ``, frz: ``, frzArrow: ``, ring: `` };
 
-		assignSwapping(_key === `swapping` ? opt : null);
+		// SideScrollのみ矢印を90度回転 (ステップ生成より前に決める)
+		rtnOffset = (_key === `playWindow` && opt === `SideScroll` && g_stateObj.rotateEnabled)
+			? 90 * (subSelected === C_FLG_REVERSE2 ? -1 : 1) : 0;
+		const swapOpt = _key === `swapping` ? opt : C_FLG_OFF;
+		assignSwapping(getLaneXs(swapOpt), swapOpt);
 		// レーンのレイヤー配置 (StepAreaは選択肢ごと、Shakingは右半分を逆スクロール側へ)
 		assignLanes((g_helpPreviewDefs[_key]?.currentKey ? getScrollLayout(_key === `scroll` ? opt : g_stateObj.scroll) : null)
 			?? (_key === `stepArea` ? g_helpStepAreaLayouts[opt] : null)
 			?? (def.splitLayer ? [0, 0, 1, 1] : [0, 0, 0, 0])
 				.map(val => g_stateObj.reverse === C_FLG_OFF ? val : val ^ 1));
+		makeKeyLabels();
 		applyFlat(opt);
 		if (_key === `stepArea`) {
 			runStepArea(opt);
 		}
 		if (_key === `appearance`) {
 			applyAppearance(opt);
-		}
-
-		// SideScrollのみ矢印を90度回転 (ゲーム側の changeStepRtn と同じ符号)
-		rtnOffset = (_key === `playWindow` && opt === `SideScroll` && g_stateObj.rotateEnabled)
-			? 90 * (subSelected === C_FLG_REVERSE2 ? -1 : 1) : 0;
-		if (g_stateObj.rotateEnabled) {
-			laneInfo.forEach((lane, j) => {
-				if (typeof getRtn(j) === `number`) {
-					document.getElementById(`pvStep${j}`).style.transform = `rotate(${getRtn(j)}deg)`;
-					hitElms[j].style.transform = `rotate(${getRtn(j)}deg)`;
-					const frzHitTop = document.getElementById(`pvFrzHitTop${j}`);
-					if (frzHitTop !== null) {
-						frzHitTop.style.transform = `rotate(${getRtn(j)}deg)`;
-					}
-				}
-			});
 		}
 
 		// Motion用の加算フレーム数計算
@@ -2985,20 +3047,23 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		if (!frzFlg) {
 			// Shuffle: 色は元レーンのグループ色 (どのグループから来たかを見せる)、矢印の向きは着地レーン側 (ゲームと同じ)
 			sub.appendChild(createColorObject2(`pvNoteTop${noteCnt}`, {
-				background: shuffleFlg ? getGroupColor(src) : colors[j], rotate: getRtn(j),
+				background: shuffleFlg ? getGroupColor(src) : colors[colorSrc(j)], rotate: getRtn(arrowSrc(j)),
 			}));
 			addEffect(sub, effectCls.arrow);
 		} else {
-			const [normalColor, barColor] = g_dfColorObj.frzColorType1[0];
+			const [normalColor, barColor] = frzColorOf(j);
+			// CamoufrageType: FrzArrow は帯を隠し、矢印を180度回転して表示 (ゲーム側と同じ)
+			const frzCamo = camoUse && subSelected === `FrzArrow`;
+			const frzRtn = getRtn(arrowSrc(j), frzCamo && g_stateObj.rotateEnabled ? 180 : 0);
 			const makeArrowRoot = (_name, _y) => {
 				const root = createEmptySprite(sub, `pv${_name}Root${noteCnt}`, { x: 0, y: _y, w: C_ARW_WIDTH, h: C_ARW_WIDTH });
-				root.appendChild(createColorObject2(`pv${_name}${noteCnt}`, { background: normalColor, rotate: getRtn(j) }));
+				root.appendChild(createColorObject2(`pv${_name}${noteCnt}`, { background: normalColor, rotate: frzRtn }));
 				addEffect(root, effectCls.frzArrow);
 				return root;
 			};
 			sub.appendChild(createColorObject2(`pvBar${noteCnt}`, {
 				x: 5, y: C_ARW_WIDTH / 2 + (lane.dir === 1 ? 0 : -len), w: C_ARW_WIDTH - 10,
-				h: len, background: barColor, styleName: `frzBar`, opacity: 0.75,
+				h: len, background: frzCamo ? `#00000000` : barColor, styleName: `frzBar`, opacity: 0.75,
 			}));
 			makeArrowRoot(`Top`, 0);
 			makeArrowRoot(`Btm`, lane.dir === 1 ? len : -len);
