@@ -2628,6 +2628,33 @@ const invertSpecificTransforms = (cssString, exceptList = []) => {
 }
 
 /**
+ * Swappingの並べ替え結果の作成 (副作用なし)
+ * - 上下でステップゾーンが分かれている場合は、分離して入れ替える
+ * @param {number[][]} _shuffleGroup
+ * @param {number[]} _dividePos レーンごとのレイヤー番号 (g_workObj.dividePos)
+ * @param {string} _swapping
+ * @returns {[number[][], number[][]]} [入れ替え前, 入れ替え後] (同じ添字が対応。後者のレーンが前者の位置へ移る)
+ */
+const getSwappingStyle = (_shuffleGroup, _dividePos, _swapping) => {
+	const styleTrans = _shuffleGroup.flatMap(arr => {
+		const groups = {};
+		arr.forEach(n => (groups[_dividePos[n]] ??= []).push(n));
+		return Object.values(groups);
+	});
+	const styleTransDf = structuredClone(styleTrans);
+
+	if (_swapping === `Mirror` || _swapping === `OuterSwap`) {
+		styleTrans.forEach(group => group.reverse());
+	}
+	if (_swapping.endsWith(`Swap`)) {
+		// グループの内側だけ入れ替える
+		styleTrans.forEach((group, i) =>
+			g_settings.swapPattern.forEach(val => swapGroupNums(styleTrans, group, i, val)));
+	}
+	return [styleTransDf, styleTrans];
+};
+
+/**
  * メイン画面前の初期化処理
  */
 const getArrowSettings = (_retryFlg = false) => {
@@ -2813,35 +2840,9 @@ const getArrowSettings = (_retryFlg = false) => {
 	}
 	if (g_settings.swappingSubs.includes(g_stateObj.swapping)) {
 
-		// Swappingにおけるグループ単位での入れ替えでは、上下でステップゾーンが分かれている場合は分離してシャッフルする
-		let _style = structuredClone(Object.values(g_workObj.shuffleGroupMap));
-		const _styleTrans = _style.flatMap(arr => {
-			// g_workObj.devidePosの値ごとにグループ化する
-			const groups = {};
+		const [_styleTransDf, _styleTrans] = getSwappingStyle(
+			Object.values(g_workObj.shuffleGroupMap), g_workObj.dividePos, g_stateObj.swapping);
 
-			arr.forEach(n => {
-				const div = g_workObj.dividePos[n];
-				if (!groups[div]) groups[div] = [];
-				groups[div].push(n);
-			});
-
-			// groups は {0:[...], 1:[...], 2:[...]} のような形になるので
-			// これを配列に変換して返す
-			return Object.values(groups);
-		});
-		const _styleTransDf = structuredClone(Object.values(_styleTrans));
-
-		if (g_stateObj.swapping === `Mirror` || g_stateObj.swapping === `OuterSwap`) {
-			_styleTrans.map(_group => _group.reverse());
-		}
-		if (g_stateObj.swapping.endsWith(`Swap`)) {
-			// グループの内側だけ入れ替える
-			_styleTrans.forEach((group, i) => {
-				g_settings.swapPattern.forEach(val => {
-					swapGroupNums(_styleTrans, group, i, val);
-				});
-			});
-		}
 		// オリジナルと同一の場合、設定をOFFに戻す
 		if (JSON.stringify(_styleTransDf) === JSON.stringify(_styleTrans)) {
 			g_stateObj.swapping = C_FLG_OFF;
