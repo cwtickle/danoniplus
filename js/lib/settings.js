@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/11/14 (v52.6.1)
+ * Revised : 2026/11/15 (v52.6.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -2590,10 +2590,13 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const srcIdleOpacity = 0.5;
 	const srcFlash = fillArray(laneNum);
 	const scrollDir = getScrollLayout(g_stateObj.scroll);
+	const orgScrollDir = getScrollLayout(g_settings.scrolls[0]);
 	const srcElms = shuffleFlg ? [...Array(laneNum).keys()].map(j => {
 		const color = getGroupColor(j);
 		return createDivCss2Label(`pvSrc${j}`, `${shuffleVals[j] + 1}`, {
-			x: laneX(j), y: scrollDir[j] % 2 === 0 ? 20 : playH - 40, w: C_ARW_WIDTH, h: 28, siz: 24, opacity: srcIdleOpacity,
+			x: laneX(j), y: (g_stateObj.scroll.endsWith(`Flat`) && scrollDir[j] !== orgScrollDir[j] ? 28 : 0) +
+				(scrollDir[j] % 2 === 0 ? 10 : playH - 60),
+			w: C_ARW_WIDTH, h: 24, siz: 24, opacity: srcIdleOpacity,
 			color, border: `2px solid ${color}`, boxSizing: `border-box`, lineHeight: `20px`, fontWeight: `bold`,
 			visibility: laneVisible[j] ? `visible` : `hidden`,
 		});
@@ -2816,7 +2819,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const applyFlat = opt => {
 		flatElms.forEach(elm => elm.remove());
 		flatElms = [];
-		const flatFlg = _key === `scroll` && opt.endsWith(`Flat`);
+		const flatFlg = g_helpPreviewDefs[_key]?.currentKey && (_key === `scroll` ? opt : g_stateObj.scroll).endsWith(`Flat`);
 		stepElms.forEach((elm, j) => elm.style.display = (flatFlg || !laneVisible[j]) ? C_DIS_NONE : ``);
 		if (!flatFlg) return;
 
