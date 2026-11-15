@@ -855,6 +855,7 @@ const getSelectedSettingList = (_orgShuffleFlg) => {
 		withOptions(g_stateObj.playWindow, `Default`,
 			`${getStgDetailName(g_stateObj.playWindowType === C_FLG_REVERSE2 ? `R-` : ``)}${getStgDetailName(g_stateObj.playWindow)}`),
 		withOptions(g_stateObj.stepArea, `Default`),
+		withOptions(g_stateObj.laneSpread ?? `Normal`, `Normal`, `Lane:${getStgDetailName(g_stateObj.laneSpread ?? `Normal`)}`),
 		withOptions(g_stateObj.frzReturn, C_FLG_OFF,
 			`FR:${getStgDetailName(g_stateObj.frzReturn)}(${getStgDetailName(g_stateObj.frzReturnType)})`),
 		withOptions(g_stateObj.shaking, C_FLG_OFF),

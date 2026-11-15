@@ -190,6 +190,10 @@ const C_ARW_WIDTH = 50;
 const C_TOUCH_JUDGE_MARGIN_X = 50;
 const C_TOUCH_JUDGE_MARGIN_Y = 100;
 
+// レーン間隔の拡張設定
+const C_LANE_SPREAD_MARGIN = 10;
+const C_LANE_SPREAD_RATIOS = { Normal: 0, Wide: 0.5, Wider: 0.9 };
+
 // ON/OFFスイッチ
 const C_FLG_ON = `ON`;
 const C_FLG_OFF = `OFF`;
@@ -446,6 +450,40 @@ const boolToSwitch = _condition => _condition ? C_FLG_ON : C_FLG_OFF;
  * @returns {string}
  */
 const wUnit = (_val, _unitName = `px`) => `${_val}${_unitName}`;
+
+/**
+ * レーン間隔の拡張倍率を取得
+ * - Wide / Wider は、外側のステップゾーンが画面端に収まる範囲で自動調整する
+ * @param {string} _keyCtrlPtn キー制御パターン
+ * @param {number} _width 対象の横幅 (プレイ画面の横幅)
+ * @returns {number} 拡張倍率 (Normal: 1)
+ */
+const getLaneSpreadRate = (_keyCtrlPtn, _width) => {
+	const ratio = C_LANE_SPREAD_RATIOS[g_stateObj.laneSpread] ?? 0;
+	if (ratio <= 0) return 1;
+
+	const posList = g_keyObj[`pos${_keyCtrlPtn}`];
+	const blank = g_keyObj.blank;
+	if (!(_width > 0) || !Array.isArray(posList) || posList.length === 0 || !(blank > 0)) return 1;
+
+	const divideCnt = g_keyObj[`div${_keyCtrlPtn}`] - 1;
+	if (!Number.isFinite(divideCnt)) return 1;
+	const posMax = g_keyObj[`divMax${_keyCtrlPtn}`] ?? Math.max(...posList) + 1;
+	const stdPosList = posList.map(posj =>
+		posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2);
+	const minStdPos = Math.min(...stdPosList);
+	const maxStdPos = Math.max(...stdPosList);
+	if (minStdPos >= 0 && maxStdPos <= 0) return 1;
+
+	const center = (_width - C_ARW_WIDTH) / 2;
+	const leftLimit = minStdPos < 0
+		? (center - C_LANE_SPREAD_MARGIN) / (-blank * minStdPos) : Infinity;
+	const rightLimit = maxStdPos > 0
+		? (_width - C_LANE_SPREAD_MARGIN - C_ARW_WIDTH - center) / (blank * maxStdPos) : Infinity;
+	const maxRate = Math.max(1, Math.min(leftLimit, rightLimit));
+
+	return 1 + (maxRate - 1) * ratio;
+};
 
 /**
  * ブール値への変換

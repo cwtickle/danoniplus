@@ -1333,6 +1333,7 @@ const g_stateObj = {
     excessiveScoreId: 0,
     adjustment: 0,
     hitPosition: 0,
+    laneSpread: `Normal`,
     fadein: 0,
     volume: 100,
 
@@ -1494,7 +1495,7 @@ const g_settings = {
         customKey: 0,
         others: 0,
     },
-    environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`, `ringSpeed`, `ringGuide`,
+    environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`, `laneSpread`, `ringSpeed`, `ringGuide`,
         `arrowJdgX`, `arrowJdgY`, `frzJdgX`, `frzJdgY`, `shortcutX`, `shortcutY`],
     keyStorages: [`reverse`, `keyCtrl`, `keyCtrlPtn`, `shuffle`, `color`, `stepRtn`, `shortcut`],
     colorStorages: [`setColor`, `setShadowColor`, `frzColor`, `frzShadowColor`],
@@ -1541,6 +1542,9 @@ const g_settings = {
     hitPositions: [...Array(g_limitObj.hitPosition * 20 + 1).keys()].map(i => (i - g_limitObj.hitPosition * 10) / 10),
     hitPositionNum: g_limitObj.hitPosition * 10,
     hitPositionTerms: [50, 10],
+
+    laneSpreads: [`Normal`, `Wide`, `Wider`],
+    laneSpreadNum: 0,
 
     ringSpeeds: makeSpeedList(g_limitObj.minRingSpeed, g_limitObj.maxRingSpeed),
     ringSpeedNum: 0,
@@ -2503,7 +2507,7 @@ let g_displays = [`stepZone`, `judgment`, `lifeGauge`, `score`, `musicInfo`, `fi
     `velocity`, `color`, `background`, `arrowEffect`, `special`];
 
 // ローカルストレージ保存対象
-let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`, `ringSpeed`, `ringGuide`];
+let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`, `laneSpread`, `ringSpeed`, `ringGuide`];
 
 // 廃棄対象のリスト(過去の登録対象をリスト化。ここに乗せるとローカルストレージから自動消去される)
 let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
@@ -4820,6 +4824,7 @@ const g_lblNameObj = {
     b_precond: `Precondition`,
     b_keyLock: `KeyLock`,
     b_kbLane: `Group Color`,
+    LaneSpread: `LaneSpread`,
 
     Difficulty: `Difficulty`,
     Speed: `Speed`,
@@ -5218,6 +5223,7 @@ const g_lang_lblNameObj = {
  */
 const g_msgObj = {
     reload: `説明文の言語を変更します。\nChange the language of the description.`,
+    laneSpread: `レーン間隔をNormal / Wide / Widerの3段階で変更します。\nWide / Widerはプレイ可能な余白に合わせて自動調整されます。`,
 };
 
 /**
@@ -5228,11 +5234,12 @@ const g_lang_msgObj = {
     Ja: {
         howto: `ゲーム画面の見方や設定の詳細についてのページへ移動します（GitHub Wiki）。`,
         fullscreen: `画面いっぱいに表示します（疑似フルスクリーン）。`,
+        laneSpread: `レーン間隔をNormal / Wide / Widerの3段階で変更します。\nWide / Widerはプレイ可能な余白に合わせて自動調整されます。`,
         dataReset: `この作品で保存されているハイスコアや\nAdjustment情報等をリセットします。`,
         github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
         security: `Dancing☆Onigiri (CW Edition)のサポート情報ページへ移動します。`,
 
-        environment: `以下の設定を初期化します。\n  - Adjustment, Volume, ColorType, Appearance, Opacity, HitPosition, 判定キャラクタ位置, ショートカット表示位置`,
+        environment: `以下の設定を初期化します。\n  - Adjustment, Volume, ColorType, Appearance, Opacity, HitPosition, LaneSpread, 判定キャラクタ位置, ショートカット表示位置`,
         highscores: `全譜面のハイスコアを初期化します。\n個別に初期化したい場合はSettings画面より行ってください。`,
         customKey: `カスタムキーに関する全ての保存データを消去します。\n下記のKeyDataから個別に消去可能できないときに使用してください。`,
         others: `標準以外に関する保存データを消去します。`,
@@ -5419,11 +5426,12 @@ const g_lang_msgObj = {
     En: {
         howto: `Go to the page about the game screen and settings at GitHub Wiki.`,
         fullscreen: `Display the game in pseudo full screen.`,
+        laneSpread: `Changes the lane spacing in three levels: Normal / Wide / Wider.\nWide and Wider are automatically adjusted to fit the available play area.`,
         dataReset: `Resets the high score, adjustment information, etc. saved in this game.`,
         github: `Go to the GitHub page of Dancing Onigiri "CW Edition".`,
         security: `Go to the support information page for Dancing Onigiri "CW Edition".`,
 
-        environment: `Initialize settings below:\n  - Adjustment, Volume, ColorType, Appearance, Opacity, HitPosition, judgment character positions and shortcut display position.`,
+        environment: `Initialize settings below:\n  - Adjustment, Volume, ColorType, Appearance, Opacity, HitPosition, LaneSpread, judgment character positions and shortcut display position.`,
         highscores: `Initializes the high score of all charts. \nIf you want to initialize each chart individually, \nplease do so from the Highscore view in the Settings screen.`,
         customKey: `Delete stored data related to all custom keymodes. \nUse this option when you cannot delete individual KeyData from the following KeyData.`,
         others: `Delete non-standard stored data.`,
