@@ -2440,6 +2440,8 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	// レイヤー数 (layerGroup 指定のあるキーは4を超える)
 	const baseLayers = useKey ? (g_keyObj[`layerGroup${keyCtrlPtn}`] ?? []) : [];
 	const layerCnt = Math.max(4, (Math.max(0, ...baseLayers) + 1) * 2);
+	const layerNumDf = Math.max((Math.max(0, ...baseLayers) + 1) * 2, 2);
+	const layerTransList = useKey ? (g_keyObj[`layerTrans${keyCtrlPtn}`]?.[0] ?? []) : [];
 
 	// キーが多い場合はフレームを広げ、縮小率で収める
 	const halfSpan = Math.max(...laneOffsets.map(Math.abs)) + C_ARW_WIDTH / 2;
@@ -2470,9 +2472,10 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const mainSprite = createEmptySprite(pvFrame, `mainSprite`, { w: playW, h: playH });
 
 	// レイヤー (StepAreaで最大4レイヤー)。ゲーム側と同じ id でステップ・矢印・フリーズヒット用スプライトを持つ
-	const stepSprites = [], arrowSprites = [], frzHitSprites = [];
+	const layerSprites = [], stepSprites = [], arrowSprites = [], frzHitSprites = [];
 	for (let j = 0; j < layerCnt; j++) {
 		const layer = createEmptySprite(mainSprite, `mainSprite${j}`, { w: playW, h: playH });
+		layerSprites.push(layer);
 		stepSprites.push(createEmptySprite(layer, `stepSprite${j}`, { w: playW, h: playH }));
 		arrowSprites.push(createEmptySprite(layer, `arrowSprite${j}`, { w: playW, h: playH }));
 		frzHitSprites.push(createEmptySprite(layer, `frzHitSprite${j}`, { w: playW, h: playH }));
@@ -2601,7 +2604,8 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 			visibility: laneVisible[j] ? `visible` : `hidden`,
 		});
 	}) : [];
-	multiAppend(infoSprite, ...srcElms);
+	// ソースレーンのレイヤーへ配置し、layerTrans の移動・回転に追従させる
+	srcElms.forEach((elm, j) => layerSprites[scrollDir[j]]?.appendChild(elm));
 	const flashSrc = j => {
 		srcElms[j].style.opacity = 1;
 		srcElms[j].style.backgroundColor =
@@ -2633,6 +2637,22 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const frzLen = 90;   // Effectプレビュー用フリーズアローの長さ(px)
 	const work = { drunkXFlg: true, drunkYFlg: true, drunkAxisFlg: false, drunkRotateFlg: false };
 	const frz = { seq: null, seqNo: 0, axes: [], start: 0, next: 0 };
+
+	/** layerTrans: ゲーム側 mainInit / getArrowSettings と同じ添字・Reverse反転でレイヤーへ適用 */
+	const applyLayerTrans = () => {
+		if (layerTransList.length === 0) return;
+		const revFlg = g_stateObj.reverse === C_FLG_ON;
+		const list = revFlg
+			? layerTransList.map(val => invertSpecificTransforms(val, [`translateX`]))
+			: layerTransList;
+		for (let j = 0; j < layerCnt; j++) {
+			const transj = j % layerNumDf;
+			const trans = list[Math.floor(transj / 2) * 2 + (transj + Number(revFlg)) % 2];
+			if (trans !== undefined) {
+				addTransform(`mainSprite${j}`, `mainSprite${j}`, trans, g_transPriority.layer);
+			}
+		}
+	};
 
 	/** 付与したtransformの初期化 */
 	const resetTransforms = () => spriteIds.forEach(id => {
@@ -2856,6 +2876,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const applyOption = opt => {
 		selected = opt;
 		resetTransforms();
+		applyLayerTrans();
 		clearNotes();
 		ringPv?.clear();
 		if (shuffleFlg) {
