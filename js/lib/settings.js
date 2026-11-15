@@ -2534,7 +2534,9 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 	const arrowSrc = j => camoOn(`Arrow`) ? camoPerm[j] : j;
 	const colorSrc = j => camoOn(`Color`) ? camoPerm[j] : j;
 	const frzColorOf = j => (camoUse || _key === `swapping`)
-		? (g_dfColorObj.frzColorType1[colorIdx[colorSrc(j)]] ?? g_dfColorObj.frzColorType1[0])
+		? (g_headerObj.frzColor?.[colorIdx[colorSrc(j)]]
+			?? g_dfColorObj.frzColorType1[colorIdx[colorSrc(j)]]
+			?? g_dfColorObj.frzColorType1[0])
 		: g_dfColorObj.frzColorType1[0];
 	const laneX = j => Math.round(laneOffsets[j] + (playW - C_ARW_WIDTH) / 2);
 	const getLaneInfo = xs => xs.map(x => ({ x, layer: 0, dir: 1, stepTop: stepY }));
