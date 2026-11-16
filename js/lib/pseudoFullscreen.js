@@ -63,7 +63,8 @@ const g_pseudoFullscreen = (() => {
 		});
 		controls.style.gap = wUnit(gap);
 
-		const totalH = buttonH * 2 + gap;
+		const buttonCount = controls.querySelectorAll(`button`).length;
+		const totalH = buttonH * buttonCount + gap * Math.max(0, buttonCount - 1);
 		controls.style.left = wUnit(Math.max(
 			viewport.left + margin,
 			viewport.left + viewport.width - buttonW - margin
@@ -96,13 +97,15 @@ const g_pseudoFullscreen = (() => {
 		const controlRoot = document.createElement(`div`);
 		controlRoot.id = `danoniPseudoFullscreenControls`;
 
+		const isPaused = () => document.getElementById(`divRoot`)?.classList.contains(`gamePaused`) ?? false;
+
 		const backBtn = document.createElement(`button`);
 		backBtn.id = `danoniPseudoFullscreenBack`;
 		backBtn.type = `button`;
 		backBtn.textContent = g_lblNameObj.b_back;
 		backBtn.title = g_lblNameObj.l_titleBack;
 		backBtn.onclick = () => {
-			if (!active || g_currentPage !== `main` || g_retryInProgress) return;
+			if (!active || g_currentPage !== `main` || g_retryInProgress || isPaused()) return;
 			g_audio.pause();
 			g_timerHandler.clearTimeout(g_timeoutEvtId);
 			titleInit();
@@ -114,7 +117,7 @@ const g_pseudoFullscreen = (() => {
 		retryBtn.textContent = g_lblNameObj.b_retry;
 		retryBtn.title = g_lblNameObj.l_retry;
 		retryBtn.onclick = async () => {
-			if (!active || g_currentPage !== `main` || g_retryInProgress) return;
+			if (!active || g_currentPage !== `main` || g_retryInProgress || isPaused()) return;
 			retryBtn.disabled = true;
 			try {
 				await executeRetry(`Retry`);
@@ -123,8 +126,19 @@ const g_pseudoFullscreen = (() => {
 			}
 		};
 
+		const pauseBtn = document.createElement(`button`);
+		pauseBtn.id = `danoniPseudoFullscreenPause`;
+		pauseBtn.type = `button`;
+		pauseBtn.textContent = g_lblNameObj.b_pause;
+		pauseBtn.title = g_lblNameObj.l_pause;
+		pauseBtn.onclick = () => {
+			if (!active || g_currentPage !== `main` || g_retryInProgress) return;
+			isPaused() ? g_timelineHooks.resume(true) : g_timelineHooks.pause(true);
+		};
+
 		controlRoot.appendChild(backBtn);
 		controlRoot.appendChild(retryBtn);
+		controlRoot.appendChild(pauseBtn);
 		document.body.appendChild(controlRoot);
 		controls = controlRoot;
 

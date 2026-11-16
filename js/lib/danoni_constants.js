@@ -4818,6 +4818,7 @@ const g_lblNameObj = {
     b_gitter: `Discord`,
     b_retry: `Retry`,
     b_close: `Close`,
+    b_pause: `Pause`,
     b_fullscreen: `Full Screen`,
     b_exitFullscreen: `Exit Full Screen`,
     b_cReset: `Reset`,
