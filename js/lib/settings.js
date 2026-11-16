@@ -4337,19 +4337,19 @@ const buildPreviewUI = (_frame, _playW, _playH) => {
 		y: _playH - 100 + g_diffObj.shortcutY, w: 80, h: 100, pointerEvents: C_DIS_AUTO,
 	});
 	multiAppend(scGroup,
-		createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, {
+		createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, {
 			...g_lblPosObj.lblMainScHeader, x: 0, y: 0,
 		}),
-		createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry], {
+		createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack], {
 			...g_lblPosObj.lblMainScKey, x: 0, y: 15,
-			fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold`,
+			fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold`,
 		}),
-		createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, {
+		createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, {
 			...g_lblPosObj.lblMainScHeader, x: 0, y: 35,
 		}),
-		createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack], {
+		createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry], {
 			...g_lblPosObj.lblMainScKey, x: 0, y: 50,
-			fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold`,
+			fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold`,
 		}),
 		createDivCss2Label(`lblPause`, `[${g_lblNameObj.l_pause}]`, {
 			...g_lblPosObj.lblMainScHeader, x: 0, y: 70,
