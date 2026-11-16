@@ -2676,6 +2676,9 @@ const getArrowSettings = (_retryFlg = false) => {
 	g_keyCopyLists.simpleDef.forEach(header => updateKeyInfo(header, keyCtrlPtn));
 	g_headerObj.tuning = g_headerObj.creatorNames[g_stateObj.scoreId];
 
+	// レーン間隔の拡張倍率
+	const laneSpread = getLaneSpreadRate(keyCtrlPtn, g_headerObj.playingWidth);
+
 	// 各種初期化
 	// g_workObj.frzArrowInitRtnはフリーズアロー(初期表示)としての利用に限定
 	g_workObj.stepX = [];
@@ -2718,7 +2721,7 @@ const getArrowSettings = (_retryFlg = false) => {
 		}
 		const div = g_keyObj[`div${keyCtrlPtn}`];
 		const divMax = g_keyObj[`divMax${keyCtrlPtn}`] ?? posMax;
-		const denom = (Math.max(div, divMax - div) + 1) * g_keyObj.blank;
+		const denom = (Math.max(div, divMax - div) + 1) * g_keyObj.blank * laneSpread;
 		if (Number.isFinite(denom) && denom > 0) {
 			g_workObj.scale *= Math.min(g_sHeight / denom, 1);
 		}
@@ -2791,11 +2794,11 @@ const getArrowSettings = (_retryFlg = false) => {
 		let stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 
 		if (g_stateObj.swapping === `Mirror+`) {
-			g_workObj.stepX_df[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
+			g_workObj.stepX_df[j] = g_keyObj.blank * stdPos * laneSpread + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
 			stdPos = -stdPos;
 		}
 
-		g_workObj.stepX[j] = g_keyObj.blank * stdPos + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
+		g_workObj.stepX[j] = g_keyObj.blank * stdPos * laneSpread + (g_headerObj.playingWidth - C_ARW_WIDTH) / 2;
 		const baseLayer = g_keyObj[`layerGroup${keyCtrlPtn}`]?.[j] || 0;
 		g_workObj.dividePos[j] = baseLayer * 2 + (
 			(posj <= divideCnt ? 0 : 1) + (scrollDirOptions[j] === 1 ? 0 : 1) + (g_stateObj.reverse === C_FLG_OFF ? 0 : 1)

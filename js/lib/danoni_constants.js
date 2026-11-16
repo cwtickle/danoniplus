@@ -245,6 +245,9 @@ const updateWindowSiz = () => {
         btnReload: {
             x: 10 + g_btnX(), y: 10, w: 30, h: 30, siz: 20, title: g_msgObj.reload,
         },
+        btnFullscreen: {
+            x: g_btnX() + 50, y: 10, w: 30, h: 30, siz: 20, title: g_msgObj.fullscreen,
+        },
         btnHelp: {
             x: g_btnX(), y: g_sHeight - 150, w: 40, h: 40, siz: 30, title: g_msgObj.howto,
         },
@@ -667,7 +670,7 @@ const updateWindowSiz = () => {
             title: g_msgObj.displayPreview,
         },
         btnKcKeyLock: {
-            x: g_btnX() + Math.floor((g_btnWidth() - 80) / 2) + 90, y: 3, w: 80, h: 18, siz: 11,
+            x: g_btnX() + Math.floor((g_btnWidth() - 80) / 2) - 90, y: 3, w: 80, h: 18, siz: 11,
             title: g_msgObj.keyLock,
         },
 
@@ -1103,6 +1106,7 @@ const g_emojiObj = {
     camera: `&#x1f4f7;`,      // カメラ (camera)
     locked: `&#x1f512;`,      // 鍵 (locked)
     unlocked: `&#x1f513;`,    // 鍵開 (unlocked)
+    expand: `&#x26f6;`,       // 全画面 (fullscreen)
 };
 
 /** 設定・オプション画面用共通 */
@@ -1329,6 +1333,7 @@ const g_stateObj = {
     excessiveScoreId: 0,
     adjustment: 0,
     hitPosition: 0,
+    laneSpread: `Normal`,
     fadein: 0,
     volume: 100,
 
@@ -1490,7 +1495,7 @@ const g_settings = {
         customKey: 0,
         others: 0,
     },
-    environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`, `ringSpeed`, `ringGuide`,
+    environments: [`adjustment`, `volume`, `colorType`, `appearance`, `opacity`, `hitPosition`, `laneSpread`, `ringSpeed`, `ringGuide`,
         `arrowJdgX`, `arrowJdgY`, `frzJdgX`, `frzJdgY`, `shortcutX`, `shortcutY`],
     keyStorages: [`reverse`, `keyCtrl`, `keyCtrlPtn`, `shuffle`, `color`, `stepRtn`, `shortcut`],
     colorStorages: [`setColor`, `setShadowColor`, `frzColor`, `frzShadowColor`],
@@ -1537,6 +1542,9 @@ const g_settings = {
     hitPositions: [...Array(g_limitObj.hitPosition * 20 + 1).keys()].map(i => (i - g_limitObj.hitPosition * 10) / 10),
     hitPositionNum: g_limitObj.hitPosition * 10,
     hitPositionTerms: [50, 10],
+
+    laneSpreads: [`Normal`, `Wide`, `Wider`],
+    laneSpreadNum: 0,
 
     ringSpeeds: makeSpeedList(g_limitObj.minRingSpeed, g_limitObj.maxRingSpeed),
     ringSpeedNum: 0,
@@ -2499,7 +2507,7 @@ let g_displays = [`stepZone`, `judgment`, `lifeGauge`, `score`, `musicInfo`, `fi
     `velocity`, `color`, `background`, `arrowEffect`, `special`];
 
 // ローカルストレージ保存対象
-let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`, `ringSpeed`, `ringGuide`];
+let g_storeSettings = [`adjustment`, `volume`, `appearance`, `opacity`, `hitPosition`, `laneSpread`, `ringSpeed`, `ringGuide`];
 
 // 廃棄対象のリスト(過去の登録対象をリスト化。ここに乗せるとローカルストレージから自動消去される)
 let g_storeSettingsEx = [`d_stepzone`, `d_judgment`, `d_fastslow`, `d_lifegauge`,
@@ -4810,10 +4818,14 @@ const g_lblNameObj = {
     b_gitter: `Discord`,
     b_retry: `Retry`,
     b_close: `Close`,
+    b_pause: `Pause`,
+    b_fullscreen: `Full Screen`,
+    b_exitFullscreen: `Exit Full Screen`,
     b_cReset: `Reset`,
     b_precond: `Precondition`,
     b_keyLock: `KeyLock`,
     b_kbLane: `Group Color`,
+    LaneSpread: `LaneSpread`,
 
     Difficulty: `Difficulty`,
     Speed: `Speed`,
@@ -5069,6 +5081,9 @@ const g_lang_lblNameObj = {
         dataDeleteOFFDesc: `消去したいデータの種類を選んで「Reset」を押してください`,
         dataDeleteONDesc: `セーフモード適用中はデータ消去は行えません。変更するにはセーフモードを解除してください`,
 
+        b_fullscreen: `全画面`,
+        b_exitFullscreen: `全画面解除`,
+
         kcDesc: `[{0}:スキップ / {1}:(代替キーのみ)キー無効化]`,
         kcNonDesc: `キー割り当て無効化中です。解除するには「KeyLock」を押してください`,
         kcShuffleDesc: `番号をクリックでシャッフルグループ、矢印をクリックでカラーグループを変更`,
@@ -5135,6 +5150,9 @@ const g_lang_lblNameObj = {
     En: {
         dataDeleteOFFDesc: `Select the type of data you wish to delete and press "Reset".`,
         dataDeleteONDesc: `Data erasure cannot be performed while safe mode is applied. <br>Please deactivate the safe mode to change the data.`,
+
+        b_fullscreen: `Full Screen`,
+        b_exitFullscreen: `Exit Full Screen`,
 
         kcDesc: `[{0}:Skip / {1}:Key invalidation (Alternate keys only)]`,
         kcNonDesc: `Key assignments are currently disabled. Press "KeyLock" to disable this setting.`,
@@ -5206,6 +5224,7 @@ const g_lang_lblNameObj = {
  */
 const g_msgObj = {
     reload: `説明文の言語を変更します。\nChange the language of the description.`,
+    laneSpread: `レーン間隔をNormal / Wide / Widerの3段階で変更します。\nWide / Widerはプレイ可能な余白に合わせて自動調整されます。`,
 };
 
 /**
@@ -5215,11 +5234,13 @@ const g_lang_msgObj = {
 
     Ja: {
         howto: `ゲーム画面の見方や設定の詳細についてのページへ移動します（GitHub Wiki）。`,
+        fullscreen: `画面いっぱいに表示します（疑似フルスクリーン）。`,
+        laneSpread: `レーン間隔をNormal / Wide / Widerの3段階で変更します。\nWide / Widerはプレイ可能な余白に合わせて自動調整されます。`,
         dataReset: `この作品で保存されているハイスコアや\nAdjustment情報等をリセットします。`,
         github: `Dancing☆Onigiri (CW Edition)のGitHubページへ移動します。`,
         security: `Dancing☆Onigiri (CW Edition)のサポート情報ページへ移動します。`,
 
-        environment: `以下の設定を初期化します。\n  - Adjustment, Volume, ColorType, Appearance, Opacity, HitPosition, 判定キャラクタ位置, ショートカット表示位置`,
+        environment: `以下の設定を初期化します。\n  - Adjustment, Volume, ColorType, Appearance, Opacity, HitPosition, LaneSpread, 判定キャラクタ位置, ショートカット表示位置`,
         highscores: `全譜面のハイスコアを初期化します。\n個別に初期化したい場合はSettings画面より行ってください。`,
         customKey: `カスタムキーに関する全ての保存データを消去します。\n下記のKeyDataから個別に消去可能できないときに使用してください。`,
         others: `標準以外に関する保存データを消去します。`,
@@ -5405,11 +5426,13 @@ const g_lang_msgObj = {
 
     En: {
         howto: `Go to the page about the game screen and settings at GitHub Wiki.`,
+        fullscreen: `Display the game in pseudo full screen.`,
+        laneSpread: `Changes the lane spacing in three levels: Normal / Wide / Wider.\nWide and Wider are automatically adjusted to fit the available play area.`,
         dataReset: `Resets the high score, adjustment information, etc. saved in this game.`,
         github: `Go to the GitHub page of Dancing Onigiri "CW Edition".`,
         security: `Go to the support information page for Dancing Onigiri "CW Edition".`,
 
-        environment: `Initialize settings below:\n  - Adjustment, Volume, ColorType, Appearance, Opacity, HitPosition, judgment character positions and shortcut display position.`,
+        environment: `Initialize settings below:\n  - Adjustment, Volume, ColorType, Appearance, Opacity, HitPosition, LaneSpread, judgment character positions and shortcut display position.`,
         highscores: `Initializes the high score of all charts. \nIf you want to initialize each chart individually, \nplease do so from the Highscore view in the Settings screen.`,
         customKey: `Delete stored data related to all custom keymodes. \nUse this option when you cannot delete individual KeyData from the following KeyData.`,
         others: `Delete non-standard stored data.`,

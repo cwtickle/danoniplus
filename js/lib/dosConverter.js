@@ -505,6 +505,7 @@ const loadLocalStorage = (_musicId = ``) => {
 	checkLocalParam(`appearance`);
 	checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
 	checkLocalParam(`hitPosition`, C_TYP_FLOAT, g_settings.hitPositionNum);
+	checkLocalParam(`laneSpread`);
 	checkLocalParam(`ringSpeed`, C_TYP_FLOAT, Math.max(g_settings.ringSpeeds.indexOf(g_stateObj.ringSpeed), 0));
 	checkLocalParam(`ringGuide`);
 

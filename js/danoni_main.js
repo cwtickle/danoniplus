@@ -129,6 +129,7 @@ const waitUntilLoaded = () => {
 	await loadScript2(`${g_rootPath}../js/lib/mainWindow.js?${g_versionForUrl}`);
 	await loadScript2(`${g_rootPath}../js/lib/result.js?${g_versionForUrl}`);
 	await loadScript2(`${g_rootPath}../js/lib/danoni_constants.js?${g_versionForUrl}`);
+	await loadScript2(`${g_rootPath}../js/lib/pseudoFullscreen.js?${g_versionForUrl}`);
 	await loadScript2(`${g_rootPath}../js/lib/legacy_functions.js?${g_versionForUrl.split(`.`)[0]}`, false);
 	initialControl();
 
@@ -138,6 +139,7 @@ const waitUntilLoaded = () => {
 		// ポインタ状態は画面や譜面の位置に関係なくクリアする。
 		if (document.hidden) {
 			resetRingPointers();
+			resetLaneTouch();
 		}
 		if (g_currentPage !== `main`) return;
 		if (g_scoreObj.baseFrame > g_scoreObj.lastFrame) return;
@@ -183,6 +185,14 @@ const g_preloadFiles = {
 
 // 矢印サイズ
 const C_ARW_WIDTH = 50;
+
+// タッチ判定の拡張幅 (見た目より広く判定する)
+const C_TOUCH_JUDGE_MARGIN_X = 50;
+const C_TOUCH_JUDGE_MARGIN_Y = 100;
+
+// レーン間隔の拡張設定
+const C_LANE_SPREAD_MARGIN = 10;
+const C_LANE_SPREAD_RATIOS = { Normal: 0, Wide: 0.5, Wider: 0.9 };
 
 // ON/OFFスイッチ
 const C_FLG_ON = `ON`;
@@ -440,6 +450,40 @@ const boolToSwitch = _condition => _condition ? C_FLG_ON : C_FLG_OFF;
  * @returns {string}
  */
 const wUnit = (_val, _unitName = `px`) => `${_val}${_unitName}`;
+
+/**
+ * レーン間隔の拡張倍率を取得
+ * - Wide / Wider は、外側のステップゾーンが画面端に収まる範囲で自動調整する
+ * @param {string} _keyCtrlPtn キー制御パターン
+ * @param {number} _width 対象の横幅 (プレイ画面の横幅)
+ * @returns {number} 拡張倍率 (Normal: 1)
+ */
+const getLaneSpreadRate = (_keyCtrlPtn, _width) => {
+	const ratio = C_LANE_SPREAD_RATIOS[g_stateObj.laneSpread] ?? 0;
+	if (ratio <= 0) return 1;
+
+	const posList = g_keyObj[`pos${_keyCtrlPtn}`];
+	const blank = g_keyObj.blank;
+	if (!(_width > 0) || !Array.isArray(posList) || posList.length === 0 || !(blank > 0)) return 1;
+
+	const divideCnt = g_keyObj[`div${_keyCtrlPtn}`] - 1;
+	if (!Number.isFinite(divideCnt)) return 1;
+	const posMax = g_keyObj[`divMax${_keyCtrlPtn}`] ?? Math.max(...posList) + 1;
+	const stdPosList = posList.map(posj =>
+		posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2);
+	const minStdPos = Math.min(...stdPosList);
+	const maxStdPos = Math.max(...stdPosList);
+	if (minStdPos >= 0 && maxStdPos <= 0) return 1;
+
+	const center = (_width - C_ARW_WIDTH) / 2;
+	const leftLimit = minStdPos < 0
+		? (center - C_LANE_SPREAD_MARGIN) / (-blank * minStdPos) : Infinity;
+	const rightLimit = maxStdPos > 0
+		? (_width - C_LANE_SPREAD_MARGIN - C_ARW_WIDTH - center) / (blank * maxStdPos) : Infinity;
+	const maxRate = Math.max(1, Math.min(leftLimit, rightLimit));
+
+	return 1 + (maxRate - 1) * ratio;
+};
 
 /**
  * ブール値への変換
@@ -1792,19 +1836,25 @@ const createDivCss2Label = (_id, _text, { x = 0, y = 0, w = g_limitObj.setLblWid
 const dragDiv = (_divName, { minX = 0, minY = 0, maxX = g_sWidth, maxY = g_sHeight } = {}) => {
 	if (document.getElementById(_divName) === null) return;
 	const div = document.getElementById(_divName);
+	div.style.touchAction = `none`;
 	div.onpointermove = evt => {
 		if (evt.buttons) {
-			const nextX = div.offsetLeft + evt.movementX;
-			const nextY = div.offsetTop + evt.movementY;
+			const fullscreenScale = g_pseudoFullscreen.getScale();
+			const currentX = div.style.left.endsWith(`px`) ? parseFloat(div.style.left) : div.offsetLeft;
+			const currentY = div.style.top.endsWith(`px`) ? parseFloat(div.style.top) : div.offsetTop;
+			const nextX = currentX + evt.movementX / fullscreenScale;
+			const nextY = currentY + evt.movementY / fullscreenScale;
 			const clampMaxX = (maxX === minX) ? maxX : (maxX - div.offsetWidth);
 			const clampMaxY = (maxY === minY) ? maxY : (maxY - div.offsetHeight);
-			div.style.left = wUnit(Math.min(Math.max(nextX, minX), clampMaxX));
-			div.style.top = wUnit(Math.min(Math.max(nextY, minY), clampMaxY));
+			const x = Math.min(Math.max(nextX, minX), clampMaxX);
+			const y = Math.min(Math.max(nextY, minY), clampMaxY);
+			div.style.left = wUnit(x);
+			div.style.top = wUnit(y);
 			div.style.position = 'absolute';
 			div.draggable = false;
 			div.setPointerCapture(evt.pointerId);
 
-			g_posObj[_divName] = { x: div.offsetLeft, y: div.offsetTop };
+			g_posObj[_divName] = { x, y };
 		}
 	};
 };
@@ -2232,7 +2282,8 @@ const g_handler = (() => {
 		 */
 		removeByContainer: _container => {
 			Object.entries(events).forEach(([k, e]) => {
-				if (_container.contains(e.target)) {
+				// WindowやVisualViewportなど、Node以外を対象にしたリスナーは対象外
+				if (e.target instanceof Node && _container.contains(e.target)) {
 					e.target.removeEventListener(e.type, e.listener, e.options);
 					delete events[k];
 				}
@@ -2350,10 +2401,14 @@ const makeBgCanvas = (_ctx, { w = g_sWidth, h = g_sHeight } = {}) => {
  */
 const clearWindow = (_customDisplayName = ``) => {
 	if (g_currentPage === `main`) {
+		divRoot.classList.remove(`gamePaused`);
 		stopRingKeepAlive();
 		g_ringTouchCleanup?.();
 		g_ringTouchCleanup = null;
 	}
+	g_laneTouchCleanup?.();
+	g_laneTouchCleanup = null;
+	resetLaneTouch();
 	closeDisplayPreview();
 	resetKeyControl();
 	resetTransform();
@@ -2427,6 +2482,10 @@ const clearWindow = (_customDisplayName = ``) => {
 
 	Object.keys(g_headerObj).filter(val => val.startsWith(`--`) && hasVal(g_headerObj[val])).forEach(prop =>
 		document.documentElement.style.setProperty(prop, getCssCustomProperty(prop, g_headerObj[prop])));
+
+	// 疑似フルスクリーン表示中は#canvas-frameの幅変更に追従
+	g_pseudoFullscreen.fit();
+	g_pseudoFullscreen.updateControls(_customDisplayName === `Main`);
 };
 
 /**
