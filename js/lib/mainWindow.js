@@ -334,19 +334,19 @@ const mainInit = () => {
 		const diffX = g_sWidth + g_headerObj.scAreaWidth - 85 + g_diffObj.shortcutX;
 		const diffY = g_headerObj.playingHeight + g_diffObj.shortcutY;
 		multiAppend(infoSprite,
-			createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, {
+			createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, {
 				...g_lblPosObj.lblMainScHeader, x: diffX, y: diffY - 95,
 			}),
-			createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry], {
+			createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack], {
 				...g_lblPosObj.lblMainScKey, x: diffX, y: diffY - 80,
-				fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold`,
+				fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold`,
 			}),
-			createDivCss2Label(`lblTitleBack`, `[${g_lblNameObj.l_titleBack}]`, {
+			createDivCss2Label(`lblRetry`, `[${g_lblNameObj.l_retry}]`, {
 				...g_lblPosObj.lblMainScHeader, x: diffX, y: diffY - 65,
 			}),
-			createDivCss2Label(`lblTitleBackSc`, g_isMac ? `Shift+${g_kCd[g_headerObj.keyRetry]}` : g_kCd[g_headerObj.keyTitleBack], {
+			createDivCss2Label(`lblRetrySc`, g_kCd[g_headerObj.keyRetry], {
 				...g_lblPosObj.lblMainScKey, x: diffX, y: diffY - 50,
-				fontWeight: g_headerObj.keyTitleBack === C_KEY_TITLEBACK ? `normal` : `bold`,
+				fontWeight: g_headerObj.keyRetry === C_KEY_RETRY ? `normal` : `bold`,
 			}),
 			createDivCss2Label(`lblPause`, `[${g_lblNameObj.l_pause}]`, {
 				...g_lblPosObj.lblMainScHeader, x: diffX, y: diffY - 35,
