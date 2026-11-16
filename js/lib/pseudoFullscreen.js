@@ -4,8 +4,8 @@
  * - ページ: common
  *
  * Source by tickle
- * Created : 2026/11/14
- * Revised : 2026/11/14 (v52.6.1)
+ * Created : 2026/11/16
+ * Revised : 2026/11/16 (v53.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */

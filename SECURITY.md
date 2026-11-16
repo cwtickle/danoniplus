@@ -6,8 +6,8 @@
 
 - 修正対象のバージョンは下記の通りです。
 - 基本的には、同一メジャーバージョンの最新版がサポート対象です。
-- v1 ～ v43, v45 ～ v48 は**更新を終了しました。**  
-  v44, v50 の対応終了時期は v53 リリース開始時を予定しています。（変更可能性あり）  
+- v1 ～ v48, v50 は**更新を終了しました。**  
+  v51 の対応終了時期は v54 リリース開始時を予定しています。（変更可能性あり）  
   バージョン別の更新継続可否は現状、[ライフサイクルポリシー](https://github.com/cwtickle/danoniplus/wiki/LifecyclePolicy)に従います。
 - 各バージョンの概要は[更新情報](https://github.com/cwtickle/danoniplus/wiki/UpdateInfo)に記載しています。
 
@@ -18,21 +18,22 @@
 
 | Version      | Supported          | Latest Version                                                                 | Logs                                                                   | First Release | End of Support   |
 | ------------ | ------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | ------------- | ---------------- |
-| v52          | :heavy_check_mark: | [v52.7.0](https://github.com/cwtickle/danoniplus/releases/tag/v52.7.0)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2026-11-01    | (At Release v55) |
-| v51          | :heavy_check_mark: | [v51.4.3](https://github.com/cwtickle/danoniplus/releases/tag/v51.4.3)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v51) | 2026-09-23    | (At Release v54) |
-| v50          | :warning:          | [v50.5.8](https://github.com/cwtickle/danoniplus/releases/tag/v50.5.8)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v50) | 2026-08-25    | (At Release v53) |
+| v53          | :heavy_check_mark: | [v53.0.0](https://github.com/cwtickle/danoniplus/releases/tag/v53.0.0)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-latest) | 2026-11-16    | (At Release v56) |
+| v52          | :heavy_check_mark: | [v52.7.0](https://github.com/cwtickle/danoniplus/releases/tag/v52.7.0)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v52) | 2026-11-01    | (At Release v55) |
+| v51          | :warning:          | [v51.4.3](https://github.com/cwtickle/danoniplus/releases/tag/v51.4.3)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v51) | 2026-09-23    | (At Release v54) |
+| v50          | :x:                | [v50.5.8 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v50.5.8)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v50) | 2026-08-25    | 2026-11-16 / Launched v53 |
 | v49 :anchor: | :heavy_check_mark: | [v49.6.7](https://github.com/cwtickle/danoniplus/releases/tag/v49.6.7)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v49) | 2026-06-23    | (At Release v58) |
-| v48          | :x:                | [v48.5.10 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v48.5.10)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v48) | 2026-05-17    | 2026-09-23 / Launched v51 |
-| v47          | :x:                | [v47.6.12 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v47.6.12)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v47) | 2026-04-19    | 2026-08-25 / Launched v50 |
-| v46          | :x:                | [v46.7.3 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v46.7.3)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v46) | 2026-03-12    | 2026-06-23 / Launched v49 |
-| v45          | :x:                | [v45.5.13 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v45.5.13)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v45) | 2026-02-26    | 2026-05-17 / Launched v48 |
-| v44 :anchor: | :warning:          | [v44.5.28](https://github.com/cwtickle/danoniplus/releases/tag/v44.5.28)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v44) | 2026-02-07    | (At Release v53) |
 
 <details>
 <summary>End of support version / 過去バージョン</summary>
 
 | Version      | Supported | Latest Version                                                                   | Logs                                                                | First Release | End of Support |
 | ------------ | --------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------- | -------------- |
+| v48          | :x:                | [v48.5.10 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v48.5.10)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v48) | 2026-05-17    | 2026-09-23 / Launched v51 |
+| v47          | :x:                | [v47.6.12 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v47.6.12)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v47) | 2026-04-19    | 2026-08-25 / Launched v50 |
+| v46          | :x:                | [v46.7.3 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v46.7.3)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v46) | 2026-03-12    | 2026-06-23 / Launched v49 |
+| v45          | :x:                | [v45.5.13 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v45.5.13)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v45) | 2026-02-26    | 2026-05-17 / Launched v48 |
+| v44 :anchor: | :x:                | [v44.5.28 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v44.5.28)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v44) | 2026-02-07    | 2026-11-16 / Launched v53 |
 | v43          | :x:                | [v43.6.12 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v43.6.12)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v43) | 2025-09-15    | 2026-03-12 / Launched v46 |
 | v42          | :x:                | [v42.5.13 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v42.5.13)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v42) | 2025-05-24    | 2026-02-26 / Launched v45 |
 | v41          | :x:                | [v41.4.16 (final)](https://github.com/cwtickle/danoniplus/releases/tag/v41.4.16)         | [:memo:](https://github.com/cwtickle/danoniplus/wiki/Changelog-v41) | 2025-04-12    | 2026-02-07 / Launched v44 |
