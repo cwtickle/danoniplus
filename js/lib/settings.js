@@ -4337,6 +4337,7 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 	// ドラッグハンドル（薄い枠）を作成
 	const handleId = _target.id ? `handle_${_target.id}` : `dragHandle_${Math.random().toString(36).slice(2, 9)}`;
 	_target.style.cursor = `grab`;
+	_target.style.touchAction = `none`;
 
 	const bgColor = g_headerObj.baseBrightFlg ? `0,0,0` : `255,255,255`;
 	createEmptySprite(_target, handleId, {

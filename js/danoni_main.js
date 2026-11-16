@@ -1836,20 +1836,25 @@ const createDivCss2Label = (_id, _text, { x = 0, y = 0, w = g_limitObj.setLblWid
 const dragDiv = (_divName, { minX = 0, minY = 0, maxX = g_sWidth, maxY = g_sHeight } = {}) => {
 	if (document.getElementById(_divName) === null) return;
 	const div = document.getElementById(_divName);
+	div.style.touchAction = `none`;
 	div.onpointermove = evt => {
 		if (evt.buttons) {
 			const fullscreenScale = g_pseudoFullscreen.getScale();
-			const nextX = div.offsetLeft + evt.movementX / fullscreenScale;
-			const nextY = div.offsetTop + evt.movementY / fullscreenScale;
+			const currentX = div.style.left.endsWith(`px`) ? parseFloat(div.style.left) : div.offsetLeft;
+			const currentY = div.style.top.endsWith(`px`) ? parseFloat(div.style.top) : div.offsetTop;
+			const nextX = currentX + evt.movementX / fullscreenScale;
+			const nextY = currentY + evt.movementY / fullscreenScale;
 			const clampMaxX = (maxX === minX) ? maxX : (maxX - div.offsetWidth);
 			const clampMaxY = (maxY === minY) ? maxY : (maxY - div.offsetHeight);
-			div.style.left = wUnit(Math.min(Math.max(nextX, minX), clampMaxX));
-			div.style.top = wUnit(Math.min(Math.max(nextY, minY), clampMaxY));
+			const x = Math.min(Math.max(nextX, minX), clampMaxX);
+			const y = Math.min(Math.max(nextY, minY), clampMaxY);
+			div.style.left = wUnit(x);
+			div.style.top = wUnit(y);
 			div.style.position = 'absolute';
 			div.draggable = false;
 			div.setPointerCapture(evt.pointerId);
 
-			g_posObj[_divName] = { x: div.offsetLeft, y: div.offsetTop };
+			g_posObj[_divName] = { x, y };
 		}
 	};
 };
