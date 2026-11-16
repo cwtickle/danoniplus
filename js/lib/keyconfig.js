@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/10/12 (v51.4.0)
+ * Revised : 2026/11/16 (v53.0.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -216,8 +216,11 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	const kWidth = parseInt(keyconSprite.style.width);
 	changeSetColor();
 
+	// レーン間隔の拡張倍率 (プレイ画面と同じ倍率を使用)
+	const laneSpread = getLaneSpreadRate(keyCtrlPtn, g_headerObj.playingWidth);
+
 	const maxLeftPos = Math.max(divideCnt, posMax - divideCnt - 2) / 2;
-	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank);
+	const maxLeftX = Math.min(0, (kWidth - C_ARW_WIDTH) / 2 - maxLeftPos * g_keyObj.blank * laneSpread);
 
 	g_keycons.cursorNumList = [...Array(keyNum).keys()].map(i => i);
 	const configKeyGroupList = g_headerObj.keyGroupOrder[g_stateObj.scoreId] ??
@@ -268,7 +271,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		const layerRotate = layerParts[layerIdx] || ``;
 		g_keycons.layerIdxList[j] = layerIdx;
 
-		const keyconX = g_keyObj.blank * stdPos + (kWidth - C_ARW_WIDTH) / 2 + addLeft;
+		const keyconX = g_keyObj.blank * stdPos * laneSpread + (kWidth - C_ARW_WIDTH) / 2 + addLeft;
 		const keyconY = C_KYC_HEIGHT * (Number(posj > divideCnt)) + 12 + baseLayer * C_LAYER_Y_OFFSET;
 		const colorPos = g_keyObj[`color${keyCtrlPtn}`][j];
 		const arrowColor = getKeyConfigColor(j, colorPos);
@@ -346,7 +349,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 
 	// カーソルの作成
 	const cursor = keyconSprite.appendChild(createImg(`cursor`, g_imgObj.cursor,
-		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * (posj - divideCnt / 2) - 10, 57, 15, 30));
+		(kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * laneSpread * (posj - divideCnt / 2) - 10, 57, 15, 30));
 	cursor.style.transitionDuration = `0.125s`;
 
 	const viewGroupObj = {
@@ -564,10 +567,22 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		);
 	}
 
+	// レーン間隔の切り替え
+	const laneSpreadX = g_btnX(5 / 6) - 20;
+	const laneSpreadY = 37;
+	multiAppend(divRoot,
+		makeKCButtonHeader(`lblLaneSpread`, `LaneSpread`, { x: laneSpreadX - 10, y: laneSpreadY }, g_cssObj.keyconfig_ConfigType),
+		makeKCButton(`lnkLaneSpread`, g_stateObj.laneSpread, () => setLaneSpread(), {
+			x: laneSpreadX, y: laneSpreadY + 13, title: g_msgObj.laneSpread, cxtFunc: () => setLaneSpread(-1),
+		}),
+		makeMiniKCButton(`lnkLaneSpread`, `L`, () => setLaneSpread(-1), { x: laneSpreadX - 10, y: laneSpreadY + 13 }),
+		makeMiniKCButton(`lnkLaneSpread`, `R`, () => setLaneSpread(), { x: laneSpreadX + g_btnWidth(1 / 6), y: laneSpreadY + 13 }),
+	);
+
 	// カラー/シャッフルグループ切替ボタン（カラー/シャッフルパターンが複数ある場合のみ）
-	makeGroupButton(`color`, { cssName: g_cssObj.keyconfig_ColorGr });
-	makeGroupButton(`shuffle`, { baseX: g_btnX(11 / 12) - 10, cssName: g_cssObj.keyconfig_ShuffleGr });
-	makeGroupButton(`stepRtn`, { baseY: 37, cssName: g_cssObj.keyconfig_StepRtnGr });
+	makeGroupButton(`color`, { baseX: g_btnX(9 / 12) - 20, cssName: g_cssObj.keyconfig_ColorGr });
+	makeGroupButton(`shuffle`, { baseX: g_btnX(5 / 6) - 10, cssName: g_cssObj.keyconfig_ShuffleGr });
+	makeGroupButton(`stepRtn`, { baseX: g_btnX(11 / 12), cssName: g_cssObj.keyconfig_StepRtnGr });
 
 	/**
 	 * カーソル位置の設定
@@ -577,7 +592,7 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 		const stdPos = posj - ((posj > divideCnt ? posMax : 0) + divideCnt) / 2;
 		const baseLayer = g_keyObj[`layerGroup${keyCtrlPtn}`]?.[g_currentj] || 0;
 
-		const nextLeft = (kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos + addLeft - 10;
+		const nextLeft = (kWidth - C_ARW_WIDTH) / 2 + g_keyObj.blank * stdPos * laneSpread + addLeft - 10;
 		cursor.style.left = wUnit(nextLeft);
 		cursor.style.top = wUnit(C_KYC_HEIGHT * Number(posj > divideCnt) + 57 + C_KYC_REPHEIGHT * g_currentk + baseLayer * C_LAYER_Y_OFFSET);
 		g_kcType = (g_currentk === 0 ? `Main` : `Replaced`);
@@ -720,6 +735,16 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 			changeColorPicker(j, `frz`, g_headerObj.frzColor[m][0]);
 			changeColorPicker(j, `frzBar`, g_headerObj.frzColor[m][1]);
 		}
+	};
+
+	/**
+	 * レーン間隔の制御
+	 * @param {number} [_scrollNum=1]
+	 */
+	const setLaneSpread = (_scrollNum = 1) => {
+		g_settings.laneSpreadNum = nextPos(g_settings.laneSpreadNum, _scrollNum, g_settings.laneSpreads.length);
+		g_stateObj.laneSpread = g_settings.laneSpreads[g_settings.laneSpreadNum];
+		keyConfigInit(g_kcType);
 	};
 
 	/**
