@@ -4329,6 +4329,7 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 	let dragging = false;
 	let dragStartX = 0, dragStartY = 0;
 	let elemStartX = 0, elemStartY = 0;
+	let dragScale = 0;
 
 	const boundsW = _bounds?.w ?? _target.offsetWidth ?? 0;
 	const boundsH = _bounds?.h ?? _target.offsetHeight ?? 0;
@@ -4353,6 +4354,7 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 		dragStartY = _evt.clientY;
 		elemStartX = parseInt(_target.style.left, 10) || 0;
 		elemStartY = parseInt(_target.style.top, 10) || 0;
+		dragScale = scale * g_pseudoFullscreen.getScale();
 		_target.style.cursor = `grabbing`;
 		_target.setPointerCapture(_evt.pointerId);
 		_evt.stopPropagation();
@@ -4361,13 +4363,22 @@ const makeElementDraggable = (_target, _key, _playW, _playH, _bounds, _config) =
 	g_handler.addListener(_target, `pointermove`, _evt => {
 		if (!dragging) return;
 
+		// 拡縮率が変わった場合（疑似フルスクリーンの再計算）は、現在位置を基準に再設定
+		const totalScale = scale * g_pseudoFullscreen.getScale();
+		if (totalScale !== dragScale) {
+			dragScale = totalScale;
+			dragStartX = _evt.clientX;
+			dragStartY = _evt.clientY;
+			elemStartX = parseInt(_target.style.left, 10) || 0;
+			elemStartY = parseInt(_target.style.top, 10) || 0;
+		}
+
 		// 1. マウスの実際の移動量を計算
 		const mouseDx = _evt.clientX - dragStartX;
 		const mouseDy = _evt.clientY - dragStartY;
 
 		// 2. 【最重要】スケール逆算して、縮小空間内の移動量に変換
 		//    疑似フルスクリーン時は祖先要素の拡縮率も加味する
-		const totalScale = scale * g_pseudoFullscreen.getScale();
 		const dx = mouseDx / totalScale;
 		const dy = mouseDy / totalScale;
 
