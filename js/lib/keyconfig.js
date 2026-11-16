@@ -580,9 +580,9 @@ const keyConfigInit = (_kcType = g_kcType, _initFlg = false) => {
 	);
 
 	// カラー/シャッフルグループ切替ボタン（カラー/シャッフルパターンが複数ある場合のみ）
-	makeGroupButton(`color`, { cssName: g_cssObj.keyconfig_ColorGr });
-	makeGroupButton(`shuffle`, { baseX: g_btnX(11 / 12) - 10, cssName: g_cssObj.keyconfig_ShuffleGr });
-	makeGroupButton(`stepRtn`, { baseY: 37, cssName: g_cssObj.keyconfig_StepRtnGr });
+	makeGroupButton(`color`, { baseX: g_btnX(9 / 12) - 20, cssName: g_cssObj.keyconfig_ColorGr });
+	makeGroupButton(`shuffle`, { baseX: g_btnX(5 / 6) - 10, cssName: g_cssObj.keyconfig_ShuffleGr });
+	makeGroupButton(`stepRtn`, { baseX: g_btnX(11 / 12), cssName: g_cssObj.keyconfig_StepRtnGr });
 
 	/**
 	 * カーソル位置の設定
