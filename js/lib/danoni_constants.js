@@ -4819,6 +4819,7 @@ const g_lblNameObj = {
     b_retry: `Retry`,
     b_close: `Close`,
     b_pause: `Pause`,
+    b_resume: `Resume`,
     b_fullscreen: `Full Screen`,
     b_exitFullscreen: `Exit Full Screen`,
     b_cReset: `Reset`,

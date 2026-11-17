@@ -1872,6 +1872,80 @@ const mainInit = () => {
 
 	let nativeAudioWasPlaying = false;
 
+	const PAUSE_MENU_ID = `pauseMenu`;
+
+	/**
+	 * ポーズメニューの配置を取得
+	 * @returns {object}
+	 */
+	const getPauseMenuLayout = () => {
+		const btnW = 120;
+		const btnH = 40;
+		const gap = 10;
+		const totalW = btnW * 3 + gap * 2;
+		return {
+			btnW, btnH, gap, totalW,
+			x: g_workObj.playingX + (g_sWidth - totalW) / 2,
+			y: g_lblPosObj.lblPauseMark.y + g_lblPosObj.lblPauseMark.h + 12,
+		};
+	};
+
+	/**
+	 * ポーズメニュー(Back/Retry/Resume)を表示
+	 * - 疑似フルスクリーン時のみ表示する
+	 */
+	const showPauseMenu = () => {
+		if (!g_pseudoFullscreen.isActive() || document.getElementById(PAUSE_MENU_ID) !== null) {
+			return;
+		}
+		const { btnW, btnH, gap, totalW, x, y } = getPauseMenuLayout();
+		const menu = createEmptySprite(divRoot, PAUSE_MENU_ID, {
+			x, y, w: totalW, h: btnH, pointerEvents: C_DIS_AUTO,
+		});
+		const btnPos = _idx => ({
+			x: (btnW + gap) * _idx, y: 0, w: btnW, h: btnH, siz: 14,
+			initDisabledFlg: false, groupName: `main`,
+		});
+
+		multiAppend(menu,
+			createCss2Button(`btnPauseBack`, g_lblNameObj.b_back, () => {
+				if (g_retryInProgress) return;
+				g_audio.pause();
+				g_timerHandler.clearTimeout(g_timeoutEvtId);
+				titleInit();
+			}, { ...btnPos(0), title: g_lblNameObj.l_titleBack }, g_cssObj.button_Back),
+
+			createCss2Button(`btnPauseRetry`, g_lblNameObj.b_retry, async () => {
+				if (g_retryInProgress) return;
+				await executeRetry(`Retry`);
+			}, { ...btnPos(1), title: g_lblNameObj.l_retry }, g_cssObj.button_Reset),
+
+			createCss2Button(`btnPauseResume`, g_lblNameObj.b_resume, () => {
+				resumeTimeline(true);
+			}, { ...btnPos(2), siz: 16, fontWeight: `bold`, title: g_lblNameObj.b_resume }, g_cssObj.button_Next),
+		);
+	};
+
+	/**
+	 * ポーズ表示(Pauseラベル・ポーズメニュー)を表示
+	 */
+	const showPauseUI = () => {
+		if (document.getElementById(`lblPauseMark`) == null) {
+			divRoot.appendChild(createDivCss2Label(`lblPauseMark`, `Pause`, {
+				...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
+			}));
+		}
+		showPauseMenu();
+	};
+
+	/**
+	 * ポーズ表示(Pauseラベル・ポーズメニュー)を非表示
+	 */
+	const hidePauseUI = () => {
+		deleteDiv(divRoot, `lblPauseMark`);
+		deleteDiv(divRoot, PAUSE_MENU_ID);
+	};
+
 	const pauseTimeline = (_manual = false) => {
 		// カウントダウン中に再度バックグラウンド化した場合は、カウントダウンのみ中断する
 		// (音源は既に停止済み・gamePausedも付与済みのため、以降の処理は不要)
@@ -1881,18 +1955,15 @@ const mainInit = () => {
 				// カウントダウン中に手動ポーズキーが押された場合、手動扱いに切り替える
 				manualPauseFlg = true;
 			}
+			// カウントダウン中断時はポーズ表示が消えているため、再表示する
+			showPauseUI();
 			return;
 		}
 		isPaused = true;
 		manualPauseFlg = _manual;
 		pausedElapsedTime = null;
 		pausedStartAdjustment = null;
-		if (document.getElementById(`lblPauseMark`) == null) {
-			const countdownLabel = createDivCss2Label(`lblPauseMark`, `Pause`, {
-				...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
-			});
-			divRoot.appendChild(countdownLabel);
-		}
+		showPauseUI();
 
 		if (g_audio instanceof AudioPlayer) {
 			if (g_audio.contextTime < g_audio.scheduledTime) {
@@ -1924,6 +1995,7 @@ const mainInit = () => {
 			mainKeyUpActFunc[g_stateObj.autoAll]();
 		}
 		divRoot.classList.add(`gamePaused`);
+		g_pseudoFullscreen.updateControls();
 	};
 
 	const resumeTimeline = (_manual = false) => {
@@ -1932,15 +2004,10 @@ const mainInit = () => {
 		}
 		if (!_manual && manualPauseFlg) {
 			// 手動ポーズ中は、タブ復帰による自動再開をスキップする
-			if (document.getElementById(`lblPauseMark`) == null) {
-				const countdownLabel = createDivCss2Label(`lblPauseMark`, `Pause`, {
-					...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
-				});
-				divRoot.appendChild(countdownLabel);
-			}
+			showPauseUI();
 			return;
 		}
-		deleteDiv(divRoot, `lblPauseMark`);
+		hidePauseUI();
 		const countdownLabel = createDivCss2Label(`lblResumeCountdown`, ``, {
 			...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
 		});
@@ -1988,6 +2055,7 @@ const mainInit = () => {
 			manualPauseFlg = false;
 			pausedElapsedTime = null;
 			pausedStartAdjustment = null;
+			g_pseudoFullscreen.updateControls();
 			g_timeoutEvtId = g_timerHandler.setTimeout(flowTimeline, 1000 / g_fps);
 
 			if (g_workObj.frzReturnPausedFlg) {
