@@ -1999,7 +1999,7 @@ const mainInit = () => {
 	};
 
 	const resumeTimeline = (_manual = false) => {
-		if (!isPaused || countdownTimeoutId !== null) {
+		if (!isPaused || countdownTimeoutId !== null || g_retryInProgress) {
 			return;
 		}
 		if (!_manual && manualPauseFlg) {
