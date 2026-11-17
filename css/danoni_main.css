@@ -78,12 +78,6 @@ html.danoni-pseudo-fullscreen #canvas-frame {
 	opacity: 1;
 }
 
-/* ポーズボタン表示時はアイコンを少し小さめに */
-#danoniPseudoFullscreenExit.isPause {
-	font-weight: bold;
-	letter-spacing: -1px;
-}
-
 /* タブのバックグラウンド化に伴う一時停止(danoni_main.js側でdivRootにgamePausedクラスを付け外し) */
 #divRoot.gamePaused * {
 	animation-play-state: paused !important;
