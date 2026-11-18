@@ -2091,7 +2091,6 @@ const mainInit = () => {
 
 	g_timelineHooks.pause = pauseTimeline;
 	g_timelineHooks.resume = resumeTimeline;
-	g_timelineHooks.isCountingDown = () => countdownTimeoutId !== null;
 	safeExecuteCustomHooks(`g_skinJsObj.main`, g_skinJsObj.main);
 
 	g_audio.currentTime = firstFrame / g_fps * g_headerObj.playbackRate;
