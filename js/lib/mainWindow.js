@@ -1872,6 +1872,89 @@ const mainInit = () => {
 
 	let nativeAudioWasPlaying = false;
 
+	const PAUSE_MENU_ID = `pauseMenu`;
+
+	/**
+	 * ポーズメニューの配置を取得
+	 * - Resumeのみ左右のボタンより約2倍のサイズにする
+	 * @returns {object}
+	 */
+	const getPauseMenuLayout = () => {
+		const btnW = 100;
+		const btnH = 40;
+		const resumeW = btnW * 2;
+		const resumeH = btnH * 2;
+		const gap = 10;
+		const totalW = btnW * 2 + resumeW + gap * 2;
+		return {
+			btnW, btnH, resumeW, resumeH, gap, totalW,
+			x: g_workObj.playingX + (g_sWidth - totalW) / 2,
+			y: g_lblPosObj.lblPauseMark.y + g_lblPosObj.lblPauseMark.h + 12,
+		};
+	};
+
+	/**
+	 * ポーズメニュー(Back/Resume/Retry)を表示
+	 * - 疑似フルスクリーン時のみ表示する
+	 */
+	const showPauseMenu = () => {
+		if (!g_pseudoFullscreen.isActive() || document.getElementById(PAUSE_MENU_ID) !== null) {
+			return;
+		}
+		const { btnW, btnH, resumeW, resumeH, gap, totalW, x, y } = getPauseMenuLayout();
+		const menu = createEmptySprite(divRoot, PAUSE_MENU_ID, {
+			x, y, w: totalW, h: resumeH, pointerEvents: C_DIS_AUTO,
+		});
+		const sideBtnPos = _x => ({
+			x: _x, y: (resumeH - btnH) / 2, w: btnW, h: btnH, siz: 14,
+			initDisabledFlg: false, groupName: `main`,
+		});
+		const resumeX = btnW + gap;
+		const iconLabel = (_icon, _label) =>
+			`<span><span class="pauseMenuIcon">${_icon}</span> ${_label}</span>`;
+
+		multiAppend(menu,
+			createCss2Button(`btnPauseBack`, iconLabel(g_emojiObj.back, g_lblNameObj.b_back), () => {
+				if (g_retryInProgress) return;
+				g_audio.pause();
+				g_timerHandler.clearTimeout(g_timeoutEvtId);
+				titleInit();
+			}, { ...sideBtnPos(0), title: g_lblNameObj.l_titleBack }, g_cssObj.button_Back),
+
+			createCss2Button(`btnPauseResume`, iconLabel(g_emojiObj.play, g_lblNameObj.b_resume), () => {
+				resumeTimeline(true);
+			}, {
+				x: resumeX, y: 0, w: resumeW, h: resumeH, siz: 24, fontWeight: `bold`,
+				initDisabledFlg: false, groupName: `main`, title: g_lblNameObj.b_resume,
+			}, g_cssObj.button_Next),
+
+			createCss2Button(`btnPauseRetry`, iconLabel(g_emojiObj.retry, g_lblNameObj.b_retry), async () => {
+				if (g_retryInProgress) return;
+				await executeRetry(`Retry`);
+			}, { ...sideBtnPos(resumeX + resumeW + gap), title: g_lblNameObj.l_retry }, g_cssObj.button_Reset),
+		);
+	};
+
+	/**
+	 * ポーズ表示(Pauseラベル・ポーズメニュー)を表示
+	 */
+	const showPauseUI = () => {
+		if (document.getElementById(`lblPauseMark`) == null) {
+			divRoot.appendChild(createDivCss2Label(`lblPauseMark`, `Pause`, {
+				...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
+			}));
+		}
+		showPauseMenu();
+	};
+
+	/**
+	 * ポーズ表示(Pauseラベル・ポーズメニュー)を非表示
+	 */
+	const hidePauseUI = () => {
+		deleteDiv(divRoot, `lblPauseMark`);
+		deleteDiv(divRoot, PAUSE_MENU_ID);
+	};
+
 	const pauseTimeline = (_manual = false) => {
 		// カウントダウン中に再度バックグラウンド化した場合は、カウントダウンのみ中断する
 		// (音源は既に停止済み・gamePausedも付与済みのため、以降の処理は不要)
@@ -1881,18 +1964,17 @@ const mainInit = () => {
 				// カウントダウン中に手動ポーズキーが押された場合、手動扱いに切り替える
 				manualPauseFlg = true;
 			}
+			// カウントダウン中断時はポーズ表示が消えているため、再表示する
+			showPauseUI();
+			// カウントダウン中断後は通常のポーズ状態(リジューム表示)へ戻す
+			g_pseudoFullscreen.updateControls();
 			return;
 		}
 		isPaused = true;
 		manualPauseFlg = _manual;
 		pausedElapsedTime = null;
 		pausedStartAdjustment = null;
-		if (document.getElementById(`lblPauseMark`) == null) {
-			const countdownLabel = createDivCss2Label(`lblPauseMark`, `Pause`, {
-				...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
-			});
-			divRoot.appendChild(countdownLabel);
-		}
+		showPauseUI();
 
 		if (g_audio instanceof AudioPlayer) {
 			if (g_audio.contextTime < g_audio.scheduledTime) {
@@ -1924,23 +2006,19 @@ const mainInit = () => {
 			mainKeyUpActFunc[g_stateObj.autoAll]();
 		}
 		divRoot.classList.add(`gamePaused`);
+		g_pseudoFullscreen.updateControls();
 	};
 
 	const resumeTimeline = (_manual = false) => {
-		if (!isPaused || countdownTimeoutId !== null) {
+		if (!isPaused || countdownTimeoutId !== null || g_retryInProgress) {
 			return;
 		}
 		if (!_manual && manualPauseFlg) {
 			// 手動ポーズ中は、タブ復帰による自動再開をスキップする
-			if (document.getElementById(`lblPauseMark`) == null) {
-				const countdownLabel = createDivCss2Label(`lblPauseMark`, `Pause`, {
-					...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
-				});
-				divRoot.appendChild(countdownLabel);
-			}
+			showPauseUI();
 			return;
 		}
-		deleteDiv(divRoot, `lblPauseMark`);
+		hidePauseUI();
 		const countdownLabel = createDivCss2Label(`lblResumeCountdown`, ``, {
 			...g_lblPosObj.lblPauseMark, x: g_workObj.playingX,
 		});
@@ -1988,6 +2066,7 @@ const mainInit = () => {
 			manualPauseFlg = false;
 			pausedElapsedTime = null;
 			pausedStartAdjustment = null;
+			g_pseudoFullscreen.updateControls();
 			g_timeoutEvtId = g_timerHandler.setTimeout(flowTimeline, 1000 / g_fps);
 
 			if (g_workObj.frzReturnPausedFlg) {
@@ -2005,6 +2084,9 @@ const mainInit = () => {
 			countdownTimeoutId = g_timerHandler.setTimeout(() => tick(_remaining - 1), 1000);
 		};
 		tick(3);
+
+		// カウントダウン中は右上ボタンをポーズ表示にし、再度ポーズ（カウントダウン中断）できるようにする
+		g_pseudoFullscreen.updateControls(true, true);
 	};
 
 	g_timelineHooks.pause = pauseTimeline;
@@ -2800,7 +2882,10 @@ const executeRetry = async (_logLabel = `Retry`) => {
 		prepareScoreData(true);
 		mainInit();
 	} catch (e) {
-		console.warn(`${_logLabel} audio load error: ${e}`);
+		// loading扱いで警告メッセージを出す
+		clearWindow();
+		g_currentPage = `loading`;
+		makeWarningWindow(`${_logLabel} error: ${e}`, { resetFlg: true, backBtnUse: true });
 	} finally {
 		g_retryInProgress = false;
 	}

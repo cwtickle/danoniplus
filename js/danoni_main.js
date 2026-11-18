@@ -2485,7 +2485,8 @@ const clearWindow = (_customDisplayName = ``) => {
 
 	// 疑似フルスクリーン表示中は#canvas-frameの幅変更に追従
 	g_pseudoFullscreen.fit();
-	g_pseudoFullscreen.updateControls(_customDisplayName === `Main`);
+	// ページ遷移時は各画面の初期化でg_currentPageが更新された後、右上ボタンへ状態を反映する
+	Promise.resolve().then(() => g_pseudoFullscreen.updateControls(_customDisplayName === `Main`));
 };
 
 /**
