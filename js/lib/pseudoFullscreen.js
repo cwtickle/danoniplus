@@ -94,9 +94,10 @@ const g_pseudoFullscreen = (() => {
 	 * 疑似フルスクリーン時の画面状態を右上ボタンへ反映
 	 * - プレイ中: ポーズ、ポーズ中: リジューム、タイトル: 全画面解除、それ以外: 非表示
 	 * @param {boolean} [_isMain=g_currentPage === `main`]
-	 * @param {boolean} [_isCountingDown=false] ポーズ解除カウントダウン中かどうか
+	 * @param {boolean} [_isCountingDown=g_timelineHooks.isCountingDown()] ポーズ解除カウントダウン中かどうか
 	 */
-	const updateControls = (_isMain = g_currentPage === `main`, _isCountingDown = false) => {
+	const updateControls = (_isMain = g_currentPage === `main`,
+		_isCountingDown = g_timelineHooks.isCountingDown?.() ?? false) => {
 		if (!active) return;
 		if (_isMain) {
 			const isPaused = document.getElementById(`divRoot`)?.classList.contains(`gamePaused`) ?? false;

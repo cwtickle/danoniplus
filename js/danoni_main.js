@@ -300,7 +300,7 @@ let g_timeoutEvtTitleId = 0;
 let g_timeoutEvtResultId = 0;
 
 // タブのバックグラウンド化に伴う一時停止/再開のフック
-let g_timelineHooks = { pause: () => { }, resume: () => { } };
+let g_timelineHooks = { pause: () => { }, resume: () => { }, isCountingDown: () => false };
 let g_timelineSessionId = 0; // mainInit()呼び出しごとに採番。古いセッションのfinishResume無効化に使用
 
 let g_inputKeyBuffer = {};
@@ -2486,7 +2486,8 @@ const clearWindow = (_customDisplayName = ``) => {
 	// 疑似フルスクリーン表示中は#canvas-frameの幅変更に追従
 	g_pseudoFullscreen.fit();
 	// ページ遷移時は各画面の初期化でg_currentPageが更新された後、右上ボタンへ状態を反映する
-	Promise.resolve().then(() => g_pseudoFullscreen.updateControls(_customDisplayName === `Main`));
+	// (実行時点のページ・カウントダウン状態を読むため、引数は固定しない)
+	Promise.resolve().then(() => g_pseudoFullscreen.updateControls());
 };
 
 /**
