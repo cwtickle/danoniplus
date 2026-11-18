@@ -1925,7 +1925,7 @@ const mainInit = () => {
 				resumeTimeline(true);
 			}, {
 				x: resumeX, y: 0, w: resumeW, h: resumeH, siz: 24, fontWeight: `bold`,
-				initDisabledFlg: false, groupName: `main`, title: g_lblNameObj.b_resume,
+				initDisabledFlg: false, groupName: `main`, title: g_lblNameObj.l_resume,
 			}, g_cssObj.button_Next),
 
 			createCss2Button(`btnPauseRetry`, iconLabel(g_emojiObj.retry, g_lblNameObj.b_retry), async () => {
