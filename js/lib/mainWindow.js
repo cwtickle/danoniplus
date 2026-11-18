@@ -2882,8 +2882,6 @@ const executeRetry = async (_logLabel = `Retry`) => {
 		prepareScoreData(true);
 		mainInit();
 	} catch (e) {
-		console.warn(`${_logLabel} audio load error: ${e}`);
-
 		// メイン画面をクリアした後に読み込みが失敗した場合、旧セッションを再開できてしまわないよう
 		// エラーメッセージを引き継いでタイトル画面へ戻す
 		g_errMsgObj.main.forEach(msg => {
@@ -2892,7 +2890,11 @@ const executeRetry = async (_logLabel = `Retry`) => {
 			}
 		});
 		g_errMsgObj.main = [];
-		titleInit();
+
+		// loading扱いで警告メッセージを出す
+		clearWindow();
+		g_currentPage = `loading`;
+		makeWarningWindow(`${_logLabel} audio load error: ${e}`, { backBtnUse: true });
 	} finally {
 		g_retryInProgress = false;
 	}
