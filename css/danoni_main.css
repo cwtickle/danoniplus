@@ -78,22 +78,28 @@ html.danoni-pseudo-fullscreen #canvas-frame {
 	opacity: 1;
 }
 
-/* 疑似フルスクリーン：プレイ中の一時停止ボタン(赤) */
+/* 疑似フルスクリーン：プレイ中の一時停止ボタン(黄) */
 #danoniPseudoFullscreenExit.isPause {
+	border-color: var(--button-bgHover-setting, #999900);
+	background-color: var(--button-bg-setting, #333311);
+	color: var(--button-color-setting-x, #ffffff);
+	opacity: 0.85;
+}
+
+/* 疑似フルスクリーン：ポーズ中のリジュームボタン(赤) */
+#danoniPseudoFullscreenExit.isResume {
 	border-color: rgba(255, 153, 153, 0.9);
 	background-color: rgba(204, 51, 51, 0.9);
 	opacity: 0.85;
 }
 
-/* 疑似フルスクリーン：ポーズ中のリジュームボタン(緑) */
-#danoniPseudoFullscreenExit.isResume {
-	border-color: rgba(153, 255, 153, 0.9);
-	background-color: rgba(51, 153, 51, 0.9);
-	opacity: 0.85;
+#danoniPseudoFullscreenExit.isPause:hover,
+#danoniPseudoFullscreenExit.isPause:focus-visible {
+	background-color: var(--button-bgHover-setting, #999900);
+	color: var(--button-colorHover-setting-x, #ffffff);
+	opacity: 1;
 }
 
-#danoniPseudoFullscreenExit.isPause:hover,
-#danoniPseudoFullscreenExit.isPause:focus-visible,
 #danoniPseudoFullscreenExit.isResume:hover,
 #danoniPseudoFullscreenExit.isResume:focus-visible {
 	opacity: 1;
