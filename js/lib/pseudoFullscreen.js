@@ -41,19 +41,31 @@ const g_pseudoFullscreen = (() => {
 		};
 	};
 
+	/** 右上ボタンのアイコンサイズ(px) */
+	const CONTROL_BTN_SIZES = { pause: 18, resume: 22, exit: 24 };
+
 	/**
 	 * 右上ボタンの表示を状態に応じて切り替え
-	 * @param {string} _mode pause: ポーズ, exit: 全画面解除
+	 * @param {string} _mode pause: ポーズ, resume: リジューム, exit: 全画面解除, hidden: 非表示
 	 */
 	const setControlMode = _mode => {
 		const controlBtn = document.getElementById(`danoniPseudoFullscreenExit`);
 		if (controlBtn === null) return;
 
+		controlBtn.classList.remove(`isPause`, `isResume`);
+
+		if (_mode === `hidden`) {
+			controlBtn.style.display = `none`;
+			controlBtn.onclick = null;
+			return;
+		}
+
 		const uiScale = 1 / (window.visualViewport?.scale || 1);
-		controlBtn.style.fontSize = wUnit((_mode === `pause` ? 18 : 24) * uiScale);
+		controlBtn.style.display = `flex`;
+		controlBtn.style.fontSize = wUnit(CONTROL_BTN_SIZES[_mode] * uiScale);
 
 		if (_mode === `pause`) {
-			controlBtn.innerHTML = `&#10074;&#10074;`;
+			controlBtn.innerHTML = g_emojiObj.pause;
 			controlBtn.classList.add(`isPause`);
 			controlBtn.title = g_lblNameObj.b_pause;
 			controlBtn.setAttribute(`aria-label`, g_lblNameObj.b_pause);
@@ -61,9 +73,17 @@ const g_pseudoFullscreen = (() => {
 				if (!active || g_retryInProgress) return;
 				g_timelineHooks.pause(true);
 			};
+		} else if (_mode === `resume`) {
+			controlBtn.innerHTML = g_emojiObj.play;
+			controlBtn.classList.add(`isResume`);
+			controlBtn.title = g_lblNameObj.b_resume;
+			controlBtn.setAttribute(`aria-label`, g_lblNameObj.b_resume);
+			controlBtn.onclick = () => {
+				if (!active || g_retryInProgress) return;
+				g_timelineHooks.resume(true);
+			};
 		} else {
-			controlBtn.innerHTML = `&#x2715;`;
-			controlBtn.classList.remove(`isPause`);
+			controlBtn.innerHTML = g_emojiObj.close;
 			controlBtn.title = g_lblNameObj.b_exitFullscreen;
 			controlBtn.setAttribute(`aria-label`, g_lblNameObj.b_exitFullscreen);
 			controlBtn.onclick = () => exit();
@@ -72,12 +92,20 @@ const g_pseudoFullscreen = (() => {
 
 	/**
 	 * 疑似フルスクリーン時の画面状態を右上ボタンへ反映
+	 * - プレイ中: ポーズ、ポーズ中: リジューム、タイトル: 全画面解除、それ以外: 非表示
 	 * @param {boolean} [_isMain=g_currentPage === `main`]
+	 * @param {boolean} [_isCountingDown=false] ポーズ解除カウントダウン中かどうか
 	 */
-	const updateControls = (_isMain = g_currentPage === `main`) => {
+	const updateControls = (_isMain = g_currentPage === `main`, _isCountingDown = false) => {
 		if (!active) return;
-		const isPaused = document.getElementById(`divRoot`)?.classList.contains(`gamePaused`) ?? false;
-		setControlMode(_isMain && !isPaused ? `pause` : `exit`);
+		if (_isMain) {
+			const isPaused = document.getElementById(`divRoot`)?.classList.contains(`gamePaused`) ?? false;
+			setControlMode(isPaused && !_isCountingDown ? `resume` : `pause`);
+		} else if (g_currentPage === `title` || g_currentPage === `initial`) {
+			setControlMode(`exit`);
+		} else {
+			setControlMode(`hidden`);
+		}
 	};
 
 	/**
@@ -111,7 +139,9 @@ const g_pseudoFullscreen = (() => {
 			const margin = 8 * uiScale;
 			exitBtn.style.width = wUnit(btnSize);
 			exitBtn.style.height = wUnit(btnSize);
-			exitBtn.style.fontSize = wUnit((exitBtn.classList.contains(`isPause`) ? 18 : 24) * uiScale);
+			const mode = exitBtn.classList.contains(`isPause`) ? `pause`
+				: exitBtn.classList.contains(`isResume`) ? `resume` : `exit`;
+			exitBtn.style.fontSize = wUnit(CONTROL_BTN_SIZES[mode] * uiScale);
 			exitBtn.style.left = wUnit(viewport.left + viewport.width - btnSize - margin);
 			exitBtn.style.top = wUnit(viewport.top + margin);
 		}

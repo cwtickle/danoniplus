@@ -78,6 +78,27 @@ html.danoni-pseudo-fullscreen #canvas-frame {
 	opacity: 1;
 }
 
+/* 疑似フルスクリーン：プレイ中の一時停止ボタン(赤) */
+#danoniPseudoFullscreenExit.isPause {
+	border-color: rgba(255, 153, 153, 0.9);
+	background-color: rgba(204, 51, 51, 0.9);
+	opacity: 0.85;
+}
+
+/* 疑似フルスクリーン：ポーズ中のリジュームボタン(緑) */
+#danoniPseudoFullscreenExit.isResume {
+	border-color: rgba(153, 255, 153, 0.9);
+	background-color: rgba(51, 153, 51, 0.9);
+	opacity: 0.85;
+}
+
+#danoniPseudoFullscreenExit.isPause:hover,
+#danoniPseudoFullscreenExit.isPause:focus-visible,
+#danoniPseudoFullscreenExit.isResume:hover,
+#danoniPseudoFullscreenExit.isResume:focus-visible {
+	opacity: 1;
+}
+
 /* タブのバックグラウンド化に伴う一時停止(danoni_main.js側でdivRootにgamePausedクラスを付け外し) */
 #divRoot.gamePaused * {
 	animation-play-state: paused !important;

@@ -1876,53 +1876,60 @@ const mainInit = () => {
 
 	/**
 	 * ポーズメニューの配置を取得
+	 * - Resumeのみ左右のボタンより約2倍のサイズにする
 	 * @returns {object}
 	 */
 	const getPauseMenuLayout = () => {
-		const btnW = 120;
+		const btnW = 100;
 		const btnH = 40;
+		const resumeW = btnW * 2;
+		const resumeH = btnH * 2;
 		const gap = 10;
-		const totalW = btnW * 3 + gap * 2;
+		const totalW = btnW * 2 + resumeW + gap * 2;
 		return {
-			btnW, btnH, gap, totalW,
+			btnW, btnH, resumeW, resumeH, gap, totalW,
 			x: g_workObj.playingX + (g_sWidth - totalW) / 2,
 			y: g_lblPosObj.lblPauseMark.y + g_lblPosObj.lblPauseMark.h + 12,
 		};
 	};
 
 	/**
-	 * ポーズメニュー(Back/Retry/Resume)を表示
+	 * ポーズメニュー(Back/Resume/Retry)を表示
 	 * - 疑似フルスクリーン時のみ表示する
 	 */
 	const showPauseMenu = () => {
 		if (!g_pseudoFullscreen.isActive() || document.getElementById(PAUSE_MENU_ID) !== null) {
 			return;
 		}
-		const { btnW, btnH, gap, totalW, x, y } = getPauseMenuLayout();
+		const { btnW, btnH, resumeW, resumeH, gap, totalW, x, y } = getPauseMenuLayout();
 		const menu = createEmptySprite(divRoot, PAUSE_MENU_ID, {
-			x, y, w: totalW, h: btnH, pointerEvents: C_DIS_AUTO,
+			x, y, w: totalW, h: resumeH, pointerEvents: C_DIS_AUTO,
 		});
-		const btnPos = _idx => ({
-			x: (btnW + gap) * _idx, y: 0, w: btnW, h: btnH, siz: 14,
+		const sideBtnPos = _x => ({
+			x: _x, y: (resumeH - btnH) / 2, w: btnW, h: btnH, siz: 14,
 			initDisabledFlg: false, groupName: `main`,
 		});
+		const resumeX = btnW + gap;
 
 		multiAppend(menu,
-			createCss2Button(`btnPauseBack`, g_lblNameObj.b_back, () => {
+			createCss2Button(`btnPauseBack`, `${g_emojiObj.back} ${g_lblNameObj.b_back}`, () => {
 				if (g_retryInProgress) return;
 				g_audio.pause();
 				g_timerHandler.clearTimeout(g_timeoutEvtId);
 				titleInit();
-			}, { ...btnPos(0), title: g_lblNameObj.l_titleBack }, g_cssObj.button_Back),
+			}, { ...sideBtnPos(0), title: g_lblNameObj.l_titleBack }, g_cssObj.button_Back),
 
-			createCss2Button(`btnPauseRetry`, g_lblNameObj.b_retry, async () => {
+			createCss2Button(`btnPauseResume`, `${g_emojiObj.play} ${g_lblNameObj.b_resume}`, () => {
+				resumeTimeline(true);
+			}, {
+				x: resumeX, y: 0, w: resumeW, h: resumeH, siz: 24, fontWeight: `bold`,
+				initDisabledFlg: false, groupName: `main`, title: g_lblNameObj.b_resume,
+			}, g_cssObj.button_Reset),
+
+			createCss2Button(`btnPauseRetry`, `${g_emojiObj.retry} ${g_lblNameObj.b_retry}`, async () => {
 				if (g_retryInProgress) return;
 				await executeRetry(`Retry`);
-			}, { ...btnPos(1), title: g_lblNameObj.l_retry }, g_cssObj.button_Reset),
-
-			createCss2Button(`btnPauseResume`, g_lblNameObj.b_resume, () => {
-				resumeTimeline(true);
-			}, { ...btnPos(2), siz: 16, fontWeight: `bold`, title: g_lblNameObj.b_resume }, g_cssObj.button_Next),
+			}, { ...sideBtnPos(resumeX + resumeW + gap), title: g_lblNameObj.l_retry }, g_cssObj.button_Next),
 		);
 	};
 
@@ -1957,6 +1964,8 @@ const mainInit = () => {
 			}
 			// カウントダウン中断時はポーズ表示が消えているため、再表示する
 			showPauseUI();
+			// カウントダウン中断後は通常のポーズ状態(リジューム表示)へ戻す
+			g_pseudoFullscreen.updateControls();
 			return;
 		}
 		isPaused = true;
@@ -2073,6 +2082,9 @@ const mainInit = () => {
 			countdownTimeoutId = g_timerHandler.setTimeout(() => tick(_remaining - 1), 1000);
 		};
 		tick(3);
+
+		// カウントダウン中は右上ボタンをポーズ表示にし、再度ポーズ（カウントダウン中断）できるようにする
+		g_pseudoFullscreen.updateControls(true, true);
 	};
 
 	g_timelineHooks.pause = pauseTimeline;
