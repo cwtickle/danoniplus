@@ -5146,8 +5146,9 @@ const g_lang_lblNameObj = {
         j_excessive: `Excessive`,
 
         l_retry: `リトライ`,
-        l_titleBack: `タイトルバック`,
+        l_titleBack: `タイトルへ戻る`,
         l_pause: `ポーズ`,
+        l_resume: `プレイを再開`,
 
         helpUrl: `https://github.com/cwtickle/danoniplus/wiki/AboutGameSystem`,
         securityUrl: `https://github.com/cwtickle/danoniplus/security/policy`,
@@ -5218,6 +5219,7 @@ const g_lang_lblNameObj = {
         l_retry: `Retry`,
         l_titleBack: `Go to title`,
         l_pause: `Pause`,
+        l_resume: `Resume`,
 
         helpUrl: `https://github.com/cwtickle/danoniplus-docs/wiki/AboutGameSystem`,
         securityUrl: `https://github.com/cwtickle/danoniplus-docs/wiki/SecurityPolicy`,
