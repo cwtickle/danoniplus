@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/11/16
- * Revised : 2026/11/16 (v53.0.0)
+ * Revised : 2026/11/19 (v53.1.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -26,7 +26,6 @@ const g_pseudoFullscreen = (() => {
 	let savedStyle = null;
 	let savedScroll = null;
 	let rafId = null;
-	let controls = null;
 
 	/**
 	 * 疑似フルスクリーンで使用する表示領域を取得
@@ -42,107 +41,71 @@ const g_pseudoFullscreen = (() => {
 		};
 	};
 
-	/**
-	 * 疑似フルスクリーン時のプレイ用ボタンの位置を更新
-	 * - 画面右下に配置し、ゲーム領域との余白が足りない場合はゲーム画面に重ねる
-	 */
-	const positionControls = () => {
-		if (controls === null || controls.style.display === `none`) return;
+	/** 右上ボタンのアイコンサイズ(px) */
+	const CONTROL_BTN_SIZES = { pause: 18, resume: 22, exit: 24 };
 
-		const viewport = getViewport();
+	/**
+	 * 右上ボタンの表示を状態に応じて切り替え
+	 * @param {string} _mode pause: ポーズ, resume: リジューム, exit: 全画面解除, hidden: 非表示
+	 */
+	const setControlMode = _mode => {
+		const controlBtn = document.getElementById(`danoniPseudoFullscreenExit`);
+		if (controlBtn === null) return;
+
+		controlBtn.classList.remove(`isPause`, `isResume`);
+
+		if (_mode === `hidden`) {
+			controlBtn.style.display = `none`;
+			controlBtn.onclick = null;
+			return;
+		}
+
 		const uiScale = 1 / (window.visualViewport?.scale || 1);
-		const buttonW = 72 * uiScale;
-		const buttonH = 36 * uiScale;
-		const gap = 8 * uiScale;
-		const margin = 12 * uiScale;
+		controlBtn.style.display = `flex`;
+		controlBtn.style.fontSize = wUnit(CONTROL_BTN_SIZES[_mode] * uiScale);
 
-		Array.from(controls.querySelectorAll(`button`)).forEach(btn => {
-			btn.style.width = wUnit(buttonW);
-			btn.style.height = wUnit(buttonH);
-			btn.style.fontSize = wUnit(14 * uiScale);
-		});
-		controls.style.gap = wUnit(gap);
-
-		const buttonCount = controls.querySelectorAll(`button`).length;
-		const totalH = buttonH * buttonCount + gap * Math.max(0, buttonCount - 1);
-		controls.style.left = wUnit(Math.max(
-			viewport.left + margin,
-			viewport.left + viewport.width - buttonW - margin
-		));
-		controls.style.top = wUnit(Math.max(
-			viewport.top + margin,
-			viewport.top + viewport.height - totalH - margin
-		));
-	};
-
-	/**
-	 * 疑似フルスクリーン時のプレイ用ボタンの表示/非表示を更新
-	 * @param {boolean} [_isMain=g_currentPage === `main`]
-	 */
-	const updateControls = (_isMain = g_currentPage === `main`) => {
-		if (!active || controls === null) return;
-
-		controls.style.display = _isMain ? `flex` : `none`;
-		if (_isMain) {
-			positionControls();
+		if (_mode === `pause`) {
+			controlBtn.innerHTML = g_emojiObj.pause;
+			controlBtn.classList.add(`isPause`);
+			controlBtn.title = g_lblNameObj.b_pause;
+			controlBtn.setAttribute(`aria-label`, g_lblNameObj.b_pause);
+			controlBtn.onclick = () => {
+				if (!active || g_retryInProgress) return;
+				g_timelineHooks.pause(true);
+			};
+		} else if (_mode === `resume`) {
+			controlBtn.innerHTML = g_emojiObj.play;
+			controlBtn.classList.add(`isResume`);
+			controlBtn.title = g_lblNameObj.b_resume;
+			controlBtn.setAttribute(`aria-label`, g_lblNameObj.b_resume);
+			controlBtn.onclick = () => {
+				if (!active || g_retryInProgress) return;
+				g_timelineHooks.resume(true);
+			};
+		} else {
+			controlBtn.innerHTML = g_emojiObj.close;
+			controlBtn.title = g_lblNameObj.b_exitFullscreen;
+			controlBtn.setAttribute(`aria-label`, g_lblNameObj.b_exitFullscreen);
+			controlBtn.onclick = () => exit();
 		}
 	};
 
 	/**
-	 * 疑似フルスクリーン時のプレイ用ボタンを作成
+	 * 疑似フルスクリーン時の画面状態を右上ボタンへ反映
+	 * - プレイ中: ポーズ、ポーズ中: リジューム、タイトル: 全画面解除、それ以外: 非表示
+	 * @param {boolean} [_isMain=g_currentPage === `main`]
+	 * @param {boolean} [_isCountingDown=false] ポーズ解除カウントダウン中かどうか
 	 */
-	const createControls = () => {
-		if (controls !== null) return;
-
-		const controlRoot = document.createElement(`div`);
-		controlRoot.id = `danoniPseudoFullscreenControls`;
-
-		const isPaused = () => document.getElementById(`divRoot`)?.classList.contains(`gamePaused`) ?? false;
-
-		const backBtn = document.createElement(`button`);
-		backBtn.id = `danoniPseudoFullscreenBack`;
-		backBtn.type = `button`;
-		backBtn.textContent = g_lblNameObj.b_back;
-		backBtn.title = g_lblNameObj.l_titleBack;
-		backBtn.onclick = () => {
-			if (!active || g_currentPage !== `main` || g_retryInProgress || isPaused()) return;
-			g_audio.pause();
-			g_timerHandler.clearTimeout(g_timeoutEvtId);
-			titleInit();
-		};
-
-		const retryBtn = document.createElement(`button`);
-		retryBtn.id = `danoniPseudoFullscreenRetry`;
-		retryBtn.type = `button`;
-		retryBtn.textContent = g_lblNameObj.b_retry;
-		retryBtn.title = g_lblNameObj.l_retry;
-		retryBtn.onclick = async () => {
-			if (!active || g_currentPage !== `main` || g_retryInProgress || isPaused()) return;
-			retryBtn.disabled = true;
-			try {
-				await executeRetry(`Retry`);
-			} finally {
-				retryBtn.disabled = false;
-			}
-		};
-
-		const pauseBtn = document.createElement(`button`);
-		pauseBtn.id = `danoniPseudoFullscreenPause`;
-		pauseBtn.type = `button`;
-		pauseBtn.textContent = g_lblNameObj.b_pause;
-		pauseBtn.title = g_lblNameObj.l_pause;
-		pauseBtn.onclick = () => {
-			if (!active || g_currentPage !== `main` || g_retryInProgress) return;
-			isPaused() ? g_timelineHooks.resume(true) : g_timelineHooks.pause(true);
-		};
-
-		controlRoot.appendChild(backBtn);
-		controlRoot.appendChild(retryBtn);
-		controlRoot.appendChild(pauseBtn);
-		document.body.appendChild(controlRoot);
-		controls = controlRoot;
-
-		updateControls();
+	const updateControls = (_isMain = g_currentPage === `main`, _isCountingDown = false) => {
+		if (!active) return;
+		if (_isMain) {
+			const isPaused = document.getElementById(`divRoot`)?.classList.contains(`gamePaused`) ?? false;
+			setControlMode(isPaused && !_isCountingDown ? `resume` : `pause`);
+		} else if (g_currentPage === `title` || g_currentPage === `initial`) {
+			setControlMode(`exit`);
+		} else {
+			setControlMode(`hidden`);
+		}
 	};
 
 	/**
@@ -176,12 +139,12 @@ const g_pseudoFullscreen = (() => {
 			const margin = 8 * uiScale;
 			exitBtn.style.width = wUnit(btnSize);
 			exitBtn.style.height = wUnit(btnSize);
-			exitBtn.style.fontSize = wUnit(24 * uiScale);
+			const mode = exitBtn.classList.contains(`isPause`) ? `pause`
+				: exitBtn.classList.contains(`isResume`) ? `resume` : `exit`;
+			exitBtn.style.fontSize = wUnit(CONTROL_BTN_SIZES[mode] * uiScale);
 			exitBtn.style.left = wUnit(viewport.left + viewport.width - btnSize - margin);
 			exitBtn.style.top = wUnit(viewport.top + margin);
 		}
-
-		positionControls();
 	};
 
 	/**
@@ -257,16 +220,11 @@ const g_pseudoFullscreen = (() => {
 		const exitBtn = document.createElement(`button`);
 		exitBtn.id = `danoniPseudoFullscreenExit`;
 		exitBtn.type = `button`;
-		exitBtn.innerHTML = `&#x2715;`;
-		exitBtn.title = g_lblNameObj.b_exitFullscreen;
-		exitBtn.setAttribute(`aria-label`, g_lblNameObj.b_exitFullscreen);
-		exitBtn.onclick = () => exit();
 		document.body.appendChild(exitBtn);
-
-		createControls();
 
 		bindEvents(frame);
 		fit();
+		updateControls();
 
 		// レイアウト確定後に再計算（URLバーの表示状態など）
 		requestFit();
@@ -298,8 +256,6 @@ const g_pseudoFullscreen = (() => {
 		document.documentElement.classList.remove(`danoni-pseudo-fullscreen`);
 		document.getElementById(`danoniPseudoFullscreenBackdrop`)?.remove();
 		document.getElementById(`danoniPseudoFullscreenExit`)?.remove();
-		controls?.remove();
-		controls = null;
 
 		if (savedScroll !== null) {
 			window.scrollTo(savedScroll.x, savedScroll.y);
@@ -318,6 +274,7 @@ const g_pseudoFullscreen = (() => {
 		toggle,
 		fit,
 		updateControls,
+		isActive: () => active,
 		getScale: () => scale,
 	};
 })();

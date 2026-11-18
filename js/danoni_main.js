@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/11/16
+ * Revised : 2026/11/19
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 53.0.0`;
-const g_revisedDate = `2026/11/16`;
+const g_version = `Ver 53.1.0`;
+const g_revisedDate = `2026/11/19`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -2485,7 +2485,8 @@ const clearWindow = (_customDisplayName = ``) => {
 
 	// 疑似フルスクリーン表示中は#canvas-frameの幅変更に追従
 	g_pseudoFullscreen.fit();
-	g_pseudoFullscreen.updateControls(_customDisplayName === `Main`);
+	// ページ遷移時は各画面の初期化でg_currentPageが更新された後、右上ボタンへ状態を反映する
+	Promise.resolve().then(() => g_pseudoFullscreen.updateControls(_customDisplayName === `Main`));
 };
 
 /**
