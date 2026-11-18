@@ -2885,7 +2885,7 @@ const executeRetry = async (_logLabel = `Retry`) => {
 		// loading扱いで警告メッセージを出す
 		clearWindow();
 		g_currentPage = `loading`;
-		makeWarningWindow(`${_logLabel} audio load error: ${e}`, { backBtnUse: true });
+		makeWarningWindow(`${_logLabel} error: ${e}`, { resetFlg: true, backBtnUse: true });
 	} finally {
 		g_retryInProgress = false;
 	}
