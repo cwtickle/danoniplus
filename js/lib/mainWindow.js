@@ -1910,23 +1910,25 @@ const mainInit = () => {
 			initDisabledFlg: false, groupName: `main`,
 		});
 		const resumeX = btnW + gap;
+		const iconLabel = (_icon, _label) =>
+			`<span><span class="pauseMenuIcon">${_icon}</span> ${_label}</span>`;
 
 		multiAppend(menu,
-			createCss2Button(`btnPauseBack`, `${g_emojiObj.back} ${g_lblNameObj.b_back}`, () => {
+			createCss2Button(`btnPauseBack`, iconLabel(g_emojiObj.back, g_lblNameObj.b_back), () => {
 				if (g_retryInProgress) return;
 				g_audio.pause();
 				g_timerHandler.clearTimeout(g_timeoutEvtId);
 				titleInit();
 			}, { ...sideBtnPos(0), title: g_lblNameObj.l_titleBack }, g_cssObj.button_Back),
 
-			createCss2Button(`btnPauseResume`, `${g_emojiObj.play} ${g_lblNameObj.b_resume}`, () => {
+			createCss2Button(`btnPauseResume`, iconLabel(g_emojiObj.play, g_lblNameObj.b_resume), () => {
 				resumeTimeline(true);
 			}, {
 				x: resumeX, y: 0, w: resumeW, h: resumeH, siz: 24, fontWeight: `bold`,
 				initDisabledFlg: false, groupName: `main`, title: g_lblNameObj.b_resume,
 			}, g_cssObj.button_Reset),
 
-			createCss2Button(`btnPauseRetry`, `${g_emojiObj.retry} ${g_lblNameObj.b_retry}`, async () => {
+			createCss2Button(`btnPauseRetry`, iconLabel(g_emojiObj.retry, g_lblNameObj.b_retry), async () => {
 				if (g_retryInProgress) return;
 				await executeRetry(`Retry`);
 			}, { ...sideBtnPos(resumeX + resumeW + gap), title: g_lblNameObj.l_retry }, g_cssObj.button_Next),

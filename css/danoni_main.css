@@ -627,6 +627,13 @@ input[type="color"] {
 	justify-content: center;
 }
 
+/* ポーズメニューのアイコン(絵文字フォントへのフォールバック防止) */
+.pauseMenuIcon {
+	font-family: sans-serif;
+	font-weight: normal;
+	font-variant-emoji: text;
+}
+
 .common_bold {
 	font-weight: bold;
 }

@@ -1109,7 +1109,7 @@ const g_emojiObj = {
     expand: `&#x26f6;`,       // 全画面 (fullscreen)
     back: `&#x2190;`,         // 左矢印 (leftwards arrow)
     retry: `&#x21ba;`,        // 反時計回りの矢印 (anticlockwise arrow)
-    play: `&#x25b6;`,         // 再生 (play)
+    play: `&#x25b6;&#xfe0e;`, // 再生 (play / テキスト表示を明示)
     pause: `&#10074;&#10074;`, // 一時停止 (pause)
     close: `&#x2715;`,        // 閉じる (close)
 };
