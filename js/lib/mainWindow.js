@@ -2883,6 +2883,16 @@ const executeRetry = async (_logLabel = `Retry`) => {
 		mainInit();
 	} catch (e) {
 		console.warn(`${_logLabel} audio load error: ${e}`);
+
+		// メイン画面をクリアした後に読み込みが失敗した場合、旧セッションを再開できてしまわないよう
+		// エラーメッセージを引き継いでタイトル画面へ戻す
+		g_errMsgObj.main.forEach(msg => {
+			if (!g_errMsgObj.title.includes(msg)) {
+				g_errMsgObj.title.push(msg);
+			}
+		});
+		g_errMsgObj.main = [];
+		titleInit();
 	} finally {
 		g_retryInProgress = false;
 	}
