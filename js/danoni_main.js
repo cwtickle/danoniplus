@@ -2492,6 +2492,9 @@ const clearWindow = (_customDisplayName = ``) => {
 	g_pseudoFullscreen.fit();
 	// ページ遷移時は各画面の初期化でg_currentPageが更新された後、右上ボタンへ状態を反映する
 	Promise.resolve().then(() => g_pseudoFullscreen.updateControls(_customDisplayName === `Main`));
+
+	// 画面遷移後にインスペクタを一度だけ更新
+	if (g_isDebug) g_idInspector.schedule();
 };
 
 /**
@@ -3216,7 +3219,7 @@ const g_idInspector = (() => {
 		}, true);
 	};
 
-	return { bind, setMode };
+	return { bind, setMode, schedule };
 })();
 
 // ライセンス原文、以下は削除しないでください
