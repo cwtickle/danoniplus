@@ -2758,6 +2758,7 @@ const g_idInspector = (() => {
 	let bound = false;
 	let cache = new Map();
 	const pointer = { x: 0, y: 0, valid: false };
+	let hoverIdx = 0, hoverKey = ``;   // Hoverモードの候補選択位置と、その候補組の識別キー
 
 	/*-------------------------------------------------------*/
 	/* 矩形・色の補助関数                                      */
@@ -2858,27 +2859,38 @@ const g_idInspector = (() => {
 		return items;
 	};
 
-	/**
-	 * ポインタ位置の対象要素を取得
-	 * - 通常: 描画物を持つ最も手前の要素 (これより奥の要素は隠れている)
-	 * - コンテナ込み: 最も手前の描画物以降(=隠れていない)の要素のうち、面積が最小のもの
-	 */
-	const findHit = () => {
-		if (!pointer.valid) return null;
+	/** ポインタ位置の候補一覧 (先頭ほど優先: 小さい順、同面積は文書順の後ろ=深い方が先) */
+	const findHits = () => {
+		if (!pointer.valid) return [];
 		const items = scan(pointer);
 		const topIdx = items.findLastIndex(item => item.info.painted);
 		if (!containerFlg) {
-			return topIdx >= 0 ? items[topIdx] : null;
+			return topIdx >= 0 ? [items[topIdx]] : [];
 		}
-		let best = null, bestArea = Infinity;
-		items.slice(Math.max(topIdx, 0)).forEach(item => {
-			const a = area(item.rect);
-			if (a <= bestArea) {
-				best = item;
-				bestArea = a;
-			}
-		});
-		return best;
+		return items.slice(Math.max(topIdx, 0))
+			.sort((a, b) => area(a.rect) - area(b.rect) || b.idx - a.idx);
+	};
+
+	/** 選択中の候補を返す (hits: 全候補, pos: 選択位置を付与) */
+	const findHit = () => {
+		const hits = findHits();
+		if (hits.length === 0) return null;
+
+		// 候補の組が変わったときだけ選択を先頭へ戻す
+		const key = hits.map(hit => hit.el.id).join(`,`);
+		if (key !== hoverKey) {
+			hoverKey = key;
+			hoverIdx = 0;
+		}
+		hoverIdx = (hoverIdx % hits.length + hits.length) % hits.length;
+		return { ...hits[hoverIdx], hits, pos: hoverIdx };
+	};
+
+	/** 選択する候補を前後に動かす (Hoverモードのみ) */
+	const cycleHit = _dir => {
+		if (mode !== 1) return;
+		hoverIdx += _dir;
+		schedule();
 	};
 
 	/*-------------------------------------------------------*/
@@ -2906,7 +2918,7 @@ const g_idInspector = (() => {
 		status.textContent =
 			`ID Inspector: ${MODES[mode]}${mode === 2 ? ` (${counts.labeled}/${counts.total} labeled)` : ``}` +
 			` | containers: ${containerFlg ? `ON` : `OFF`}\n` +
-			`Alt+Shift+I: mode / Alt+Shift+C: containers / Alt+Click: copy ID (+Shift: path)`;
+			`Alt+Shift+I: mode / Alt+Shift+C: containers / Alt+Shift+↑↓: pick overlapped (hover) / Alt+Click: copy ID (+Shift: path)`;
 	};
 
 	/*-------------------------------------------------------*/
@@ -2920,7 +2932,7 @@ const g_idInspector = (() => {
 			label.style.display = `none`;
 			return;
 		}
-		const { el, rect, info } = hit;
+		const { el, rect, info, hits, pos } = hit;
 		Object.assign(box.style, {
 			display: `block`,
 			left: wUnit(rect.left), top: wUnit(rect.top),
@@ -2931,6 +2943,17 @@ const g_idInspector = (() => {
 		if (el.classList.length > 0) lines.push(`class: ${[...el.classList].join(` `)}`);
 		const path = getPath(el, PATH_DEPTH);
 		if (path !== ``) lines.push(`path: ${path}`);
+		if (hits.length > 1) {
+			lines.push(`hits: ${pos + 1}/${hits.length} (Alt+Shift+↑↓)`);
+			// 選択位置が窓の中に入るようにスクロールさせる (先頭側・末尾側の省略数も表示)
+			const winSize = 10;
+			const winStart = Math.max(0, Math.min(pos - Math.floor(winSize / 2), hits.length - winSize));
+			const winEnd = Math.min(hits.length, winStart + winSize);
+			if (winStart > 0) lines.push(`  … ${winStart} more ↑`);
+			hits.slice(winStart, winEnd).forEach((h, i) =>
+				lines.push(`${winStart + i === pos ? `▶` : `  `}#${h.el.id}`));
+			if (winEnd < hits.length) lines.push(`  … ${hits.length - winEnd} more ↓`);
+		}
 		label.textContent = lines.join(`\n`);
 		label.style.display = `block`;
 
@@ -2964,16 +2987,20 @@ const g_idInspector = (() => {
 		const items = scan().map(item => ({ ...item, rect: intersect(item.rect, viewport) }))
 			.filter(item => !isEmpty(item.rect));
 
-		// 描画物を持つ要素は、自身の中心が「後から描画される別要素(子孫を除く)」に覆われていれば除外
-		// コンテナ(描画物なし)は、コンテナ込み指定時のみ全て対象
+		// 中心と四隅の5点が全て「後から描画される別要素(子孫を除く)」に覆われていれば、隠れているとみなして除外
+		// コンテナ(描画物なし)は、コンテナ込み指定時のみ対象
 		const painted = items.filter(item => item.info.painted);
-		const shown = items.filter(item => {
-			if (!item.info.painted) return containerFlg;
-			const cx = (item.rect.left + item.rect.right) / 2;
-			const cy = (item.rect.top + item.rect.bottom) / 2;
-			return !painted.some(other => other.idx > item.idx && !item.el.contains(other.el) &&
-				contains(other.rect, cx, cy));
-		});
+		const isCovered = item => {
+			const r = item.rect;
+			const pts = [
+				[(r.left + r.right) / 2, (r.top + r.bottom) / 2],
+				[r.left + 1, r.top + 1], [r.right - 1, r.top + 1],
+				[r.left + 1, r.bottom - 1], [r.right - 1, r.bottom - 1],
+			];
+			return pts.every(([x, y]) => painted.some(other =>
+				other.idx > item.idx && !item.el.contains(other.el) && contains(other.rect, x, y)));
+		};
+		const shown = items.filter(item => (item.info.painted || containerFlg) && !isCovered(item));
 		shown.sort((a, b) => area(b.rect) - area(a.rect));   // 面積の大きい順
 
 		const colorOf = depth => `hsl(${(depth * 47) % 360} 90% 60%)`;
@@ -3167,14 +3194,18 @@ const g_idInspector = (() => {
 		const actions = {
 			KeyI: () => setMode((mode + 1) % MODES.length),
 			KeyC: toggleContainers,
+			ArrowUp: () => cycleHit(-1),    // より小さい(子側)の候補へ
+			ArrowDown: () => cycleHit(1),   // より大きい(親側)の候補へ
 		};
 		g_handler.addListener(document, `keydown`, evt => {
 			if (!evt.altKey || !evt.shiftKey || evt.ctrlKey || evt.metaKey) return;
 			const action = actions[evt.code];
-			if (action === undefined) return;
+			// 矢印キーはHoverモード中のみ奪う (それ以外は通常のショートカットへ渡す)
+			if (action === undefined || (evt.code.startsWith(`Arrow`) && mode !== 1)) return;
 			evt.preventDefault();
 			evt.stopImmediatePropagation();
-			if (!evt.repeat) action();
+			// 矢印は長押しで連続移動できるよう repeat も許可
+			if (!evt.repeat || evt.code.startsWith('Arrow')) action();
 		}, true);
 
 		g_handler.addListener(document, `pointermove`, evt => {
