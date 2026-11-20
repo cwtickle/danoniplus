@@ -778,7 +778,7 @@ const updateWindowSiz = () => {
 
         /** 結果画面 */
         lblRank: {
-            x: 340, y: 160, w: 70, h: 20, siz: 50, align: C_ALIGN_CENTER,
+            x: 340, y: 160, w: 70, h: 50, siz: 50, align: C_ALIGN_CENTER,
         },
         lblResultPre: {
             x: g_sWidth / 2 - 150, y: 90, w: 200, h: 50, siz: 60, opacity: 0,
@@ -1270,7 +1270,7 @@ const g_resultObj = {
 };
 
 const C_RLT_BRACKET_L = 210;
-const C_RLT_HIDIF_X = 165;
+const C_RLT_HIDIF_X = 225;
 const C_RLT_BRACKET_R = 320;
 
 let g_allArrow = 0;

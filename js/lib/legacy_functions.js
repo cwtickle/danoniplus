@@ -76,7 +76,7 @@ const makeResultPlayData = (_id, _x, _color, _heightPos, _text, _align) => {
 };
 /** @deprecated */
 const makeResultSymbol = (_id, _x, _color, _heightPos, _text, _align) => {
-    const div = makeCssResultSymbol(_id, _x, ``, _heightPos, _text, _align);
+    const div = makeCssResultSymbol(_id, _x, ``, _heightPos, _text, { align: _align });
     div.style.color = _color;
     return div;
 };

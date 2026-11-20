@@ -175,28 +175,28 @@ const resultInit = () => {
 	Object.keys(jdgScoreObj).forEach(score =>
 		multiAppend(resultWindow,
 			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}`, 0,
-				g_cssObj[`common_${jdgScoreObj[score].color}`], jdgScoreObj[score].pos, jdgScoreObj[score].label),
-			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}S`, 50,
-				g_cssObj.common_score, jdgScoreObj[score].pos, g_resultObj[score], C_ALIGN_RIGHT),
+				g_cssObj[`common_${jdgScoreObj[score].color}`], jdgScoreObj[score].pos, jdgScoreObj[score].label, { w: 120 }),
+			makeCssResultSymbol(`lbl${jdgScoreObj[score].id}S`, 100,
+				g_cssObj.common_score, jdgScoreObj[score].pos, g_resultObj[score], { align: C_ALIGN_RIGHT, w: 100 }),
 		));
 	if (g_stateObj.autoAll === C_FLG_OFF) {
-		const [lblPosX, dataPosX] = [350, 260];
+		const [lblPosX, dataPosX] = [350, 340];
 		multiAppend(resultWindow,
-			makeCssResultSymbol(`lblFast`, lblPosX, g_cssObj.common_diffFast, 0, g_lblNameObj.j_fast),
-			makeCssResultSymbol(`lblSlow`, lblPosX, g_cssObj.common_diffSlow, 2, g_lblNameObj.j_slow),
-			makeCssResultSymbol(`lblFastS`, dataPosX, g_cssObj.score, 1, g_resultObj.fast, C_ALIGN_RIGHT),
-			makeCssResultSymbol(`lblSlowS`, dataPosX, g_cssObj.score, 3, g_resultObj.slow, C_ALIGN_RIGHT),
+			makeCssResultSymbol(`lblFast`, lblPosX, g_cssObj.common_diffFast, 0, g_lblNameObj.j_fast, { w: 90 }),
+			makeCssResultSymbol(`lblSlow`, lblPosX, g_cssObj.common_diffSlow, 2, g_lblNameObj.j_slow, { w: 90 }),
+			makeCssResultSymbol(`lblFastS`, dataPosX, g_cssObj.score, 1, g_resultObj.fast, { align: C_ALIGN_RIGHT, w: 70 }),
+			makeCssResultSymbol(`lblSlowS`, dataPosX, g_cssObj.score, 3, g_resultObj.slow, { align: C_ALIGN_RIGHT, w: 70 }),
 		);
 		if (estimatedAdj !== ``) {
 			multiAppend(resultWindow,
-				makeCssResultSymbol(`lblAdj`, lblPosX, g_cssObj.common_estAdj, 4, g_lblNameObj.j_adj),
-				makeCssResultSymbol(`lblAdjS`, dataPosX, g_cssObj.score, 5, `${getDiffFrame(estimatedAdj)}`, C_ALIGN_RIGHT),
+				makeCssResultSymbol(`lblAdj`, lblPosX, g_cssObj.common_estAdj, 4, g_lblNameObj.j_adj, { w: 90 }),
+				makeCssResultSymbol(`lblAdjS`, dataPosX, g_cssObj.score, 5, `${getDiffFrame(estimatedAdj)}`, { align: C_ALIGN_RIGHT, w: 70 }),
 			);
 		}
 		if (g_stateObj.excessive === C_FLG_ON) {
 			multiAppend(resultWindow,
-				makeCssResultSymbol(`lblExcessive`, lblPosX, g_cssObj.common_excessive, 6, g_lblNameObj.j_excessive),
-				makeCssResultSymbol(`lblExcessiveS`, dataPosX, g_cssObj.score, 7, g_resultObj.excessive, C_ALIGN_RIGHT),
+				makeCssResultSymbol(`lblExcessive`, lblPosX, g_cssObj.common_excessive, 6, g_lblNameObj.j_excessive, { w: 90 }),
+				makeCssResultSymbol(`lblExcessiveS`, dataPosX, g_cssObj.score, 7, g_resultObj.excessive, { align: C_ALIGN_RIGHT, w: 70 }),
 			);
 		}
 	}
@@ -252,17 +252,15 @@ const resultInit = () => {
 		Object.keys(jdgScoreObj).filter(score => score !== `score`).forEach(score =>
 			multiAppend(resultWindow,
 				makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L1`, C_RLT_BRACKET_L,
-					g_cssObj.result_scoreHiBlanket, jdgScoreObj[score].pos, `(+`),
+					g_cssObj.result_scoreHiBlanket, jdgScoreObj[score].pos, `(+`, { w: 20 }),
 				makeCssResultSymbol(`lbl${jdgScoreObj[score].id}LS`, C_RLT_HIDIF_X,
-					g_cssObj.result_scoreHi, jdgScoreObj[score].pos, 0, C_ALIGN_RIGHT),
+					g_cssObj.result_scoreHi, jdgScoreObj[score].pos, 0, { align: C_ALIGN_RIGHT, w: 90 }),
 				makeCssResultSymbol(`lbl${jdgScoreObj[score].id}L2`, C_RLT_BRACKET_R,
-					g_cssObj.result_scoreHiBlanket, jdgScoreObj[score].pos, `)`),
+					g_cssObj.result_scoreHiBlanket, jdgScoreObj[score].pos, `)`, { w: 20 }),
 			));
 
 	} else {
-		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 215, g_cssObj.result_noRecord, 4, `(No Record)`));
-		const lblAutoView = document.getElementById(`lblAutoView`);
-		lblAutoView.style.fontSize = wUnit(20);
+		resultWindow.appendChild(makeCssResultSymbol(`lblAutoView`, 215, g_cssObj.result_noRecord, 4, `(No Record)`, { siz: 20 }));
 	}
 
 	// ゲージ推移グラフの描画
@@ -518,13 +516,13 @@ const resultInit = () => {
 				multiAppend(resultWindow,
 					makeCssResultSymbol(`lbl${jdgScore.id}L1`, C_RLT_BRACKET_L,
 						`${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
-						jdgScore.pos, `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`),
+						jdgScore.pos, `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`, { w: 20 }),
 					makeCssResultSymbol(`lbl${jdgScore.id}LS`, C_RLT_HIDIF_X,
 						`${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHi}`,
-						jdgScore.pos, Math.abs(highscoreDfObj[score]), C_ALIGN_RIGHT),
+						jdgScore.pos, Math.abs(highscoreDfObj[score]), { align: C_ALIGN_RIGHT, w: 90 }),
 					makeCssResultSymbol(`lbl${jdgScore.id}L2`, C_RLT_BRACKET_R,
 						`${highscoreDfObj.score > 0 ? g_cssObj.result_scoreHiPlus : g_cssObj.result_scoreHiBlanket}`,
-						jdgScore.pos, `)`),
+						jdgScore.pos, `)`, { w: 20 }),
 				);
 			} else {
 				document.getElementById(`lbl${jdgScore.id}L1`).textContent = `(${highscoreDfObj[score] >= 0 ? "+" : "－"}`;
@@ -972,5 +970,5 @@ const makeCssResultPlayData = (_id, _x, _class, _heightPos, _text, _align = C_AL
  * @param {string} _align
  * @returns {HTMLDivElement}
  */
-const makeCssResultSymbol = (_id, _x, _class, _heightPos, _text, _align = C_ALIGN_LEFT) =>
-	makeCssResultPlayData(_id, _x, _class, _heightPos, _text, _align, { w: 150, siz: g_limitObj.jdgCntsSiz });
+const makeCssResultSymbol = (_id, _x, _class, _heightPos, _text, { align = C_ALIGN_LEFT, w = 150, siz = g_limitObj.jdgCntsSiz } = {}) =>
+	makeCssResultPlayData(_id, _x, _class, _heightPos, _text, align, { w, siz });
