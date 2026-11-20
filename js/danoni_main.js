@@ -133,6 +133,11 @@ const waitUntilLoaded = () => {
 	await loadScript2(`${g_rootPath}../js/lib/legacy_functions.js?${g_versionForUrl.split(`.`)[0]}`, false);
 	initialControl();
 
+	// デバッグ時のみ、IDインスペクタ (Alt+Shift+I で ON/OFF) を有効化
+	if (g_isDebug) {
+		g_idInspector.bind();
+	}
+
 	// プレイ画面(g_currentPage === `main`)でのみ有効化される、タブ非表示検知(常時1個だけ登録)
 	bindRingMouse();
 	g_handler.addListener(document, `visibilitychange`, () => {
@@ -2712,6 +2717,480 @@ const getKeyInfo = () => {
 		keyCtrlPtn, keyNum, posMax, divideCnt, keyGroupMaps, keyGroupList,
 	};
 };
+
+/*-----------------------------------------------------------*/
+/* デバッグ用: IDインスペクタ (g_isDebug時のみ)                */
+/*-----------------------------------------------------------*/
+
+/**
+ * 画面上のID付き要素を可視化するデバッグ機能
+ * - Alt+Shift+I : OFF -> Hover(ホバー表示) -> All(一括表示) -> OFF の順に切替
+ * - Alt+Shift+C : コンテナ(見た目を持たない階層用の要素)も対象にするかを切替
+ * - Alt+クリック : IDをコピー (Shiftも押すと divRoot からのパスをコピー)。通常のクリックは素通し
+ *
+ * 見えている要素だけを対象にする判定:
+ * - 表示状態 (visibility / 祖先を含む opacity / overflow による切り抜き) を getComputedStyle で確認
+ * - 重なり順は「文書順 = 描画順」と見做す。ポインタ位置を含む要素のうち、
+ *   背景・文字・canvas等の「描画物」を持つ最も手前の要素を採用し、それより奥の要素は隠れていると判断
+ * - divRoot の外(body直下)に描画し、既存DOMのスタイル・クラスは変更しない
+ */
+const g_idInspector = (() => {
+	const MODES = [`off`, `hover`, `all`];
+	const OVERLAY_ID = `danoniIdInspector`;
+	const PATH_DEPTH = 4;
+	const LABEL_FONT = 11;
+
+	let mode = 0;
+	let containerFlg = false;
+	let overlay = null, canvas = null, box = null, label = null, toast = null, status = null;
+	let rafId = null, observer = null, observeTimer = null, toastTimer = null;
+	let counts = { labeled: 0, total: 0 };
+	let bound = false;
+	let cache = new Map();
+	const pointer = { x: 0, y: 0, valid: false };
+
+	/*-------------------------------------------------------*/
+	/* 矩形・色の補助関数                                      */
+	/*-------------------------------------------------------*/
+
+	const intersect = (a, b) => ({
+		left: Math.max(a.left, b.left), top: Math.max(a.top, b.top),
+		right: Math.min(a.right, b.right), bottom: Math.min(a.bottom, b.bottom),
+	});
+	const isEmpty = r => r.right <= r.left || r.bottom <= r.top;
+	const contains = (r, x, y) => x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+	const area = r => (r.right - r.left) * (r.bottom - r.top);
+
+	/** computed color のアルファ値 (rgba(r, g, b, a) / rgb(r g b / a) 形式に対応) */
+	const colorAlpha = _color => {
+		if (_color === `transparent`) return 0;
+		let m = _color.match(/^rgba\(.*,\s*([\d.]+)\s*\)$/);
+		if (m !== null) return parseFloat(m[1]);
+		m = _color.match(/\/\s*([\d.]+)(%?)\s*\)$/);
+		if (m !== null) return parseFloat(m[1]) / (m[2] === `%` ? 100 : 1);
+		return 1;
+	};
+
+	/** 背景・枠線・文字・canvas等の「描画物」を自身で持つか (階層用の空コンテナは false) */
+	const isPainted = (_el, _cs) => {
+		if ([`CANVAS`, `IMG`, `INPUT`, `TEXTAREA`, `SELECT`].includes(_el.tagName)) return true;
+		if (colorAlpha(_cs.backgroundColor) > 0 || _cs.backgroundImage !== `none`) return true;
+		if (parseFloat(_cs.borderTopWidth) > 0 && _cs.borderTopStyle !== `none` && colorAlpha(_cs.borderTopColor) > 0) return true;
+		const ownText = Array.from(_el.childNodes)
+			.some(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== ``);
+		// ID無しの子孫(span等)だけで文字を構成している場合も描画物とみなす
+		return ownText || (_el.querySelector(`[id]`) === null && _el.textContent.trim() !== ``);
+	};
+
+	/*-------------------------------------------------------*/
+	/* 要素の解析・スキャン                                    */
+	/*-------------------------------------------------------*/
+
+	/**
+	 * 要素の表示状態を解析 (スキャン単位でキャッシュ)
+	 * - clip: overflow によって切り抜かれる祖先の矩形の共通部分
+	 * - opacity: 祖先を含めた累積の不透明度
+	 */
+	const analyze = _el => {
+		let info = cache.get(_el);
+		if (info !== undefined) return info;
+
+		const cs = getComputedStyle(_el);
+		const parent = _el.parentElement;
+		const pInfo = (_el.id === `canvas-frame` || parent === null) ? null : analyze(parent);
+
+		let clip = pInfo?.clip ?? null;
+		if (pInfo?.clipsChildren) {
+			const pr = parent.getBoundingClientRect();
+			clip = clip === null ? pr : intersect(clip, pr);
+		}
+		const opacity = (pInfo?.opacity ?? 1) * parseFloat(cs.opacity);
+		info = {
+			clip, opacity,
+			depth: (pInfo?.depth ?? -1) + 1,
+			hidden: cs.visibility !== `visible` || opacity <= 0.01,
+			clipsChildren: cs.overflowX !== `visible` || cs.overflowY !== `visible`,
+			painted: isPainted(_el, cs),
+		};
+		cache.set(_el, info);
+		return info;
+	};
+
+	/**
+	 * divRoot 配下の表示中のID付き要素を、文書順(=描画順)で取得
+	 * @param {{x: number, y: number}|null} _point 指定時はその位置を含むものだけを対象にする
+	 * @returns {{ el: HTMLElement, rect: object, info: object, idx: number }[]}
+	 */
+	const scan = (_point = null) => {
+		cache = new Map();
+		const root = document.getElementById(`divRoot`);
+		if (root === null) return [];
+
+		const items = [];
+		[root, ...root.querySelectorAll(`[id]`)].forEach(el => {
+			let rect = el.getBoundingClientRect();
+			if (rect.width <= 0 || rect.height <= 0) return;
+			if (_point !== null && !contains(rect, _point.x, _point.y)) return;
+
+			const info = analyze(el);
+			if (info.hidden) return;
+			if (info.clip !== null) {
+				rect = intersect(rect, info.clip);
+			}
+			if (isEmpty(rect) || (_point !== null && !contains(rect, _point.x, _point.y))) return;
+			items.push({ el, rect, info, idx: items.length });
+		});
+		return items;
+	};
+
+	/**
+	 * ポインタ位置の対象要素を取得
+	 * - 通常: 描画物を持つ最も手前の要素 (これより奥の要素は隠れている)
+	 * - コンテナ込み: 最も手前の描画物以降(=隠れていない)の要素のうち、面積が最小のもの
+	 */
+	const findHit = () => {
+		if (!pointer.valid) return null;
+		const items = scan(pointer);
+		const topIdx = items.findLastIndex(item => item.info.painted);
+		if (!containerFlg) {
+			return topIdx >= 0 ? items[topIdx] : null;
+		}
+		let best = null, bestArea = Infinity;
+		items.slice(Math.max(topIdx, 0)).forEach(item => {
+			const a = area(item.rect);
+			if (a <= bestArea) {
+				best = item;
+				bestArea = a;
+			}
+		});
+		return best;
+	};
+
+	/*-------------------------------------------------------*/
+	/* 表示用テキストの取得                                    */
+	/*-------------------------------------------------------*/
+
+	/** 祖先のID連鎖 (_depth個まで。超過分は「…」で省略) */
+	const getPath = (_el, _depth = Infinity) => {
+		const ids = [];
+		for (let p = _el.parentElement; p !== null && p.id !== `canvas-frame`; p = p.parentElement) {
+			if (p.id !== ``) ids.unshift(p.id);
+		}
+		const part = ids.slice(-_depth);
+		return (ids.length > part.length ? `… > ` : ``) + part.join(` > `);
+	};
+
+	/** ゲーム内座標系 (インラインstyle) での位置・サイズ */
+	const getStyleInfo = _el => {
+		const pick = _name => _el.style[_name] !== `` ? _el.style[_name] : `-`;
+		return `x:${pick(`left`)} y:${pick(`top`)} w:${pick(`width`)} h:${pick(`height`)}`;
+	};
+
+	const updateStatus = () => {
+		if (status === null) return;
+		status.textContent =
+			`ID Inspector: ${MODES[mode]}${mode === 2 ? ` (${counts.labeled}/${counts.total} labeled)` : ``}` +
+			` | containers: ${containerFlg ? `ON` : `OFF`}\n` +
+			`Alt+Shift+I: mode / Alt+Shift+C: containers / Alt+Click: copy ID (+Shift: path)`;
+	};
+
+	/*-------------------------------------------------------*/
+	/* Hover表示                                              */
+	/*-------------------------------------------------------*/
+
+	const render = () => {
+		const hit = findHit();
+		if (hit === null) {
+			box.style.display = `none`;
+			label.style.display = `none`;
+			return;
+		}
+		const { el, rect, info } = hit;
+		Object.assign(box.style, {
+			display: `block`,
+			left: wUnit(rect.left), top: wUnit(rect.top),
+			width: wUnit(rect.right - rect.left), height: wUnit(rect.bottom - rect.top),
+		});
+
+		const lines = [`#${el.id}${info.painted ? `` : `  (container)`}`, getStyleInfo(el)];
+		if (el.classList.length > 0) lines.push(`class: ${[...el.classList].join(` `)}`);
+		const path = getPath(el, PATH_DEPTH);
+		if (path !== ``) lines.push(`path: ${path}`);
+		label.textContent = lines.join(`\n`);
+		label.style.display = `block`;
+
+		// ラベルは対象の下側に置き、はみ出す場合は上側 → 画面内の順で退避
+		const [lw, lh] = [label.offsetWidth, label.offsetHeight];
+		let top = rect.bottom + 4;
+		if (top + lh > window.innerHeight) top = rect.top - lh - 4;
+		if (top < 0) top = 4;
+		label.style.left = wUnit(Math.max(0, Math.min(rect.left, window.innerWidth - lw)));
+		label.style.top = wUnit(top);
+	};
+
+	/*-------------------------------------------------------*/
+	/* All表示 (全要素の枠とIDをcanvasへ描画)                  */
+	/*-------------------------------------------------------*/
+
+	const drawAll = () => {
+		if (canvas === null) return;
+		const [w, h, dpr] = [window.innerWidth, window.innerHeight, g_dpr];
+		if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+			canvas.width = Math.round(w * dpr);
+			canvas.height = Math.round(h * dpr);
+			canvas.style.width = wUnit(w);
+			canvas.style.height = wUnit(h);
+		}
+		const ctx = canvas.getContext(`2d`);
+		ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+		ctx.clearRect(0, 0, w, h);
+
+		const viewport = { left: 0, top: 0, right: w, bottom: h };
+		const items = scan().map(item => ({ ...item, rect: intersect(item.rect, viewport) }))
+			.filter(item => !isEmpty(item.rect));
+
+		// 描画物を持つ要素は、自身の中心が「後から描画される別要素(子孫を除く)」に覆われていれば除外
+		// コンテナ(描画物なし)は、コンテナ込み指定時のみ全て対象
+		const painted = items.filter(item => item.info.painted);
+		const shown = items.filter(item => {
+			if (!item.info.painted) return containerFlg;
+			const cx = (item.rect.left + item.rect.right) / 2;
+			const cy = (item.rect.top + item.rect.bottom) / 2;
+			return !painted.some(other => other.idx > item.idx && !item.el.contains(other.el) &&
+				contains(other.rect, cx, cy));
+		});
+		shown.sort((a, b) => area(b.rect) - area(a.rect));   // 面積の大きい順
+
+		const colorOf = depth => `hsl(${(depth * 47) % 360} 90% 60%)`;
+
+		// 枠 (大きい要素から描画し、小さい要素を手前にする)
+		ctx.lineWidth = 1;
+		shown.forEach(item => {
+			const r = item.rect;
+			ctx.strokeStyle = colorOf(item.info.depth);
+			ctx.strokeRect(r.left + 0.5, r.top + 0.5, r.right - r.left - 1, r.bottom - r.top - 1);
+		});
+
+		// ラベル (小さい要素を優先して配置。他のラベルと重なる場合は別の隅へ、置けなければ省略)
+		ctx.font = `${LABEL_FONT}px monospace`;
+		ctx.textBaseline = `top`;
+		const placed = [];
+		[...shown].reverse().forEach(item => {
+			const r = item.rect;
+			const text = item.el.id;
+			const [tw, th] = [ctx.measureText(text).width + 6, LABEL_FONT + 4];
+			const spots = [
+				[r.left, r.top], [r.right - tw, r.top],
+				[r.left, r.bottom - th], [r.right - tw, r.bottom - th],
+			];
+			const spot = spots.find(([x, y]) =>
+				x >= 0 && y >= 0 && x + tw <= w && y + th <= h &&
+				placed.every(p => x >= p.right || x + tw <= p.left || y >= p.bottom || y + th <= p.top));
+			if (spot === undefined) return;
+
+			const [x, y] = spot;
+			placed.push({ left: x, top: y, right: x + tw, bottom: y + th });
+			ctx.fillStyle = `rgba(0,0,0,0.8)`;
+			ctx.fillRect(x, y, tw, th);
+			ctx.fillStyle = colorOf(item.info.depth);
+			ctx.fillText(text, x + 3, y + 2);
+		});
+		counts = { labeled: placed.length, total: shown.length };
+		updateStatus();
+	};
+
+	/*-------------------------------------------------------*/
+	/* オーバーレイ・モード管理                                */
+	/*-------------------------------------------------------*/
+
+	const schedule = () => {
+		if (mode === 0 || rafId !== null) return;
+		rafId = window.requestAnimationFrame(() => {
+			rafId = null;
+			mode === 1 ? render() : drawAll();
+		});
+	};
+
+	const makeEl = (_style, _parent = overlay) => {
+		const el = document.createElement(`div`);
+		Object.assign(el.style, { position: `fixed`, ...(_style) });
+		_parent.appendChild(el);
+		return el;
+	};
+
+	const buildOverlay = () => {
+		overlay = document.createElement(`div`);
+		overlay.id = OVERLAY_ID;
+		Object.assign(overlay.style, {
+			position: `fixed`, left: `0`, top: `0`, width: `100vw`, height: `100vh`,
+			pointerEvents: `none`, zIndex: `2147483647`,
+		});
+		document.body.appendChild(overlay);
+
+		canvas = document.createElement(`canvas`);
+		Object.assign(canvas.style, { position: `fixed`, left: `0`, top: `0`, display: `none` });
+		overlay.appendChild(canvas);
+
+		const textStyle = {
+			font: `12px/1.4 monospace`, color: `#ffeeaa`, background: `rgba(0,0,0,0.85)`,
+			border: `1px solid #ffcc00`, padding: `4px 6px`, whiteSpace: `pre-wrap`, wordBreak: `break-all`,
+		};
+		box = makeEl({
+			display: `none`, boxSizing: `border-box`,
+			border: `2px solid #ffcc00`, background: `rgba(255,204,0,0.12)`,
+		});
+		label = makeEl({ display: `none`, maxWidth: `480px`, ...textStyle });
+		toast = makeEl({ display: `none`, ...textStyle, color: `#aaffaa`, borderColor: `#66cc66` });
+		status = makeEl({ right: `4px`, bottom: `4px`, ...textStyle, font: `11px/1.3 monospace`, opacity: `0.85` });
+	};
+
+	const destroyOverlay = () => {
+		if (rafId !== null) window.cancelAnimationFrame(rafId);
+		window.clearTimeout(observeTimer);
+		window.clearTimeout(toastTimer);
+		rafId = null;
+		overlay?.remove();
+		overlay = canvas = box = label = toast = status = null;
+	};
+
+	/** All表示中は、画面の更新(DOMの変化)に追従して再描画 (main画面は負荷軽減のため追従しない) */
+	const startObserve = () => {
+		const root = document.getElementById(`divRoot`);
+		if (root === null) return;
+		observer = new MutationObserver(() => {
+			if (g_currentPage === `main`) return;
+			window.clearTimeout(observeTimer);
+			observeTimer = window.setTimeout(schedule, 150);
+		});
+		observer.observe(root, {
+			childList: true, subtree: true, attributes: true, attributeFilter: [`style`, `class`],
+		});
+	};
+
+	const setMode = _mode => {
+		mode = _mode;
+		observer?.disconnect();
+		observer = null;
+		if (mode === 0) {
+			destroyOverlay();
+			return;
+		}
+		if (overlay === null) buildOverlay();
+		box.style.display = `none`;
+		label.style.display = `none`;
+		canvas.style.display = mode === 2 ? `block` : `none`;
+		if (mode === 2) startObserve();
+		updateStatus();
+		schedule();
+	};
+
+	const toggleContainers = () => {
+		containerFlg = !containerFlg;
+		updateStatus();
+		schedule();
+	};
+
+	/*-------------------------------------------------------*/
+	/* コピー                                                 */
+	/*-------------------------------------------------------*/
+
+	const showToast = _text => {
+		if (toast === null) return;
+		toast.textContent = _text;
+		Object.assign(toast.style, {
+			display: `block`,
+			left: wUnit(Math.max(0, Math.min(pointer.x + 12, window.innerWidth - 260))),
+			top: wUnit(Math.max(0, pointer.y - 32)),
+		});
+		window.clearTimeout(toastTimer);
+		toastTimer = window.setTimeout(() => {
+			if (toast !== null) toast.style.display = `none`;
+		}, 1200);
+	};
+
+	const copyText = async _text => {
+		try {
+			await navigator.clipboard.writeText(_text);
+		} catch (e) {
+			// http環境等では navigator.clipboard が使えないため従来の方法で代替
+			const area = document.createElement(`textarea`);
+			area.value = _text;
+			document.body.appendChild(area);
+			area.select();
+			document.execCommand(`copy`);
+			area.remove();
+		}
+	};
+
+	/*-------------------------------------------------------*/
+	/* リスナー登録                                           */
+	/*-------------------------------------------------------*/
+
+	/**
+	 * リスナー登録 (1回のみ)
+	 * - Alt+Shift系のショートカットはキャプチャ段階で受け、該当キーのみ stopImmediatePropagation する
+	 *   (document.onkeydown 側の画面別ショートカット・キーコンフィグ割当へ渡さないため)
+	 * - Alt+クリックのみ横取りし、通常のクリックはそのままゲーム側へ渡す
+	 */
+	const bind = () => {
+		if (bound) return;
+		bound = true;
+
+		const actions = {
+			KeyI: () => setMode((mode + 1) % MODES.length),
+			KeyC: toggleContainers,
+		};
+		g_handler.addListener(document, `keydown`, evt => {
+			if (!evt.altKey || !evt.shiftKey || evt.ctrlKey || evt.metaKey) return;
+			const action = actions[evt.code];
+			if (action === undefined) return;
+			evt.preventDefault();
+			evt.stopImmediatePropagation();
+			if (!evt.repeat) action();
+		}, true);
+
+		g_handler.addListener(document, `pointermove`, evt => {
+			pointer.x = evt.clientX;
+			pointer.y = evt.clientY;
+			pointer.valid = true;
+			if (mode === 1) schedule();
+		}, { capture: true, passive: true });
+
+		// ウィンドウ外へ出たらホバー表示を消す
+		g_handler.addListener(document, `pointerout`, evt => {
+			if (evt.relatedTarget !== null) return;
+			pointer.valid = false;
+			if (mode === 1 && box !== null) {
+				box.style.display = `none`;
+				label.style.display = `none`;
+			}
+		}, true);
+
+		g_handler.addListener(window, `resize`, () => {
+			if (mode === 2) schedule();
+		});
+
+		g_handler.addListener(document, `click`, evt => {
+			if (mode === 0 || !evt.altKey) return;
+			evt.preventDefault();
+			evt.stopImmediatePropagation();
+			pointer.x = evt.clientX;
+			pointer.y = evt.clientY;
+			pointer.valid = true;
+
+			const hit = findHit();
+			if (hit === null) {
+				showToast(`(no element)`);
+				return;
+			}
+			const path = getPath(hit.el);
+			const text = evt.shiftKey ? `${path}${path !== `` ? ` > ` : ``}${hit.el.id}` : hit.el.id;
+			copyText(text).then(() => showToast(`Copied: ${text}`));
+		}, true);
+	};
+
+	return { bind, setMode };
+})();
 
 // ライセンス原文、以下は削除しないでください
 /*-----------------------------------------------------------*/
