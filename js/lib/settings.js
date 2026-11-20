@@ -3234,6 +3234,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 			colSub.style.opacity = activeCol === 1 ? 1 : 0.5;   // 操作対象でない列は薄く表示
 		}
 		colMain.style.opacity = subUse && activeCol !== 0 ? 0.5 : 1;
+		if (g_isDebug) g_idInspector.schedule();
 		g_helpSelectHook(subUse ? [selected, subSelected] : [selected], activeCol);
 		safeExecuteCustomHooks(`g_customJsObj.helpPreview`, g_customJsObj.helpPreview, _key, selected,
 			{ pvFrame, mainSprite, stepSprites, arrowSprites, playW, playH, sub: subSelected });
