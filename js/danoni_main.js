@@ -2867,7 +2867,8 @@ const g_idInspector = (() => {
 		if (!containerFlg) {
 			return topIdx >= 0 ? [items[topIdx]] : [];
 		}
-		return items.slice(Math.max(topIdx, 0))
+		const topEl = topIdx >= 0 ? items[topIdx].el : null;
+		return items.filter((item, i) => i >= topIdx || (topEl !== null && item.el.contains(topEl)))
 			.sort((a, b) => area(a.rect) - area(b.rect) || b.idx - a.idx);
 	};
 
