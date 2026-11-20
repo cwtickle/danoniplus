@@ -3500,6 +3500,7 @@ const makeRingHelpPreview = (_parent, _key, _top, _height) => {
 			chip.classList.add(sameVal(chipList[i], selected) ? g_cssObj.button_Setting : g_cssObj.button_Default);
 		});
 		lblInfo.textContent = isSpeed ? `${round2(selected)} ${g_lblNameObj.multi} (${getTotal()}f)` : ``;
+		if (g_isDebug) g_idInspector.schedule();
 		g_helpSelectHook([selected], 0);
 		safeExecuteCustomHooks(`g_customJsObj.helpPreview`, g_customJsObj.helpPreview, _key, selected,
 			{ pvFrame, ringSprite, playW, playH });
