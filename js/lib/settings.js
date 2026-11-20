@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/11/16 (v53.0.0)
+ * Revised : 2026/11/21 (v53.2.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -3234,6 +3234,7 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 			colSub.style.opacity = activeCol === 1 ? 1 : 0.5;   // 操作対象でない列は薄く表示
 		}
 		colMain.style.opacity = subUse && activeCol !== 0 ? 0.5 : 1;
+		if (g_isDebug) g_idInspector.schedule();
 		g_helpSelectHook(subUse ? [selected, subSelected] : [selected], activeCol);
 		safeExecuteCustomHooks(`g_customJsObj.helpPreview`, g_customJsObj.helpPreview, _key, selected,
 			{ pvFrame, mainSprite, stepSprites, arrowSprites, playW, playH, sub: subSelected });
@@ -3499,6 +3500,7 @@ const makeRingHelpPreview = (_parent, _key, _top, _height) => {
 			chip.classList.add(sameVal(chipList[i], selected) ? g_cssObj.button_Setting : g_cssObj.button_Default);
 		});
 		lblInfo.textContent = isSpeed ? `${round2(selected)} ${g_lblNameObj.multi} (${getTotal()}f)` : ``;
+		if (g_isDebug) g_idInspector.schedule();
 		g_helpSelectHook([selected], 0);
 		safeExecuteCustomHooks(`g_customJsObj.helpPreview`, g_customJsObj.helpPreview, _key, selected,
 			{ pvFrame, ringSprite, playW, playH });
