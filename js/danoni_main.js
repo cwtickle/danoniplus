@@ -2542,6 +2542,29 @@ const getCssCustomProperties = () => {
 };
 
 /**
+* クリップボードへのコピー処理
+* @param {string} _text コピーする文字列
+* @returns {Promise<boolean>} コピーに成功した場合は true
+*/
+const writeClipboardText = async _text => {
+	try {
+		await navigator.clipboard.writeText(_text);
+		return true;
+	} catch (error) {
+		// Clipboard APIが使えない場合は従来の方法で代替
+		const area = document.createElement(`textarea`);
+		try {
+			area.value = _text;
+			document.body.appendChild(area);
+			area.select();
+			return document.execCommand(`copy`);
+		} finally {
+			area.remove();
+		}
+	}
+};
+
+/**
  * クリップボードコピー関数
  * 入力値をクリップボードへコピーし、メッセージを表示
  * @param {string} _textVal 入力値
@@ -2549,25 +2572,7 @@ const getCssCustomProperties = () => {
  */
 const copyTextToClipboard = async (_textVal, _msg) => {
 	try {
-		await navigator.clipboard.writeText(_textVal);
-
-	} catch (error) {
-		// http環境では navigator.clipboard が使えないため、従来の方法を実行
-		// テキストエリアを用意し、値をセット
-		const copyFrom = document.createElement(`textarea`);
-		copyFrom.textContent = _textVal;
-
-		// bodyタグの要素を取得
-		const bodyElm = document.getElementsByTagName(`body`)[0];
-		// 子要素にテキストエリアを配置
-		bodyElm.appendChild(copyFrom);
-
-		// テキストエリアの値を選択し、コピーコマンド発行
-		copyFrom.select();
-		document.execCommand(`copy`);
-		// 追加テキストエリアを削除
-		bodyElm.removeChild(copyFrom);
-
+		await writeClipboardText(_textVal);
 	} finally {
 		makeInfoWindow(_msg, `leftToRightFade`);
 	}
@@ -2739,11 +2744,13 @@ const g_idInspector = (() => {
 	const OVERLAY_ID = `danoniIdInspector`;
 	const PATH_DEPTH = 4;
 	const LABEL_FONT = 11;
+	const SCROLL_TIMER_MS = 150;
 
 	let mode = 0;
 	let containerFlg = false;
 	let overlay = null, canvas = null, box = null, label = null, toast = null, status = null;
 	let rafId = null, observer = null, observeTimer = null, toastTimer = null;
+	let scrollTimer = null, scrollListener = null, scrollOnly = false;
 	let counts = { labeled: 0, total: 0 };
 	let bound = false;
 	let cache = new Map();
@@ -2776,6 +2783,11 @@ const g_idInspector = (() => {
 		if ([`CANVAS`, `IMG`, `INPUT`, `TEXTAREA`, `SELECT`].includes(_el.tagName)) return true;
 		if (colorAlpha(_cs.backgroundColor) > 0 || _cs.backgroundImage !== `none`) return true;
 		if (parseFloat(_cs.borderTopWidth) > 0 && _cs.borderTopStyle !== `none` && colorAlpha(_cs.borderTopColor) > 0) return true;
+		if (g_currentPage !== `main`) {
+			if (parseFloat(_cs.borderRightWidth) > 0 && _cs.borderRightStyle !== `none` && colorAlpha(_cs.borderRightColor) > 0) return true;
+			if (parseFloat(_cs.borderBottomWidth) > 0 && _cs.borderBottomStyle !== `none` && colorAlpha(_cs.borderBottomColor) > 0) return true;
+			if (parseFloat(_cs.borderLeftWidth) > 0 && _cs.borderLeftStyle !== `none` && colorAlpha(_cs.borderLeftColor) > 0) return true;
+		}
 		const ownText = Array.from(_el.childNodes)
 			.some(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== ``);
 		// ID無しの子孫(span等)だけで文字を構成している場合も描画物とみなす
@@ -3003,10 +3015,16 @@ const g_idInspector = (() => {
 	/* オーバーレイ・モード管理                                */
 	/*-------------------------------------------------------*/
 
-	const schedule = () => {
-		if (mode === 0 || rafId !== null) return;
+	const schedule = (_scrollOnly = false) => {
+		if (mode === 0) return;
+		if (rafId !== null) {
+			if (!_scrollOnly) scrollOnly = false;
+			return;
+		}
+		scrollOnly = _scrollOnly;
 		rafId = window.requestAnimationFrame(() => {
 			rafId = null;
+			if (scrollOnly && (mode !== 2 || g_currentPage === `main`)) return;
 			mode === 1 ? render() : drawAll();
 		});
 	};
@@ -3046,9 +3064,9 @@ const g_idInspector = (() => {
 
 	const destroyOverlay = () => {
 		if (rafId !== null) window.cancelAnimationFrame(rafId);
-		window.clearTimeout(observeTimer);
-		window.clearTimeout(toastTimer);
-		rafId = null;
+		g_timerHandler.clearTimeout(observeTimer);
+		g_timerHandler.clearTimeout(toastTimer);
+		rafId = observeTimer = toastTimer = null;
 		overlay?.remove();
 		overlay = canvas = box = label = toast = status = null;
 	};
@@ -3059,18 +3077,35 @@ const g_idInspector = (() => {
 		if (root === null) return;
 		observer = new MutationObserver(() => {
 			if (g_currentPage === `main`) return;
-			window.clearTimeout(observeTimer);
-			observeTimer = window.setTimeout(schedule, 150);
+			g_timerHandler.clearTimeout(observeTimer);
+			observeTimer = g_timerHandler.setTimeout(() => {
+				observeTimer = null;
+				if (mode === 2 && g_currentPage !== `main`) schedule(true);
+			}, SCROLL_TIMER_MS);
 		});
 		observer.observe(root, {
 			childList: true, subtree: true, attributes: true, attributeFilter: [`style`, `class`],
 		});
 	};
 
+	// スクロールが150ms止まった後に、プレイ画面以外で再描画
+	const onScroll = () => {
+		if (g_currentPage === `main`) return;
+		g_timerHandler.clearTimeout(scrollTimer);
+		scrollTimer = g_timerHandler.setTimeout(() => {
+			scrollTimer = null;
+			if (mode === 2 && g_currentPage !== `main`) schedule(true);
+		}, SCROLL_TIMER_MS);
+	};
+
 	const setMode = _mode => {
 		mode = _mode;
 		observer?.disconnect();
 		observer = null;
+		g_handler.removeListener(scrollListener);
+		g_timerHandler.clearTimeout(scrollTimer);
+		g_timerHandler.clearTimeout(observeTimer);
+		scrollListener = scrollTimer = observeTimer = null;
 		if (mode === 0) {
 			destroyOverlay();
 			return;
@@ -3079,7 +3114,10 @@ const g_idInspector = (() => {
 		box.style.display = `none`;
 		label.style.display = `none`;
 		canvas.style.display = mode === 2 ? `block` : `none`;
-		if (mode === 2) startObserve();
+		if (mode === 2) {
+			startObserve();
+			scrollListener = g_handler.addListener(document, `scroll`, onScroll, { capture: true, passive: true });
+		}
 		updateStatus();
 		schedule();
 	};
@@ -3102,24 +3140,11 @@ const g_idInspector = (() => {
 			left: wUnit(Math.max(0, Math.min(pointer.x + 12, window.innerWidth - 260))),
 			top: wUnit(Math.max(0, pointer.y - 32)),
 		});
-		window.clearTimeout(toastTimer);
-		toastTimer = window.setTimeout(() => {
+		g_timerHandler.clearTimeout(toastTimer);
+		toastTimer = g_timerHandler.setTimeout(() => {
+			toastTimer = null;
 			if (toast !== null) toast.style.display = `none`;
 		}, 1200);
-	};
-
-	const copyText = async _text => {
-		try {
-			await navigator.clipboard.writeText(_text);
-		} catch (e) {
-			// http環境等では navigator.clipboard が使えないため従来の方法で代替
-			const area = document.createElement(`textarea`);
-			area.value = _text;
-			document.body.appendChild(area);
-			area.select();
-			document.execCommand(`copy`);
-			area.remove();
-		}
 	};
 
 	/*-------------------------------------------------------*/
@@ -3185,7 +3210,9 @@ const g_idInspector = (() => {
 			}
 			const path = getPath(hit.el);
 			const text = evt.shiftKey ? `${path}${path !== `` ? ` > ` : ``}${hit.el.id}` : hit.el.id;
-			copyText(text).then(() => showToast(`Copied: ${text}`));
+			writeClipboardText(text)
+				.then(copied => showToast(copied ? `Copied: ${text}` : `Copy failed`))
+				.catch(() => showToast(`Copy failed`));
 		}, true);
 	};
 
