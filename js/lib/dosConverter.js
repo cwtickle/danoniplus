@@ -1391,7 +1391,12 @@ const headerConvert = _dosObj => {
 		g_stateObj.scoreId = obj.viewLists[0];
 	}
 	if (g_stateObj.scoreId >= obj.difLabels.length) {
-		g_stateObj.scoreId = obj.viewLists[0];
+		const queryMusicId = getQueryParamVal(`musicId`);
+		const musicScoreId = obj.musicSelectUse && queryMusicId !== null
+			? obj.viewLists.find(id =>
+				(obj.musicGroups?.[obj.musicNos[id]] ?? obj.musicNos[id]) === Number(queryMusicId))
+			: undefined;
+		g_stateObj.scoreId = musicScoreId ?? obj.viewLists[0];
 	}
 	g_stateObj.speed = obj.initSpeeds[g_stateObj.scoreId];
 	g_settings.speedNum = roundZero(g_settings.speeds.findIndex(speed => speed === g_stateObj.speed));
