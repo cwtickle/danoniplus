@@ -438,6 +438,28 @@ const sortByScoreOrder = (_ids, _orders = g_headerObj.scoreIdOrders) =>
 	_ids.concat().sort((a, b) => _orders[a] - _orders[b] || a - b);
 
 /**
+ * difficultyパラメータから譜面番号を取得
+ * - "キー名-難易度名" または "キー名-難易度名-製作者名" の形式で、一致した最初の譜面を返す
+ * - 一致する譜面が無い場合は -1
+ * @param {string} _difficulty
+ * @returns {number}
+ */
+const getScoreIdByDifficulty = (_difficulty, _obj) => {
+	if (!hasVal(_difficulty)) {
+		return -1;
+	}
+	const target = escapeHtml(trimStr(_difficulty));
+	const names = j => {
+		const base = `${_obj.keyLabels[j]}-${_obj.difLabels[j]}`;
+		return [base, `${base}-${_obj.creatorNames[j]}`];
+	};
+	// 制作者名まで含む完全一致を優先し、次に「キー名-難易度名」のみの一致を採用
+	const ids = sortByScoreOrder(_obj.keyLabels.map((_, j) => j), _obj.scoreIdOrders);
+	const found = ids.find(j => names(j)[1] === target) ?? ids.find(j => names(j)[0] === target);
+	return found ?? -1;
+};
+
+/**
  * 作品別ローカルストレージの読み込み・初期設定
  * @param {string} _musicId 楽曲ID
  */
@@ -448,6 +470,7 @@ const loadLocalStorage = (_musicId = ``) => {
 	// 選択中の楽曲ID(_musicId)がある場合は、キーとして区別するため追加
 	const url = new URL(location.href);
 	url.searchParams.delete(`scoreId`);
+	url.searchParams.delete(`difficulty`);
 	url.searchParams.delete(`h`);
 	url.searchParams.delete(`debug`);
 	url.searchParams.delete(`musicId`);
@@ -1321,6 +1344,14 @@ const headerConvert = _dosObj => {
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 	obj.undefinedKeyLists = obj.keyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
 
+	// difficultyパラメータによる譜面指定 (scoreId指定が無い場合のみ)
+	if (getQueryParamVal(`scoreId`) === null && getQueryParamVal(`difficulty`) !== null) {
+		const scoreId = getScoreIdByDifficulty(getQueryParamVal(`difficulty`), obj);
+		if (scoreId >= 0) {
+			g_stateObj.scoreId = scoreId;
+			obj.difficultyHit = true;
+		}
+	}
 	// 楽曲別のグループ化設定（選曲モードのみ）
 	if (hasVal(_dosObj.musicGroup)) {
 		obj.musicGroups = _dosObj.musicGroup.split(`,`)
@@ -1387,7 +1418,7 @@ const headerConvert = _dosObj => {
 
 	// 初期速度の設定
 	// scoreId指定が無い場合 (選曲モードを除く) は、表示順の先頭の譜面を初期選択
-	if (getQueryParamVal(`scoreId`) === null && !obj.musicSelectUse) {
+	if (getQueryParamVal(`scoreId`) === null && !obj.difficultyHit && !obj.musicSelectUse) {
 		g_stateObj.scoreId = obj.viewLists[0];
 	}
 	if (g_stateObj.scoreId >= obj.difLabels.length) {

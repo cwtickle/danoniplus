@@ -66,7 +66,7 @@ const titleInit = (_initFlg = false) => {
 	// 背景の矢印オブジェクトを表示
 	const tmpCreatorList = [];
 	if (g_headerObj.musicSelectUse) {
-		if (getQueryParamVal(`scoreId`) !== null) {
+		if (isSingleScoreMode()) {
 			g_headerObj.viewLists = getMusicScoreIds(g_settings.musicIdxNum);
 			tmpCreatorList.push(...g_headerObj.viewLists.map(j => g_headerObj.creatorNames[j]));
 			divRoot.appendChild(drawBackArrow(g_headerObj.viewLists[0] + 1));
@@ -79,7 +79,7 @@ const titleInit = (_initFlg = false) => {
 	}
 
 	let wheelHandler;
-	if (g_headerObj.musicSelectUse && getQueryParamVal(`scoreId`) === null) {
+	if (g_headerObj.musicSelectUse && !isSingleScoreMode()) {
 
 		// 選曲画面の初期化
 		const wheelCycle = 2;
@@ -279,7 +279,7 @@ const titleInit = (_initFlg = false) => {
 		createCss2Button(_id, _text, () => true,
 			{ ...g_lblPosObj[_id], siz: getLinkSiz(_text), whiteSpace: `normal`, resetFunc: () => openLink(_url) }, g_cssObj.button_Default);
 
-	if (g_headerObj.musicSelectUse && getQueryParamVal(`scoreId`) === null) {
+	if (g_headerObj.musicSelectUse && !isSingleScoreMode()) {
 		// 選曲モードではクレジット表示は別で行われているため表示しない
 	} else {
 		if (tmpCreatorList.length === 0) {
@@ -369,7 +369,7 @@ const titleInit = (_initFlg = false) => {
 					lblComment.style.display = (lblCommentDef === C_DIS_NONE ? C_DIS_INHERIT : C_DIS_NONE);
 				}, g_lblPosObj.btnComment, g_cssObj.button_Default),
 			);
-			if (g_headerObj.musicSelectUse && getQueryParamVal(`scoreId`) === null) {
+			if (g_headerObj.musicSelectUse && !isSingleScoreMode()) {
 				lblComment.style.height = wUnit(g_sHeight - 100);
 			}
 			setUserSelect(lblComment.style, `text`);
@@ -421,6 +421,12 @@ const externalWebTitle = () => {
 			`${g_headerObj.artistNames[g_settings.musicIdxNum]}</a>)</span>`;
 	}
 };
+
+/**
+ * 譜面指定(scoreId, difficulty)による選曲単品モードかどうか
+ * @returns {boolean}
+ */
+const isSingleScoreMode = () => getQueryParamVal(`scoreId`) !== null || getQueryParamVal(`difficulty`) !== null;
 
 /**
  * 楽曲(musicIdxList上の値)に属する譜面番号を、表示順で取得
