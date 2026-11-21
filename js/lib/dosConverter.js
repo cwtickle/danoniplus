@@ -1390,7 +1390,7 @@ const headerConvert = _dosObj => {
 	if (getQueryParamVal(`scoreId`) === null && !obj.musicSelectUse) {
 		g_stateObj.scoreId = obj.viewLists[0];
 	}
-	if (g_stateObj.scoreId > obj.difLabels.length) {
+	if (g_stateObj.scoreId >= obj.difLabels.length) {
 		g_stateObj.scoreId = obj.viewLists[0];
 	}
 	g_stateObj.speed = obj.initSpeeds[g_stateObj.scoreId];
