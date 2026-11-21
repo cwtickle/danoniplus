@@ -429,6 +429,15 @@ const initialControl = async () => {
 };
 
 /**
+ * 譜面番号を scoreIdOrder の順(同値は譜面番号順)に並べ替え
+ * @param {number[]} _ids
+ * @param {number[]} [_orders]
+ * @returns {number[]}
+ */
+const sortByScoreOrder = (_ids, _orders = g_headerObj.scoreIdOrders) =>
+	_ids.concat().sort((a, b) => _orders[a] - _orders[b] || a - b);
+
+/**
  * 作品別ローカルストレージの読み込み・初期設定
  * @param {string} _musicId 楽曲ID
  */
@@ -1264,7 +1273,6 @@ const headerConvert = _dosObj => {
 		obj.initSpeeds = [];
 		obj.creatorNames = [];
 		obj.difficulties = [];
-		g_stateObj.scoreId = (g_stateObj.scoreId < difs.length ? g_stateObj.scoreId : 0);
 
 		difs.forEach((dif, scoreId) => {
 			const difDetails = dif.split(`,`);
@@ -1306,7 +1314,10 @@ const headerConvert = _dosObj => {
 		obj.difficulties = [0];
 	}
 	const keyLists = makeDedupliArray(obj.keyLabels);
-	obj.viewLists = [...Array(obj.keyLabels.length).keys()];
+	// 譜面の表示順 (未指定の譜面は自身の譜面番号(1始まり))
+	const scoreIdOrders = splitLF2(_dosObj.scoreIdOrder) ?? [];
+	obj.scoreIdOrders = obj.keyLabels.map((_, j) => setVal(scoreIdOrders[j], j + 1, C_TYP_FLOAT));
+	obj.viewLists = sortByScoreOrder([...Array(obj.keyLabels.length).keys()], obj.scoreIdOrders);
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 	obj.undefinedKeyLists = obj.keyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
 
@@ -1375,6 +1386,13 @@ const headerConvert = _dosObj => {
 	obj.difSelectorUse = getDifSelectorUse(_dosObj.difSelectorUse, obj.viewLists);
 
 	// 初期速度の設定
+	// scoreId指定が無い場合 (選曲モードを除く) は、表示順の先頭の譜面を初期選択
+	if (getQueryParamVal(`scoreId`) === null && !obj.musicSelectUse) {
+		g_stateObj.scoreId = obj.viewLists[0];
+	}
+	if (g_stateObj.scoreId > obj.difLabels.length) {
+		g_stateObj.scoreId = obj.viewLists[0];
+	}
 	g_stateObj.speed = obj.initSpeeds[g_stateObj.scoreId];
 	g_settings.speedNum = roundZero(g_settings.speeds.findIndex(speed => speed === g_stateObj.speed));
 
