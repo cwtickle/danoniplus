@@ -67,13 +67,8 @@ const titleInit = (_initFlg = false) => {
 	const tmpCreatorList = [];
 	if (g_headerObj.musicSelectUse) {
 		if (getQueryParamVal(`scoreId`) !== null) {
-			g_headerObj.viewLists = [];
-			g_headerObj.musicNos.forEach((val, j) => {
-				if ((g_headerObj.musicGroups?.[val] ?? val) === g_settings.musicIdxNum) {
-					g_headerObj.viewLists.push(j);
-					tmpCreatorList.push(g_headerObj.creatorNames[j]);
-				}
-			});
+			g_headerObj.viewLists = getMusicScoreIds(g_settings.musicIdxNum);
+			tmpCreatorList.push(...g_headerObj.viewLists.map(j => g_headerObj.creatorNames[j]));
 			divRoot.appendChild(drawBackArrow(g_headerObj.viewLists[0] + 1));
 			loadLocalStorage(g_settings.musicIdxNum);
 			makeInfoWindow(g_msgInfoObj.W_0041.split(`{0}`).join(g_localStorageUrl), ``,
@@ -426,6 +421,15 @@ const externalWebTitle = () => {
 			`${g_headerObj.artistNames[g_settings.musicIdxNum]}</a>)</span>`;
 	}
 };
+
+/**
+ * 楽曲(musicIdxList上の値)に属する譜面番号を、表示順で取得
+ * @param {number} _musicIdx
+ * @returns {number[]}
+ */
+const getMusicScoreIds = _musicIdx => sortByScoreOrder(
+	g_headerObj.musicNos.map((val, j) => j).filter(j =>
+		(g_headerObj.musicGroups?.[g_headerObj.musicNos[j]] ?? g_headerObj.musicNos[j]) === _musicIdx));
 
 /**
  * 背景矢印の表示
@@ -854,22 +858,19 @@ const changeMSelect = (_num, _initFlg = false) => {
 	const currentLoopNum = g_settings.musicLoopNum;
 
 	// 選択した楽曲に対応する譜面番号、製作者情報、曲長を取得
-	g_headerObj.viewLists = [];
 	const keyList = [], creatorList = [], playingFrameList = [], bpmList = [], difNameList = [], diffiList = [], notesList = [];
 	const targetIdx = g_headerObj.musicIdxList[
 		(g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 20) % g_headerObj.musicIdxList.length
 	];
-	g_headerObj.musicNos.forEach((val, j) => {
-		if ((g_headerObj.musicGroups?.[val] ?? val) === targetIdx) {
-			g_headerObj.viewLists.push(j);
-			keyList.push(g_headerObj.keyLabels[j]);
-			creatorList.push(g_headerObj.creatorNames[j]);
-			playingFrameList.push(g_detailObj.playingFrameWithBlank[j]);
-			bpmList.push(g_headerObj.bpms[g_headerObj.musicNos[j]]);
-			difNameList.push(`${g_headerObj.keyLabels[j]} / ${g_headerObj.difLabels[j]}`);
-			diffiList.push(g_headerObj.difficulties[j]);
-			notesList.push(`Arrows: ${sumData(g_detailObj.arrowCnt[j])}+${sumData(g_detailObj.frzCnt[j])}`);
-		}
+	g_headerObj.viewLists = getMusicScoreIds(targetIdx);
+	g_headerObj.viewLists.forEach(j => {
+		keyList.push(g_headerObj.keyLabels[j]);
+		creatorList.push(g_headerObj.creatorNames[j]);
+		playingFrameList.push(g_detailObj.playingFrameWithBlank[j]);
+		bpmList.push(g_headerObj.bpms[g_headerObj.musicNos[j]]);
+		difNameList.push(`${g_headerObj.keyLabels[j]} / ${g_headerObj.difLabels[j]}`);
+		diffiList.push(g_headerObj.difficulties[j]);
+		notesList.push(`Arrows: ${sumData(g_detailObj.arrowCnt[j])}+${sumData(g_detailObj.frzCnt[j])}`);
 	});
 	const playingFrames = makeDedupliArray(playingFrameList.map(val => transFrameToTimer(val))).join(`, `);
 	const bpm = makeDedupliArray(bpmList).join(`, `);
@@ -903,6 +904,10 @@ const changeMSelect = (_num, _initFlg = false) => {
 	if (_initFlg || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
 		g_stateObj.speed = g_headerObj.initSpeeds[g_headerObj.viewLists[0]];
 		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
+	}
+	// 初期表示時は、表示順の先頭の譜面を初期選択
+	if (_initFlg) {
+		g_stateObj.scoreId = g_headerObj.viewLists[0] ?? g_stateObj.scoreId;
 	}
 
 	// 譜面情報、コメント文の加工
