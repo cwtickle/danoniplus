@@ -65,9 +65,11 @@ const titleInit = (_initFlg = false) => {
 
 	// 背景の矢印オブジェクトを表示
 	const tmpCreatorList = [];
+	const musicIdx = g_headerObj.musicSelectUse
+		? g_headerObj.musicIdxList[g_settings.musicIdxNum] : g_settings.musicIdxNum;
 	if (g_headerObj.musicSelectUse) {
 		if (isSingleScoreMode()) {
-			g_headerObj.viewLists = getMusicScoreIds(g_settings.musicIdxNum);
+			g_headerObj.viewLists = getMusicScoreIds(musicIdx);
 			tmpCreatorList.push(...g_headerObj.viewLists.map(j => g_headerObj.creatorNames[j]));
 			divRoot.appendChild(drawBackArrow(g_headerObj.viewLists[0] + 1));
 			loadLocalStorage(g_settings.musicIdxNum);
@@ -133,7 +135,7 @@ const titleInit = (_initFlg = false) => {
 			createCss2Button(`btnMusicSelectNext`, `↓`, () => changeMSelect(1),
 				g_lblPosObj.btnMusicSelectNext, g_cssObj.button_Setting),
 			createCss2Button(`btnMusicSelectRandom`, `Random`, () =>
-				changeMSelect(Math.floor(Math.random() * (g_headerObj.musicIdxList.length - 1)) + 1),
+				changeMSelect(Math.floor(Math.random() * (getSelectableMusicIndexes(g_headerObj).length - 1)) + 1),
 				g_lblPosObj.btnMusicSelectRandom, g_cssObj.button_Default),
 			createDivCss2Label(`lblMusicCnt`, ``, g_lblPosObj.lblMusicCnt),
 		);
@@ -240,7 +242,7 @@ const titleInit = (_initFlg = false) => {
 		// 曲名文字描画（曲名は譜面データから取得）
 		divRoot.appendChild(
 			g_headerObj.musicSelectUse
-				? drawTitle(g_headerObj.musicTitlesForView[g_settings.musicIdxNum], g_headerObj.viewLists[0] + 1)
+				? drawTitle(g_headerObj.musicTitlesForView[musicIdx], g_headerObj.viewLists[0] + 1)
 				: drawTitle()
 		);
 	}
@@ -302,8 +304,8 @@ const titleInit = (_initFlg = false) => {
 				g_headerObj.musicSelectUse ? creatorUrl : g_headerObj.creatorUrl),
 
 			// アーティスト表示
-			createCreditBtn(`lnkArtist`, `${g_lblNameObj.artist}: ${g_headerObj.artistNames[g_settings.musicIdxNum]}`,
-				g_headerObj.artistUrls[g_settings.musicIdxNum]),
+			createCreditBtn(`lnkArtist`, `${g_lblNameObj.artist}: ${g_headerObj.artistNames[musicIdx]}`,
+				g_headerObj.artistUrls[musicIdx]),
 		);
 	}
 
@@ -415,10 +417,12 @@ const titleInit = (_initFlg = false) => {
  */
 const externalWebTitle = () => {
 	if (document.getElementById(`webMusicTitle`) !== null) {
+		const musicIdx = g_headerObj.musicSelectUse
+			? g_headerObj.musicIdxList[g_settings.musicIdxNum] : g_settings.musicIdxNum;
 		webMusicTitle.innerHTML =
-			`<span style="font-size:${wUnit(32)}">${g_headerObj.musicTitlesForView[g_settings.musicIdxNum].join(`<br>`)}</span><br>` +
-			`<span style="font-size:${wUnit(16)}">(Artist: <a href="${g_headerObj.artistUrls[g_settings.musicIdxNum]}" target="_blank">` +
-			`${g_headerObj.artistNames[g_settings.musicIdxNum]}</a>)</span>`;
+			`<span style="font-size:${wUnit(32)}">${g_headerObj.musicTitlesForView[musicIdx].join(`<br>`)}</span><br>` +
+			`<span style="font-size:${wUnit(16)}">(Artist: <a href="${g_headerObj.artistUrls[musicIdx]}" target="_blank">` +
+			`${g_headerObj.artistNames[musicIdx]}</a>)</span>`;
 	}
 };
 
@@ -434,8 +438,7 @@ const isSingleScoreMode = () => getQueryParamVal(`scoreId`) !== null || getQuery
  * @returns {number[]}
  */
 const getMusicScoreIds = _musicIdx => sortByScoreOrder(
-	g_headerObj.musicNos.map((val, j) => j).filter(j =>
-		(g_headerObj.musicGroups?.[g_headerObj.musicNos[j]] ?? g_headerObj.musicNos[j]) === _musicIdx));
+	g_headerObj.keyLabels.map((_, j) => j).filter(j => getScoreMusicGroup(g_headerObj, j) === _musicIdx));
 
 /**
  * 背景矢印の表示
@@ -841,12 +844,15 @@ const changeMSelect = (_num, _initFlg = false) => {
 	}
 	const limitedMLength = 35;
 	pauseBGM();
+	const selectable = getSelectableMusicIndexes(g_headerObj);
+	const current = Math.max(0, selectable.indexOf(g_settings.musicIdxNum));
+	const wrap = (_pos, _offset) =>
+		((_pos + _offset) % selectable.length + selectable.length) % selectable.length;
+	const next = wrap(current, _num);
 
 	// 選択方向に合わせて楽曲リスト情報を再取得
 	for (let j = -g_settings.mSelectableTerms; j <= g_settings.mSelectableTerms; j++) {
-		const idx = g_headerObj.musicIdxList[
-			(j + _num + g_settings.musicIdxNum + g_headerObj.musicIdxList.length * 10) % g_headerObj.musicIdxList.length
-		];
+		const idx = g_headerObj.musicIdxList[selectable[wrap(next, j)]];
 		if (j === 0) {
 		} else {
 			document.getElementById(`btnMusicSelect${j}`).style.fontSize =
@@ -857,7 +863,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 		}
 	}
 	// 現在選択中の楽曲IDを再設定
-	g_settings.musicIdxNum = (g_settings.musicIdxNum + _num + g_headerObj.musicIdxList.length) % g_headerObj.musicIdxList.length;
+	g_settings.musicIdxNum = selectable[next];
 
 	// 楽曲の多重読込防止（この値が変化していれば読み込まない）
 	g_settings.musicLoopNum++;
@@ -900,14 +906,14 @@ const changeMSelect = (_num, _initFlg = false) => {
 			createDivCss2Label(`btnKeyTitle${val}`, val, { ...g_lblPosObj.btnKeyTitle, x: 10 + j * 40 })));
 
 	// 選択した楽曲の選択位置を表示
-	lblMusicCnt.innerHTML = `${g_settings.musicIdxNum + 1} / ${g_headerObj.musicIdxList.length}`;
+	lblMusicCnt.innerHTML = `${next + 1} / ${selectable.length}`;
 
 	// 楽曲別のローカルストレージを再取得
 	loadLocalStorage(g_settings.musicIdxNum);
 	viewKeyStorage.cache = new Map();
 
 	// 初期化もしくは楽曲変更時に速度を初期化
-	if (_initFlg || Math.abs(_num) % g_headerObj.musicIdxList.length !== 0) {
+	if (_initFlg || Math.abs(_num) % selectable.length !== 0) {
 		g_stateObj.speed = g_headerObj.initSpeeds[g_headerObj.viewLists[0]];
 		g_settings.speedNum = getCurrentNo(g_settings.speeds, g_stateObj.speed);
 	}
@@ -943,7 +949,7 @@ const changeMSelect = (_num, _initFlg = false) => {
 	lblDiffiInfoM.style.fontSize = lblDifNameInfoM.style.fontSize;
 	lblNotesInfoM.style.fontSize = lblDifNameInfoM.style.fontSize;
 	lblCommentInfoM.style.top = wUnit(getStrHeight(lblDifNameInfoM.innerHTML, parseFloat(lblDifNameInfoM.style.fontSize)));
-	lblCommentInfoM.innerHTML = convertStrToVal(g_headerObj[`commentVal${g_settings.musicIdxNum}`]);
+	lblCommentInfoM.innerHTML = convertStrToVal(g_headerObj[`commentVal${idx}`]);
 	lblCommentM.scrollTop = 0;
 
 	// BGM再生処理

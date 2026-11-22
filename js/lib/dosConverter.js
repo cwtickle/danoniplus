@@ -270,8 +270,7 @@ const initialControl = async () => {
 	resolveGaugeValuesAll();
 
 	safeExecuteCustomHooks(`g_customJsObj.preTitle`, g_customJsObj.preTitle);
-	const queryMusicId = getQueryParamVal(`musicId`);
-	g_settings.musicIdxNum = queryMusicId !== null ? Number(queryMusicId) :
+	g_settings.musicIdxNum = g_headerObj.initialMusicIdx ??
 		roundZero(g_headerObj.musicIdxList.indexOf(
 			g_headerObj.musicGroups?.[g_headerObj.musicNos[g_stateObj.scoreId]] ??
 			g_headerObj.musicNos[g_stateObj.scoreId] ?? g_headerObj.musicNos[0]));
@@ -437,6 +436,20 @@ const initialControl = async () => {
  */
 const sortByScoreOrder = (_ids, _orders = g_headerObj.scoreIdOrders) =>
 	_ids.concat().sort((a, b) => _orders[a] - _orders[b] || a - b);
+
+/**
+ * 譜面に対応する楽曲グループと、譜面がある選曲位置を取得
+ */
+const getScoreMusicGroup = (_obj, _scoreId) =>
+	_obj.musicGroups?.[_obj.musicNos[_scoreId]] ?? _obj.musicNos[_scoreId];
+
+const getSelectableMusicIndexes = _obj => _obj.musicIdxList.map((_, j) => j).filter(j =>
+	_obj.keyLabels.some((_, scoreId) => getScoreMusicGroup(_obj, scoreId) === _obj.musicIdxList[j]));
+
+const getValidMusicIndex = (_obj, _index) => {
+	const indexes = getSelectableMusicIndexes(_obj);
+	return indexes.includes(_index) ? _index : (indexes[0] ?? 0);
+};
 
 /**
  * difficultyパラメータから譜面番号を取得
@@ -1365,12 +1378,23 @@ const headerConvert = _dosObj => {
 		obj.musicIdxList = [...Array(Math.max(...obj.musicNos) + 1).keys()];
 	}
 
+	const queryMusicId = getQueryParamVal(`musicId`);
+	const queryScoreId = getQueryParamVal(`scoreId`);
+	const queryMusicIdx = obj.musicSelectUse && queryMusicId !== null
+		? getValidMusicIndex(obj, Number(queryMusicId)) : null;
+	const validScoreId = queryScoreId !== null && g_stateObj.scoreId >= 0 &&
+		g_stateObj.scoreId < obj.keyLabels.length;
+
+	// 有効なscoreIdを優先し、選曲位置も譜面に合わせる
+	obj.initialMusicIdx = validScoreId
+		? roundZero(obj.musicIdxList.indexOf(getScoreMusicGroup(obj, g_stateObj.scoreId)))
+		: queryMusicIdx;
+
 	// difficultyパラメータによる譜面指定 (scoreId指定が無い場合のみ)
-	if (getQueryParamVal(`scoreId`) === null && getQueryParamVal(`dif`) !== null) {
-		const queryMusicId = getQueryParamVal(`musicId`);
-		const targetIds = queryMusicId === null ? undefined
-			: obj.musicNos.map((_, j) => j).filter(j =>
-				(obj.musicGroups?.[obj.musicNos[j]] ?? obj.musicNos[j]) === Number(queryMusicId));
+	if (queryScoreId === null && getQueryParamVal(`dif`) !== null) {
+		const targetIds = queryMusicIdx === null ? undefined
+			: obj.keyLabels.map((_, j) => j).filter(j =>
+				getScoreMusicGroup(obj, j) === obj.musicIdxList[queryMusicIdx]);
 		const scoreId = getScoreIdByDifficulty(getQueryParamVal(`dif`), obj, targetIds);
 		if (scoreId >= 0) {
 			g_stateObj.scoreId = scoreId;
@@ -1434,11 +1458,10 @@ const headerConvert = _dosObj => {
 	if (getQueryParamVal(`scoreId`) === null && !obj.difficultyHit && !obj.musicSelectUse) {
 		g_stateObj.scoreId = obj.viewLists[0];
 	}
-	if (g_stateObj.scoreId >= obj.difLabels.length) {
-		const queryMusicId = getQueryParamVal(`musicId`);
-		const musicScoreId = obj.musicSelectUse && queryMusicId !== null
-			? obj.viewLists.find(id =>
-				(obj.musicGroups?.[obj.musicNos[id]] ?? obj.musicNos[id]) === Number(queryMusicId))
+	if ((queryScoreId === null && !obj.difficultyHit && queryMusicIdx !== null) ||
+		g_stateObj.scoreId < 0 || g_stateObj.scoreId >= obj.difLabels.length) {
+		const musicScoreId = queryMusicIdx !== null
+			? obj.viewLists.find(id => getScoreMusicGroup(obj, id) === obj.musicIdxList[queryMusicIdx])
 			: undefined;
 		g_stateObj.scoreId = musicScoreId ?? obj.viewLists[0];
 	}
