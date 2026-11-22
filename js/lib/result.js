@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/11/21 (v53.2.0)
+ * Revised : 2026/11/22 (v53.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -542,9 +542,7 @@ const resultInit = () => {
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${shuffleName}`;
 	}
-	const twiturl = new URL(g_localStorageUrl);
-	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
-	const baseTwitUrl = g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``);
+	const baseTwitUrl = g_isLocal ? `` : getScoreUrl(g_stateObj.scoreId);
 
 	const tweetExcessive = (g_stateObj.excessive === C_FLG_ON) ? `(+${g_resultObj.excessive})` : ``;
 

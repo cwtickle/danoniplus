@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/11/21 (v53.2.0)
+ * Revised : 2026/11/22 (v53.3.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -282,7 +282,8 @@ const makeDifList = (_difList, _targetKey = ``) => {
 			const [difText, difSiz] = getFontSizeMulti(text, g_limitObj.difSelectorWidth, {
 				maxSiz: g_limitObj.difSelectorSiz, maxSizMulti: 9, prefix, len: 30,
 			})
-			_difList.appendChild(makeDifLblCssButton(`dif${k}`, difText, k, () => nextDifficulty(j - g_stateObj.scoreId), {
+			_difList.appendChild(makeDifLblCssButton(`dif${k}`, difText, k, () => nextDifficulty(
+				g_headerObj.viewLists.indexOf(j) - g_headerObj.viewLists.indexOf(g_stateObj.scoreId)), {
 				btnStyle: (j === g_stateObj.scoreId ? `Setting` : `Default`), siz: difSiz,
 			}));
 			document.getElementById(`dif${k}`).style.lineHeight = `9px`;
@@ -341,7 +342,7 @@ const createDifWindow = (_key = ``) => {
 	// ランダム選択
 	difCover.appendChild(
 		makeDifLblCssButton(`difRandom`, `RANDOM`, 0, () => {
-			nextDifficulty(Math.floor(Math.random() * g_headerObj.keyLabels.length));
+			nextDifficulty(Math.floor(Math.random() * g_headerObj.viewLists.length));
 		}, { w: g_limitObj.difCoverWidth })
 	);
 
@@ -994,9 +995,7 @@ const makeHighScore = _scoreId => {
 
 	// 結果をクリップボードへコピー (ハイスコア保存分)
 	if (g_localStorage.highscores?.[scoreName] !== undefined) {
-		const twiturl = new URL(g_localStorageUrlOrg);
-		twiturl.searchParams.append(`scoreId`, _scoreId);
-		const baseTwitUrl = g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``);
+		const baseTwitUrl = g_isLocal ? `` : getScoreUrl(_scoreId);
 
 		let tweetFrzJdg = ``;
 		let tweetMaxCombo = `${g_localStorage.highscores?.[scoreName]?.maxCombo}`;
