@@ -272,8 +272,9 @@ const initialControl = async () => {
 	safeExecuteCustomHooks(`g_customJsObj.preTitle`, g_customJsObj.preTitle);
 	const queryMusicId = getQueryParamVal(`musicId`);
 	g_settings.musicIdxNum = queryMusicId !== null ? Number(queryMusicId) :
-		g_headerObj.musicGroups?.[g_headerObj.musicNos[g_stateObj.scoreId]] ??
-		g_headerObj.musicNos[g_stateObj.scoreId] ?? g_headerObj.musicNos[0];
+		roundZero(g_headerObj.musicIdxList.indexOf(
+			g_headerObj.musicGroups?.[g_headerObj.musicNos[g_stateObj.scoreId]] ??
+			g_headerObj.musicNos[g_stateObj.scoreId] ?? g_headerObj.musicNos[0]));
 	titleInit(true);
 
 	// 未使用のg_keyObjプロパティを削除
@@ -1351,18 +1352,6 @@ const headerConvert = _dosObj => {
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 	obj.undefinedKeyLists = obj.keyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
 
-	// difficultyパラメータによる譜面指定 (scoreId指定が無い場合のみ)
-	if (getQueryParamVal(`scoreId`) === null && getQueryParamVal(`dif`) !== null) {
-		const queryMusicId = getQueryParamVal(`musicId`);
-		const targetIds = queryMusicId === null ? undefined
-			: obj.musicNos.map((_, j) => j).filter(j =>
-				(obj.musicGroups?.[obj.musicNos[j]] ?? obj.musicNos[j]) === Number(queryMusicId));
-		const scoreId = getScoreIdByDifficulty(getQueryParamVal(`dif`), obj, targetIds);
-		if (scoreId >= 0) {
-			g_stateObj.scoreId = scoreId;
-			obj.difficultyHit = true;
-		}
-	}
 	// 楽曲別のグループ化設定（選曲モードのみ）
 	if (hasVal(_dosObj.musicGroup)) {
 		obj.musicGroups = _dosObj.musicGroup.split(`,`)
@@ -1374,6 +1363,19 @@ const headerConvert = _dosObj => {
 		obj.musicIdxList = makeDedupliArray(obj.musicGroups);
 	} else {
 		obj.musicIdxList = [...Array(Math.max(...obj.musicNos) + 1).keys()];
+	}
+
+	// difficultyパラメータによる譜面指定 (scoreId指定が無い場合のみ)
+	if (getQueryParamVal(`scoreId`) === null && getQueryParamVal(`dif`) !== null) {
+		const queryMusicId = getQueryParamVal(`musicId`);
+		const targetIds = queryMusicId === null ? undefined
+			: obj.musicNos.map((_, j) => j).filter(j =>
+				(obj.musicGroups?.[obj.musicNos[j]] ?? obj.musicNos[j]) === Number(queryMusicId));
+		const scoreId = getScoreIdByDifficulty(getQueryParamVal(`dif`), obj, targetIds);
+		if (scoreId >= 0) {
+			g_stateObj.scoreId = scoreId;
+			obj.difficultyHit = true;
+		}
 	}
 
 	// 難易度配色の設定（選曲画面でのみ使用）

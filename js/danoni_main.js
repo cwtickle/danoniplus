@@ -44,10 +44,7 @@ const current = () => {
  * @param {string} _name
  * @returns {string}
  */
-const getQueryParamVal = _name => {
-	const param = new URL(location.href).searchParams.get(_name);
-	return param !== null ? decodeURIComponent(param.replace(/\+/g, ` `)) : null;
-};
+const getQueryParamVal = _name => new URL(location.href).searchParams.get(_name);
 
 // 常時デバッグを許可するドメイン
 const g_reservedDomains = [
@@ -1408,7 +1405,9 @@ const getScoreQuery = _scoreId => {
 
 	// 最短の形式から順に、同じ曲内で一意になるものを採用
 	// (表示用の値はエスケープ済みのため元の文字に戻す)
-	const found = [key, base, full].find(func => peers.filter(j => func(j) === func(_scoreId)).length === 1);
+	const found = [key, base, full].find(func =>
+		peers.filter(j => func(j) === func(_scoreId)).length === 1 &&
+		getScoreIdByDifficulty(unEscapeHtml(func(_scoreId)), g_headerObj, peers) === _scoreId);
 	if (found !== undefined) {
 		return [`dif`, unEscapeHtml(found(_scoreId))];
 	}
