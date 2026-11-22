@@ -440,7 +440,7 @@ const getScoreIdByDifficulty = (_difficulty, _obj, _targetIds = _obj.selectableS
 	const target = escapeHtml(trimStr(_difficulty));
 	// 具体的な形式から順に照合: [キー名-難易度名-制作者名, キー名-難易度名, キー名]
 	const names = j => {
-		const key = `${getKeyName(_obj.keyLabels[j])}`;
+		const key = escapeHtml(getKeyName(_obj.keyLabels[j]));
 		const base = `${key}-${_obj.difLabels[j]}`;
 		return [`${base}-${_obj.creatorNames[j]}`, base, key];
 	};
@@ -1371,7 +1371,7 @@ const headerConvert = _dosObj => {
 	}
 
 	// カスタムキー定義の取得・補完処理
-	obj.undefinedKeyListFinal = [];
+	obj.undefinedKeyListFinal = g_headerObj.undefinedKeyListFinal = [];
 	const importKeysData = _data => {
 		keysConvert(dosConvert(_data));
 		obj.undefinedKeyLists = obj.undefinedKeyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
