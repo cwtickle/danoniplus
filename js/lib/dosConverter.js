@@ -1358,6 +1358,13 @@ const headerConvert = _dosObj => {
 		obj.difficulties = [0];
 	}
 	const keyLists = makeDedupliArray(obj.keyLabels);
+
+	// 選曲モードでは、musicNo が不足する譜面を楽曲番号 0 に割り当てる
+	if (obj.musicSelectUse) {
+		for (let j = obj.musicNos.length; j < obj.keyLabels.length; j++) {
+			obj.musicNos[j] = 0;
+		}
+	}
 	// 未指定は譜面番号(1始まり)、明示的な無効値は選択対象外
 	const scoreIdOrders = splitLF2(_dosObj.scoreIdOrder) ?? [];
 	obj.scoreIdOrders = obj.keyLabels.map((_, j) => {
