@@ -1399,8 +1399,8 @@ const getScoreQuery = _scoreId => {
 		(g_headerObj.musicGroups?.[g_headerObj.musicNos[j]] ?? g_headerObj.musicNos[j]) ===
 		(g_headerObj.musicGroups?.[g_headerObj.musicNos[_scoreId]] ?? g_headerObj.musicNos[_scoreId]);
 	const peers = g_headerObj.selectableScoreIds.filter(sameMusic);
-	const key = j => `${g_headerObj.keyLabels[j]}`;
-	const base = j => `${g_headerObj.keyLabels[j]}-${g_headerObj.difLabels[j]}`;
+	const key = j => `${getKeyName(g_headerObj.keyLabels[j])}`;
+	const base = j => `${key(j)}-${g_headerObj.difLabels[j]}`;
 	const full = j => `${base(j)}-${g_headerObj.creatorNames[j]}`;
 
 	// 最短の形式から順に、同じ曲内で一意になるものを採用
