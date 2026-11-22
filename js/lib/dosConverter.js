@@ -444,7 +444,7 @@ const getScoreMusicGroup = (_obj, _scoreId) =>
 	_obj.musicGroups?.[_obj.musicNos[_scoreId]] ?? _obj.musicNos[_scoreId];
 
 const getSelectableMusicIndexes = _obj => _obj.musicIdxList.map((_, j) => j).filter(j =>
-	_obj.keyLabels.some((_, scoreId) => getScoreMusicGroup(_obj, scoreId) === _obj.musicIdxList[j]));
+	_obj.selectableScoreIds.some(scoreId => getScoreMusicGroup(_obj, scoreId) === _obj.musicIdxList[j]));
 
 const getValidMusicIndex = (_obj, _index) => {
 	const indexes = getSelectableMusicIndexes(_obj);
@@ -460,7 +460,7 @@ const getValidMusicIndex = (_obj, _index) => {
  * @param {string[]} _targetIds
  * @returns {number}
  */
-const getScoreIdByDifficulty = (_difficulty, _obj, _targetIds = _obj.keyLabels.map((_, j) => j)) => {
+const getScoreIdByDifficulty = (_difficulty, _obj, _targetIds = _obj.selectableScoreIds) => {
 	if (!hasVal(_difficulty)) {
 		return -1;
 	}
@@ -1358,10 +1358,21 @@ const headerConvert = _dosObj => {
 		obj.difficulties = [0];
 	}
 	const keyLists = makeDedupliArray(obj.keyLabels);
-	// 譜面の表示順 (未指定の譜面は自身の譜面番号(1始まり))
+	// 未指定は譜面番号(1始まり)、明示的な無効値は選択対象外
 	const scoreIdOrders = splitLF2(_dosObj.scoreIdOrder) ?? [];
-	obj.scoreIdOrders = obj.keyLabels.map((_, j) => setVal(scoreIdOrders[j], j + 1, C_TYP_FLOAT));
-	obj.viewLists = sortByScoreOrder([...Array(obj.keyLabels.length).keys()], obj.scoreIdOrders);
+	obj.scoreIdOrders = obj.keyLabels.map((_, j) => {
+		const value = scoreIdOrders[j];
+		return value === undefined || value.trim() === `` ? j + 1 : setVal(value, NaN, C_TYP_FLOAT);
+	});
+	obj.selectableScoreIds = obj.keyLabels.map((_, j) => j)
+		.filter(j => Number.isFinite(obj.scoreIdOrders[j]));
+	if (obj.selectableScoreIds.length === 0) {
+		makeWarningWindow(g_msgInfoObj.E_0024);
+		obj.scoreIdOrders = obj.keyLabels.map((_, j) => j + 1);
+		obj.selectableScoreIds = obj.keyLabels.map((_, j) => j);
+	}
+	obj.selectableScoreIds = sortByScoreOrder(obj.selectableScoreIds, obj.scoreIdOrders);
+	obj.viewLists = obj.selectableScoreIds.concat();
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 	obj.undefinedKeyLists = obj.keyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
 
@@ -1383,7 +1394,7 @@ const headerConvert = _dosObj => {
 	const queryMusicIdx = obj.musicSelectUse && queryMusicId !== null
 		? getValidMusicIndex(obj, Number(queryMusicId)) : null;
 	const validScoreId = queryScoreId !== null && !isNaN(parseInt(queryScoreId)) &&
-		g_stateObj.scoreId >= 0 && g_stateObj.scoreId < obj.keyLabels.length;
+		obj.selectableScoreIds.includes(g_stateObj.scoreId);
 
 	// 有効なscoreIdを優先し、選曲位置も譜面に合わせる
 	obj.initialMusicIdx = obj.musicSelectUse && validScoreId
@@ -1393,7 +1404,7 @@ const headerConvert = _dosObj => {
 	// difficultyパラメータによる譜面指定 (scoreId指定が無い場合のみ)
 	if (queryScoreId === null && getQueryParamVal(`dif`) !== null) {
 		const targetIds = queryMusicIdx === null ? undefined
-			: obj.keyLabels.map((_, j) => j).filter(j =>
+			: obj.selectableScoreIds.filter(j =>
 				getScoreMusicGroup(obj, j) === obj.musicIdxList[queryMusicIdx]);
 		const scoreId = getScoreIdByDifficulty(getQueryParamVal(`dif`), obj, targetIds);
 		if (scoreId >= 0) {
@@ -1459,7 +1470,7 @@ const headerConvert = _dosObj => {
 		g_stateObj.scoreId = obj.viewLists[0];
 	}
 	if ((!validScoreId && !obj.difficultyHit && queryMusicIdx !== null) ||
-		g_stateObj.scoreId < 0 || g_stateObj.scoreId >= obj.difLabels.length) {
+		!obj.selectableScoreIds.includes(g_stateObj.scoreId)) {
 		const musicScoreId = queryMusicIdx !== null
 			? obj.viewLists.find(id => getScoreMusicGroup(obj, id) === obj.musicIdxList[queryMusicIdx])
 			: undefined;

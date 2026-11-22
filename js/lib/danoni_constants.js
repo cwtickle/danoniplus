@@ -4696,6 +4696,7 @@ const g_lang_msgInfoObj = {
 	    以下のいずれか、または両方を指定してください。<br>
 	    &lt;input type="hidden" name="externalDos" id="externalDos" value="dos.txt"&gt;<br>
         &lt;input type="hidden" name="dos" id="dos" value="(譜面データ)"&gt;<br>`,
+        E_0024: `scoreIdOrder: 有効な譜面がないため、全譜面を表示します。(E-0024)`,
         E_0031: `楽曲ファイルが未指定か、フォーマットが間違っています。(E-0031)<br>
         |musicUrl=****.mp3|`,
         E_0033: `楽曲ファイルの読み込み中に接続がタイムアウトしました。(E-0033)`,
@@ -4747,6 +4748,7 @@ const g_lang_msgInfoObj = {
 	    Specify either or both of the following:<br>
 	    &lt;input type="hidden" name="externalDos" id="externalDos" value="dos.txt"&gt;<br>
         &lt;input type="hidden" name="dos" id="dos" value="(Chart data)"&gt;<br>`,
+        E_0024: `scoreIdOrder: Since there are no valid charts, all charts will be displayed. (E-0024)`,
         E_0031: `The music file is not set or the format is incorrect.(E-0031)<br>
         |musicUrl=****.mp3|`,
         E_0033: `The connection timed out while loading a music file. (E-0033)`,

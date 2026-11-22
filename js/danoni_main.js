@@ -1398,7 +1398,7 @@ const getScoreQuery = _scoreId => {
 	const sameMusic = j => !g_headerObj.musicSelectUse ||
 		(g_headerObj.musicGroups?.[g_headerObj.musicNos[j]] ?? g_headerObj.musicNos[j]) ===
 		(g_headerObj.musicGroups?.[g_headerObj.musicNos[_scoreId]] ?? g_headerObj.musicNos[_scoreId]);
-	const peers = g_headerObj.keyLabels.map((_, j) => j).filter(sameMusic);
+	const peers = g_headerObj.selectableScoreIds.filter(sameMusic);
 	const key = j => `${g_headerObj.keyLabels[j]}`;
 	const base = j => `${g_headerObj.keyLabels[j]}-${g_headerObj.difLabels[j]}`;
 	const full = j => `${base(j)}-${g_headerObj.creatorNames[j]}`;

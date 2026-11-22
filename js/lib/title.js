@@ -437,8 +437,8 @@ const isSingleScoreMode = () => getQueryParamVal(`scoreId`) !== null || getQuery
  * @param {number} _musicIdx
  * @returns {number[]}
  */
-const getMusicScoreIds = _musicIdx => sortByScoreOrder(
-	g_headerObj.keyLabels.map((_, j) => j).filter(j => getScoreMusicGroup(g_headerObj, j) === _musicIdx));
+const getMusicScoreIds = _musicIdx => g_headerObj.selectableScoreIds
+	.filter(j => getScoreMusicGroup(g_headerObj, j) === _musicIdx);
 
 /**
  * 背景矢印の表示
