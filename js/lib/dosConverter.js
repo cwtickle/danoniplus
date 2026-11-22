@@ -270,10 +270,10 @@ const initialControl = async () => {
 	resolveGaugeValuesAll();
 
 	safeExecuteCustomHooks(`g_customJsObj.preTitle`, g_customJsObj.preTitle);
-	g_settings.musicIdxNum = g_headerObj.initialMusicIdx ??
-		roundZero(g_headerObj.musicIdxList.indexOf(
-			g_headerObj.musicGroups?.[g_headerObj.musicNos[g_stateObj.scoreId]] ??
-			g_headerObj.musicNos[g_stateObj.scoreId] ?? g_headerObj.musicNos[0]));
+	g_settings.musicIdxNum = g_headerObj.musicSelectUse
+		? (g_headerObj.initialMusicIdx ?? roundZero(g_headerObj.musicIdxList.indexOf(
+			getScoreMusicGroup(g_headerObj, g_stateObj.scoreId))))
+		: (g_headerObj.musicNos[g_stateObj.scoreId] ?? g_headerObj.musicNos[0] ?? 0);
 	titleInit(true);
 
 	// 未使用のg_keyObjプロパティを削除
@@ -1382,11 +1382,11 @@ const headerConvert = _dosObj => {
 	const queryScoreId = getQueryParamVal(`scoreId`);
 	const queryMusicIdx = obj.musicSelectUse && queryMusicId !== null
 		? getValidMusicIndex(obj, Number(queryMusicId)) : null;
-	const validScoreId = queryScoreId !== null && g_stateObj.scoreId >= 0 &&
-		g_stateObj.scoreId < obj.keyLabels.length;
+	const validScoreId = queryScoreId !== null && !isNaN(parseInt(queryScoreId)) &&
+		g_stateObj.scoreId >= 0 && g_stateObj.scoreId < obj.keyLabels.length;
 
 	// 有効なscoreIdを優先し、選曲位置も譜面に合わせる
-	obj.initialMusicIdx = validScoreId
+	obj.initialMusicIdx = obj.musicSelectUse && validScoreId
 		? roundZero(obj.musicIdxList.indexOf(getScoreMusicGroup(obj, g_stateObj.scoreId)))
 		: queryMusicIdx;
 
@@ -1458,7 +1458,7 @@ const headerConvert = _dosObj => {
 	if (getQueryParamVal(`scoreId`) === null && !obj.difficultyHit && !obj.musicSelectUse) {
 		g_stateObj.scoreId = obj.viewLists[0];
 	}
-	if ((queryScoreId === null && !obj.difficultyHit && queryMusicIdx !== null) ||
+	if ((!validScoreId && !obj.difficultyHit && queryMusicIdx !== null) ||
 		g_stateObj.scoreId < 0 || g_stateObj.scoreId >= obj.difLabels.length) {
 		const musicScoreId = queryMusicIdx !== null
 			? obj.viewLists.find(id => getScoreMusicGroup(obj, id) === obj.musicIdxList[queryMusicIdx])
