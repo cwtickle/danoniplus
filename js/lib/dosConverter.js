@@ -270,10 +270,10 @@ const initialControl = async () => {
 	resolveGaugeValuesAll();
 
 	safeExecuteCustomHooks(`g_customJsObj.preTitle`, g_customJsObj.preTitle);
-	const queryMusicId = getQueryParamVal(`musicId`);
-	g_settings.musicIdxNum = queryMusicId !== null ? Number(queryMusicId) :
-		g_headerObj.musicGroups?.[g_headerObj.musicNos[g_stateObj.scoreId]] ??
-		g_headerObj.musicNos[g_stateObj.scoreId] ?? g_headerObj.musicNos[0];
+	g_settings.musicIdxNum = g_headerObj.musicSelectUse
+		? (g_headerObj.initialMusicIdx ?? roundZero(g_headerObj.musicIdxList.indexOf(
+			getScoreMusicGroup(g_headerObj, g_stateObj.scoreId))))
+		: (g_headerObj.musicNos[g_stateObj.scoreId] ?? g_headerObj.musicNos[0] ?? 0);
 	titleInit(true);
 
 	// 未使用のg_keyObjプロパティを削除
@@ -438,6 +438,49 @@ const sortByScoreOrder = (_ids, _orders = g_headerObj.scoreIdOrders) =>
 	_ids.concat().sort((a, b) => _orders[a] - _orders[b] || a - b);
 
 /**
+ * 譜面に対応する楽曲グループと、譜面がある選曲位置を取得
+ */
+const getScoreMusicGroup = (_obj, _scoreId) =>
+	_obj.musicGroups?.[_obj.musicNos[_scoreId]] ?? _obj.musicNos[_scoreId];
+
+const getSelectableMusicIndexes = _obj => _obj.musicIdxList.map((_, j) => j).filter(j =>
+	_obj.selectableScoreIds.some(scoreId => getScoreMusicGroup(_obj, scoreId) === _obj.musicIdxList[j]));
+
+const getValidMusicIndex = (_obj, _index) => {
+	const indexes = getSelectableMusicIndexes(_obj);
+	return indexes.includes(_index) ? _index : (indexes[0] ?? 0);
+};
+
+/**
+ * difficultyパラメータから譜面番号を取得
+ * - "キー名-難易度名" または "キー名-難易度名-製作者名" の形式で、一致した最初の譜面を返す
+ * - 一致する譜面が無い場合は -1
+ * @param {string} _difficulty
+ * @param {object} _obj
+ * @param {string[]} _targetIds
+ * @returns {number}
+ */
+const getScoreIdByDifficulty = (_difficulty, _obj, _targetIds = _obj.selectableScoreIds) => {
+	if (!hasVal(_difficulty)) {
+		return -1;
+	}
+	const target = escapeHtml(trimStr(_difficulty));
+	// 具体的な形式から順に照合: [キー名-難易度名-制作者名, キー名-難易度名, キー名]
+	const names = j => {
+		const base = `${_obj.keyLabels[j]}-${_obj.difLabels[j]}`;
+		return [`${base}-${_obj.creatorNames[j]}`, base, `${_obj.keyLabels[j]}`];
+	};
+	const ids = sortByScoreOrder(_targetIds, _obj.scoreIdOrders);
+	for (let k = 0; k < 3; k++) {
+		const found = ids.find(j => names(j)[k] === target);
+		if (found !== undefined) {
+			return found;
+		}
+	}
+	return -1;
+};
+
+/**
  * 作品別ローカルストレージの読み込み・初期設定
  * @param {string} _musicId 楽曲ID
  */
@@ -448,6 +491,7 @@ const loadLocalStorage = (_musicId = ``) => {
 	// 選択中の楽曲ID(_musicId)がある場合は、キーとして区別するため追加
 	const url = new URL(location.href);
 	url.searchParams.delete(`scoreId`);
+	url.searchParams.delete(`dif`);
 	url.searchParams.delete(`h`);
 	url.searchParams.delete(`debug`);
 	url.searchParams.delete(`musicId`);
@@ -1314,10 +1358,28 @@ const headerConvert = _dosObj => {
 		obj.difficulties = [0];
 	}
 	const keyLists = makeDedupliArray(obj.keyLabels);
-	// 譜面の表示順 (未指定の譜面は自身の譜面番号(1始まり))
+
+	// 選曲モードでは、musicNo が不足する譜面を楽曲番号 0 に割り当てる
+	if (obj.musicSelectUse) {
+		for (let j = obj.musicNos.length; j < obj.keyLabels.length; j++) {
+			obj.musicNos[j] = 0;
+		}
+	}
+	// 未指定は譜面番号(1始まり)、明示的な無効値は選択対象外
 	const scoreIdOrders = splitLF2(_dosObj.scoreIdOrder) ?? [];
-	obj.scoreIdOrders = obj.keyLabels.map((_, j) => setVal(scoreIdOrders[j], j + 1, C_TYP_FLOAT));
-	obj.viewLists = sortByScoreOrder([...Array(obj.keyLabels.length).keys()], obj.scoreIdOrders);
+	obj.scoreIdOrders = obj.keyLabels.map((_, j) => {
+		const value = scoreIdOrders[j];
+		return value === undefined || value.trim() === `` ? j + 1 : setVal(value, NaN, C_TYP_FLOAT);
+	});
+	obj.selectableScoreIds = obj.keyLabels.map((_, j) => j)
+		.filter(j => Number.isFinite(obj.scoreIdOrders[j]));
+	if (obj.selectableScoreIds.length === 0) {
+		makeWarningWindow(g_msgInfoObj.E_0024);
+		obj.scoreIdOrders = obj.keyLabels.map((_, j) => j + 1);
+		obj.selectableScoreIds = obj.keyLabels.map((_, j) => j);
+	}
+	obj.selectableScoreIds = sortByScoreOrder(obj.selectableScoreIds, obj.scoreIdOrders);
+	obj.viewLists = obj.selectableScoreIds.concat();
 	obj.keyLists = keyLists.sort((a, b) => parseInt(a) - parseInt(b));
 	obj.undefinedKeyLists = obj.keyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
 
@@ -1332,6 +1394,30 @@ const headerConvert = _dosObj => {
 		obj.musicIdxList = makeDedupliArray(obj.musicGroups);
 	} else {
 		obj.musicIdxList = [...Array(Math.max(...obj.musicNos) + 1).keys()];
+	}
+
+	const queryMusicId = getQueryParamVal(`musicId`);
+	const queryScoreId = getQueryParamVal(`scoreId`);
+	const queryMusicIdx = obj.musicSelectUse && queryMusicId !== null
+		? getValidMusicIndex(obj, Number(queryMusicId)) : null;
+	const validScoreId = queryScoreId !== null && !isNaN(parseInt(queryScoreId)) &&
+		obj.selectableScoreIds.includes(g_stateObj.scoreId);
+
+	// 有効なscoreIdを優先し、選曲位置も譜面に合わせる
+	obj.initialMusicIdx = obj.musicSelectUse && validScoreId
+		? roundZero(obj.musicIdxList.indexOf(getScoreMusicGroup(obj, g_stateObj.scoreId)))
+		: queryMusicIdx;
+
+	// difficultyパラメータによる譜面指定 (scoreId指定が無い場合のみ)
+	if (queryScoreId === null && getQueryParamVal(`dif`) !== null) {
+		const targetIds = queryMusicIdx === null ? undefined
+			: obj.selectableScoreIds.filter(j =>
+				getScoreMusicGroup(obj, j) === obj.musicIdxList[queryMusicIdx]);
+		const scoreId = getScoreIdByDifficulty(getQueryParamVal(`dif`), obj, targetIds);
+		if (scoreId >= 0) {
+			g_stateObj.scoreId = scoreId;
+			obj.difficultyHit = true;
+		}
 	}
 
 	// 難易度配色の設定（選曲画面でのみ使用）
@@ -1387,14 +1473,13 @@ const headerConvert = _dosObj => {
 
 	// 初期速度の設定
 	// scoreId指定が無い場合 (選曲モードを除く) は、表示順の先頭の譜面を初期選択
-	if (getQueryParamVal(`scoreId`) === null && !obj.musicSelectUse) {
+	if (getQueryParamVal(`scoreId`) === null && !obj.difficultyHit && !obj.musicSelectUse) {
 		g_stateObj.scoreId = obj.viewLists[0];
 	}
-	if (g_stateObj.scoreId >= obj.difLabels.length) {
-		const queryMusicId = getQueryParamVal(`musicId`);
-		const musicScoreId = obj.musicSelectUse && queryMusicId !== null
-			? obj.viewLists.find(id =>
-				(obj.musicGroups?.[obj.musicNos[id]] ?? obj.musicNos[id]) === Number(queryMusicId))
+	if ((!validScoreId && !obj.difficultyHit && queryMusicIdx !== null) ||
+		!obj.selectableScoreIds.includes(g_stateObj.scoreId)) {
+		const musicScoreId = queryMusicIdx !== null
+			? obj.viewLists.find(id => getScoreMusicGroup(obj, id) === obj.musicIdxList[queryMusicIdx])
 			: undefined;
 		g_stateObj.scoreId = musicScoreId ?? obj.viewLists[0];
 	}

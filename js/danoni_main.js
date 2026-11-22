@@ -44,10 +44,7 @@ const current = () => {
  * @param {string} _name
  * @returns {string}
  */
-const getQueryParamVal = _name => {
-	const param = new URL(location.href).searchParams.get(_name);
-	return param !== null ? decodeURIComponent(param.replace(/\+/g, ` `)) : null;
-};
+const getQueryParamVal = _name => new URL(location.href).searchParams.get(_name);
 
 // 常時デバッグを許可するドメイン
 const g_reservedDomains = [
@@ -1375,6 +1372,46 @@ const reviseCssText = _str => {
 		return replaceStr(_str, [[imgOriginal, imgPath]]);
 	}
 	return _str;
+};
+
+/**
+ * 譜面指定用のURLを作成 (dif/scoreId を先、musicId を後ろに付与)
+ * @param {number} _scoreId
+ * @returns {string}
+ */
+const getScoreUrl = _scoreId => {
+	const url = new URL(g_localStorageUrlOrg);
+	url.searchParams.append(...getScoreQuery(_scoreId));
+	if (g_headerObj.musicSelectUse) {
+		url.searchParams.append(`musicId`, g_settings.musicIdxNum);
+	}
+	return url.toString().replace(/[\t\n]/g, ``);
+};
+
+/**
+ * 譜面指定用のクエリを取得 (原則 difficulty、一意にできない場合のみ scoreId)
+ * - 検索対象は同じ曲(musicId)内の譜面。選曲モード以外は全譜面
+ * @param {number} _scoreId
+ * @returns {[string, string]} [パラメータ名, 値]
+ */
+const getScoreQuery = _scoreId => {
+	const sameMusic = j => !g_headerObj.musicSelectUse ||
+		(g_headerObj.musicGroups?.[g_headerObj.musicNos[j]] ?? g_headerObj.musicNos[j]) ===
+		(g_headerObj.musicGroups?.[g_headerObj.musicNos[_scoreId]] ?? g_headerObj.musicNos[_scoreId]);
+	const peers = g_headerObj.selectableScoreIds.filter(sameMusic);
+	const key = j => `${g_headerObj.keyLabels[j]}`;
+	const base = j => `${g_headerObj.keyLabels[j]}-${g_headerObj.difLabels[j]}`;
+	const full = j => `${base(j)}-${g_headerObj.creatorNames[j]}`;
+
+	// 最短の形式から順に、同じ曲内で一意になるものを採用
+	// (表示用の値はエスケープ済みのため元の文字に戻す)
+	const found = [key, base, full].find(func =>
+		peers.filter(j => func(j) === func(_scoreId)).length === 1 &&
+		getScoreIdByDifficulty(unEscapeHtml(func(_scoreId)), g_headerObj, peers) === _scoreId);
+	if (found !== undefined) {
+		return [`dif`, unEscapeHtml(found(_scoreId))];
+	}
+	return [`scoreId`, String(_scoreId)];
 };
 
 /*-----------------------------------------------------------*/
