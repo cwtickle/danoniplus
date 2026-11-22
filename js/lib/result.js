@@ -542,9 +542,7 @@ const resultInit = () => {
 	if (g_stateObj.shuffle !== `OFF`) {
 		tweetDifData += `:${shuffleName}`;
 	}
-	const twiturl = new URL(g_localStorageUrl);
-	twiturl.searchParams.append(`scoreId`, g_stateObj.scoreId);
-	const baseTwitUrl = g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``);
+	const baseTwitUrl = g_isLocal ? `` : getScoreUrl(g_stateObj.scoreId);
 
 	const tweetExcessive = (g_stateObj.excessive === C_FLG_ON) ? `(+${g_resultObj.excessive})` : ``;
 

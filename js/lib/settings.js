@@ -995,9 +995,7 @@ const makeHighScore = _scoreId => {
 
 	// 結果をクリップボードへコピー (ハイスコア保存分)
 	if (g_localStorage.highscores?.[scoreName] !== undefined) {
-		const twiturl = new URL(g_localStorageUrlOrg);
-		twiturl.searchParams.append(`scoreId`, _scoreId);
-		const baseTwitUrl = g_isLocal ? `` : `${twiturl.toString()}`.replace(/[\t\n]/g, ``);
+		const baseTwitUrl = g_isLocal ? `` : getScoreUrl(_scoreId);
 
 		let tweetFrzJdg = ``;
 		let tweetMaxCombo = `${g_localStorage.highscores?.[scoreName]?.maxCombo}`;

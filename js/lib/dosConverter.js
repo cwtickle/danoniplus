@@ -442,21 +442,28 @@ const sortByScoreOrder = (_ids, _orders = g_headerObj.scoreIdOrders) =>
  * - "キー名-難易度名" または "キー名-難易度名-製作者名" の形式で、一致した最初の譜面を返す
  * - 一致する譜面が無い場合は -1
  * @param {string} _difficulty
+ * @param {object} _obj
+ * @param {string[]} _targetIds
  * @returns {number}
  */
-const getScoreIdByDifficulty = (_difficulty, _obj) => {
+const getScoreIdByDifficulty = (_difficulty, _obj, _targetIds = _obj.keyLabels.map((_, j) => j)) => {
 	if (!hasVal(_difficulty)) {
 		return -1;
 	}
 	const target = escapeHtml(trimStr(_difficulty));
+	// 具体的な形式から順に照合: [キー名-難易度名-制作者名, キー名-難易度名, キー名]
 	const names = j => {
 		const base = `${_obj.keyLabels[j]}-${_obj.difLabels[j]}`;
-		return [base, `${base}-${_obj.creatorNames[j]}`];
+		return [`${base}-${_obj.creatorNames[j]}`, base, `${_obj.keyLabels[j]}`];
 	};
-	// 制作者名まで含む完全一致を優先し、次に「キー名-難易度名」のみの一致を採用
-	const ids = sortByScoreOrder(_obj.keyLabels.map((_, j) => j), _obj.scoreIdOrders);
-	const found = ids.find(j => names(j)[1] === target) ?? ids.find(j => names(j)[0] === target);
-	return found ?? -1;
+	const ids = sortByScoreOrder(_targetIds, _obj.scoreIdOrders);
+	for (let k = 0; k < 3; k++) {
+		const found = ids.find(j => names(j)[k] === target);
+		if (found !== undefined) {
+			return found;
+		}
+	}
+	return -1;
 };
 
 /**
@@ -470,7 +477,7 @@ const loadLocalStorage = (_musicId = ``) => {
 	// 選択中の楽曲ID(_musicId)がある場合は、キーとして区別するため追加
 	const url = new URL(location.href);
 	url.searchParams.delete(`scoreId`);
-	url.searchParams.delete(`difficulty`);
+	url.searchParams.delete(`dif`);
 	url.searchParams.delete(`h`);
 	url.searchParams.delete(`debug`);
 	url.searchParams.delete(`musicId`);
@@ -1345,8 +1352,12 @@ const headerConvert = _dosObj => {
 	obj.undefinedKeyLists = obj.keyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
 
 	// difficultyパラメータによる譜面指定 (scoreId指定が無い場合のみ)
-	if (getQueryParamVal(`scoreId`) === null && getQueryParamVal(`difficulty`) !== null) {
-		const scoreId = getScoreIdByDifficulty(getQueryParamVal(`difficulty`), obj);
+	if (getQueryParamVal(`scoreId`) === null && getQueryParamVal(`dif`) !== null) {
+		const queryMusicId = getQueryParamVal(`musicId`);
+		const targetIds = queryMusicId === null ? undefined
+			: obj.musicNos.map((_, j) => j).filter(j =>
+				(obj.musicGroups?.[obj.musicNos[j]] ?? obj.musicNos[j]) === Number(queryMusicId));
+		const scoreId = getScoreIdByDifficulty(getQueryParamVal(`dif`), obj, targetIds);
 		if (scoreId >= 0) {
 			g_stateObj.scoreId = scoreId;
 			obj.difficultyHit = true;

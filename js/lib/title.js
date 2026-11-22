@@ -426,7 +426,7 @@ const externalWebTitle = () => {
  * 譜面指定(scoreId, difficulty)による選曲単品モードかどうか
  * @returns {boolean}
  */
-const isSingleScoreMode = () => getQueryParamVal(`scoreId`) !== null || getQueryParamVal(`difficulty`) !== null;
+const isSingleScoreMode = () => getQueryParamVal(`scoreId`) !== null || getQueryParamVal(`dif`) !== null;
 
 /**
  * 楽曲(musicIdxList上の値)に属する譜面番号を、表示順で取得
