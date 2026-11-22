@@ -84,33 +84,6 @@ const initialControl = async () => {
 
 	// 譜面ヘッダー、特殊キー情報の読込
 	Object.assign(g_headerObj, headerConvert(g_rootObj));
-	g_headerObj.undefinedKeyListFinal = [];
-	const importKeysData = _data => {
-		keysConvert(dosConvert(_data));
-		g_headerObj.undefinedKeyLists = g_headerObj.undefinedKeyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
-	};
-	g_presetObj.keysDataLib.forEach(list => importKeysData(list));
-	if (g_presetObj.keysData !== undefined) {
-		g_presetObj.keysDataLocal.unshift(g_presetObj.keysData);
-	}
-	g_presetObj.keysDataLocal.forEach(list => importKeysData(list));
-	g_headerObj.keyExtraList = keysConvert(g_rootObj, {
-		keyExtraList: makeDedupliArray(g_headerObj.undefinedKeyLists, g_rootObj.keyExtraList?.split(`,`)),
-	});
-
-	// キー定義でエラーになる場合は強制的にデフォルトキーへ変更して続行
-	let hasUndefinedKey = false;
-	for (let j = 0; j < g_headerObj.keyLabels.length; j++) {
-		if (g_headerObj.undefinedKeyListFinal.includes(g_headerObj.keyLabels[j])) {
-			g_headerObj.keyLists = g_headerObj.keyLists.filter(key => key !== g_headerObj.keyLabels[j]);
-			g_headerObj.keyLabels[j] = g_keyObj.initKeyLabel;
-			hasUndefinedKey = true;
-		}
-	}
-	if (hasUndefinedKey) {
-		g_headerObj.keyLists = makeDedupliArray(g_headerObj.keyLists, [g_keyObj.initKeyLabel])
-			.sort((a, b) => parseInt(a) - parseInt(b));
-	}
 
 	// ラベルテキスト、オンマウステキスト、確認メッセージ定義の上書き設定
 	Object.assign(g_lblNameObj, g_lang_lblNameObj[g_localeObj.val], g_presetObj.lblName?.[g_localeObj.val]);
@@ -467,8 +440,9 @@ const getScoreIdByDifficulty = (_difficulty, _obj, _targetIds = _obj.selectableS
 	const target = escapeHtml(trimStr(_difficulty));
 	// 具体的な形式から順に照合: [キー名-難易度名-制作者名, キー名-難易度名, キー名]
 	const names = j => {
-		const base = `${_obj.keyLabels[j]}-${_obj.difLabels[j]}`;
-		return [`${base}-${_obj.creatorNames[j]}`, base, `${_obj.keyLabels[j]}`];
+		const key = escapeHtml(getKeyName(_obj.keyLabels[j]));
+		const base = `${key}-${_obj.difLabels[j]}`;
+		return [`${base}-${_obj.creatorNames[j]}`, base, key];
 	};
 	const ids = sortByScoreOrder(_targetIds, _obj.scoreIdOrders);
 	for (let k = 0; k < 3; k++) {
@@ -1396,6 +1370,36 @@ const headerConvert = _dosObj => {
 		obj.musicIdxList = [...Array(Math.max(...obj.musicNos) + 1).keys()];
 	}
 
+	// カスタムキー定義の取得・補完処理
+	obj.undefinedKeyListFinal = g_headerObj.undefinedKeyListFinal = [];
+	const importKeysData = _data => {
+		keysConvert(dosConvert(_data));
+		obj.undefinedKeyLists = obj.undefinedKeyLists.filter(key => g_keyObj[`${g_keyObj.defaultProp}${key}_0`] === undefined);
+	};
+	g_presetObj.keysDataLib.forEach(list => importKeysData(list));
+	if (g_presetObj.keysData !== undefined) {
+		g_presetObj.keysDataLocal.unshift(g_presetObj.keysData);
+	}
+	g_presetObj.keysDataLocal.forEach(list => importKeysData(list));
+	obj.keyExtraList = keysConvert(_dosObj, {
+		keyExtraList: makeDedupliArray(obj.undefinedKeyLists, _dosObj.keyExtraList?.split(`,`)),
+	});
+
+	// キー定義でエラーになる場合は強制的にデフォルトキーへ変更して続行
+	let hasUndefinedKey = false;
+	for (let j = 0; j < obj.keyLabels.length; j++) {
+		if (obj.undefinedKeyListFinal.includes(obj.keyLabels[j])) {
+			obj.keyLists = obj.keyLists.filter(key => key !== obj.keyLabels[j]);
+			obj.keyLabels[j] = g_keyObj.initKeyLabel;
+			hasUndefinedKey = true;
+		}
+	}
+	if (hasUndefinedKey) {
+		obj.keyLists = makeDedupliArray(obj.keyLists, [g_keyObj.initKeyLabel])
+			.sort((a, b) => parseInt(a) - parseInt(b));
+	}
+
+	// GETクエリパラメーターの補完処理
 	const queryMusicId = getQueryParamVal(`musicId`);
 	const queryScoreId = getQueryParamVal(`scoreId`);
 	const queryMusicIdx = obj.musicSelectUse && queryMusicId !== null
