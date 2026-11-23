@@ -484,7 +484,9 @@ const resultInit = () => {
 			}
 
 			// ハイスコア更新時処理
-			if (highscoreDfObj.score > 0) {
+			// 初回記録は0点でも保存する (判定値・メタデータを含め、差分計算の基準を作るため)
+			const firstRecordFlg = g_localStorage.highscores[scoreName] === undefined;
+			if (highscoreDfObj.score > 0 || firstRecordFlg) {
 				if (g_localStorage.highscores[scoreName] === undefined) {
 					g_localStorage.highscores[scoreName] = {};
 				}
@@ -496,11 +498,6 @@ const resultInit = () => {
 			// クリアランプ点灯処理
 			const isGameCompleted = !g_gameOverFlg && g_finishFlg;
 			const hasValidAccuracy = g_workObj.requiredAccuracy !== `----`;
-			const lampFlg = (![``, `failed`, `cleared`].includes(g_resultObj.spState)) ||
-				(isGameCompleted && hasValidAccuracy && allArrowsPlayed);
-			if (lampFlg && g_localStorage.highscores[scoreName] === undefined) {
-				g_localStorage.highscores[scoreName] = {};
-			}
 			if (![``, `failed`, `cleared`].includes(g_resultObj.spState)) {
 				g_localStorage.highscores[scoreName][g_resultObj.spState] = true;
 			}
