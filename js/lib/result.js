@@ -450,7 +450,7 @@ const resultInit = () => {
 
 		Object.keys(jdgScoreObj).filter(judge => judge !== ``)
 			.forEach(judge => highscoreDfObj[judge] = g_resultObj[judge] -
-				(scoreName in g_localStorage.highscores ? g_localStorage.highscores[scoreName][judge] : 0));
+				(g_localStorage.highscores[scoreName]?.[judge] ?? 0));
 
 		if (g_stateObj.dataSaveFlg) {
 
@@ -494,11 +494,16 @@ const resultInit = () => {
 			}
 
 			// クリアランプ点灯処理
+			const isGameCompleted = !g_gameOverFlg && g_finishFlg;
+			const hasValidAccuracy = g_workObj.requiredAccuracy !== `----`;
+			const lampFlg = (![``, `failed`, `cleared`].includes(g_resultObj.spState)) ||
+				(isGameCompleted && hasValidAccuracy && allArrowsPlayed);
+			if (lampFlg && g_localStorage.highscores[scoreName] === undefined) {
+				g_localStorage.highscores[scoreName] = {};
+			}
 			if (![``, `failed`, `cleared`].includes(g_resultObj.spState)) {
 				g_localStorage.highscores[scoreName][g_resultObj.spState] = true;
 			}
-			const isGameCompleted = !g_gameOverFlg && g_finishFlg;
-			const hasValidAccuracy = g_workObj.requiredAccuracy !== `----`;
 			if (isGameCompleted && hasValidAccuracy && allArrowsPlayed) {
 				if (g_localStorage.highscores[scoreName].clearLamps === undefined) {
 					g_localStorage.highscores[scoreName].clearLamps = [];
