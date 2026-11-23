@@ -496,11 +496,11 @@ const resultInit = () => {
 			}
 
 			// クリアランプ点灯処理
-			const isGameCompleted = !g_gameOverFlg && g_finishFlg;
-			const hasValidAccuracy = g_workObj.requiredAccuracy !== `----`;
 			if (![``, `failed`, `cleared`].includes(g_resultObj.spState)) {
 				g_localStorage.highscores[scoreName][g_resultObj.spState] = true;
 			}
+			const isGameCompleted = !g_gameOverFlg && g_finishFlg;
+			const hasValidAccuracy = g_workObj.requiredAccuracy !== `----`;
 			if (isGameCompleted && hasValidAccuracy && allArrowsPlayed) {
 				if (g_localStorage.highscores[scoreName].clearLamps === undefined) {
 					g_localStorage.highscores[scoreName].clearLamps = [];
