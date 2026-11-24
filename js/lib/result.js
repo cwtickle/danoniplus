@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/11/22 (v53.3.1)
+ * Revised : 2026/11/24 (v53.3.2)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -450,7 +450,7 @@ const resultInit = () => {
 
 		Object.keys(jdgScoreObj).filter(judge => judge !== ``)
 			.forEach(judge => highscoreDfObj[judge] = g_resultObj[judge] -
-				(scoreName in g_localStorage.highscores ? g_localStorage.highscores[scoreName][judge] : 0));
+				(g_localStorage.highscores[scoreName]?.[judge] ?? 0));
 
 		if (g_stateObj.dataSaveFlg) {
 
@@ -484,7 +484,9 @@ const resultInit = () => {
 			}
 
 			// ハイスコア更新時処理
-			if (highscoreDfObj.score > 0) {
+			// 初回記録は0点でも保存する (判定値・メタデータを含め、差分計算の基準を作るため)
+			const firstRecordFlg = g_localStorage.highscores[scoreName] === undefined;
+			if (highscoreDfObj.score > 0 || firstRecordFlg) {
 				if (g_localStorage.highscores[scoreName] === undefined) {
 					g_localStorage.highscores[scoreName] = {};
 				}
