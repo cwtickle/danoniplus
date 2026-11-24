@@ -4,12 +4,12 @@
  * 
  * Source by tickle
  * Created : 2018/10/08
- * Revised : 2026/10/25
+ * Revised : 2026/11/24
  *
  * https://github.com/cwtickle/danoniplus
  */
-const g_version = `Ver 49.6.7`;
-const g_revisedDate = `2026/10/25`;
+const g_version = `Ver 49.6.8`;
+const g_revisedDate = `2026/11/24`;
 
 // カスタム用バージョン (danoni_custom.js 等で指定可)
 let g_localVersion = ``;
@@ -17755,7 +17755,7 @@ const resultInit = () => {
 
 		Object.keys(jdgScoreObj).filter(judge => judge !== ``)
 			.forEach(judge => highscoreDfObj[judge] = g_resultObj[judge] -
-				(scoreName in g_localStorage.highscores ? g_localStorage.highscores[scoreName][judge] : 0));
+				(g_localStorage.highscores[scoreName]?.[judge] ?? 0));
 
 		if (g_stateObj.dataSaveFlg) {
 
@@ -17789,7 +17789,9 @@ const resultInit = () => {
 			}
 
 			// ハイスコア更新時処理
-			if (highscoreDfObj.score > 0) {
+			// 初回記録は0点でも保存する (判定値・メタデータを含め、差分計算の基準を作るため)
+			const firstRecordFlg = g_localStorage.highscores[scoreName] === undefined;
+			if (highscoreDfObj.score > 0 || firstRecordFlg) {
 				if (g_localStorage.highscores[scoreName] === undefined) {
 					g_localStorage.highscores[scoreName] = {};
 				}
