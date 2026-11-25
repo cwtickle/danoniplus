@@ -8,6 +8,7 @@ if (!/^\d+\.\d+\.\d+$/.test(version ?? '')) {
     console.error('version を X.Y.Z 形式で指定してください');
     process.exit(1);
 }
+const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const opt = (name, def) => {
     const i = rest.indexOf(name);
     return i >= 0 ? rest[i + 1] : def;
@@ -57,7 +58,8 @@ fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
 
 // 3. SECURITY.md の該当メジャー行の Latest Version
 let sec = fs.readFileSync('SECURITY.md', 'utf8');
-const rowRe = new RegExp(`^(\\| v${major}[ :].*)$`, 'm');
+const safeMajor = escapeRegExp(major);
+const rowRe = new RegExp(`^(\\| v${safeMajor}[ :].*)$`, 'm');
 const link = `[v${version}](https://github.com/cwtickle/danoniplus/releases/tag/v${version})`;
 sec = sec.replace(rowRe, row =>
     row.replace(/\[v\d+\.\d+\.\d+\]\(https:\/\/github\.com\/cwtickle\/danoniplus\/releases\/tag\/v\d+\.\d+\.\d+\)/, link));
