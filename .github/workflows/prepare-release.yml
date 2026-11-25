@@ -39,21 +39,21 @@ jobs:
           node-version: '24.x'
 
       - name: Bump version
-        run: node .github/scripts/bump-version.mjs "${{ inputs.version }}" --base origin/master
+        env:
+          VERSION: ${{ inputs.version }}
+        run: node .github/scripts/bump-version.mjs "$VERSION" --base origin/master
 
-      - name: Push branch and create PR to master
+      - name: Commit & push to develop and create PR to master
         env:
           GH_TOKEN: ${{ steps.app_token.outputs.token }}
           VERSION: ${{ inputs.version }}
           SUMMARY: ${{ inputs.summary }}
         run: |
-          BRANCH="release/v${VERSION}"
-          git checkout -b "$BRANCH"
           git config user.name "danoniplus-release-bot[bot]"
           git config user.email "danoniplus-release-bot[bot]@users.noreply.github.com"
           git add -A
           git commit -m "[ver${VERSION}] ${SUMMARY}"
-          git push -u origin "$BRANCH"
+          git push origin develop
 
           node -e '
             const { execSync } = require("node:child_process");
@@ -80,6 +80,6 @@ jobs:
 
           gh pr create \
             --base master \
-            --head "$BRANCH" \
+            --head develop \
             --title "[ver${VERSION}] ${SUMMARY}" \
             --body-file /tmp/pr_body.md
