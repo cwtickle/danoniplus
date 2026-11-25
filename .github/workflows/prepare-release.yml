@@ -49,8 +49,8 @@ jobs:
           VERSION: ${{ inputs.version }}
           SUMMARY: ${{ inputs.summary }}
         run: |
-          git config user.name "danoniplus-release-bot[bot]"
-          git config user.email "danoniplus-release-bot[bot]@users.noreply.github.com"
+          git config user.name "361131824+danoniplus-ci-bot[bot]"
+          git config user.email "361131824+danoniplus-ci-bot[bot]@users.noreply.github.com"
           git add -A
           if ! git diff --cached --quiet; then
             git commit -m "[ver${VERSION}] ${SUMMARY}"
@@ -80,8 +80,17 @@ jobs:
             fs.writeFileSync("/tmp/pr_body.md", body, "utf8");
           '
 
-          gh pr create \
-            --base master \
-            --head develop \
-            --title "[ver${VERSION}] ${SUMMARY}" \
-            --body-file /tmp/pr_body.md
+          EXISTING=$(gh pr list --base master --head develop --state open --json number --jq '.[0].number')
+          if [ -n "$EXISTING" ]; then
+            echo "既存のPR #${EXISTING} があるため、タイトルのみ更新します"
+            gh pr edit "$EXISTING" \
+              --title "[ver${VERSION}] ${SUMMARY}" \
+              --body-file /tmp/pr_body.md
+          else
+            gh pr create \
+              --base master \
+              --head develop \
+              --title "[ver${VERSION}] ${SUMMARY}" \
+              --body-file /tmp/pr_body.md \
+              --label release
+          fi
