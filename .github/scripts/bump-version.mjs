@@ -25,7 +25,9 @@ const isoDate = date.replace(/\//g, '-');
 const [majorStr] = version.split('.');
 const majorNum = Number(majorStr);
 const prevMajor = majorNum - 1;
-const eosMajor = majorNum + 3;
+// 5n + 4 のメジャーバージョンは 9 メジャー先まで延長サポート、それ以外は 3 メジャー先
+const isExtendedSupport = majorNum % 5 === 4;
+const eosMajor = majorNum + (isExtendedSupport ? 9 : 3);
 const safeMajor = escapeRegExp(majorStr);
 
 // 書き込み予定をまとめて保持: { path, content, log }

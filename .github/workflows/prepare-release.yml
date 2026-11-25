@@ -52,8 +52,10 @@ jobs:
           git config user.name "danoniplus-release-bot[bot]"
           git config user.email "danoniplus-release-bot[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "[ver${VERSION}] ${SUMMARY}"
-          git push origin develop
+          if ! git diff --cached --quiet; then
+            git commit -m "[ver${VERSION}] ${SUMMARY}"
+            git push origin develop
+          fi
 
           node -e '
             const { execSync } = require("node:child_process");
