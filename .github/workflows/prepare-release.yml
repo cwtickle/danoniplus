@@ -1,0 +1,40 @@
+# .github/workflows/prepare-release.yml
+name: Prepare release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'リリースバージョン (例: 53.4.0)'
+        required: true
+      summary:
+        description: 'PRタイトルの更新内容'
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: develop
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.x'
+
+      - name: Bump version
+        run: node scripts/bump-version.mjs "${{ inputs.version }}" --base origin/master
+
+      - name: Commit & push to develop
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "[ver${{ inputs.version }}] ${{ inputs.summary }}"
+          git push origin develop
