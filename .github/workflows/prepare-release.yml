@@ -1,0 +1,96 @@
+# .github/workflows/prepare-release.yml
+name: Prepare release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'リリースバージョン (例: 53.4.0)'
+        required: true
+      summary:
+        description: 'PRタイトルの更新内容'
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app_token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.RELEASE_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Checkout develop
+        uses: actions/checkout@v7
+        with:
+          token: ${{ steps.app_token.outputs.token }}
+          ref: develop
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24.x'
+
+      - name: Bump version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: node .github/scripts/bump-version.mjs "$VERSION" --base origin/master
+
+      - name: Commit & push to develop and create PR to master
+        env:
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+          VERSION: ${{ inputs.version }}
+          SUMMARY: ${{ inputs.summary }}
+        run: |
+          git config user.name "361131824+danoniplus-ci-bot[bot]"
+          git config user.email "361131824+danoniplus-ci-bot[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "[ver${VERSION}] ${SUMMARY}"
+            git push origin develop
+          fi
+
+          node -e '
+            const { execSync } = require("node:child_process");
+            const fs = require("node:fs");
+
+            // origin/master..HEAD のマージコミットから PR 番号を抽出
+            const out = execSync(
+              "git log origin/master..HEAD --merges --format=%s%n%b",
+              { encoding: "utf8" }
+            );
+            const nums = [...new Set(
+              [...out.matchAll(/Merge pull request #(\d+)/g)].map(m => Number(m[1]))
+            )].sort((a, b) => a - b);
+
+            const body = [
+              "## :hammer: 変更内容 / Details of Changes",
+              "",
+              ...(nums.length > 0 ? nums.map(n => `- #${n}`) : [""]),
+              ""
+            ].join("\n");
+
+            fs.writeFileSync("/tmp/pr_body.md", body, "utf8");
+          '
+
+          EXISTING=$(gh pr list --base master --head develop --state open --json number --jq '.[0].number')
+          if [ -n "$EXISTING" ]; then
+            echo "既存のPR #${EXISTING} があるため、タイトルのみ更新します"
+            gh pr edit "$EXISTING" \
+              --title "[ver${VERSION}] ${SUMMARY}" \
+              --body-file /tmp/pr_body.md
+          else
+            gh pr create \
+              --base master \
+              --head develop \
+              --title "[ver${VERSION}] ${SUMMARY}" \
+              --body-file /tmp/pr_body.md \
+              --label release
+          fi
