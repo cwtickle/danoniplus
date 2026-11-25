@@ -41,10 +41,45 @@ jobs:
       - name: Bump version
         run: node .github/scripts/bump-version.mjs "${{ inputs.version }}" --base origin/master
 
-      - name: Commit & push to develop
+      - name: Push branch and create PR to master
+        env:
+          GH_TOKEN: ${{ steps.app_token.outputs.token }}
+          VERSION: ${{ inputs.version }}
+          SUMMARY: ${{ inputs.summary }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="release/v${VERSION}"
+          git checkout -b "$BRANCH"
+          git config user.name "danoniplus-release-bot[bot]"
+          git config user.email "danoniplus-release-bot[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "[ver${{ inputs.version }}] ${{ inputs.summary }}"
-          git push origin develop
+          git commit -m "[ver${VERSION}] ${SUMMARY}"
+          git push -u origin "$BRANCH"
+
+          node -e '
+            const { execSync } = require("node:child_process");
+            const fs = require("node:fs");
+
+            // origin/master..HEAD のマージコミットから PR 番号を抽出
+            const out = execSync(
+              "git log origin/master..HEAD --merges --format=%s%n%b",
+              { encoding: "utf8" }
+            );
+            const nums = [...new Set(
+              [...out.matchAll(/Merge pull request #(\d+)/g)].map(m => Number(m[1]))
+            )].sort((a, b) => a - b);
+
+            const body = [
+              "## :hammer: 変更内容 / Details of Changes",
+              "",
+              ...(nums.length > 0 ? nums.map(n => `- #${n}`) : [""]),
+              ""
+            ].join("\n");
+
+            fs.writeFileSync("/tmp/pr_body.md", body, "utf8");
+          '
+
+          gh pr create \
+            --base master \
+            --head "$BRANCH" \
+            --title "[ver${VERSION}] ${SUMMARY}" \
+            --body-file /tmp/pr_body.md
