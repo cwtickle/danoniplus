@@ -1,0 +1,53 @@
+# .github/workflows/post-release.yml
+name: Post release
+
+on:
+  pull_request:
+    branches: [master]
+    types: [closed]
+
+permissions:
+  contents: read   # 実際のpushはAppトークンで行うため最小限でよい
+
+jobs:
+  post_release:
+    if: >
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'release')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app_token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ secrets.RELEASE_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v7
+        with:
+          token: ${{ steps.app_token.outputs.token }}
+          ref: master
+          fetch-depth: 0
+
+      - name: Tag and back-merge
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v${VERSION}"
+
+          git config user.name "361131824+danoniplus-ci-bot[bot]"
+          git config user.email "361131824+danoniplus-ci-bot[bot]@users.noreply.github.com"
+
+          # 既にタグがある場合は二重発行しない
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "::error::タグ ${TAG} は既に存在します"
+            exit 1
+          fi
+
+          # 先に逆マージ → 最後にタグ、の順にすると失敗時に公開されない
+          git checkout develop
+          git merge --no-ff origin/master -m "Merge master into develop (${TAG})"
+          git push origin develop
+
+          git checkout master
+          git tag "$TAG"
+          git push origin "$TAG"
