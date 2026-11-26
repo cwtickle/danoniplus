@@ -1590,6 +1590,7 @@ const setDifficulty = (_chartChangeFlg) => {
 	// ユーザカスタムイベント(初期)
 	safeExecuteCustomHooks(`g_customJsObj.difficulty`, g_customJsObj.difficulty, _chartChangeFlg, g_canLoadDifInfoFlg);
 	resolveKeyFamily();
+	applyRingOnlyDisabled(`option`);
 
 	// 設定サマリー表示の更新
 	updateSettingSummary();
@@ -1610,6 +1611,26 @@ const setDifficulty = (_chartChangeFlg) => {
  */
 const registerKeyFamily = (_name, _match, _fields = {}, _hooks = {}, _appliers = {}) => {
 	g_familyObj.families.push({ name: _name, match: _match, fields: _fields, appliers: _appliers, ..._hooks });
+};
+
+/**
+ * ファミリーによる強制前の値を取得する
+ * @param {string} _path
+ * @returns {*}
+ */
+const getKeyFamilyBaseVal = _path => g_familyObj.ownership[_path]
+	? g_familyObj.snapshot[_path] : getPathVal(_path);
+
+/**
+ * 所有中のパスの復元値を更新する
+ * @param {string} _path
+ * @param {*} _value
+ * @returns {boolean} ファミリーが所有している場合 true
+ */
+const updateKeyFamilySnapshot = (_path, _value) => {
+	if (!g_familyObj.ownership[_path]) return false;
+	g_familyObj.snapshot[_path] = _value;
+	return true;
 };
 
 /**
@@ -3959,6 +3980,7 @@ const settingsDisplayInit = () => {
 
 	// オプションボタン用の設置
 	createSettingsDisplayWindow(divRoot);
+	applyRingOnlyDisabled(`settingsDisplay`);
 
 	// ショートカットキーメッセージ
 	multiAppend(divRoot,
@@ -4743,6 +4765,73 @@ const createSettingsDisplayWindow = _sprite => {
 const hasRingNotes = () => (g_detailObj.ringCnt[g_stateObj.scoreId] ?? 0) > 0;
 
 /**
+ * リングノートのみの譜面で強制する設定値を、UI・設定番号ごと更新する関数を作成
+ * @param {string} _name g_stateObj のプロパティ名
+ * @returns {Function}
+ */
+const makeRingOnlyApplier = _name => _val => {
+	g_stateObj[_name] = _val;
+	const list = g_settings[`${_name}s`];
+	if (list !== undefined) {
+		g_settings[`${_name}Num`] = roundZero(list.indexOf(_val));
+	}
+	const lnk = document.getElementById(`lnk${toCapitalize(_name)}`);
+	if (lnk !== null) {
+		lnk.textContent = getStgDetailName(_val);
+	}
+	// ハイスコア表示はシャッフルに依存するため再描画
+	if (_name === `shuffle` && document.getElementById(`detailHighScore`) !== null) {
+		makeHighScore(g_stateObj.scoreId);
+	}
+};
+
+/** リングノートのみの譜面で強制する設定 (離脱時は自動で元の値へ復元) */
+const registerRingOnlyFamily = () => {
+	const forced = {
+		'g_stateObj.shuffle': C_FLG_OFF,
+		'g_stateObj.stepArea': `Default`,
+		'g_stateObj.appearance': `Visible`,
+		'g_stateObj.frzReturn': C_FLG_OFF,
+		'g_stateObj.camoufrage': C_FLG_OFF,
+		'g_stateObj.camoufrageType': C_FLG_HYPHEN,
+		'g_stateObj.swapping': C_FLG_OFF,
+	};
+	const appliers = {};
+	Object.keys(forced).forEach(path => appliers[path] = makeRingOnlyApplier(path.split(`.`)[1]));
+
+	registerKeyFamily(`ringOnly`, (_key, { scoreId }) => isRingOnlyScore(scoreId), forced, {}, appliers);
+};
+
+/**
+ * リングノートのみの譜面かどうか
+ * @param {number} [_scoreId]
+ * @returns {boolean}
+ */
+const isRingOnlyScore = (_scoreId = g_stateObj.scoreId) =>
+	(g_detailObj.ringCnt[_scoreId] ?? 0) > 0 &&
+	sumData(g_detailObj.arrowCnt[_scoreId]) + sumData(g_detailObj.frzCnt[_scoreId]) <= 0;
+
+/**
+ * リングノートのみの譜面のとき、関係しない設定を操作不可にする (違う譜面なら元に戻す)
+ * - ショートカットは pointerEvents を見て弾かれるため、ボタン側を無効化すれば効く
+ * @param {string} _page g_ringOnlyDisabled のキー
+ */
+const applyRingOnlyDisabled = _page => {
+	const flg = isRingOnlyScore();
+	(g_ringOnlyDisabled[_page] ?? []).forEach(id => {
+		const target = document.getElementById(id);
+		if (target === null) return;
+		const els = target.classList.contains(`button_common`)
+			? [target] : [...target.querySelectorAll(`.button_common, input`)]
+				.filter(el => !g_ringOnlyExcludeIds.includes(el.id));
+		els.forEach(el => {
+			el.style.pointerEvents = flg ? C_DIS_NONE : C_DIS_AUTO;
+			el.style.opacity = flg ? 0.4 : ``;
+		});
+	});
+};
+
+/**
  * Displayボタンを切り替えたときに連動して切り替えるボタンの設定
  * @param {object} _headerObj 
  * @param {string} _name 
@@ -4826,6 +4915,7 @@ const exSettingInit = () => {
 		}
 	});
 	createGeneralSetting(spriteList.autoRetry, `autoRetry`);
+	applyRingOnlyDisabled(`exSetting`);
 
 	// 判定範囲の設定を表示
 	const getJudgRangeView = () => `| ` +
