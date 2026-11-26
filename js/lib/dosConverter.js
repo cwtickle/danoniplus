@@ -464,8 +464,16 @@ const loadLocalStorage = (_musicId = ``) => {
 	const checkLocalParam = (_name, _type = C_TYP_STRING, _defaultPos = 0) => {
 		const defaultVal = g_settings[`${_name}s`][_defaultPos];
 		if (g_localStorage[_name] !== undefined) {
-			g_stateObj[_name] = setVal(g_localStorage[_name], defaultVal, _type);
-			g_settings[`${_name}Num`] = roundZero(g_settings[`${_name}s`].findIndex(val => val === g_stateObj[_name]), defaultVal);
+			const value = setVal(g_localStorage[_name], defaultVal, _type);
+			const stateOwned = updateKeyFamilySnapshot(`g_stateObj.${_name}`, value);
+			if (!stateOwned) {
+				g_stateObj[_name] = value;
+			}
+			const num = roundZero(g_settings[`${_name}s`].findIndex(val => val === value), _defaultPos);
+			const numOwned = updateKeyFamilySnapshot(`g_settings.${_name}Num`, num);
+			if (!stateOwned && !numOwned) {
+				g_settings[`${_name}Num`] = num;
+			}
 		} else {
 			g_localStorage[_name] = defaultVal;
 		}
@@ -499,13 +507,22 @@ const loadLocalStorage = (_musicId = ``) => {
 		makeWarningWindow(g_msgInfoObj.W_0031);
 	}
 
+	// 現在値を既定位置に使う設定は、ファミリー強制前の位置を使う
+	const getBaseSettingNum = _name => {
+		const path = `g_stateObj.${_name}`;
+		const num = getKeyFamilyBaseVal(`g_settings.${_name}Num`);
+		return g_familyObj.ownership[path]
+			? roundZero(g_settings[`${_name}s`].indexOf(getKeyFamilyBaseVal(path)), num)
+			: num;
+	};
+
 	// Adjustment, Volume, Appearance, Opacity, HitPosition初期値設定
-	checkLocalParam(`adjustment`, C_TYP_FLOAT, g_settings.adjustmentNum);
+	checkLocalParam(`adjustment`, C_TYP_FLOAT, getBaseSettingNum(`adjustment`));
 	checkLocalParam(`volume`, C_TYP_NUMBER, g_settings.volumes.length - 1);
 	checkLocalParam(`appearance`);
 	checkLocalParam(`opacity`, C_TYP_NUMBER, g_settings.opacitys.length - 1);
-	checkLocalParam(`hitPosition`, C_TYP_FLOAT, g_settings.hitPositionNum);
-	checkLocalParam(`ringSpeed`, C_TYP_FLOAT, Math.max(g_settings.ringSpeeds.indexOf(g_stateObj.ringSpeed), 0));
+	checkLocalParam(`hitPosition`, C_TYP_FLOAT, getBaseSettingNum(`hitPosition`));
+	checkLocalParam(`ringSpeed`, C_TYP_FLOAT, Math.max(g_settings.ringSpeeds.indexOf(getKeyFamilyBaseVal(`g_stateObj.ringSpeed`)), 0));
 	checkLocalParam(`ringGuide`);
 
 	// ハイスコア取得準備
