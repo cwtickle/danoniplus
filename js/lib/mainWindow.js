@@ -5,7 +5,7 @@
  *
  * Source by tickle
  * Created : 2026/09/13
- * Revised : 2026/11/19 (v53.1.0)
+ * Revised : 2026/11/26 (v53.4.0)
  *
  * https://github.com/cwtickle/danoniplus
  */
@@ -98,12 +98,14 @@ const mainInit = () => {
 	let speedCnts = 0;
 	let keychCnts = 0;
 
+	g_workObj.ringOnlyFlg = isRingOnlyScore();
 	g_workObj.flatMode = g_stateObj.d_stepzone === `FlatBar` ||
 		g_stateObj.scroll.endsWith(`Flat`) ||
 		g_keyObj[`flatMode${keyCtrlPtn}`] ||
 		(g_stateObj.stepArea === `Halfway` &&
 			g_keyObj[`div${keyCtrlPtn}`] < g_keyObj[`${g_keyObj.defaultProp}${keyCtrlPtn}`].length);
-	g_workObj.stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_workObj.flatMode) ? C_DIS_NONE : C_DIS_INHERIT;
+	g_workObj.stepZoneDisp = (g_stateObj.d_stepzone === C_FLG_OFF || g_workObj.flatMode || g_workObj.ringOnlyFlg)
+		? C_DIS_NONE : C_DIS_INHERIT;
 
 	// mainSprite配下に層別のスプライトを作成し、ステップゾーン・矢印本体・フリーズアローヒット部分に分ける
 	const mainSpriteN = [], stepSprite = [], arrowSprite = [], frzHitSprite = [];
@@ -150,7 +152,7 @@ const mainInit = () => {
 	for (let j = 0; j < keyNum; j++) {
 		makeStepZone(j, keyCtrlPtn);
 	}
-	if (g_workObj.flatMode && g_stateObj.d_stepzone !== C_FLG_OFF) {
+	if (g_workObj.flatMode && g_stateObj.d_stepzone !== C_FLG_OFF && !g_workObj.ringOnlyFlg) {
 
 		// スクロール名に`R-`が含まれていればリバースと見做す
 		const reverseFlg = g_stateObj.reverse === C_FLG_ON || g_stateObj.scroll.startsWith(`R-`);
@@ -3204,7 +3206,7 @@ const judgeArrow = _j => {
 	} else if (difFrame > frzDifFrame) {
 		judgeFlg = judgeTargetFrzArrow(frzDifFrame);
 	}
-	if (!judgeFlg) {
+	if (!judgeFlg && !g_workObj.ringOnlyFlg) {
 		$id(`stepDiv${_j}`).display = C_DIS_INHERIT;
 	}
 };
