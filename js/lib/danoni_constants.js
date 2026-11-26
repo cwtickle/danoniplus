@@ -1657,6 +1657,16 @@ g_settings.volumeNum = g_settings.volumes.length - 1;
 g_settings.bgmVolumeNum = roundZero(g_settings.volumes.findIndex(v => v === g_stateObj.bgmVolume));
 g_settings.opacityNum = g_settings.opacitys.length - 1;
 
+/** リングノートのみの譜面で無効化する要素 (画面別)。ここを編集して調整 */
+const g_ringOnlyDisabled = {
+    option: [`speedSprite`, `shuffleSprite`, `lnkExcessive`],
+    settingsDisplay: [`lnkstepZone`, `lnkstepZoneR`, `lnkcolor`, `lnkfilterLine`, `appearanceSprite`, `hitPositionSprite`],
+    exSetting: [`stepAreaSprite`, `frzReturnSprite`, `camoufrageSprite`, `swappingSprite`],
+};
+
+/** 無効化から除外する要素 (譜面明細ボタンは Speed スプライト内にあるため) */
+const g_ringOnlyExcludeIds = [`btnGraph`, `btnGraphB`];
+
 const g_settingWindowTitleKeys = new Map([
     [optionInit, `Option`],
     [settingsDisplayInit, `Display`],

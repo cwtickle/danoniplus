@@ -241,6 +241,7 @@ const initialControl = async () => {
 	// g_loadObj.mainがfalseで上のブロックが丸ごとスキップされた場合でも、
 	// setGaugeが必ずg_gaugeResolvedObjを引けるよう毎回解決し直す
 	resolveGaugeValuesAll();
+	registerRingOnlyFamily();
 
 	safeExecuteCustomHooks(`g_customJsObj.preTitle`, g_customJsObj.preTitle);
 	g_settings.musicIdxNum = g_headerObj.musicSelectUse
