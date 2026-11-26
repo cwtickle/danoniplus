@@ -4770,6 +4770,9 @@ const registerRingOnlyFamily = () => {
 	const forced = {
 		'g_stateObj.shuffle': C_FLG_OFF,
 		'g_stateObj.stepArea': `Default`,
+		'g_stateObj.appearance': `Visible`,
+		'g_stateObj.frzReturn': C_FLG_OFF,
+		'g_stateObj.frzReturnType': C_FLG_HYPHEN,
 		'g_stateObj.camoufrage': C_FLG_OFF,
 		'g_stateObj.camoufrageType': C_FLG_HYPHEN,
 		'g_stateObj.swapping': C_FLG_OFF,
