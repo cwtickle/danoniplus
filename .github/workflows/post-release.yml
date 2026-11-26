@@ -43,11 +43,14 @@ jobs:
             exit 1
           fi
 
-          # 先に逆マージ → 最後にタグ、の順にすると失敗時に公開されない
+          # 先に逆マージ(fast-forward) → 最後にタグ、の順にすると失敗時に公開されない
+          # developがmasterの祖先でない(=PRマージ後にdevelopが進んだ)場合は
+          # fast-forwardできず失敗する。マージコミットを増やさないため、これは意図した挙動
           git checkout develop
-          git merge --no-ff origin/master -m "Merge master into develop (${TAG})"
+          git merge --ff-only origin/master
           git push origin develop
 
+          # タグはメッセージ無しの軽量タグ (マージコミットそのものを指す)
           git checkout master
           git tag "$TAG"
           git push origin "$TAG"
