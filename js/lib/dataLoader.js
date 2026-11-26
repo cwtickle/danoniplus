@@ -2545,9 +2545,10 @@ const getArrowSettings = (_retryFlg = false) => {
 	g_workObj.initManualEnabled = g_keyObj[`initManual${g_keyObj.currentKey}`] === true;
 
 	if (g_stateObj.dataSaveFlg) {
-		// ローカルストレージへAdjustment, HitPosition, Volume設定を保存
+		// ファミリー所有中の設定は強制前の値を保存
+		g_storeSettings.forEach(setting =>
+			g_localStorage[setting] = getKeyFamilyBaseVal(`g_stateObj.${setting}`));
 		// 変更が確定した時点で表示用のキャッシュを解放
-		g_storeSettings.forEach(setting => g_localStorage[setting] = g_stateObj[setting]);
 		viewKeyStorage.cache = new Map();
 		localStorage.setItem(g_localStorageUrl, JSON.stringify(g_localStorage));
 	}

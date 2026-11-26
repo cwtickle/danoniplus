@@ -1515,6 +1515,26 @@ const registerKeyFamily = (_name, _match, _fields = {}, _hooks = {}, _appliers =
 };
 
 /**
+ * ファミリーによる強制前の値を取得する
+ * @param {string} _path
+ * @returns {*}
+ */
+const getKeyFamilyBaseVal = _path => g_familyObj.ownership[_path]
+	? g_familyObj.snapshot[_path] : getPathVal(_path);
+
+/**
+ * 所有中のパスの復元値を更新する
+ * @param {string} _path
+ * @param {*} _value
+ * @returns {boolean} ファミリーが所有している場合 true
+ */
+const updateKeyFamilySnapshot = (_path, _value) => {
+	if (!g_familyObj.ownership[_path]) return false;
+	g_familyObj.snapshot[_path] = _value;
+	return true;
+};
+
+/**
  * 現在のキー状態に応じて適用すべき設定群を判定し、
  * 各パラメータの値・スナップショット・フックを管理・適用する
  */
