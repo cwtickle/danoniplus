@@ -1,5 +1,6 @@
 // .github/scripts/bump-version.mjs
-// usage: node .github/scripts/bump-version.mjs 54.0.0 [--base origin/master] [--date 2026/11/25]
+// usage: node .github/scripts/bump-version.mjs 54.0.0 [--base origin/master] [--date 2026/11/25] [--no-security]
+//   --no-security: SECURITY.md を更新しない (サポートバージョン用)
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 
@@ -14,6 +15,7 @@ const opt = (name, def) => {
     return i >= 0 ? rest[i + 1] : def;
 };
 const base = opt('--base', 'origin/master');
+const skipSecurity = rest.includes('--no-security');
 const d = new Date(Date.now() + 9 * 3600 * 1000); // JST
 const date = opt(
     '--date',
@@ -75,47 +77,50 @@ pendingWrites.push({
 });
 
 // 3. SECURITY.md（既存行の更新 or 新メジャー行追加＋直前メジャーの Logs 切替）
-let sec = fs.readFileSync('SECURITY.md', 'utf8');
-const rowRe = new RegExp(`^(\\|[ \\t]*v${safeMajor}(?:[ :].*))$`, 'm');
-const targetRe = /\[v\d+\.\d+\.\d+\]\(https:\/\/github\.com\/cwtickle\/danoniplus\/releases\/tag\/v\d+\.\d+\.\d+\)/;
-const latestLogsUrl = 'https://github.com/cwtickle/danoniplus/wiki/Changelog-latest';
-const link = `[v${version}](https://github.com/cwtickle/danoniplus/releases/tag/v${version})`;
+//    サポートバージョン (--no-security) では更新しない
+if (!skipSecurity) {
+    let sec = fs.readFileSync('SECURITY.md', 'utf8');
+    const rowRe = new RegExp(`^(\\|[ \\t]*v${safeMajor}(?:[ :].*))$`, 'm');
+    const targetRe = /\[v\d+\.\d+\.\d+\]\(https:\/\/github\.com\/cwtickle\/danoniplus\/releases\/tag\/v\d+\.\d+\.\d+\)/;
+    const latestLogsUrl = 'https://github.com/cwtickle/danoniplus/wiki/Changelog-latest';
+    const link = `[v${version}](https://github.com/cwtickle/danoniplus/releases/tag/v${version})`;
 
-if (rowRe.test(sec)) {
-    let matched = false;
-    sec = sec.replace(rowRe, (row) => {
-        if (!targetRe.test(row)) {
-            throw new Error(`SECURITY.md の v${majorStr} 行で Latest Version リンクが一致しません: ${row}`);
+    if (rowRe.test(sec)) {
+        let matched = false;
+        sec = sec.replace(rowRe, (row) => {
+            if (!targetRe.test(row)) {
+                throw new Error(`SECURITY.md の v${majorStr} 行で Latest Version リンクが一致しません: ${row}`);
+            }
+            matched = true;
+            return row.replace(targetRe, link);
+        });
+        if (!matched) {
+            throw new Error(`SECURITY.md の v${majorStr} 行を更新できませんでした。`);
         }
-        matched = true;
-        return row.replace(targetRe, link);
-    });
-    if (!matched) {
-        throw new Error(`SECURITY.md の v${majorStr} 行を更新できませんでした。`);
-    }
-} else {
-    const separatorRe = /^(\|[ \t-]+\|[ \t-]+\|[^\n]*)$/m;
-    if (!separatorRe.test(sec)) {
-        throw new Error('SECURITY.md のテーブル区切り行が見つかりません。');
-    }
+    } else {
+        const separatorRe = /^(\|[ \t-]+\|[ \t-]+\|[^\n]*)$/m;
+        if (!separatorRe.test(sec)) {
+            throw new Error('SECURITY.md のテーブル区切り行が見つかりません。');
+        }
 
-    const newRow = `| v${majorNum} | :heavy_check_mark: | ${link} | [:memo:](${latestLogsUrl}) | ${isoDate} | (At Release v${eosMajor}) |`;
-    sec = sec.replace(separatorRe, `$1\n${newRow}`);
+        const newRow = `| v${majorNum} | :heavy_check_mark: | ${link} | [:memo:](${latestLogsUrl}) | ${isoDate} | (At Release v${eosMajor}) |`;
+        sec = sec.replace(separatorRe, `$1\n${newRow}`);
 
-    if (prevMajor >= 1) {
-        const prevRowRe = new RegExp(`^(\\|[ \\t]*v${prevMajor}[ \\t]*\\|[^\\n]*)$`, 'm');
-        if (prevRowRe.test(sec)) {
-            sec = sec.replace(prevRowRe, (prevRow) =>
-                prevRow.replace(
-                    latestLogsUrl,
-                    `https://github.com/cwtickle/danoniplus/wiki/Changelog-v${prevMajor}`
-                )
-            );
+        if (prevMajor >= 1) {
+            const prevRowRe = new RegExp(`^(\\|[ \\t]*v${prevMajor}[ \\t]*\\|[^\\n]*)$`, 'm');
+            if (prevRowRe.test(sec)) {
+                sec = sec.replace(prevRowRe, (prevRow) =>
+                    prevRow.replace(
+                        latestLogsUrl,
+                        `https://github.com/cwtickle/danoniplus/wiki/Changelog-v${prevMajor}`
+                    )
+                );
+            }
         }
     }
+
+    pendingWrites.push({ path: 'SECURITY.md', content: sec, log: 'updated: SECURITY.md' });
 }
-
-pendingWrites.push({ path: 'SECURITY.md', content: sec, log: 'updated: SECURITY.md' });
 
 // 4. すべて問題なく生成できたあとに一括書き出し
 for (const item of pendingWrites) {
