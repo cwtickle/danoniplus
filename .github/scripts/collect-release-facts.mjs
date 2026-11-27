@@ -25,7 +25,7 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { classifyPath, TAG_RE } from './release-config.mjs';
+import { classifyPath, TAG_RE, ZIP_GROUPS } from './release-config.mjs';
 
 const DL_BASE = 'https://dl-danoniplus.qu7-52m.workers.dev/danoniplus';
 
@@ -168,7 +168,9 @@ function collectPrs(o) {
 
     // リリースPR本文に列挙された子PR (`- #1234`) を追加で取得
     for (const rp of releasePrs) {
-        for (const m of rp.body.matchAll(/#(\d+)/g)) {
+        for (const { line, outsideFence } of markdownLines(stripComments(rp.body))) {
+            const m = outsideFence && line.match(/^ {0,3}-[ \t]+#(\d+)[ \t]*$/);
+            if (!m) continue;
             const n = Number(m[1]);
             if (!all.has(n) && n !== rp.number) all.set(n, normalizePr(fetchPr(o, n), o.repo));
         }
@@ -190,12 +192,32 @@ function stripComments(s) {
     return cur;
 }
 
-function splitSections(body) {
-    const text = stripComments(body).replace(/\r\n/g, '\n');
-    const parts = text.split(/^##[ \t]+(?!#)(.*)$/m); // [前置き, 見出し1, 本文1, ...]
-    const out = [];
-    for (let i = 1; i < parts.length; i += 2) out.push({ title: parts[i].trim(), content: parts[i + 1] ?? '' });
-    return out;
+function* markdownLines(body) {
+    let fence;
+    for (const line of body.replace(/\r\n/g, '\n').split('\n')) {
+        const marker = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+        if (fence) {
+            if (marker && marker[1][0] === fence[0] && marker[1].length >= fence.length && !marker[2].trim()) fence = null;
+            yield { line, outsideFence: false };
+        } else if (marker && (marker[1][0] === '~' || !marker[2].includes('`'))) {
+            fence = marker[1];
+            yield { line, outsideFence: false };
+        } else yield { line, outsideFence: true };
+    }
+}
+
+function splitSections(body, level = 2) {
+    const heading = new RegExp(`^ {0,3}#{${level}}[ \t]+(.*)$`);
+    const sections = [];
+    let current;
+    for (const { line, outsideFence } of markdownLines(body)) {
+        const match = outsideFence && line.match(heading);
+        if (match) {
+            current = { title: match[1].trim(), lines: [] };
+            sections.push(current);
+        } else current?.lines.push(line);
+    }
+    return sections.map(({ title, lines }) => ({ title, content: lines.join('\n') }));
 }
 
 const findSection = (sections, re) => sections.find((s) => re.test(s.title))?.content.trim() ?? '';
@@ -207,7 +229,8 @@ const vers = (s) => [...new Set([...(s.match(/v?\d+\.\d+\.\d+/g) ?? [])].map((v)
 /** 不具合修正の項目に書かれたメタ情報行を取り出し、本文からは除く */
 function extractFixMeta(body) {
     const meta = { severity: null, origins: [], originInitial: false, backports: [] };
-    const lines = body.split('\n').filter((line) => {
+    const lines = [...markdownLines(body)].filter(({ line, outsideFence }) => {
+        if (!outsideFence) return true;
         let m = line.match(/^\s*[-*]\s*(?:重要度|Severity)[^:：\n]*[:：]\s*(.*)$/i);
         if (m) {
             meta.severity = m[1].match(/\b([ABC])\b/i)?.[1].toUpperCase() ?? null;
@@ -226,21 +249,19 @@ function extractFixMeta(body) {
         }
         return true;
     });
-    return { meta, body: lines.join('\n').trim() };
+    return { meta, body: lines.map(({ line }) => line).join('\n').trim() };
 }
 
 function parseItems(pr) {
-    const sections = splitSections(pr.body);
+    const sections = splitSections(stripComments(pr.body));
     const details = findSection(sections, /変更内容|Details of Changes/i);
     const items = [];
-    const parts = details.split(/^###[ \t]+(.*)$/m);
-    for (let i = 1; i < parts.length; i += 2) {
-        const rawHeading = parts[i].trim();
+    for (const { title: rawHeading, content } of splitSections(details, 3)) {
         const headingText = rawHeading.replace(/^\d+\.[ \t]*/, '').trim();
-        const { meta, body } = extractFixMeta((parts[i + 1] ?? '').trim());
         if (!headingText) continue; // 未記入のテンプレート項目
         const m = headingText.match(TYPE_RE);
         const type = m ? m[1].toLowerCase() : null;
+        const { meta, body } = type === 'fix' ? extractFixMeta(content) : { meta: null, body: content.trim() };
         const title = (m ? m[2] : headingText).trim();
         const item = {
             id: `${pr.number}-${items.length + 1}`,
@@ -278,37 +299,42 @@ const DEFAULT_PREAMBLE = [
     '- legacy_functions.js は過去関数群です。',
 ];
 
-function parseRows(block) {
+function parseTable(block) {
+    const lines = [...markdownLines(block)].map(({ line, outsideFence }) => outsideFence ? line.trim() : '');
+    const first = lines.findIndex((line) => line.startsWith('|'));
+    if (first < 0) return null;
+    const cells = (line) => line?.startsWith('|') ? line.replace(/^\||\|$/g, '').split('|').map((cell) => cell.trim()) : [];
+    const header = cells(lines[first]);
+    const separator = cells(lines[first + 1]);
+    if (header.length !== 4 || !header[0] || !header[1] || !header[3] ||
+        separator.length !== 4 || !separator.every((cell) => /^:?-{3,}:?$/.test(cell))) return null;
+
     const rows = [];
-    for (const line of block.split('\n')) {
-        if (!line.startsWith('|')) continue;
-        if (/^\|[-\s|:]+\|?$/.test(line)) continue;
-        const cells = line.replace(/^\||\|$/g, '').split('|');
-        if (cells.length !== 4) continue;
-        const [dir, nameCell, dlCell, lastCell] = cells;
-        if (/Directory|^フォルダ$/.test(dir)) continue; // ヘッダー行
+    let end = first + 2;
+    for (; lines[end]?.startsWith('|'); end++) {
+        const values = cells(lines[end]);
+        if (values.length !== 4 || !values[0] || !values[1]) return null;
+        const [dir, nameCell, dlCell, lastCell] = values;
         const linkText = nameCell.match(/^\[(.*?)\]\(.*\)$/)?.[1];
         rows.push({ dir, nameCell, names: (linkText ?? nameCell).split(/<br\s*\/?>/).map((s) => s.trim()), dlCell, lastCell });
     }
-    return rows;
+    if (lines.slice(end).some((line) => line.startsWith('|'))) return null;
+    return { start: first, rows };
 }
 
 function parsePreviousFilesChanged(body) {
-    const text = body.replace(/\r\n/g, '\n');
-    const start = text.search(/^##[ \t]+🔃[ \t]*Files changed/m);
-    if (start < 0) return null;
-    const rest = text.slice(start);
-    const detailsAt = rest.indexOf('<details>');
-    const detailsEnd = rest.indexOf('</details>');
+    const section = splitSections(body).find(({ title }) => /^🔃[ \t]*Files changed(?:[ \t(]|$)/.test(title));
+    if (!section) return null;
+    const lines = [...markdownLines(section.content)];
+    const detailsAt = lines.findIndex(({ line, outsideFence }) => outsideFence && line.trim() === '<details>');
+    const detailsEnd = lines.findIndex(({ line, outsideFence }, i) => i > detailsAt && outsideFence && line.trim() === '</details>');
     if (detailsAt < 0 || detailsEnd < 0) return null;
-    const mainPart = rest.slice(0, detailsAt);
-    const firstTableLine = mainPart.split('\n').findIndex((l) => l.startsWith('|'));
-    const preamble = mainPart.split('\n').slice(1, firstTableLine).map((l) => l.trimEnd()).filter(Boolean);
-    return {
-        preamble: preamble.length ? preamble : DEFAULT_PREAMBLE,
-        mainRows: parseRows(mainPart),
-        referenceRows: parseRows(rest.slice(detailsAt, detailsEnd)),
-    };
+    const mainLines = lines.slice(0, detailsAt).map(({ line }) => line);
+    const main = parseTable(mainLines.join('\n'));
+    const reference = parseTable(lines.slice(detailsAt + 1, detailsEnd).map(({ line }) => line).join('\n'));
+    if (!main || !reference) return null;
+    const preamble = mainLines.slice(0, main.start).map((line) => line.trimEnd()).filter(Boolean);
+    return { preamble: preamble.length ? preamble : DEFAULT_PREAMBLE, mainRows: main.rows, referenceRows: reference.rows };
 }
 
 const boldToLink = (cell, repo) => {
@@ -330,7 +356,6 @@ function buildFilesChanged(o, ver, changes, prevBody) {
         if (hit) hits.push({ ...hit, path: p });
     }
 
-    const touchedKeys = new Set();
     const isTouched = (row) => hits.some((h) => rowMatches(row, h));
     const assetOfRow = (row) => hits.find((h) => rowMatches(row, h))?.asset;
 
@@ -368,13 +393,17 @@ function buildFilesChanged(o, ver, changes, prevBody) {
     }
     // どの行にも対応しない配布ファイル -> 新規行
     const known = [...prev.mainRows, ...prev.referenceRows];
-    for (const h of hits) {
-        if (known.some((r) => rowMatches(r, h))) continue;
-        const name = path.posix.basename(h.path);
+    const missing = new Map();
+    for (const hit of hits) {
+        if (!known.some((row) => rowMatches(row, hit)) && !missing.has(hit.asset)) missing.set(hit.asset, hit);
+    }
+    for (const h of missing.values()) {
+        const group = ZIP_GROUPS.find((g) => g.asset === h.asset);
+        const names = (group?.files ?? [h.path]).map((file) => path.posix.basename(file));
         main.push({
             dir: h.row.dir,
-            nameCell: name,
-            names: [name],
+            nameCell: names.join('<br>'),
+            names,
             dlCell: `[:inbox_tray:](${DL_BASE}/${o.tag}/${h.asset})`,
             lastCell: `**${o.tag}**`,
         });
@@ -403,8 +432,14 @@ function buildFilesChanged(o, ver, changes, prevBody) {
 }
 
 // ---------------------------------------------------------------- Functions & Variables
+const LITERAL = /"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`/g;
+
 /** コメントを同じ長さの空白に置き換える (位置・改行を保つ) */
-const blankComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '));
+const blankComments = (src) => src.replace(new RegExp(`${LITERAL.source}|/\\*[\\s\\S]*?\\*/|//[^\\r\\n]*`, 'g'),
+    (token) => token.startsWith('/') ? token.replace(/[^\r\n]/g, ' ') : token);
+
+const SIGNATURE_TOKEN = new RegExp(`${LITERAL.source}|[\\p{ID_Continue}$]+|=>|\\.\\.\\.|\\+\\+|--|\\?\\.|[!=]==?|\\*\\*=?|&&=?|\\|\\|=?|\\?\\?=?|>>>=?|>>=?|<<=?|[+*/%&|^<>-]=|[^\\s]`, 'gu');
+const normalizeSignature = (text) => JSON.stringify(text.match(SIGNATURE_TOKEN) ?? []);
 
 /** text[open] の '(' に対応する ')' の位置を返す (文字列リテラルは読み飛ばす) */
 function matchParen(text, open) {
@@ -429,19 +464,19 @@ export function extractTopLevel(source) {
         if (m[2]) {
             const open = m.index + m[0].length - 1;
             const close = matchParen(text, open);
-            out.push({ name: m[2], kind: 'function', sig: text.slice(open + 1, close).replace(/\s+/g, '') });
+            out.push({ name: m[2], kind: 'function', sig: normalizeSignature(text.slice(open + 1, close)) });
         } else if (m[3]) {
             const rest = text.slice(m.index + m[0].length, m.index + m[0].length + 400);
             let sig = null;
             let fm = rest.match(/^(?:async\s+)?function\s*\*?\s*[\w$]*\s*\(/);
             if (fm) {
                 const open = m.index + m[0].length + fm[0].length - 1;
-                sig = text.slice(open + 1, matchParen(text, open)).replace(/\s+/g, '');
+                sig = normalizeSignature(text.slice(open + 1, matchParen(text, open)));
             } else if ((fm = rest.match(/^(?:async\s+)?\(/))) {
                 const open = m.index + m[0].length + fm[0].length - 1;
                 const close = matchParen(text, open);
-                if (close > 0 && /^\s*=>/.test(text.slice(close + 1, close + 20))) sig = text.slice(open + 1, close).replace(/\s+/g, '');
-            } else if ((fm = rest.match(/^(?:async\s+)?([A-Za-z_$][\w$]*)\s*=>/))) sig = fm[1];
+                if (close > 0 && /^\s*=>/.test(text.slice(close + 1, close + 20))) sig = normalizeSignature(text.slice(open + 1, close));
+            } else if ((fm = rest.match(/^(?:async\s+)?([A-Za-z_$][\w$]*)\s*=>/))) sig = normalizeSignature(fm[1]);
             out.push(sig === null ? { name: m[3], kind: 'variable', sig: '' } : { name: m[3], kind: 'function', sig });
         } else out.push({ name: m[4], kind: 'variable', sig: '' });
     }
@@ -566,7 +601,7 @@ for (const pr of prs) {
 }
 if (contributors.length) review('contributors', `オーナー以外の PR 作成者がいます。Contributors への記載名を確認してください: ${contributors.map((c) => c.login).join(', ')}`);
 
-const warning = releasePrs.map((p) => findSection(splitSections(p.body), /⚠|Warning/i)).find(Boolean) ?? '';
+const warning = releasePrs.map((p) => findSection(splitSections(stripComments(p.body)), /⚠|Warning/i)).find(Boolean) ?? '';
 
 const changes = (() => {
     const out = git(['diff', '--name-status', '-z', '--no-renames', o.base, o.tag]);

@@ -1,0 +1,26 @@
+[
+    {
+        "asset": "skin_css.zip",
+        "files": [
+            "skin/danoni_skin_default.css",
+            "skin/danoni_skin_light.css",
+            "skin/danoni_skin_skyblue.css"
+        ]
+    },
+    {
+        "asset": "img.zip",
+        "files": [
+            "img/aaShadow.svg",
+            "img/arrow.svg",
+            "img/arrowShadow.svg",
+            "img/borderline.svg",
+            "img/c.svg",
+            "img/cursor.svg",
+            "img/giko.svg",
+            "img/iyo.svg",
+            "img/monar.svg",
+            "img/morara.svg",
+            "img/onigiri.svg"
+        ]
+    }
+]

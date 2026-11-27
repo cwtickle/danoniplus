@@ -60,7 +60,18 @@ jobs:
             BASE="$BASE_INPUT"
           else
             # タグの親コミットから辿った直前のタグ (サポート版・最新版とも同じ考え方)
-            BASE=$(git describe --tags --abbrev=0 --match 'v[0-9]*' "${TAG}^")
+            stable_tags=$(git tag --list)
+            MATCHES=()
+            while IFS= read -r candidate; do
+              if [[ "$candidate" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                MATCHES+=(--match "$candidate")
+              fi
+            done <<< "$stable_tags"
+            if (( ${#MATCHES[@]} == 0 )); then
+              echo "::error::vX.Y.Z 形式のタグがありません"
+              exit 1
+            fi
+            BASE=$(git describe --tags --abbrev=0 "${MATCHES[@]}" "${TAG}^")
           fi
           echo "base=${BASE}" >> "$GITHUB_OUTPUT"
           echo "diff: ${BASE} -> ${TAG}"
@@ -75,14 +86,10 @@ jobs:
 
       - name: Create draft release
         run: |
-          # 公開済みの Release がある場合は絶対に触らない。ドラフトのみ再作成可
+          # 既存の Release (ドラフトを含む) は変更しない
           if gh release view "$TAG" >/dev/null 2>&1; then
-            if [ "$(gh release view "$TAG" --json isDraft --jq .isDraft)" = "true" ]; then
-              gh release delete "$TAG" --yes
-            else
-              echo "::error::${TAG} は既に公開済みの Release です"
-              exit 1
-            fi
+            echo "::error::${TAG} の Release は既に存在します"
+            exit 1
           fi
 
           printf '%s\n' "**[DRAFT]** Release Notes は公開前にここへ記載してください。" > release-notes-draft.md
