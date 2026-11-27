@@ -112,15 +112,35 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       # Release Notes / Changelog の下書き用データ。失敗しても Assets のドラフト作成は止めない
+      # サポート版は取り込む PR・項目の指定が必要なため、ここでは自動でスキップされる
+      # (release-facts.yml を手動実行して prs を指定する)
       - name: Collect release facts
         continue-on-error: true
         env:
           BASE: ${{ steps.base.outputs.base }}
         run: node .github/scripts/collect-release-facts.mjs --tag "$TAG" --base "$BASE" --out release-facts.json
 
+      # facts から Release Notes 本文を組み立て、ドラフトの Release 本文を置き換える (サポート版は facts が無いためスキップ)
+      - name: Render release notes
+        id: notes
+        if: hashFiles('release-facts.json') != ''
+        continue-on-error: true
+        run: node .github/scripts/render-release-notes.mjs --facts release-facts.json --date "$(TZ=Asia/Tokyo date +%F)" --out release-notes.md
+
+      - name: Update draft release notes
+        if: steps.notes.outcome == 'success'
+        continue-on-error: true
+        run: |
+          # 公開済みの Release 本文は上書きしない (ドラフトのみ)
+          if [ "$(gh release view "$TAG" --json isDraft --jq .isDraft)" = "true" ]; then
+            gh release edit "$TAG" --notes-file release-notes.md
+          fi
+
       - name: Upload release facts
         uses: actions/upload-artifact@v4
         with:
           name: release-facts-${{ env.TAG }}
-          path: release-facts.json
+          path: |
+            release-facts.json
+            release-notes.md
           if-no-files-found: warn

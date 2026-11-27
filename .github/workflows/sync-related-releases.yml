@@ -1,0 +1,52 @@
+# .github/workflows/sync-related-releases.yml
+#
+# 最新版の公開後に、同じ不具合修正を含む他バージョン(サポート版)の Release 本文へ
+# 「🎣 Related Releases」を反映して完成させる。
+# apply を false のまま実行すると、更新予定の差分を表示するだけで本文は変更しない。
+# 更新するのは Related Releases の節のみ (Assets・タグには触れない)。
+name: Sync related releases
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '最新版のタグ (例: v53.4.0)。この Release 本文の Related Releases を反映元にする'
+        required: true
+      apply:
+        description: 'Release 本文を実際に更新する (false の場合は差分の表示のみ)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # Release 本文の更新 (apply 時のみ使用)
+
+concurrency:
+  group: sync-related-releases
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag }}
+      APPLY: ${{ github.event.inputs.apply }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Validate tag name
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::タグ名が vX.Y.Z 形式ではありません: ${TAG}"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.x'
+
+      - name: Sync Related Releases
+        run: |
+          ARGS=(--tag "$TAG")
+          if [ "$APPLY" = "true" ]; then ARGS+=(--apply); fi
+          node .github/scripts/sync-related-releases.mjs "${ARGS[@]}"

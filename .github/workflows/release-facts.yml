@@ -1,0 +1,113 @@
+# .github/workflows/release-facts.yml
+#
+# Release Notes / Changelog の下書き用データ (release-facts.json) を手動で作る。
+# - サポート版: 取り込む PR・項目を prs で指定する (必須)
+# - 最新版: 再実行したいとき (prs は空欄なら自動検出)
+# Release / Assets には一切触れない (読み取りのみ)。
+name: Release facts
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '対象タグ (例: v52.7.2)'
+        required: true
+      base:
+        description: '差分の基準タグ (空欄なら直前のタグを自動判定)'
+        required: false
+      prs:
+        description: '取り込む PR と項目。"PR番号:項目番号+項目番号" をカンマ区切り (例: 2333:2,2340)。サポート版は必須'
+        required: false
+      date:
+        description: 'Release の公開日 YYYY-MM-DD (Changelog のアンカーに使用)。空欄なら実行日(JST)'
+        required: false
+      update_draft:
+        description: '生成した Release Notes でドラフトの Release 本文を置き換える (公開済みは上書きしない)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # update_draft 時のみ、ドラフト Release の本文更新に使用
+
+jobs:
+  facts:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag }}
+      BASE_INPUT: ${{ github.event.inputs.base }}
+      PR_SPEC: ${{ github.event.inputs.prs }}
+      DATE_INPUT: ${{ github.event.inputs.date }}
+      UPDATE_DRAFT: ${{ github.event.inputs.update_draft }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Validate tag name
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::タグ名が vX.Y.Z 形式ではありません: ${TAG}"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ github.event.inputs.tag }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.x'
+
+      - name: Decide diff base
+        id: base
+        run: |
+          if [ -n "$BASE_INPUT" ]; then
+            BASE="$BASE_INPUT"
+          else
+            # タグの親コミットから辿った直前のタグ (サポート版・最新版とも同じ考え方)
+            stable_tags=$(git tag --list)
+            MATCHES=()
+            while IFS= read -r candidate; do
+              if [[ "$candidate" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                MATCHES+=(--match "$candidate")
+              fi
+            done <<< "$stable_tags"
+            if (( ${#MATCHES[@]} == 0 )); then
+              echo "::error::vX.Y.Z 形式のタグがありません"
+              exit 1
+            fi
+            BASE=$(git describe --tags --abbrev=0 "${MATCHES[@]}" "${TAG}^")
+          fi
+          echo "base=${BASE}" >> "$GITHUB_OUTPUT"
+          echo "diff: ${BASE} -> ${TAG}"
+
+      - name: Collect release facts
+        env:
+          BASE: ${{ steps.base.outputs.base }}
+        run: |
+          ARGS=(--tag "$TAG" --base "$BASE" --out release-facts.json)
+          if [ -n "$PR_SPEC" ]; then ARGS+=(--pr-spec "$PR_SPEC"); fi
+          node .github/scripts/collect-release-facts.mjs "${ARGS[@]}"
+
+      - name: Render release notes
+        run: |
+          DATE="${DATE_INPUT:-$(TZ=Asia/Tokyo date +%F)}"
+          node .github/scripts/render-release-notes.mjs --facts release-facts.json --date "$DATE" --out release-notes.md
+
+      - name: Update draft release notes
+        if: env.UPDATE_DRAFT == 'true'
+        run: |
+          # 公開済みの Release 本文は上書きしない (ドラフトのみ)
+          if [ "$(gh release view "$TAG" --json isDraft --jq .isDraft)" != "true" ]; then
+            echo "::error::${TAG} は公開済みの Release です。本文は更新しません"
+            exit 1
+          fi
+          gh release edit "$TAG" --notes-file release-notes.md
+
+      - name: Upload release facts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-facts-${{ env.TAG }}
+          path: |
+            release-facts.json
+            release-notes.md
+          if-no-files-found: error

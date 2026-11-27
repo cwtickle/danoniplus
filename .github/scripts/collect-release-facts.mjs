@@ -11,11 +11,18 @@
  *
  * 必要な環境 (Actions 上): fetch-depth: 0 / fetch-tags: true、GH_TOKEN (gh api を使用)
  *
+ * サポート版 (過去メジャー) の指定:
+ *   --pr-spec "2333:2+3,2340"  対象の PR と項目番号 ("PR番号:項目番号+項目番号" をカンマ区切り)。
+ *     項目番号を省略した PR は全項目が対象。項目番号は PR 本文の「### N.」の N。
+ *     サポート版は develop の PR を丸ごと取り込まない/cherry-pick できない場合があるため必須
+ *     (未指定ならスキップして何も出力しない)。最新版でも指定すれば git log からの検出より優先する。
+ *
  * テスト用オプション (API を呼ばずに固定データで実行):
  *   --prs-dir <dir>     <dir>/<番号>.json (GitHub REST の pulls レスポンス形式) を PR 情報として使う
  *   --prev-body <file>  前回リリース(base)の Release 本文として使う
  *   --releases-file <file> 公開済み Release のタグ一覧(1行1タグ)として使う
  *   --pr-numbers 1,2    git log からの PR 番号検出の代わりに指定する
+ *   --releases-json <file>  直近の Release 一覧(GitHub REST の releases レスポンス形式, 新しい順)。Backport の自動検出に使う
  *   --repo <owner/name> 既定: $GITHUB_REPOSITORY または cwtickle/danoniplus
  *
  * 出力 (主なキー):
@@ -64,7 +71,7 @@ function parseArgs(argv) {
     const o = { out: 'release-facts.json', repo: process.env.GITHUB_REPOSITORY || 'cwtickle/danoniplus' };
     const valued = {
         '--tag': 'tag', '--base': 'base', '--out': 'out', '--repo': 'repo', '--owner': 'owner',
-        '--prs-dir': 'prsDir', '--prev-body': 'prevBody', '--releases-file': 'releasesFile', '--pr-numbers': 'prNumbers',
+        '--prs-dir': 'prsDir', '--prev-body': 'prevBody', '--releases-file': 'releasesFile', '--pr-numbers': 'prNumbers', '--pr-spec': 'prSpec', '--releases-json': 'releasesJson',
     };
     for (let i = 0; i < argv.length; i++) {
         const key = valued[argv[i]];
@@ -122,7 +129,22 @@ function versionInfo(o, allTags) {
 }
 
 // ---------------------------------------------------------------- PR の収集
+/** "2333:2+3,2340" -> Map(2333 => Set{2,3}, 2340 => null(全項目)) */
+function parsePrSpec(spec) {
+    const map = new Map();
+    for (const tok of spec.split(/[,\s]+/).filter(Boolean)) {
+        const m = tok.match(/^#?(\d+)(?::(\d+(?:\+\d+)*))?$/);
+        if (!m) fail(`--pr-spec を解釈できません: "${tok}" (例: 2333:2+3,2340)`);
+        const n = Number(m[1]);
+        if (map.has(n)) fail(`--pr-spec に PR #${n} が重複しています`);
+        map.set(n, m[2] ? new Set(m[2].split('+').map(Number)) : null);
+    }
+    if (map.size === 0) fail('--pr-spec が空です');
+    return map;
+}
+
 function detectPrNumbers(o) {
+    if (o.prSpec) return [...parsePrSpec(o.prSpec).keys()];
     if (o.prNumbers) return o.prNumbers.split(',').map((s) => Number(s.trim())).filter(Boolean);
     const log = git(['log', '--format=%s%x00', `${o.base}..${o.tag}`]);
     const nums = new Set();
@@ -252,20 +274,25 @@ function extractFixMeta(body) {
     return { meta, body: lines.map(({ line }) => line).join('\n').trim() };
 }
 
-function parseItems(pr) {
+function parseItems(pr, only = null) {
     const sections = splitSections(stripComments(pr.body));
     const details = findSection(sections, /変更内容|Details of Changes/i);
     const items = [];
+    const seen = new Set();
     for (const { title: rawHeading, content } of splitSections(details, 3)) {
         const headingText = rawHeading.replace(/^\d+\.[ \t]*/, '').trim();
         if (!headingText) continue; // 未記入のテンプレート項目
+        const num = Number(rawHeading.match(/^(\d+)\./)?.[1] ?? items.length + 1);
+        if (only && !only.has(num)) continue; // --pr-spec で対象外の項目
+        seen.add(num);
         const m = headingText.match(TYPE_RE);
         const type = m ? m[1].toLowerCase() : null;
         const { meta, body } = type === 'fix' ? extractFixMeta(content) : { meta: null, body: content.trim() };
         const title = (m ? m[2] : headingText).trim();
         const item = {
-            id: `${pr.number}-${items.length + 1}`,
+            id: `${pr.number}-${num}`,
             pr: pr.number,
+            num,
             rawHeading,
             type,
             category: type ? CATEGORY[type] : 'unknown',
@@ -280,6 +307,7 @@ function parseItems(pr) {
         }
         items.push(item);
     }
+    for (const n of only ?? []) if (!seen.has(n)) review(`PR #${pr.number}`, `--pr-spec で指定された項目 ${n} が PR 本文に見つかりません`);
     if (items.length === 0) review(`PR #${pr.number}`, '「変更内容」に項目(### N. 見出し)が見つかりませんでした');
 
     const wiki = findSection(sections, /Wiki|ドキュメント|Documentation/i)
@@ -622,22 +650,63 @@ function buildRecentChanges(o, allTags) {
     return { versions, slidToPatch: slid, markdown };
 }
 
-function buildRelatedReleases(o, items) {
+/** 直近の Release 一覧 (新しい順)。ドラフトも含める (サポート版は最新版より先にタグ・ドラフトが作られるため) */
+function fetchRecentReleases(o) {
+    try {
+        const raw = o.releasesJson ? fs.readFileSync(o.releasesJson, 'utf8') : gh(['api', `repos/${o.repo}/releases?per_page=100`]);
+        return JSON.parse(raw).filter((r) => TAG_RE.test(r.tag_name ?? ''));
+    } catch (e) {
+        review('relatedReleases', `Release 一覧を取得できず Backport を自動検出できませんでした: ${String(e.stderr ?? e.message).trim()}`);
+        return [];
+    }
+}
+
+/** Release 本文の Bug Fixes 欄に挙がっている PR 番号 */
+const bugFixPrNumbers = (body) =>
+    new Set([...findSection(splitSections(stripComments(body ?? '')), /Bug Fixes/i).matchAll(/#(\d+)/g)].map((m) => Number(m[1])));
+
+/**
+ * 最新版の作成時点では、サポート版のタグ・Release は先に作られている。
+ * 前回の最新版より後に作られた過去メジャーの Release のうち、同じ PR を Bug Fixes に挙げているものを Backport とみなす。
+ * Release Notes / PR 本文に Backport が明記されている場合はそちらを優先する。
+ */
+function detectBackports(o, items) {
+    const fixes = items.filter((i) => i.category === 'bugfix' && !i.fix.backports.length);
+    if (fixes.length === 0) return;
+    const releases = fetchRecentReleases(o);
+    const idx = releases.findIndex((r) => r.tag_name === o.base);
+    if (releases.length && idx < 0) review('relatedReleases', `前回リリース ${o.base} が直近100件に見つからず、Backport の検出範囲が不明です`);
+    const major = parseVer(o.tag)[0];
+    const older = (idx < 0 ? releases : releases.slice(0, idx)).filter((r) => parseVer(r.tag_name)[0] < major);
+    for (const it of fixes) {
+        const hits = older.filter((r) => bugFixPrNumbers(r.body).has(it.pr));
+        it.fix.backports = hits.map((r) => r.tag_name).sort(cmpVer).reverse();
+        it.fix.backportsDetected = hits.length > 0;
+        const drafts = hits.filter((r) => r.draft).map((r) => r.tag_name);
+        if (drafts.length) review('relatedReleases', `Backport として検出した ${drafts.join(', ')} は未公開(ドラフト)です。公開順を確認してください`);
+        if (!hits.length) review('relatedReleases', `「${it.title}」(PR #${it.pr}) の Backport は検出されませんでした (サポート版が無い場合は問題ありません)`);
+    }
+}
+
+function buildRelatedReleases(o, items, ver) {
     const fixes = items.filter((i) => i.category === 'bugfix');
-    if (fixes.length === 0) return { show: false, lines: [], markdown: '' };
+    if (fixes.length === 0) return { show: false, partial: false, lines: [], markdown: '' };
     const link = (v) => `[${v}](${releaseUrl(o.repo, v)})`;
     const lines = [];
     for (const it of fixes) {
         const f = it.fix;
         // 公開バージョン自身を先頭に、他バージョンへの適用を新しい順に続ける
-        const versions = [o.tag, ...f.backports.filter((v) => v !== o.tag)];
+        const versions = [o.tag, ...[...f.backports].sort(cmpVer).reverse().filter((v) => v !== o.tag)];
         const origin = f.originInitial ? '**initial**' : f.origins.map(link).join(' / ');
         const line = `${versions.map(link).join(' / ')}${origin ? ` <- ${origin}` : ''}`;
         if (!lines.includes(line)) lines.push(line);
         if (f.originInitial) review('relatedReleases', `原因バージョンが initial の場合の表記(**initial**)を確認してください: ${it.title}`);
     }
     if (lines.length > 1) review('relatedReleases', '不具合修正が複数あり Related Releases が複数行になります。表記・統合を確認してください');
-    return { show: true, lines, markdown: `## 🎣 Related Releases\n${lines.map((l) => `- ${l}`).join('\n')}` };
+    // サポート版は最新版・他のサポート版より先に出すため、この時点では一部しか分からない
+    const partial = !ver.isLatestMajor;
+    if (partial) review('relatedReleases', 'サポート版のため Related Releases は暫定です。最新版・他のサポート版の公開後に同期して完成させてください');
+    return { show: true, partial, lines, markdown: `## 🎣 Related Releases\n${lines.map((l) => `- ${l}`).join('\n')}` };
 }
 
 // ---------------------------------------------------------------- main
@@ -653,12 +722,20 @@ for (const ref of [o.tag, o.base]) {
 const allTags = listTags(o);
 const version = versionInfo(o, allTags);
 
+if (!version.isLatestMajor && !o.prSpec) {
+    const msg = `${o.tag} はサポート版です。取り込む PR・項目を --pr-spec で指定してください (例: --pr-spec "2333:2+3,2340")。Release facts の収集をスキップしました`;
+    console.log(`::notice::${msg}`);
+    if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${msg}\n`);
+    process.exit(0);
+}
+const prSpec = o.prSpec ? parsePrSpec(o.prSpec) : null;
+
 const { prs, releasePrs } = collectPrs(o);
 const items = [];
 const documentation = [];
 const otherComments = [];
 for (const pr of prs) {
-    const parsed = parseItems(pr);
+    const parsed = parseItems(pr, prSpec?.get(pr.number) ?? null);
     items.push(...parsed.items);
     documentation.push(...parsed.wiki.map((line) => ({ pr: pr.number, line })));
     if (parsed.otherComments) otherComments.push({ pr: pr.number, text: parsed.otherComments });
@@ -696,7 +773,9 @@ else {
 const filesChanged = buildFilesChanged(o, version, changes, prevBody);
 const functionsVariables = buildFunctionsVariables(o);
 const recentChanges = buildRecentChanges(o, allTags);
-const relatedReleases = buildRelatedReleases(o, items);
+if (version.isLatestMajor) detectBackports(o, items);
+else review('items', 'サポート版です。Remarks 等は develop 側 PR 本文の転記です。実装が異なる場合は手修正してください');
+const relatedReleases = buildRelatedReleases(o, items, version);
 
 const facts = {
     schema: 1,
