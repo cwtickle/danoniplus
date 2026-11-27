@@ -180,7 +180,15 @@ function collectPrs(o) {
 }
 
 // ---------------------------------------------------------------- PR 本文の解析
-const stripComments = (s) => s.replace(/<!--[\s\S]*?-->/g, '');
+function stripComments(s) {
+    let prev;
+    let cur = s;
+    do {
+        prev = cur;
+        cur = cur.replace(/<!--[\s\S]*?-->/g, '');
+    } while (cur !== prev);
+    return cur;
+}
 
 function splitSections(body) {
     const text = stripComments(body).replace(/\r\n/g, '\n');
