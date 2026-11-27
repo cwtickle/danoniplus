@@ -33,6 +33,16 @@ import path from 'node:path';
 const TAG_RE = /^v\d+\.\d+\.\d+$/;
 const warnings = [];
 
+function stripHtmlCommentMarkers(input) {
+    let out = input;
+    let prev;
+    do {
+        prev = out;
+        out = out.replace(/<!--|--!?>/g, '');
+    } while (out !== prev);
+    return out;
+}
+
 function fail(msg) {
     console.error(`::error::${msg}`);
     process.exit(1);
@@ -211,7 +221,7 @@ function applyLines(body, tag, selected) {
     if (hiddenAt >= 0) {
         const id = block[hiddenAt];
         const idx = lines.map((_, n) => n).filter((n) => kind[n] === 'comment' && block[n] === id);
-        const inner = idx.map((n) => lines[n].replace(/<!--|--!?>/g, '').trim()).filter(Boolean);
+        const inner = idx.map((n) => stripHtmlCommentMarkers(lines[n]).trim()).filter(Boolean);
         if (inner.length !== 1) return { skip: 'コメントアウトされた節に他の内容があり、置き換え位置を特定できません' };
         lines.splice(idx[0], idx.length, heading, ...bullets(selected));
         return { body: lines.join(eol), action: '更新 (コメントアウトされた節を有効化)' };
