@@ -45,14 +45,42 @@ export const ZIP_GROUPS = zipGroups;
 /** 毎リリース必ず変わる(バージョン番号を含む)ため、欠けていたら異常とみなす */
 export const REQUIRED_ASSETS = ['danoni_main.js'];
 
-/**
- * 変更パスを Assets / Files changed 表の行に対応付ける。対象外なら null。
- * @returns {{kind:'file'|'zip', asset:string, row:{dir:string,names?:string[]}}|null}
- */
-export function classifyPath(p) {
-    const rule = SINGLE_RULES.find((r) => r.test(p));
-    if (rule) return { kind: 'file', asset: rule.name(p), row: rule.row(p) };
-    const group = ZIP_GROUPS.find((g) => g.files.includes(p));
-    if (group) return { kind: 'zip', asset: group.asset, row: { dir: `/${path.posix.dirname(group.files[0])}` } };
-    return null;
+const ZIP_CONFIG = '.github/scripts/release-zip-groups.json';
+function taggedZipGroups(git, tag) {
+    if (!git(['ls-tree', tag, '--', ZIP_CONFIG]).trim()) return null;
+    const groups = JSON.parse(git(['cat-file', 'blob', `${tag}:${ZIP_CONFIG}`]));
+    const assets = new Set();
+    if (!Array.isArray(groups) || !groups.every((group) => {
+        const { asset, files } = group ?? {};
+        if (typeof asset !== 'string' || !/^[\w.-]+\.zip$/.test(asset) || assets.has(asset) ||
+            !Array.isArray(files) || !files.length ||
+            !files.every((file) => typeof file === 'string' && /^[\w.-]+(?:\/[\w.-]+)+$/.test(file) &&
+                !file.split('/').some((part) => part === '.' || part === '..')) ||
+            new Set(files.map((file) => path.posix.basename(file))).size !== files.length) return false;
+        assets.add(asset);
+        return true;
+    })) throw new Error(`${tag}: ${ZIP_CONFIG} の内容が不正です`);
+    return groups;
+}
+
+// These assets predate the tagged inventory.
+const LEGACY_ZIPS = new Set(['skin_css.zip', 'img.zip']);
+
+export function changedZipGroups(git, base, tag, changes) {
+    const tagged = taggedZipGroups(git, tag);
+    const before = taggedZipGroups(git, base);
+    // The first tagged inventory schedules all of its groups.
+    const oldGroups = before ?? (tagged ? [] : ZIP_GROUPS);
+    const changedPaths = new Set(changes.map(({ path }) => path));
+    const result = [];
+    for (const group of tagged ?? ZIP_GROUPS) {
+        const old = oldGroups.find(({ asset }) => asset === group.asset);
+        const membershipChanged = !old || old.files.length !== group.files.length ||
+            group.files.some((file) => !old.files.includes(file));
+        if (membershipChanged || group.files.some((file) => changedPaths.has(file))) {
+            const previousFiles = before ? old?.files : LEGACY_ZIPS.has(group.asset) ? group.files : null;
+            result.push({ ...group, previousFiles, membershipChanged });
+        }
+    }
+    return result;
 }

@@ -27,7 +27,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import zlib from 'node:zlib';
-import { REQUIRED_ASSETS, SINGLE_RULES, TAG_RE, ZIP_GROUPS } from './release-config.mjs';
+import { REQUIRED_ASSETS, SINGLE_RULES, TAG_RE, changedZipGroups } from './release-config.mjs';
 
 // ---------------------------------------------------------------- 設定
 // 添付ルール (SINGLE_RULES / ZIP_GROUPS) は release-config.mjs に定義
@@ -211,34 +211,9 @@ function changedFiles(base, tag) {
     return list;
 }
 
-const ZIP_CONFIG = '.github/scripts/release-zip-groups.json';
-function taggedZipGroups(tag) {
-    if (!git(['ls-tree', tag, '--', ZIP_CONFIG]).trim()) return null;
-    const groups = JSON.parse(blob(tag, ZIP_CONFIG).toString('utf8'));
-    const assets = new Set();
-    if (!Array.isArray(groups) || !groups.every((group) => {
-        const { asset, files } = group ?? {};
-        if (typeof asset !== 'string' || !/^[\w.-]+\.zip$/.test(asset) || assets.has(asset) ||
-            !Array.isArray(files) || !files.length ||
-            !files.every((file) => typeof file === 'string' && /^[\w.-]+(?:\/[\w.-]+)+$/.test(file) &&
-                !file.split('/').some((part) => part === '.' || part === '..')) ||
-            new Set(files.map((file) => path.posix.basename(file))).size !== files.length) return false;
-        assets.add(asset);
-        return true;
-    })) throw new Error(`${tag}: ${ZIP_CONFIG} の内容が不正です`);
-    return groups;
-}
-
 function buildPlan(changes, base, tag) {
-    const taggedGroups = taggedZipGroups(tag);
-    const groups = taggedGroups ?? ZIP_GROUPS;
-    // Older tags have no inventory. On the first tag with one, schedule each declared ZIP.
-    const previous = taggedZipGroups(base) ?? (taggedGroups ? [] : ZIP_GROUPS);
+    const groups = changedZipGroups(git, base, tag, changes);
     const singles = new Map(); // assetName -> sourcePath
-    const touchedGroups = new Set(groups.filter(({ asset, files }) => {
-        const old = previous.find((g) => g.asset === asset);
-        return !old || JSON.stringify([...old.files].sort()) !== JSON.stringify([...files].sort());
-    }).map((g) => g.asset));
     const ignored = [];
 
     for (const { status, path: p } of changes) {
@@ -256,7 +231,6 @@ function buildPlan(changes, base, tag) {
         if (matchingGroups.length) {
             for (const group of matchingGroups) {
                 if (status === 'D') errors.push(`${group.asset} の対象ファイル ${p} が削除されています。ZIP_GROUPS を見直してください`);
-                touchedGroups.add(group.asset);
             }
         } else if (!rule) {
             ignored.push(p);
@@ -264,14 +238,14 @@ function buildPlan(changes, base, tag) {
     }
 
     const zips = [];
-    for (const group of groups.filter((g) => touchedGroups.has(g.asset))) {
+    for (const group of groups) {
         const existing = new Set(git(['ls-tree', '-r', '--name-only', '-z', tag, '--', ...group.files]).split('\0').filter(Boolean));
         const missing = group.files.filter((f) => !existing.has(f));
         if (missing.length) errors.push(`${group.asset}: タグ ${tag} に存在しないファイルがあります: ${missing.join(', ')}`);
         zips.push({
             asset: group.asset,
             files: group.files.map((p) => ({ name: path.posix.basename(p), source: p })),
-            paths: previous.find((g) => g.asset === group.asset)?.files ?? group.files,
+            previousFiles: group.previousFiles,
         });
     }
     return { singles, zips, ignored };
@@ -279,12 +253,13 @@ function buildPlan(changes, base, tag) {
 
 // ---------------------------------------------------------------- zip の構成を過去リリースと比較
 function compareWithPreviousZip(zip, base) {
-    const last = git(['log', '-1', '--format=%H', base, '--', ...zip.paths]).trim();
+    if (!zip.previousFiles) return;
+    const last = git(['log', '-1', '--format=%H', base, '--', ...zip.previousFiles]).trim();
     if (!last) {
-        warnings.push(`${zip.asset}: 過去に対象ファイルの変更履歴が無く、構成比較をスキップしました`);
+        errors.push(`${zip.asset}: 過去に対象ファイルの変更履歴がありません (--skip-zip-compare で省略可)`);
         return;
     }
-    const candidates = git(['tag', '--contains', last, '--merged', base, '--sort=creatordate'])
+    const candidates = git(['tag', '--contains', last, '--merged', base, '--sort=-creatordate'])
         .split('\n')
         .map((s) => s.trim())
         .filter((t) => TAG_RE.test(t));

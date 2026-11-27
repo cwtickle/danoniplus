@@ -25,7 +25,7 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { classifyPath, TAG_RE, ZIP_GROUPS } from './release-config.mjs';
+import { changedZipGroups, SINGLE_RULES, TAG_RE } from './release-config.mjs';
 
 const DL_BASE = 'https://dl-danoniplus.qu7-52m.workers.dev/danoniplus';
 
@@ -341,8 +341,15 @@ const boldToLink = (cell, repo) => {
     const m = cell.match(/^\*\*(v\d+\.\d+\.\d+)\*\*$/);
     return m ? `[${m[1]}](${releaseUrl(repo, m[1])})` : cell;
 };
-const rowMatches = (row, hit) =>
-    row.dir === hit.row.dir && (!hit.row.names || hit.row.names.some((n) => row.names.includes(n)));
+const rowMatches = (row, hit) => {
+    const linkedZip = row.dlCell.match(/\/([^/()]+\.zip)\)/)?.[1];
+    if (linkedZip) return linkedZip === hit.asset;
+    if (hit.group) {
+        return [...(hit.group.previousFiles ?? []), ...hit.group.files].some((file) =>
+            row.dir === `/${path.posix.dirname(file)}` && row.names.includes(path.posix.basename(file)));
+    }
+    return row.dir === hit.row.dir && hit.row.names.some((n) => row.names.includes(n));
+};
 
 function buildFilesChanged(o, ver, changes, prevBody) {
     const prev = parsePreviousFilesChanged(prevBody);
@@ -352,18 +359,28 @@ function buildFilesChanged(o, ver, changes, prevBody) {
     const hits = [];
     for (const { status, path: p } of changes) {
         if (status === 'D') continue;
-        const hit = classifyPath(p);
-        if (hit) hits.push({ ...hit, path: p });
+        const rule = SINGLE_RULES.find((r) => r.test(p));
+        if (rule) hits.push({ asset: rule.name(p), row: rule.row(p), path: p });
+    }
+    for (const group of changedZipGroups(git, o.base, o.tag, changes)) {
+        const file = group.files[0];
+        hits.push({ asset: group.asset, row: { dir: `/${path.posix.dirname(file)}` }, path: file, group });
     }
 
-    const isTouched = (row) => hits.some((h) => rowMatches(row, h));
-    const assetOfRow = (row) => hits.find((h) => rowMatches(row, h))?.asset;
+    const hitForRow = (row) => hits.find((hit) => rowMatches(row, hit));
 
-    const refresh = (row) => {
-        const asset = assetOfRow(row);
+    const refresh = (row, { asset, group, row: hitRow }) => {
         const out = { ...row, dlCell: `[:inbox_tray:](${DL_BASE}/${o.tag}/${asset})`, lastCell: `**${o.tag}**` };
-        if (/^\[.*\]\(.*compare.*\)$/.test(row.nameCell)) {
-            const text = row.nameCell.match(/^\[(.*?)\]/)[1];
+        const compareText = row.nameCell.match(/^\[(.*)\]\(.*compare.*\)$/)?.[1];
+        if (group?.membershipChanged) {
+            out.dir = hitRow.dir;
+            out.names = group.files.map((file) => path.posix.basename(file));
+            if (JSON.stringify([...row.names].sort()) !== JSON.stringify([...out.names].sort())) {
+                out.nameCell = out.names.join('<br>');
+            }
+        }
+        if (compareText) {
+            const text = out.nameCell === row.nameCell ? compareText : out.nameCell;
             out.nameCell = `[${text}](https://github.com/${o.repo}/compare/${o.base}...${o.tag}#files_bucket)`;
             review('filesChanged', `${text} の比較リンクを ${o.base}...${o.tag} に更新しました。範囲が正しいか確認してください`);
         }
@@ -374,15 +391,17 @@ function buildFilesChanged(o, ver, changes, prevBody) {
     let main = [];
     let reference = [];
     for (const row of prev.mainRows) {
-        if (isTouched(row)) main.push(refresh(row));
+        const hit = hitForRow(row);
+        if (hit) main.push(refresh(row, hit));
         else if (ver.majorBumped) reference.push(demote(row)); // メジャー更新: 未更新のメイン枠は参考枠へ
         else main.push(demote(row));
     }
     if (ver.majorBumped) review('filesChanged', `メジャー更新: 未更新のメイン枠の行を参考枠へ移しました (${ver.prevMajor}以前の枠内の並び順を確認してください)`);
     const movedIn = [];
     for (const row of prev.referenceRows) {
-        if (isTouched(row)) {
-            movedIn.push(refresh(row));
+        const hit = hitForRow(row);
+        if (hit) {
+            movedIn.push(refresh(row, hit));
             review('filesChanged', `参考枠からメイン枠へ移動: ${row.names.join(', ')} (メイン枠内の並び順を確認してください)`);
         } else reference.push(row);
     }
@@ -398,8 +417,7 @@ function buildFilesChanged(o, ver, changes, prevBody) {
         if (!known.some((row) => rowMatches(row, hit)) && !missing.has(hit.asset)) missing.set(hit.asset, hit);
     }
     for (const h of missing.values()) {
-        const group = ZIP_GROUPS.find((g) => g.asset === h.asset);
-        const names = (group?.files ?? [h.path]).map((file) => path.posix.basename(file));
+        const names = (h.group?.files ?? [h.path]).map((file) => path.posix.basename(file));
         main.push({
             dir: h.row.dir,
             nameCell: names.join('<br>'),
@@ -434,36 +452,86 @@ function buildFilesChanged(o, ver, changes, prevBody) {
 // ---------------------------------------------------------------- Functions & Variables
 const LITERAL = /"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`/g;
 
+const SIGNATURE_TOKEN = new RegExp(String.raw`\s+|/\*[\s\S]*?\*/|//[^\r\n\u2028\u2029]*|${LITERAL.source}|[\p{ID_Continue}$]+|=>|\.\.\.|\+\+|--|\?\.|[!=]==?|\*\*=?|&&=?|\|\|=?|\?\?=?|>>>=?|>>=?|<<=?|[+*/%&|^<>-]=|[^\s]`, 'uy');
+const REGEX_LITERAL = /\/(?:\\.|\[(?:\\.|[^\]\\\r\n\u2028\u2029])*\]|[^/\\[\r\n\u2028\u2029])+\/[a-z]*/iy;
+const EXPRESSION_PREFIX = /^(?:[({[;,?:~]|=>|[=!<>+*/%&|^-]=*|&&=?|\|\|=?|\?\?=?|\*\*=?|(?:>>>?|<<)=?)$/;
+const EXPRESSION_KEYWORD = /^(?:return|throw|case|yield|await|typeof|void|delete|in|instanceof|of|else|do|new)$/;
+const CONTROL_KEYWORD = /^(?:if|while|for|with|switch|catch)$/;
+
+function* sourceTokens(src) {
+    let offset = 0;
+    let regexAllowed = true;
+    let control = false;
+    let previous = '';
+    const parens = [];
+    while (offset < src.length) {
+        SIGNATURE_TOKEN.lastIndex = offset;
+        let [token] = SIGNATURE_TOKEN.exec(src);
+        const comment = token.startsWith('//') || token.startsWith('/*');
+        const whitespace = /^\s/.test(token);
+        let literal = /^["'\x60]/.test(token);
+        if (!comment && !whitespace) {
+            if (regexAllowed && token.startsWith('/')) {
+                REGEX_LITERAL.lastIndex = offset;
+                const match = REGEX_LITERAL.exec(src);
+                if (match) {
+                    [token] = match;
+                    literal = true;
+                }
+            }
+
+            // A control condition can be followed by a regex expression statement.
+            if (token === '(') parens.push(control);
+            const isProperty = previous === '.' || previous === '?.';
+            regexAllowed = !literal && (EXPRESSION_PREFIX.test(token) ||
+                (!isProperty && EXPRESSION_KEYWORD.test(token)) || (token === ')' && parens.pop()));
+            control = !isProperty && CONTROL_KEYWORD.test(token);
+            previous = token;
+        }
+        yield { token, offset, comment, whitespace, literal };
+        offset += token.length;
+    }
+}
+
 /** コメントを同じ長さの空白に置き換える (位置・改行を保つ) */
-const blankComments = (src) => src.replace(new RegExp(`${LITERAL.source}|/\\*[\\s\\S]*?\\*/|//[^\\r\\n]*`, 'g'),
-    (token) => token.startsWith('/') ? token.replace(/[^\r\n]/g, ' ') : token);
+function blankComments(src) {
+    const parts = [];
+    const literals = new Map();
+    let start = 0;
+    for (const { token, offset, comment, literal } of sourceTokens(src)) {
+        if (comment) {
+            parts.push(src.slice(start, offset), token.replace(/[^\r\n\u2028\u2029]/g, ' '));
+            start = offset + token.length;
+        } else if (literal) literals.set(offset, offset + token.length);
+    }
+    parts.push(src.slice(start));
+    return { text: parts.join(''), literals };
+}
 
-const SIGNATURE_TOKEN = new RegExp(`${LITERAL.source}|[\\p{ID_Continue}$]+|=>|\\.\\.\\.|\\+\\+|--|\\?\\.|[!=]==?|\\*\\*=?|&&=?|\\|\\|=?|\\?\\?=?|>>>=?|>>=?|<<=?|[+*/%&|^<>-]=|[^\\s]`, 'gu');
-const normalizeSignature = (text) => JSON.stringify(text.match(SIGNATURE_TOKEN) ?? []);
+const normalizeSignature = (text) => JSON.stringify(
+    [...sourceTokens(text)].filter(({ whitespace, comment }) => !whitespace && !comment).map(({ token }) => token));
 
-/** text[open] の '(' に対応する ')' の位置を返す (文字列リテラルは読み飛ばす) */
-function matchParen(text, open) {
+/** text[open] の '(' に対応する ')' の位置を返す (リテラルは読み飛ばす) */
+function matchParen(text, open, literals) {
     let depth = 0;
     for (let i = open; i < text.length; i++) {
-        const c = text[i];
-        if (c === '"' || c === "'" || c === '`') {
-            for (i++; i < text.length && text[i] !== c; i++) if (text[i] === '\\') i++;
-        } else if (c === '(') depth++;
-        else if (c === ')' && --depth === 0) return i;
+        if (literals.has(i)) i = literals.get(i) - 1;
+        else if (text[i] === '(') depth++;
+        else if (text[i] === ')' && --depth === 0) return i;
     }
     return -1;
 }
 
 /** 行頭(インデント無し)で宣言された関数・変数・クラスを抽出する */
 export function extractTopLevel(source) {
-    const text = blankComments(source);
+    const { text, literals } = blankComments(source);
     const out = [];
     const re = /^(?:export\s+)?(?:(async\s+)?function\s*\*?\s+([A-Za-z_$][\w$]*)\s*\(|(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*|class\s+([A-Za-z_$][\w$]*))/gm;
     let m;
     while ((m = re.exec(text))) {
         if (m[2]) {
             const open = m.index + m[0].length - 1;
-            const close = matchParen(text, open);
+            const close = matchParen(text, open, literals);
             out.push({ name: m[2], kind: 'function', sig: normalizeSignature(text.slice(open + 1, close)) });
         } else if (m[3]) {
             const rest = text.slice(m.index + m[0].length, m.index + m[0].length + 400);
@@ -471,10 +539,10 @@ export function extractTopLevel(source) {
             let fm = rest.match(/^(?:async\s+)?function\s*\*?\s*[\w$]*\s*\(/);
             if (fm) {
                 const open = m.index + m[0].length + fm[0].length - 1;
-                sig = normalizeSignature(text.slice(open + 1, matchParen(text, open)));
+                sig = normalizeSignature(text.slice(open + 1, matchParen(text, open, literals)));
             } else if ((fm = rest.match(/^(?:async\s+)?\(/))) {
                 const open = m.index + m[0].length + fm[0].length - 1;
-                const close = matchParen(text, open);
+                const close = matchParen(text, open, literals);
                 if (close > 0 && /^\s*=>/.test(text.slice(close + 1, close + 20))) sig = normalizeSignature(text.slice(open + 1, close));
             } else if ((fm = rest.match(/^(?:async\s+)?([A-Za-z_$][\w$]*)\s*=>/))) sig = normalizeSignature(fm[1]);
             out.push(sig === null ? { name: m[3], kind: 'variable', sig: '' } : { name: m[3], kind: 'function', sig });
