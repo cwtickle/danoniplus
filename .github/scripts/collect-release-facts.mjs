@@ -278,17 +278,19 @@ function parseItems(pr, only = null) {
     const sections = splitSections(stripComments(pr.body));
     const details = findSection(sections, /変更内容|Details of Changes/i);
     const items = [];
+    const fixCandidates = [];
     const seen = new Set();
     for (const { title: rawHeading, content } of splitSections(details, 3)) {
         const headingText = rawHeading.replace(/^\d+\.[ \t]*/, '').trim();
         if (!headingText) continue; // 未記入のテンプレート項目
         const num = Number(rawHeading.match(/^(\d+)\./)?.[1] ?? items.length + 1);
-        if (only && !only.has(num)) continue; // --pr-spec で対象外の項目
-        seen.add(num);
         const m = headingText.match(TYPE_RE);
         const type = m ? m[1].toLowerCase() : null;
-        const { meta, body } = type === 'fix' ? extractFixMeta(content) : { meta: null, body: content.trim() };
         const title = (m ? m[2] : headingText).trim();
+        if (type === 'fix') fixCandidates.push({ pr: pr.number, title });
+        if (only && !only.has(num)) continue; // --pr-spec で対象外の項目
+        seen.add(num);
+        const { meta, body } = type === 'fix' ? extractFixMeta(content) : { meta: null, body: content.trim() };
         const item = {
             id: `${pr.number}-${num}`,
             pr: pr.number,
@@ -314,6 +316,7 @@ function parseItems(pr, only = null) {
         .split('\n').map((l) => l.trim()).filter((l) => /^[-*]\s+\S/.test(l) || /https?:\/\//.test(l));
     return {
         items,
+        fixCandidates,
         wiki,
         otherComments: findSection(sections, /その他コメント|Other Comments/i),
     };
@@ -661,25 +664,40 @@ function fetchRecentReleases(o) {
     }
 }
 
-/** Release 本文の Bug Fixes 欄に挙がっている PR 番号 */
-const bugFixPrNumbers = (body) =>
-    new Set([...findSection(splitSections(stripComments(body ?? '')), /Bug Fixes/i).matchAll(/#(\d+)/g)].map((m) => Number(m[1])));
+const normalizeFixTitle = (title) => title.trim().replace(/\s+/g, ' ');
+
+/** Bug Fixes の箇条書き末尾にある PR クレジットを本文の参照番号と区別する */
+function creditedBugFixes(body) {
+    const section = splitSections(stripComments(body ?? '')).find(({ title }) => /Bug Fixes/i.test(title))?.content ?? '';
+    const credits = [];
+    for (const { line, outsideFence } of markdownLines(section)) {
+        const m = outsideFence && line.match(/^ {0,3}[-*][ \t]+(.+?)\s+\(\s*PR\s+(#\d+(?:\s*,\s*#\d+)*)\s*\)\s*$/i);
+        if (m) credits.push({ title: normalizeFixTitle(m[1]), prs: m[2].match(/\d+/g).map(Number) });
+    }
+    return credits;
+}
 
 /**
  * 最新版の作成時点では、サポート版のタグ・Release は先に作られている。
- * 前回の最新版より後に作られた過去メジャーの Release のうち、同じ PR を Bug Fixes に挙げているものを Backport とみなす。
+ * Bug Fixes の PR クレジットを使い、同じ PR に複数の修正があれば項目名でも照合する。
  * Release Notes / PR 本文に Backport が明記されている場合はそちらを優先する。
  */
-function detectBackports(o, items) {
+function detectBackports(o, items, fixCandidates) {
     const fixes = items.filter((i) => i.category === 'bugfix' && !i.fix.backports.length);
     if (fixes.length === 0) return;
     const releases = fetchRecentReleases(o);
     const idx = releases.findIndex((r) => r.tag_name === o.base);
     if (releases.length && idx < 0) review('relatedReleases', `前回リリース ${o.base} が直近100件に見つからず、Backport の検出範囲が不明です`);
     const major = parseVer(o.tag)[0];
-    const older = (idx < 0 ? releases : releases.slice(0, idx)).filter((r) => parseVer(r.tag_name)[0] < major);
+    const older = (idx < 0 ? releases : releases.slice(0, idx))
+        .filter((r) => parseVer(r.tag_name)[0] < major)
+        .map((r) => ({ ...r, credits: creditedBugFixes(r.body) }));
     for (const it of fixes) {
-        const hits = older.filter((r) => bugFixPrNumbers(r.body).has(it.pr));
+        const candidates = fixCandidates.filter((f) => f.pr === it.pr);
+        const title = normalizeFixTitle(it.title);
+        const uniqueTitle = candidates.filter((f) => normalizeFixTitle(f.title) === title).length === 1;
+        const hits = older.filter((r) => r.credits.some((credit) => credit.prs.includes(it.pr) &&
+            (candidates.length === 1 || (uniqueTitle && credit.title === title))));
         it.fix.backports = hits.map((r) => r.tag_name).sort(cmpVer).reverse();
         it.fix.backportsDetected = hits.length > 0;
         const drafts = hits.filter((r) => r.draft).map((r) => r.tag_name);
@@ -732,11 +750,13 @@ const prSpec = o.prSpec ? parsePrSpec(o.prSpec) : null;
 
 const { prs, releasePrs } = collectPrs(o);
 const items = [];
+const fixCandidates = [];
 const documentation = [];
 const otherComments = [];
 for (const pr of prs) {
     const parsed = parseItems(pr, prSpec?.get(pr.number) ?? null);
     items.push(...parsed.items);
+    fixCandidates.push(...parsed.fixCandidates);
     documentation.push(...parsed.wiki.map((line) => ({ pr: pr.number, line })));
     if (parsed.otherComments) otherComments.push({ pr: pr.number, text: parsed.otherComments });
 }
@@ -773,7 +793,7 @@ else {
 const filesChanged = buildFilesChanged(o, version, changes, prevBody);
 const functionsVariables = buildFunctionsVariables(o);
 const recentChanges = buildRecentChanges(o, allTags);
-if (version.isLatestMajor) detectBackports(o, items);
+if (version.isLatestMajor) detectBackports(o, items, fixCandidates);
 else review('items', 'サポート版です。Remarks 等は develop 側 PR 本文の転記です。実装が異なる場合は手修正してください');
 const relatedReleases = buildRelatedReleases(o, items, version);
 

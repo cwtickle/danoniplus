@@ -24,7 +24,8 @@ permissions:
   contents: write   # ドラフト Release の作成・Assets の添付
 
 concurrency:
-  group: release-assets-${{ github.event.inputs.tag || github.ref_name }}
+  group: draft-release-writes
+  queue: max
   cancel-in-progress: false
 
 jobs:

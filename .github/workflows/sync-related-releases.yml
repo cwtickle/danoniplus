@@ -21,7 +21,8 @@ permissions:
   contents: write   # Release 本文の更新 (apply 時のみ使用)
 
 concurrency:
-  group: sync-related-releases
+  group: draft-release-writes
+  queue: max
   cancel-in-progress: false
 
 jobs:

@@ -14,8 +14,8 @@
  *   node .github/scripts/sync-related-releases.mjs --tag v53.4.0 --apply    # Release 本文を更新する
  *
  * 更新するのは Related Releases の節だけ。Assets・タグ・他の節には触れない。
- *   - 節が有効 : 最新版の行を反映する。既存の行のうち、反映する行に包含されるもの(暫定行)は置き換え、
- *               包含されない行(別の不具合の行)は残す
+ *   - 節が有効 : 最新版の行を反映し、同じ原因バージョンと確認できる暫定行を置き換える。
+ *               別の不具合の行や、照合が曖昧な行は残す
  *   - 節がコメントアウト(<!-- ## 🎣 Related Releases -->) : 有効な節に置き換える
  *   - 節が無い : 「💡 Recent Changes」の直前に挿入する
  *   - 挿入位置が分からない場合は更新せず、警告に出す (手作業)
@@ -58,7 +58,12 @@ function parseArgs(argv) {
     const valued = { '--tag': 'tag', '--repo': 'repo', '--releases-dir': 'releasesDir', '--out-dir': 'outDir' };
     for (let i = 0; i < argv.length; i++) {
         if (argv[i] === '--apply') o.apply = true;
-        else if (valued[argv[i]]) o[valued[argv[i]]] = argv[++i];
+        else if (Object.hasOwn(valued, argv[i])) {
+            const value = argv[i + 1];
+            if (!value?.trim() || value.startsWith('--')) fail(`${argv[i]} に値を指定してください`);
+            o[valued[argv[i]]] = value;
+            i++;
+        }
         else fail(`未知の引数: ${argv[i]}`);
     }
     if (!TAG_RE.test(o.tag ?? '')) fail(`--tag は vX.Y.Z 形式で指定してください (指定値: ${o.tag})`);
@@ -113,14 +118,16 @@ function updateRelease(o, release, body) {
 function classify(lines) {
     const kind = [];
     const block = [];
+    const visible = [];
     let fence = null;
     let inComment = false;
     let blockId = 0;
     for (const line of lines) {
+        visible.push('');
         if (inComment) {
             kind.push('comment');
             block.push(blockId);
-            if (line.includes('-->')) inComment = false;
+            if (/--!?>/.test(line)) inComment = false;
             continue;
         }
         if (fence) {
@@ -137,34 +144,37 @@ function classify(lines) {
             block.push(-1);
             continue;
         }
-        const start = line.indexOf('<!--');
-        if (start >= 0 && line.slice(0, start).trim() === '') {
+        const withoutComments = line.replace(/<!--.*?--!?>/g, '');
+        if (withoutComments.includes('<!--') || (line.trimStart().startsWith('<!--') && !withoutComments.trim())) {
             blockId++;
             kind.push('comment');
             block.push(blockId);
-            if (!line.slice(start).includes('-->')) inComment = true;
+            if (withoutComments.includes('<!--')) inComment = true;
             continue;
         }
         kind.push('text');
         block.push(-1);
+        visible[visible.length - 1] = withoutComments;
     }
-    return { kind, block };
+    return { kind, block, visible };
 }
 
 const isHeading = (kind, line) => kind === 'text' && /^ {0,3}##[ \t]+\S/.test(line);
 const isStandaloneComment = (kind, line) => kind === 'comment' && /^\s*<!--[\s\S]*-->\s*$/.test(line);
 const RELATED_HEADING = /^ {0,3}##[ \t]+🎣[ \t]*Related Releases[ \t]*$/;
 const RECENT_HEADING = /^ {0,3}##[ \t]+💡[ \t]*Recent Changes[ \t]*$/;
+const listedVersions = (text) => [...new Set([...text.matchAll(/\[(v\d+\.\d+\.\d+)\]/g)].map((x) => x[1]))];
 
-/** Related Releases の行 (箇条書き) を { raw, members } に解析する。members は " <- " より前のバージョン */
-function parseRelatedLines(lines) {
+/** 有効な箇条書きから関連バージョンと原因バージョンを取得する */
+function parseRelatedLines(lines, kind, start, end) {
     const out = [];
-    for (const line of lines) {
-        const m = line.match(/^\s*[-*]\s+(.*\S)\s*$/);
+    for (let index = start; index < end; index++) {
+        if (kind[index] !== 'text') continue;
+        const m = lines[index].match(/^ {0,3}[-*][ \t]+(.*\S)\s*$/);
         if (!m) continue;
-        const body = m[1].split(' <- ')[0];
-        const members = [...body.matchAll(/\[(v\d+\.\d+\.\d+)\]/g)].map((x) => x[1]);
-        out.push({ raw: `- ${m[1]}`, members });
+        const [body, origin = ''] = m[1].split(' <- ');
+        const members = listedVersions(body);
+        if (members.length) out.push({ raw: `- ${m[1]}`, members, origin: listedVersions(origin).sort().join('/'), index });
     }
     return out;
 }
@@ -172,20 +182,18 @@ function parseRelatedLines(lines) {
 /** 本文から有効な Related Releases の行を取り出す (無ければ null) */
 function readRelatedSection(body) {
     const lines = body.replace(/\r\n/g, '\n').split('\n');
-    const { kind } = classify(lines);
+    const { kind, visible } = classify(lines);
     const i = lines.findIndex((l, n) => kind[n] === 'text' && RELATED_HEADING.test(l));
     if (i < 0) return null;
-    return parseRelatedLines(sectionLines(lines, kind, i));
+    return parseRelatedLines(visible, kind, i + 1, sectionEnd(lines, kind, i));
 }
 
-function sectionLines(lines, kind, headingIndex) {
-    const out = [];
+function sectionEnd(lines, kind, headingIndex) {
     for (let j = headingIndex + 1; j < lines.length; j++) {
-        if (isHeading(kind[j], lines[j]) || isStandaloneComment(kind[j], lines[j]) ||
-            (kind[j] === 'text' && lines[j].trim() === '</details>')) break;
-        out.push(lines[j]);
+        if (isHeading(kind[j], lines[j]) ||
+            (kind[j] === 'text' && lines[j].trim() === '</details>')) return j;
     }
-    return out;
+    return lines.length;
 }
 
 // ---------------------------------------------------------------- 本文の更新
@@ -196,23 +204,30 @@ function sectionLines(lines, kind, headingIndex) {
 function applyLines(body, tag, selected) {
     const eol = body.includes('\r\n') ? '\r\n' : '\n';
     const lines = body.replace(/\r\n/g, '\n').split('\n');
-    const { kind, block } = classify(lines);
+    const { kind, block, visible } = classify(lines);
     const heading = '## 🎣 Related Releases';
     const bullets = (list) => list.map((l) => l.raw);
 
     const active = lines.findIndex((l, n) => kind[n] === 'text' && RELATED_HEADING.test(l));
     if (active >= 0) {
-        const end = active + 1 + sectionLines(lines, kind, active).length;
-        const existing = parseRelatedLines(lines.slice(active + 1, end));
-        // 反映する行に包含される既存行(暫定行)は置き換え、それ以外(別の不具合の行)は残す
-        const kept = existing.filter((e) => !e.members.length || !selected.some((s) => e.members.every((v) => s.members.includes(v))));
-        const merged = [...selected, ...kept.filter((k) => !selected.some((s) => s.raw === k.raw))];
-        let last = end - 1;
-        while (last > active && lines[last].trim() === '') last--;
-        const next = [heading, ...bullets(merged)];
-        const before = lines.slice(active, last + 1);
+        const end = sectionEnd(lines, kind, active);
+        const existing = parseRelatedLines(visible, kind, active + 1, end);
+        const matches = (e, s) => e.origin && e.origin === s.origin && e.members.every((v) => s.members.includes(v));
+        const replaced = new Set(existing.filter((e) => {
+            if (selected.some((s) => s.raw === e.raw)) return true;
+            const candidates = selected.filter((s) => matches(e, s));
+            return candidates.length === 1 && existing.filter((row) => matches(row, candidates[0])).length === 1;
+        }).map((e) => e.index));
+        const before = lines.slice(active + 1, end);
+        const next = [
+            ...selected.map((s) => {
+                const row = existing.find((e) => s.raw === e.raw);
+                return row ? lines[row.index] : s.raw;
+            }),
+            ...before.filter((_, i) => !replaced.has(active + 1 + i)),
+        ];
         if (JSON.stringify(before) === JSON.stringify(next)) return { skip: '変更なし' };
-        lines.splice(active, last + 1 - active, ...next);
+        lines.splice(active + 1, before.length, ...next);
         return { body: lines.join(eol), action: '更新 (有効な節を置き換え)' };
     }
 

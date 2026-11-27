@@ -3,7 +3,7 @@
 # Release Notes / Changelog の下書き用データ (release-facts.json) を手動で作る。
 # - サポート版: 取り込む PR・項目を prs で指定する (必須)
 # - 最新版: 再実行したいとき (prs は空欄なら自動検出)
-# Release / Assets には一切触れない (読み取りのみ)。
+# update_draft を指定した場合だけ、ドラフトの Release 本文を更新する。
 name: Release facts
 
 on:
@@ -29,6 +29,11 @@ on:
 permissions:
   contents: write   # update_draft 時のみ、ドラフト Release の本文更新に使用
 
+concurrency:
+  group: draft-release-writes
+  queue: max
+  cancel-in-progress: false
+
 jobs:
   facts:
     runs-on: ubuntu-latest
@@ -47,11 +52,20 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/checkout@v7
+      - name: Check out workflow tooling
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Check out target tag history
+        uses: actions/checkout@v7
         with:
           ref: refs/tags/${{ github.event.inputs.tag }}
+          path: release-history
           fetch-depth: 0
           fetch-tags: true
+          persist-credentials: false
 
       - uses: actions/setup-node@v7
         with:
@@ -59,6 +73,7 @@ jobs:
 
       - name: Decide diff base
         id: base
+        working-directory: release-history
         run: |
           if [ -n "$BASE_INPUT" ]; then
             BASE="$BASE_INPUT"
@@ -81,12 +96,13 @@ jobs:
           echo "diff: ${BASE} -> ${TAG}"
 
       - name: Collect release facts
+        working-directory: release-history
         env:
           BASE: ${{ steps.base.outputs.base }}
         run: |
-          ARGS=(--tag "$TAG" --base "$BASE" --out release-facts.json)
+          ARGS=(--tag "$TAG" --base "$BASE" --out ../release-facts.json)
           if [ -n "$PR_SPEC" ]; then ARGS+=(--pr-spec "$PR_SPEC"); fi
-          node .github/scripts/collect-release-facts.mjs "${ARGS[@]}"
+          node ../.github/scripts/collect-release-facts.mjs "${ARGS[@]}"
 
       - name: Render release notes
         run: |
