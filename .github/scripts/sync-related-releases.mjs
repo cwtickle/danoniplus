@@ -142,7 +142,7 @@ function classify(lines) {
 }
 
 const isHeading = (kind, line) => kind === 'text' && /^ {0,3}##[ \t]+\S/.test(line);
-const isStandaloneComment = (kind, line) => kind === 'comment' && /^\s*<!--.*-->\s*$/.test(line);
+const isStandaloneComment = (kind, line) => kind === 'comment' && /^\s*<!--[\s\S]*-->\s*$/.test(line);
 const RELATED_HEADING = /^ {0,3}##[ \t]+🎣[ \t]*Related Releases[ \t]*$/;
 const RECENT_HEADING = /^ {0,3}##[ \t]+💡[ \t]*Recent Changes[ \t]*$/;
 
