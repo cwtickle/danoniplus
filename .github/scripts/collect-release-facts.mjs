@@ -526,14 +526,18 @@ function matchParen(text, open, literals) {
 export function extractTopLevel(source) {
     const { text, literals } = blankComments(source);
     const out = [];
-    const re = /^(?:export\s+)?(?:(async\s+)?function\s*\*?\s+([A-Za-z_$][\w$]*)\s*\(|(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*|class\s+([A-Za-z_$][\w$]*))/gm;
+    const re = /^(?:export\s+)?(?:(async\s+)?function\s*\*?\s+([A-Za-z_$][\w$]*)\s*\(|(?:const|let|var)\s+([A-Za-z_$][\w$]*)(?:\s*(=)\s*|[^\S\r\n\u2028\u2029]*(?=;|$))|class\s+([A-Za-z_$][\w$]*))/gm;
+    const ranges = literals.entries(); // In source order, like the declaration matches.
+    let range = ranges.next().value;
     let m;
     while ((m = re.exec(text))) {
+        while (range && range[1] <= m.index) range = ranges.next().value;
+        if (range && range[0] <= m.index) continue;
         if (m[2]) {
             const open = m.index + m[0].length - 1;
             const close = matchParen(text, open, literals);
             out.push({ name: m[2], kind: 'function', sig: normalizeSignature(text.slice(open + 1, close)) });
-        } else if (m[3]) {
+        } else if (m[4]) {
             const rest = text.slice(m.index + m[0].length, m.index + m[0].length + 400);
             let sig = null;
             let fm = rest.match(/^(?:async\s+)?function\s*\*?\s*[\w$]*\s*\(/);
@@ -546,7 +550,7 @@ export function extractTopLevel(source) {
                 if (close > 0 && /^\s*=>/.test(text.slice(close + 1, close + 20))) sig = normalizeSignature(text.slice(open + 1, close));
             } else if ((fm = rest.match(/^(?:async\s+)?([A-Za-z_$][\w$]*)\s*=>/))) sig = normalizeSignature(fm[1]);
             out.push(sig === null ? { name: m[3], kind: 'variable', sig: '' } : { name: m[3], kind: 'function', sig });
-        } else out.push({ name: m[4], kind: 'variable', sig: '' });
+        } else out.push({ name: m[3] ?? m[5], kind: 'variable', sig: '' });
     }
     return out;
 }
