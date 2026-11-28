@@ -1,0 +1,214 @@
+# .github/workflows/release-changelog.yml
+#
+# 公開済みの Release から Changelog を作り、4 つの Wiki へ反映する (手動実行)。
+#   GitHub Wiki 日本語 (danoniplus) / GitHub Wiki 英語 (danoniplus-docs) / GitLab Wiki (danonicw: Ja/ と En/)
+# 英訳だけ LLM (Anthropic API) を使う。それ以外 (リンク・日付・表・重要度/原因バージョン) は決定的に生成する。
+# ⇒ 現状、LLM利用部分だけコメントアウトしているため、英訳は動かない。
+#
+# dry_run=true (既定) のときは差分を要約に出すだけで、push しない。
+#
+# 実行順の目安: サポート版 → 最新版の順に公開したあと、サポート版 → 最新版の順に実行する
+#   (最新版の実行時に、サポート版エントリへ 🎣 Related Releases の行を後追いで追記する)。
+name: Release changelog (wiki)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '対象タグ (公開済みの Release。例: v53.4.0)'
+        required: true
+        type: string
+      prs:
+        description: 'サポート版のみ必須: 対象 PR と項目 (例: 2333:2+3,2340)。最新版は空欄'
+        required: false
+        type: string
+        default: ''
+      base:
+        description: '差分の基準タグ (空欄なら直前のタグを自動判定)'
+        required: false
+        type: string
+        default: ''
+      date:
+        description: 'Changelog の公開日 YYYY-MM-DD (空欄なら Release の公開日 JST)'
+        required: false
+        type: string
+        default: ''
+      translate:
+        description: 'true の場合は英語版 (GitHub EN / GitLab En) も作る。false なら日本語版のみ'
+        required: true
+        type: boolean
+        default: true
+      dry_run:
+        description: 'true の場合は差分確認のみ、実際の push はしない'
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-changelog
+  cancel-in-progress: false
+
+jobs:
+  changelog:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag }}
+      PRS: ${{ inputs.prs }}
+      BASE_INPUT: ${{ inputs.base }}
+      DATE_INPUT: ${{ inputs.date }}
+      TRANSLATE: ${{ inputs.translate }}
+      DRY_RUN: ${{ inputs.dry_run }}
+      GITLAB_NAMESPACE: "cwtickle"
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Validate inputs
+        run: |
+          set -euo pipefail
+          # 以降のシェル・スクリプトに渡すため、形式を厳密に検証する
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::tag は vX.Y.Z 形式で指定してください"; exit 1; }
+          [[ -z "$BASE_INPUT" || "$BASE_INPUT" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::base は vX.Y.Z 形式で指定してください"; exit 1; }
+          [[ -z "$DATE_INPUT" || "$DATE_INPUT" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "::error::date は YYYY-MM-DD 形式で指定してください"; exit 1; }
+          [[ -z "$PRS" || "$PRS" =~ ^[0-9]+(:[0-9]+(\+[0-9]+)*)?(,[0-9]+(:[0-9]+(\+[0-9]+)*)?)*$ ]] || { echo "::error::prs の形式が不正です (例: 2333:2+3,2340)"; exit 1; }
+
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.x'
+
+      - name: Set up git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch published release
+        run: |
+          set -euo pipefail
+          gh release view "$TAG" --json isDraft,publishedAt,body > release.json
+          if [ "$(jq -r .isDraft release.json)" = "true" ]; then
+            echo "::error::${TAG} はまだ公開されていません。公開後に実行してください"
+            exit 1
+          fi
+          jq -r .body release.json > release-body.md
+          if [ -n "$DATE_INPUT" ]; then
+            DATE="$DATE_INPUT"
+          else
+            DATE=$(TZ=Asia/Tokyo date -d "$(jq -r .publishedAt release.json)" +%F)
+          fi
+          echo "DATE=${DATE}" >> "$GITHUB_ENV"
+          echo "公開日: ${DATE}"
+
+      - name: Decide diff base
+        run: |
+          set -euo pipefail
+          if [ -n "$BASE_INPUT" ]; then
+            BASE="$BASE_INPUT"
+          else
+            BASE=$(git describe --tags --abbrev=0 --match 'v[0-9]*' "${TAG}^")
+          fi
+          echo "BASE=${BASE}" >> "$GITHUB_ENV"
+          echo "diff: ${BASE} -> ${TAG}"
+
+      - name: Collect release facts
+        run: |
+          set -euo pipefail
+          ARGS=(--tag "$TAG" --base "$BASE" --out release-facts.json)
+          if [ -n "$PRS" ]; then ARGS+=(--pr-spec "$PRS"); fi
+          node .github/scripts/collect-release-facts.mjs "${ARGS[@]}"
+          if [ ! -f release-facts.json ]; then
+            echo "::error::release-facts.json が作られませんでした。サポート版は prs (例: 2333:2+3) の指定が必要です"
+            exit 1
+          fi
+
+      # ---------- Wiki の取得 (日付の参照元と反映先) ----------
+      - name: Clone wikis
+        env:
+          GH_WIKI_TOKEN: ${{ secrets.RELEASE_EDIT_TOKEN }}
+          GITLAB_TOKEN: ${{ secrets.GITLAB_WIKI_TOKEN }}
+        run: |
+          set -euo pipefail
+          git clone "https://x-access-token:${GH_WIKI_TOKEN}@github.com/cwtickle/danoniplus.wiki.git" wiki-gh-main
+          git clone "https://x-access-token:${GH_WIKI_TOKEN}@github.com/cwtickle/danoniplus-docs.wiki.git" wiki-gh-docs
+          git clone "https://oauth2:${GITLAB_TOKEN}@gitlab.com/${GITLAB_NAMESPACE}/danonicw.wiki.git" wiki-gitlab
+
+      # ---------- 生成 ----------
+      - name: Render changelog (Japanese)
+        env:
+          GITHUB_STEP_SUMMARY: ''   # 英訳前の仮実行なので要約は出さない
+        run: |
+          node .github/scripts/render-changelog.mjs \
+            --facts release-facts.json --body release-body.md \
+            --wiki-dir wiki-gh-main --date "$DATE" --out-dir changelog-out
+
+#      - name: Translate to English
+#        if: ${{ inputs.translate }}
+#        env:
+#          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+#        run: |
+#          node .github/scripts/translate-changelog.mjs \
+#            --in changelog-out/bullets-ja.json \
+#            --prompt .github/prompts/changelog-translate.md \
+#            --out changelog-out/bullets-en.json
+
+      - name: Render changelog (final)
+        run: |
+          ARGS=(--facts release-facts.json --body release-body.md --wiki-dir wiki-gh-main --date "$DATE" --out-dir changelog-out)
+          if [ "$TRANSLATE" = "true" ]; then ARGS+=(--en changelog-out/bullets-en.json); fi
+          node .github/scripts/render-changelog.mjs "${ARGS[@]}"
+
+      # ---------- 反映 (すべて成功してから push する) ----------
+      - name: Update wikis
+        run: |
+          set -euo pipefail
+          U=.github/scripts/update-wiki-changelog.mjs
+          O=changelog-out
+          COMMON=(--files-changed "$O/files-changed.md" --meta "$O/meta.json")
+          node "$U" --dir wiki-gh-main --entry "$O/gh-ja.md" "${COMMON[@]}" > /dev/null
+          node "$U" --dir wiki-gitlab --subdir Ja --entry "$O/gl-ja.md" "${COMMON[@]}" > /dev/null
+          if [ "$TRANSLATE" = "true" ]; then
+            node "$U" --dir wiki-gh-docs --entry "$O/gh-en.md" "${COMMON[@]}" > /dev/null
+            node "$U" --dir wiki-gitlab --subdir En --entry "$O/gl-en.md" "${COMMON[@]}" > /dev/null
+          fi
+
+      - name: Show diff
+        run: |
+          {
+            echo "## Wiki 差分 (${TAG})"
+            for d in wiki-gh-main wiki-gh-docs wiki-gitlab; do
+              echo ""
+              echo "### ${d}"
+              echo '```diff'
+              git -C "$d" diff --no-color | head -c 30000
+              echo '```'
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit & push wikis
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          set -euo pipefail
+          for d in wiki-gh-main wiki-gh-docs wiki-gitlab; do
+            if [ -z "$(git -C "$d" status --porcelain)" ]; then
+              echo "${d}: 変更なし"
+              continue
+            fi
+            git -C "$d" add -A
+            git -C "$d" commit -m "Add changelog ${TAG}"
+            git -C "$d" push
+          done
+
+      - name: Upload changelog files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog-${{ inputs.tag }}
+          path: |
+            changelog-out
+            release-facts.json
+          if-no-files-found: warn
