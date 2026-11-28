@@ -19,6 +19,8 @@
  *   - 参照した項目は既定の箇条書きの代わりに、この 1 行にまとめて出力する (PR 番号は自動で並記)
  *   - 参照されない項目は既定どおり出力する
  *
+ * Bug Fixes の箇条書き末尾には照合用の項目 ID を HTML コメントとして残す。
+ *
  * 出力に含めない確認事項は標準出力の「要確認」に出す。
  */
 import fs from 'node:fs';
@@ -106,8 +108,12 @@ function section({ comment, heading, body }) {
     return lines.join('\n');
 }
 
-function bulletList(entries) {
-    return entries.map((e) => `- ${e.text} ${prNote(e.prs)}`);
+function bulletList(entries, includeFixIds = false) {
+    return entries.map((e) => {
+        const ids = e.items.filter((item) => item.fix).map((item) => item.id);
+        const credit = includeFixIds ? ` <!-- fix-items: ${ids.join(', ')} -->` : '';
+        return `- ${e.text} ${prNote(e.prs)}${credit}`;
+    });
 }
 
 function buildRemarks(entries) {
@@ -174,7 +180,7 @@ function render(facts, o, overrides) {
     const details = [
         section({ comment: '機能追加', heading: '## ⭐ New Features', body: bulletList(entries.new) }),
         section({ comment: '機能追加以外の改善内容', heading: '## 🛠️ Improvements', body: bulletList(entries.improvements) }),
-        section({ comment: '不具合修正', heading: '## 🐞 Bug Fixes', body: bulletList(entries.bugfix) }),
+        section({ comment: '不具合修正', heading: '## 🐞 Bug Fixes', body: bulletList(entries.bugfix, true) }),
         section({ heading: '## 📝 Chores', body: bulletList(entries.chores) }),
         section({ comment: '今回更新したWikiドキュメントへのリンク', heading: '## 📔 Documentation', body: docLines }),
         facts.rendered.functionsVariables,

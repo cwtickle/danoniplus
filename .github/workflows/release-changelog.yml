@@ -34,10 +34,10 @@ on:
         type: string
         default: ''
       translate:
-        description: 'true の場合は英語版 (GitHub EN / GitLab En) も作る。false なら日本語版のみ'
+        description: '英訳は現在無効です (false: 日本語版のみ)'
         required: true
         type: boolean
-        default: true
+        default: false
       dry_run:
         description: 'true の場合は差分確認のみ、実際の push はしない'
         required: true
@@ -67,6 +67,7 @@ jobs:
       - name: Validate inputs
         run: |
           set -euo pipefail
+          [[ "$TRANSLATE" == "false" ]] || { echo "::error::英訳は現在無効です。translate は false にしてください"; exit 1; }
           # 以降のシェル・スクリプトに渡すため、形式を厳密に検証する
           [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::tag は vX.Y.Z 形式で指定してください"; exit 1; }
           [[ -z "$BASE_INPUT" || "$BASE_INPUT" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::base は vX.Y.Z 形式で指定してください"; exit 1; }
@@ -110,7 +111,19 @@ jobs:
           if [ -n "$BASE_INPUT" ]; then
             BASE="$BASE_INPUT"
           else
-            BASE=$(git describe --tags --abbrev=0 --match 'v[0-9]*' "${TAG}^")
+            # タグの親コミットから辿った直前のタグ (サポート版・最新版とも同じ考え方)
+            stable_tags=$(git tag --list)
+            MATCHES=()
+            while IFS= read -r candidate; do
+              if [[ "$candidate" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                MATCHES+=(--match "$candidate")
+              fi
+            done <<< "$stable_tags"
+            if (( ${#MATCHES[@]} == 0 )); then
+              echo "::error::vX.Y.Z 形式のタグがありません"
+              exit 1
+            fi
+            BASE=$(git describe --tags --abbrev=0 "${MATCHES[@]}" "${TAG}^")
           fi
           echo "BASE=${BASE}" >> "$GITHUB_ENV"
           echo "diff: ${BASE} -> ${TAG}"
@@ -134,7 +147,9 @@ jobs:
         run: |
           set -euo pipefail
           git clone "https://x-access-token:${GH_WIKI_TOKEN}@github.com/cwtickle/danoniplus.wiki.git" wiki-gh-main
-          git clone "https://x-access-token:${GH_WIKI_TOKEN}@github.com/cwtickle/danoniplus-docs.wiki.git" wiki-gh-docs
+          if [ "$TRANSLATE" = "true" ]; then
+            git clone "https://x-access-token:${GH_WIKI_TOKEN}@github.com/cwtickle/danoniplus-docs.wiki.git" wiki-gh-docs
+          fi
           git clone "https://oauth2:${GITLAB_TOKEN}@gitlab.com/${GITLAB_NAMESPACE}/danonicw.wiki.git" wiki-gitlab
 
       # ---------- 生成 ----------
@@ -181,6 +196,7 @@ jobs:
           {
             echo "## Wiki 差分 (${TAG})"
             for d in wiki-gh-main wiki-gh-docs wiki-gitlab; do
+              [ -d "$d" ] || continue
               echo ""
               echo "### ${d}"
               echo '```diff'
@@ -194,6 +210,7 @@ jobs:
         run: |
           set -euo pipefail
           for d in wiki-gh-main wiki-gh-docs wiki-gitlab; do
+            [ -d "$d" ] || continue
             if [ -z "$(git -C "$d" status --porcelain)" ]; then
               echo "${d}: 変更なし"
               continue

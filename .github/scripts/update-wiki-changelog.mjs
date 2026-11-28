@@ -4,10 +4,10 @@
  *
  * render-changelog.mjs が作ったエントリと Files changed 節を、Wiki クローン内の Changelog ページへ反映する。
  *   1. 対象ページ (Changelog-latest.md / Changelog-vXX.md) の先頭に今回のエントリを挿入 (既にあれば置換)
- *   2. Files changed 節を差し替え
+ *   2. 対象がページ内の最新バージョンの場合のみ Files changed 節を差し替え
  *   3. 「🔖 N Releases」を、ページ内のバージョン見出しの数に合わせる
- *   4. --backfill のとき、関連リリースの各エントリに 🎣 行が無ければ追記 (サポート版を先に作った場合の後追い)
- * 変更したファイルは標準出力に 1 行ずつ出す。--dry-run でもファイルは書き換える (コミットは呼び出し側が制御)。
+ *   4. meta.backfill に指定された関連リリースの各エントリに 🎣 行を追記・更新 (サポート版を先に作った場合の後追い)
+ * 変更したファイルは標準出力に 1 行ずつ出す。ファイルはローカルで更新し、push するかどうかは workflow の dry_run 入力が制御する。
  *
  * 使い方:
  *   node .github/scripts/update-wiki-changelog.mjs --dir wiki-gh-main --entry changelog-out/gh-ja.md \
@@ -36,7 +36,18 @@ function parseArgs(argv) {
 }
 
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const ENTRY_HEAD = /^## v\d+\.\d+\.\d+ \(/;
+const ENTRY_HEAD = /^## (v\d+\.\d+\.\d+) \(/;
+
+function isNewestEntry(lines, tag) {
+    const version = (v) => v.slice(1).split('.').map(Number);
+    const [major, minor, patch] = version(tag);
+    return !lines.some((line) => {
+        const match = ENTRY_HEAD.exec(line);
+        if (!match) return false;
+        const [a, b, c] = version(match[1]);
+        return a > major || (a === major && (b > minor || (b === minor && c > patch)));
+    });
+}
 
 function readPage(file) {
     const raw = fs.readFileSync(file, 'utf8');
@@ -93,7 +104,15 @@ function addRelated(lines, tag, relatedLine) {
     const range = entryRange(lines, tag);
     if (!range) return 'missing';
     const [start, end] = range;
-    if (lines.slice(start, end).some((l) => l.includes('🎣'))) return 'exists';
+    const existing = lines.findIndex((line, i) => i > start && i < end && line.includes('🎣'));
+    if (existing >= 0) {
+        const generated = /^> \/ 🎣 \[\*\*(v\d+\.\d+\.\d+)\*\*\]\((\.\/[^#)]+#[^)]+)\)(<br>:heart: .*)?$/;
+        const before = generated.exec(lines[existing]);
+        const after = generated.exec(relatedLine);
+        if (!before || !after || before[1] !== after[1] || before[2] === after[2]) return 'exists';
+        lines[existing] = `${relatedLine}${before[3] ?? ''}`;
+        return 'refreshed';
+    }
     const last = end - 1;
     if (!/^(>|\/)/.test(lines[last])) return 'unexpected';
     const m = /^(.*?)(<br>:heart: .*)?$/.exec(lines[last]);
@@ -118,7 +137,7 @@ if (!fs.existsSync(pageFile)) fail(`${pageFile} がありません`);
     const { lines, crlf } = readPage(pageFile);
     try {
         const r = applyEntry(lines, entry, meta.tag);
-        applyFilesChanged(lines, section);
+        if (isNewestEntry(lines, meta.tag)) applyFilesChanged(lines, section);
         const n = applyReleaseCount(lines);
         writePage(pageFile, lines, crlf);
         changed.add(path.relative(o.dir, pageFile));
@@ -142,7 +161,7 @@ for (const member of meta.backfill ?? []) {
     const line = `> / 🎣 [**${newest}**](./${meta.page}#${anchor})`;
     const { lines, crlf } = readPage(file);
     const r = addRelated(lines, member, line);
-    if (r === 'added') {
+    if (r === 'added' || r === 'refreshed') {
         writePage(file, lines, crlf);
         changed.add(path.relative(o.dir, file));
     }

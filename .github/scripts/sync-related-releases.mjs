@@ -144,17 +144,32 @@ function classify(lines) {
             block.push(-1);
             continue;
         }
-        const withoutComments = stripHtmlCommentMarkers(line);
-        if (withoutComments.includes('<!--') || (line.trimStart().startsWith('<!--') && !withoutComments.trim())) {
-            blockId++;
-            kind.push('comment');
-            block.push(blockId);
-            if (withoutComments.includes('<!--')) inComment = true;
-            continue;
+        let text = '';
+        let rest = line;
+        for (;;) {
+            const open = rest.indexOf('<!--');
+            if (open < 0) {
+                text += rest;
+                break;
+            }
+            text += rest.slice(0, open);
+            const tail = rest.slice(open + 4);
+            const close = /--!?>/.exec(tail);
+            if (!close) {
+                inComment = true;
+                break;
+            }
+            rest = tail.slice(close.index + close[0].length);
         }
-        kind.push('text');
-        block.push(-1);
-        visible[visible.length - 1] = withoutComments;
+        if (line.includes('<!--') && !text.trim()) {
+            kind.push('comment');
+            block.push(++blockId);
+        } else {
+            kind.push('text');
+            block.push(-1);
+            visible[visible.length - 1] = text;
+            if (inComment) blockId++;
+        }
     }
     return { kind, block, visible };
 }
@@ -232,10 +247,13 @@ function applyLines(body, tag, selected) {
     }
 
     // コメントアウトされた節: <!--\n## 🎣 Related Releases\n-->
-    const hiddenAt = lines.findIndex((l, n) => kind[n] === 'comment' && /^\s*##[ \t]+🎣[ \t]*Related Releases[ \t]*$/.test(l));
+    const hiddenAt = lines.findIndex((l, n) => kind[n] === 'comment' && RELATED_HEADING.test(stripHtmlCommentMarkers(l).trim()));
     if (hiddenAt >= 0) {
         const id = block[hiddenAt];
         const idx = lines.map((_, n) => n).filter((n) => kind[n] === 'comment' && block[n] === id);
+        if (!lines[idx[0]].trimStart().startsWith('<!--') || !/--!?>\s*$/.test(lines[idx.at(-1)])) {
+            return { skip: 'コメントアウトされた節の範囲を特定できません' };
+        }
         const inner = idx.map((n) => stripHtmlCommentMarkers(lines[n]).trim()).filter(Boolean);
         if (inner.length !== 1) return { skip: 'コメントアウトされた節に他の内容があり、置き換え位置を特定できません' };
         lines.splice(idx[0], idx.length, heading, ...bullets(selected));

@@ -22,6 +22,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { markdownLines } from './release-markdown.mjs';
 
 const REPO = 'cwtickle/danoniplus';
 const GH = `https://github.com/${REPO}`;
@@ -105,60 +106,66 @@ function releaseDate(ver) {
 }
 
 // ---------------------------------------------------------------- Release 本文の読み取り
-function stripComments(s) {
-    let prev;
-    let out = s;
-    do {
-        prev = out;
-        out = out.replace(/<!--[\s\S]*?-->/g, '');
-    } while (out !== prev);
-    return out;
-}
-
 function sectionsOf(body) {
     const map = new Map();
     let cur = null;
-    for (const line of stripComments(body).split(/\r?\n/)) {
-        const h = /^## (.+?)\s*$/.exec(line);
+    for (const { line, fixIds, outsideFence } of markdownLines(body, { hideComments: true })) {
+        if (!outsideFence) continue;
+        const h = /^ {0,3}##[ \t]+(.+?)\s*$/.exec(line);
         if (h) {
             cur = [];
             map.set(h[1].replace(/️/g, ''), cur);
-        } else if (cur) cur.push(line);
+        } else if (cur) cur.push({ line, fixIds });
     }
     return map;
 }
 
 function parseBullets(lines, where) {
     const out = [];
-    for (const line of lines) {
-        const m = /^- (.+)$/.exec(line.trimEnd());
+    for (const { line, fixIds } of lines) {
+        const m = /^ {0,3}[-*][ \t]+(.+)$/.exec(line.trimEnd());
         if (!m) continue;
         const pr = /^(.*?)\s*\(\s*PR\s+((?:#\d+(?:\s*,\s*)?)+)\s*\)\s*$/.exec(m[1]);
         if (!pr) {
             review.push(`${where}: PR 番号の書式 ( PR #N ) を読めない行があります: ${m[1]}`);
-            out.push({ text: m[1].trim(), prs: [] });
+            out.push({ text: m[1].trim(), prs: [], fixIds });
             continue;
         }
-        out.push({ text: pr[1].trim(), prs: [...pr[2].matchAll(/#(\d+)/g)].map((x) => Number(x[1])) });
+        out.push({ text: pr[1].trim(), prs: [...pr[2].matchAll(/#(\d+)/g)].map((x) => Number(x[1])), fixIds });
     }
     return out;
 }
 
 const SEVERITY_ORDER = { A: 0, B: 1, C: 2 };
 
-/** 不具合修正の箇条書きと facts の fix 項目を PR 番号で対応付ける */
-function bindFixes(bullets, items) {
+/** 項目 ID で照合する。古い PR クレジットだけの場合は PR に修正が 1 件のときに限る */
+function bindFixes(bullets, items, fixCandidates) {
     const fixes = items.filter((i) => i.fix);
-    const used = new Set();
+    const byId = new Map(fixes.map((f) => [f.id, f]));
     return bullets.map((b) => {
         const picked = [];
-        for (const pr of b.prs) {
-            const hit = fixes.find((f) => f.pr === pr && !used.has(f.id));
-            if (hit) {
-                used.add(hit.id);
-                picked.push(hit);
+        let unresolved = false;
+        if (b.fixIds) {
+            for (const id of new Set(b.fixIds)) {
+                const hit = byId.get(id);
+                if (hit && b.prs.includes(hit.pr)) picked.push(hit);
+                else {
+                    review.push(`不具合修正「${b.text}」の項目 ID「${id}」を facts と照合できません`);
+                    unresolved = true;
+                }
+            }
+        } else {
+            for (const pr of new Set(b.prs)) {
+                const candidates = (fixCandidates ?? fixes).filter((f) => f.pr === pr);
+                if (candidates.length > 1) {
+                    review.push(`不具合修正「${b.text}」: PR #${pr} に複数の修正があり、項目 ID がないため特定できません`);
+                    unresolved = true;
+                } else if (candidates.length === 1 && byId.has(candidates[0].id)) {
+                    picked.push(byId.get(candidates[0].id));
+                }
             }
         }
+        if (unresolved) return { ...b, severity: null, origins: [], initial: false };
         if (!picked.length) {
             review.push(`不具合修正「${b.text}」に対応する facts の項目が見つかりません (重要度・原因バージョンを手で補ってください)`);
             return { ...b, severity: null, origins: [], initial: false };
@@ -191,12 +198,13 @@ function bulletLine(b, section, ctx, platform, lang, text) {
     if (section === 'bugfix') {
         const sev = b.severity ? `**${b.severity})**` : '**?)**';
         let line = `- 🐞 ${sev} ${text} ${prLinks(b.prs)}`;
+        const origins = b.origins.map((v) => originLink(v, ctx, platform, lang));
         if (b.initial) {
-            line += ' <- :boom: **initial**';
+            origins.unshift('**initial**');
             review.push(`「${b.text}」の原因バージョンが initial です。表記を確認してください`);
-        } else if (b.origins.length) {
-            line += ` <- :boom: ${b.origins.map((v) => originLink(v, ctx, platform, lang)).join(' / ')}`;
-        } else review.push(`不具合修正「${b.text}」の原因バージョンがありません`);
+        }
+        if (origins.length) line += ` <- :boom: ${origins.join(' / ')}`;
+        else review.push(`不具合修正「${b.text}」の原因バージョンがありません`);
         if (!b.severity) review.push(`不具合修正「${b.text}」の重要度がありません (**?)** を出力。手で A/B/C を記入してください)`);
         return line;
     }
@@ -311,13 +319,13 @@ const bullets = {
     improvements: parseBullets(sec.get('🛠️ Improvements'.replace(/️/g, '')) ?? [], 'Improvements'),
     bugfix: [],
 };
-bullets.bugfix = bindFixes(parseBullets(sec.get('🐞 Bug Fixes') ?? [], 'Bug Fixes'), facts.items);
+bullets.bugfix = bindFixes(parseBullets(sec.get('🐞 Bug Fixes') ?? [], 'Bug Fixes'), facts.items, facts.fixCandidates);
 const total = bullets.new.length + bullets.improvements.length + bullets.bugfix.length;
 if (!total) fail('Release 本文に New Features / Improvements / Bug Fixes の項目がありません。公開済みの Release か確認してください');
 
 // 貢献者 (Release 本文が正)
 const contributors = (sec.get('❤ Contributors') ?? [])
-    .map((l) => /^- (.+)$/.exec(l.trim())?.[1]?.trim())
+    .map(({ line }) => /^- (.+)$/.exec(line.trim())?.[1]?.trim())
     .filter(Boolean);
 
 // 関連リリース (Release 本文に節がある場合のみ)
@@ -325,8 +333,13 @@ let relatedLine = null;
 let group = [];
 const relatedLines = sec.get('🎣 Related Releases');
 if (relatedLines) {
-    const first = relatedLines.find((l) => l.startsWith('- ')) ?? '';
-    group = [...new Set([...first.split('<-')[0].matchAll(/\[(v\d+\.\d+\.\d+)\]/g)].map((m) => m[1]))].sort(cmpVer);
+    const members = new Set();
+    for (const { line } of relatedLines) {
+        if (!/^ {0,3}[-*][ \t]+/.test(line)) continue;
+        const tags = [...line.split('<-')[0].matchAll(/\[(v\d+\.\d+\.\d+)\]/g)].map((m) => m[1]);
+        for (const tag of tags) members.add(tag);
+    }
+    group = [...members].sort(cmpVer);
     const newest = group[group.length - 1];
     if (newest && newest !== v.tag) {
         const d = wiki.dateOf(newest) ?? releaseDate(newest);

@@ -26,12 +26,13 @@
  *   --repo <owner/name> 既定: $GITHUB_REPOSITORY または cwtickle/danoniplus
  *
  * 出力 (主なキー):
- *   version / date / prs / items / filesChanged / functionsVariables / recentChanges /
+ *   version / date / prs / items / fixCandidates / filesChanged / functionsVariables / recentChanges /
  *   relatedReleases / contributors / documentation / warning / needsReview / rendered
  */
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { markdownLines } from './release-markdown.mjs';
 import { changedZipGroups, SINGLE_RULES, TAG_RE } from './release-config.mjs';
 
 const DL_BASE = 'https://dl-danoniplus.qu7-52m.workers.dev/danoniplus';
@@ -214,20 +215,6 @@ function stripComments(s) {
     return cur;
 }
 
-function* markdownLines(body) {
-    let fence;
-    for (const line of body.replace(/\r\n/g, '\n').split('\n')) {
-        const marker = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
-        if (fence) {
-            if (marker && marker[1][0] === fence[0] && marker[1].length >= fence.length && !marker[2].trim()) fence = null;
-            yield { line, outsideFence: false };
-        } else if (marker && (marker[1][0] === '~' || !marker[2].includes('`'))) {
-            fence = marker[1];
-            yield { line, outsideFence: false };
-        } else yield { line, outsideFence: true };
-    }
-}
-
 function splitSections(body, level = 2) {
     const heading = new RegExp(`^ {0,3}#{${level}}[ \t]+(.*)$`);
     const sections = [];
@@ -280,19 +267,22 @@ function parseItems(pr, only = null) {
     const items = [];
     const fixCandidates = [];
     const seen = new Set();
+    let ordinal = 0;
     for (const { title: rawHeading, content } of splitSections(details, 3)) {
         const headingText = rawHeading.replace(/^\d+\.[ \t]*/, '').trim();
         if (!headingText) continue; // 未記入のテンプレート項目
-        const num = Number(rawHeading.match(/^(\d+)\./)?.[1] ?? items.length + 1);
+        ordinal++;
+        const num = Number(rawHeading.match(/^(\d+)\./)?.[1] ?? ordinal);
         const m = headingText.match(TYPE_RE);
         const type = m ? m[1].toLowerCase() : null;
         const title = (m ? m[2] : headingText).trim();
-        if (type === 'fix') fixCandidates.push({ pr: pr.number, title });
+        const id = `${pr.number}-${num}`;
+        if (type === 'fix') fixCandidates.push({ pr: pr.number, id });
         if (only && !only.has(num)) continue; // --pr-spec で対象外の項目
         seen.add(num);
         const { meta, body } = type === 'fix' ? extractFixMeta(content) : { meta: null, body: content.trim() };
         const item = {
-            id: `${pr.number}-${num}`,
+            id,
             pr: pr.number,
             num,
             rawHeading,
@@ -664,22 +654,24 @@ function fetchRecentReleases(o) {
     }
 }
 
-const normalizeFixTitle = (title) => title.trim().replace(/\s+/g, ' ');
-
-/** Bug Fixes の箇条書き末尾にある PR クレジットを本文の参照番号と区別する */
+/** Bug Fixes の箇条書き末尾にある PR クレジットと項目 ID を取得する */
 function creditedBugFixes(body) {
-    const section = splitSections(stripComments(body ?? '')).find(({ title }) => /Bug Fixes/i.test(title))?.content ?? '';
     const credits = [];
-    for (const { line, outsideFence } of markdownLines(section)) {
-        const m = outsideFence && line.match(/^ {0,3}[-*][ \t]+(.+?)\s+\(\s*PR\s+(#\d+(?:\s*,\s*#\d+)*)\s*\)\s*$/i);
-        if (m) credits.push({ title: normalizeFixTitle(m[1]), prs: m[2].match(/\d+/g).map(Number) });
+    let inBugFixes = false;
+    for (const { line, fixIds, outsideFence } of markdownLines(body ?? '', { hideComments: true })) {
+        if (!outsideFence) continue;
+        const heading = /^ {0,3}##[ 	]+(.+)$/.exec(line);
+        if (heading) inBugFixes = /Bug Fixes/i.test(heading[1]);
+        if (!inBugFixes) continue;
+        const m = line.match(/^ {0,3}[-*][ 	]+.+?\s+\(\s*PR\s+(#\d+(?:\s*,\s*#\d+)*)\s*\)\s*$/i);
+        if (m) credits.push({ fixIds, prs: m[1].match(/\d+/g).map(Number) });
     }
     return credits;
 }
 
 /**
  * 最新版の作成時点では、サポート版のタグ・Release は先に作られている。
- * Bug Fixes の PR クレジットを使い、同じ PR に複数の修正があれば項目名でも照合する。
+ * Bug Fixes の項目 ID を使う。古い Release の PR クレジットは修正が 1 件の場合のみ使う。
  * Release Notes / PR 本文に Backport が明記されている場合はそちらを優先する。
  */
 function detectBackports(o, items, fixCandidates) {
@@ -692,12 +684,27 @@ function detectBackports(o, items, fixCandidates) {
     const older = (idx < 0 ? releases : releases.slice(0, idx))
         .filter((r) => parseVer(r.tag_name)[0] < major)
         .map((r) => ({ ...r, credits: creditedBugFixes(r.body) }));
+    const ambiguous = new Set();
     for (const it of fixes) {
         const candidates = fixCandidates.filter((f) => f.pr === it.pr);
-        const title = normalizeFixTitle(it.title);
-        const uniqueTitle = candidates.filter((f) => normalizeFixTitle(f.title) === title).length === 1;
-        const hits = older.filter((r) => r.credits.some((credit) => credit.prs.includes(it.pr) &&
-            (candidates.length === 1 || (uniqueTitle && credit.title === title))));
+        const hits = older.filter((r) => {
+            let matched = false;
+            for (const credit of r.credits) {
+                if (!credit.prs.includes(it.pr)) continue;
+                if (credit.fixIds) {
+                    matched ||= credit.fixIds.includes(it.id);
+                } else if (candidates.length === 1) {
+                    matched = true;
+                } else {
+                    const key = `${r.tag_name} / PR #${it.pr}`;
+                    if (!ambiguous.has(key)) {
+                        ambiguous.add(key);
+                        review('relatedReleases', `${key}: 項目 ID がなく、複数の修正から Backport 対象を特定できません`);
+                    }
+                }
+            }
+            return matched;
+        });
         it.fix.backports = hits.map((r) => r.tag_name).sort(cmpVer).reverse();
         it.fix.backportsDetected = hits.length > 0;
         const drafts = hits.filter((r) => r.draft).map((r) => r.tag_name);
@@ -803,6 +810,7 @@ const facts = {
     prs: prs.map(({ body, ...rest }) => rest),
     releasePrs: releasePrs.map(({ body, ...rest }) => rest),
     items,
+    fixCandidates,
     otherComments,
     documentation,
     contributors,
