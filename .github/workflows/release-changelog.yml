@@ -2,8 +2,9 @@
 #
 # 公開済みの Release から Changelog を作り、4 つの Wiki へ反映する (手動実行)。
 #   GitHub Wiki 日本語 (danoniplus) / GitHub Wiki 英語 (danoniplus-docs) / GitLab Wiki (danonicw: Ja/ と En/)
-# 英訳だけ LLM (Anthropic API) を使う。それ以外 (リンク・日付・表・重要度/原因バージョン) は決定的に生成する。
-# ⇒ 現状、LLM利用部分だけコメントアウトしているため、英訳は動かない。
+# LLM は使わず、すべて決定的に生成する (リンク・日付・表・重要度/原因バージョン)。
+# 英語版 (GitHub EN / GitLab En) にも本文は日本語のまま反映する。
+# 英語版に Changelog が無い v18 以前の原因バージョン・最終更新は、日本語版 Wiki へのリンクにする。
 #
 # dry_run=true (既定) のときは差分を要約に出すだけで、push しない。
 #
@@ -33,11 +34,6 @@ on:
         required: false
         type: string
         default: ''
-      translate:
-        description: '英訳は現在無効です (false: 日本語版のみ)'
-        required: true
-        type: boolean
-        default: false
       dry_run:
         description: 'true の場合は差分確認のみ、実際の push はしない'
         required: true
@@ -59,7 +55,6 @@ jobs:
       PRS: ${{ inputs.prs }}
       BASE_INPUT: ${{ inputs.base }}
       DATE_INPUT: ${{ inputs.date }}
-      TRANSLATE: ${{ inputs.translate }}
       DRY_RUN: ${{ inputs.dry_run }}
       GITLAB_NAMESPACE: "cwtickle"
       GH_TOKEN: ${{ github.token }}
@@ -67,7 +62,6 @@ jobs:
       - name: Validate inputs
         run: |
           set -euo pipefail
-          [[ "$TRANSLATE" == "false" ]] || { echo "::error::英訳は現在無効です。translate は false にしてください"; exit 1; }
           # 以降のシェル・スクリプトに渡すため、形式を厳密に検証する
           [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::tag は vX.Y.Z 形式で指定してください"; exit 1; }
           [[ -z "$BASE_INPUT" || "$BASE_INPUT" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::base は vX.Y.Z 形式で指定してください"; exit 1; }
@@ -147,35 +141,15 @@ jobs:
         run: |
           set -euo pipefail
           git clone "https://x-access-token:${GH_WIKI_TOKEN}@github.com/cwtickle/danoniplus.wiki.git" wiki-gh-main
-          if [ "$TRANSLATE" = "true" ]; then
-            git clone "https://x-access-token:${GH_WIKI_TOKEN}@github.com/cwtickle/danoniplus-docs.wiki.git" wiki-gh-docs
-          fi
+          git clone "https://x-access-token:${GH_WIKI_TOKEN}@github.com/cwtickle/danoniplus-docs.wiki.git" wiki-gh-docs
           git clone "https://oauth2:${GITLAB_TOKEN}@gitlab.com/${GITLAB_NAMESPACE}/danonicw.wiki.git" wiki-gitlab
 
       # ---------- 生成 ----------
-      - name: Render changelog (Japanese)
-        env:
-          GITHUB_STEP_SUMMARY: ''   # 英訳前の仮実行なので要約は出さない
+      - name: Render changelog
         run: |
           node .github/scripts/render-changelog.mjs \
             --facts release-facts.json --body release-body.md \
             --wiki-dir wiki-gh-main --date "$DATE" --out-dir changelog-out
-
-#      - name: Translate to English
-#        if: ${{ inputs.translate }}
-#        env:
-#          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-#        run: |
-#          node .github/scripts/translate-changelog.mjs \
-#            --in changelog-out/bullets-ja.json \
-#            --prompt .github/prompts/changelog-translate.md \
-#            --out changelog-out/bullets-en.json
-
-      - name: Render changelog (final)
-        run: |
-          ARGS=(--facts release-facts.json --body release-body.md --wiki-dir wiki-gh-main --date "$DATE" --out-dir changelog-out)
-          if [ "$TRANSLATE" = "true" ]; then ARGS+=(--en changelog-out/bullets-en.json); fi
-          node .github/scripts/render-changelog.mjs "${ARGS[@]}"
 
       # ---------- 反映 (すべて成功してから push する) ----------
       - name: Update wikis
@@ -183,20 +157,21 @@ jobs:
           set -euo pipefail
           U=.github/scripts/update-wiki-changelog.mjs
           O=changelog-out
-          COMMON=(--files-changed "$O/files-changed.md" --meta "$O/meta.json")
-          node "$U" --dir wiki-gh-main --entry "$O/gh-ja.md" "${COMMON[@]}" > /dev/null
-          node "$U" --dir wiki-gitlab --subdir Ja --entry "$O/gl-ja.md" "${COMMON[@]}" > /dev/null
-          if [ "$TRANSLATE" = "true" ]; then
-            node "$U" --dir wiki-gh-docs --entry "$O/gh-en.md" "${COMMON[@]}" > /dev/null
-            node "$U" --dir wiki-gitlab --subdir En --entry "$O/gl-en.md" "${COMMON[@]}" > /dev/null
-          fi
+          upd() { # <dir> <subdir|""> <variant>
+            local args=(--dir "$1" --entry "$O/$3.md" --files-changed "$O/files-changed-$3.md" --meta "$O/meta.json")
+            if [ -n "$2" ]; then args+=(--subdir "$2"); fi
+            node "$U" "${args[@]}" > /dev/null
+          }
+          upd wiki-gh-main "" gh-ja
+          upd wiki-gh-docs "" gh-en
+          upd wiki-gitlab Ja gl-ja
+          upd wiki-gitlab En gl-en
 
       - name: Show diff
         run: |
           {
             echo "## Wiki 差分 (${TAG})"
             for d in wiki-gh-main wiki-gh-docs wiki-gitlab; do
-              [ -d "$d" ] || continue
               echo ""
               echo "### ${d}"
               echo '```diff'
@@ -210,7 +185,6 @@ jobs:
         run: |
           set -euo pipefail
           for d in wiki-gh-main wiki-gh-docs wiki-gitlab; do
-            [ -d "$d" ] || continue
             if [ -z "$(git -C "$d" status --porcelain)" ]; then
               echo "${d}: 変更なし"
               continue

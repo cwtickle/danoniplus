@@ -4,20 +4,19 @@
  *
  * 公開済み Release の本文 (JA の箇条書きの根拠) と release-facts.json (重要度・原因バージョン・Files changed) から、
  * Wiki の Changelog に追記する 4 種のエントリ (GitHub JA/EN, GitLab JA/EN) と Files changed 節を決定的に組み立てる。
- * LLM を使うのは英訳だけ (translate-changelog.mjs)。この script 自体は LLM を呼ばない。
+ * LLM は使わない。EN のエントリも本文は日本語のままで、EN 版 Wiki に v19 以降のページしか無いことによる
+ * リンク先の違い (v18 以前は日本語版 Wiki へ) だけを反映する。
  *
  * 使い方:
  *   node .github/scripts/render-changelog.mjs --facts release-facts.json --body release-body.md \
- *        --wiki-dir wiki-gh-main --date 2026-11-27 [--en bullets-en.json] [--out-dir changelog-out]
+ *        --wiki-dir wiki-gh-main --date 2026-11-27 [--out-dir changelog-out]
  *
  *   --wiki-dir  日本語版 GitHub Wiki のクローン。過去バージョンの公開日 (## vX.Y.Z ([YYYY-MM-DD]) と最新メジャーの判定に使う
- *   --en        英訳 (translate-changelog.mjs の出力)。無ければ EN のエントリは生成しない
  *
  * 出力 (--out-dir):
- *   gh-ja.md / gh-en.md / gl-ja.md / gl-en.md   追記するエントリ
- *   files-changed.md                            Files changed 節 (4 種共通)
- *   bullets-ja.json                             英訳の入力 [{ key, ja }]
- *   meta.json                                   反映スクリプトへ渡す情報 (関連リリースの 🎣 行など)
+ *   gh-ja.md / gh-en.md / gl-ja.md / gl-en.md                                   追記するエントリ
+ *   files-changed-gh-ja.md / -gh-en.md / -gl-ja.md / -gl-en.md                  Files changed 節 (EN は v18 以前の行のリンク先が JA 版)
+ *   meta.json                                                                    反映スクリプトへ渡す情報 (関連リリースの 🎣 行など)
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -41,7 +40,7 @@ function fail(msg) {
 // ---------------------------------------------------------------- 引数
 function parseArgs(argv) {
     const o = { outDir: 'changelog-out' };
-    const valued = { '--facts': 'facts', '--body': 'body', '--wiki-dir': 'wikiDir', '--date': 'date', '--en': 'en', '--out-dir': 'outDir' };
+    const valued = { '--facts': 'facts', '--body': 'body', '--wiki-dir': 'wikiDir', '--date': 'date', '--out-dir': 'outDir' };
     for (let i = 0; i < argv.length; i++) {
         const key = valued[argv[i]];
         if (!key) fail(`未知の引数: ${argv[i]}`);
@@ -189,9 +188,7 @@ function originLink(ver, ctx, platform, lang) {
     }
     const page = ctx.wiki.pageOf(ver);
     const hash = `#${anchorOf(ver, date)}`;
-    let base = `./${page}`;
-    if (lang === 'en' && majorOf(ver) < 19) base = platform === 'gh' ? `${GH}/wiki/${page}` : `../Ja/${page}`;
-    return `[**${ver}**](${base}${hash})`;
+    return `[**${ver}**](${wikiLink(page, ver, platform, lang)}${hash})`;
 }
 
 function bulletLine(b, section, ctx, platform, lang, text) {
@@ -235,9 +232,8 @@ function renderEntry(ctx, platform, lang) {
 
     const lines = [];
     for (const section of ['new', 'improvements', 'bugfix']) {
-        bullets[section].forEach((b, i) => {
-            const text = lang === 'en' ? ctx.en.get(`${section}:${i}`) : b.text;
-            lines.push(bulletLine(b, section, ctx, platform, lang, text));
+        bullets[section].forEach((b) => {
+            lines.push(bulletLine(b, section, ctx, platform, lang, b.text));
         });
     }
 
@@ -265,9 +261,15 @@ function renderEntry(ctx, platform, lang) {
 }
 
 // ---------------------------------------------------------------- Files changed
+/** Wiki 内リンクの基点。EN 版は v19 以降のページしか無いため、v18 以前は日本語版を参照する */
+function wikiLink(page, ver, platform, lang) {
+    if (lang === 'en' && majorOf(ver) < 19) return platform === 'gh' ? `${GH}/wiki/${page}` : `../Ja/${page}`;
+    return `./${page}`;
+}
+
 const EXCLUDED_NAME = /^(legacy_functions\.js|danoni_setting.*)$/;
 
-function renderFilesChanged(facts, ctx) {
+function renderFilesChanged(facts, ctx, platform, lang) {
     const fc = facts.filesChanged;
     const convertRow = (r) => {
         const names = r.names ?? [];
@@ -279,7 +281,7 @@ function renderFilesChanged(facts, ctx) {
         } else {
             const v = /^\[(v\d+\.\d+\.\d+)\]/.exec(r.lastCell)?.[1];
             const date = v ? ctx.wiki.dateOf(v) : null;
-            if (v && date) last = `[${v}](./${ctx.wiki.pageOf(v)}#${anchorOf(v, date)})`;
+            if (v && date) last = `[${v}](${wikiLink(ctx.wiki.pageOf(v), v, platform, lang)}#${anchorOf(v, date)})`;
             else {
                 last = r.lastCell;
                 review.push(`Files changed: ${r.nameCell} の最終更新 ${v ?? r.lastCell} の公開日が Wiki に見つかりません (Release へのリンクのまま出力)`);
@@ -358,35 +360,15 @@ const ctx = {
     relatedLine,
     facts,
     wiki,
-    en: new Map(),
 };
 
-// 英訳
-const jaList = ['new', 'improvements', 'bugfix'].flatMap((s) => bullets[s].map((b, i) => ({ key: `${s}:${i}`, section: s, ja: b.text })));
 fs.mkdirSync(o.outDir, { recursive: true });
-fs.writeFileSync(path.join(o.outDir, 'bullets-ja.json'), `${JSON.stringify(jaList, null, 2)}\n`);
 
-let enOk = false;
-if (o.en) {
-    let en;
-    try {
-        en = JSON.parse(fs.readFileSync(o.en, 'utf8'));
-    } catch (e) {
-        fail(`--en を読めません: ${e.message}`);
-    }
-    for (const { key } of jaList) {
-        const hit = Array.isArray(en) ? en.find((x) => x.key === key) : null;
-        if (!hit || typeof hit.en !== 'string' || !hit.en.trim()) fail(`--en に ${key} の英訳がありません`);
-        ctx.en.set(key, hit.en.trim());
-    }
-    enOk = true;
-} else review.push('英訳が指定されていないため、EN のエントリは生成していません');
-
-const outputs = { 'gh-ja': ['gh', 'ja'], 'gl-ja': ['gl', 'ja'], ...(enOk ? { 'gh-en': ['gh', 'en'], 'gl-en': ['gl', 'en'] } : {}) };
+const outputs = { 'gh-ja': ['gh', 'ja'], 'gh-en': ['gh', 'en'], 'gl-ja': ['gl', 'ja'], 'gl-en': ['gl', 'en'] };
 for (const [name, [platform, lang]] of Object.entries(outputs)) {
     fs.writeFileSync(path.join(o.outDir, `${name}.md`), renderEntry(ctx, platform, lang));
+    fs.writeFileSync(path.join(o.outDir, `files-changed-${name}.md`), renderFilesChanged(facts, ctx, platform, lang));
 }
-fs.writeFileSync(path.join(o.outDir, 'files-changed.md'), renderFilesChanged(facts, ctx));
 
 const meta = {
     tag: v.tag,
@@ -399,7 +381,6 @@ const meta = {
     relatedLine,
     // 最新版の Changelog を作ったとき、🎣 が未設定のサポート版へ追記する対象
     backfill: group.length && group[group.length - 1] === v.tag ? group.filter((g) => g !== v.tag) : [],
-    en: enOk,
     needsReview: review,
 };
 fs.writeFileSync(path.join(o.outDir, 'meta.json'), `${JSON.stringify(meta, null, 2)}\n`);
@@ -407,7 +388,7 @@ fs.writeFileSync(path.join(o.outDir, 'meta.json'), `${JSON.stringify(meta, null,
 const md = [
     `## Changelog 下書き: ${v.tag}`,
     '',
-    `出力: ${o.outDir}/ (${Object.keys(outputs).join(', ')}, files-changed.md)`,
+    `出力: ${o.outDir}/ (${Object.keys(outputs).join(', ')} と files-changed-*.md)`,
     ...(review.length ? ['', '### 要確認', ...[...new Set([...(facts.needsReview ?? []).filter((r) => /severity|重要度|原因/.test(r.message)).map((r) => `[${r.where}] ${r.message}`), ...review])].map((n) => `- ${n}`)] : []),
 ].join('\n');
 console.log(md);
