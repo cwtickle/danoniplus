@@ -62,6 +62,7 @@ const cmpVer = (a, b) => {
 const majorOf = (v) => Number(VER.exec(v)[1]);
 const dotless = (v) => v.replace(/\./g, '');
 const anchorOf = (v, date) => `${dotless(v)}-${date}`;
+const escapeRegExp = (s) => s.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
 
 function makeWiki(wikiDir, latestMajor) {
     const cache = new Map();
@@ -74,7 +75,7 @@ function makeWiki(wikiDir, latestMajor) {
         return cache.get(page);
     };
     const dateOf = (ver) => {
-        const m = new RegExp(`^## ${ver.replace(/\./g, '\\.')} \\(\\[(\\d{4}-\\d{2}-\\d{2})\\]`, 'm').exec(read(pageOf(ver)));
+        const m = new RegExp(`^## ${escapeRegExp(ver)} \\(\\[(\\d{4}-\\d{2}-\\d{2})\\]`, 'm').exec(read(pageOf(ver)));
         return m ? m[1] : null;
     };
     return { pageOf, dateOf };
