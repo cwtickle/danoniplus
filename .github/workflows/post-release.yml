@@ -1,5 +1,5 @@
 # .github/workflows/post-release.yml
-name: Post release
+name: R03. Post release [auto]
 
 on:
   pull_request:
