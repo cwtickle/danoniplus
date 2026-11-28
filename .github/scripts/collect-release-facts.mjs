@@ -273,13 +273,14 @@ function parseItems(pr, only = null) {
         if (!headingText) continue; // 未記入のテンプレート項目
         ordinal++;
         const num = Number(rawHeading.match(/^(\d+)\./)?.[1] ?? ordinal);
+        if (seen.has(num)) fail(`PR #${pr.number}: 項目番号 ${num} が重複しています`);
+        seen.add(num);
         const m = headingText.match(TYPE_RE);
         const type = m ? m[1].toLowerCase() : null;
         const title = (m ? m[2] : headingText).trim();
         const id = `${pr.number}-${num}`;
         if (type === 'fix') fixCandidates.push({ pr: pr.number, id });
         if (only && !only.has(num)) continue; // --pr-spec で対象外の項目
-        seen.add(num);
         const { meta, body } = type === 'fix' ? extractFixMeta(content) : { meta: null, body: content.trim() };
         const item = {
             id,
