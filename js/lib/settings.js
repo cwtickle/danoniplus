@@ -3300,9 +3300,9 @@ const makeHelpPreview = (_parent, _key, _top, _height) => {
 		markChips();
 	};
 
-	// 初期表示: 現在値 (OFF/Default の場合は最初の非OFFの選択肢)
+	// 初期表示: 現在値
 	const current = g_stateObj[_key];
-	applyOption(optList.includes(current) && current !== optList[0] ? current : (optList[1] ?? optList[0]));
+	applyOption(optList.includes(current) ? current : optList[0]);
 	markChips();
 	timerId = g_timerHandler.setTimeout(tick, 1000 / g_fps);
 };
