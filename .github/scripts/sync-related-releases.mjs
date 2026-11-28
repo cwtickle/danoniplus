@@ -144,7 +144,7 @@ function classify(lines) {
             block.push(-1);
             continue;
         }
-        const withoutComments = line.replace(/<!--[\s\S]*?--!?>/g, '');
+        const withoutComments = stripHtmlCommentMarkers(line);
         if (withoutComments.includes('<!--') || (line.trimStart().startsWith('<!--') && !withoutComments.trim())) {
             blockId++;
             kind.push('comment');
