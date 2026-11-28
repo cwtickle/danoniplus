@@ -4,7 +4,7 @@
 # 「🎣 Related Releases」を反映して完成させる。
 # apply を false のまま実行すると、更新予定の差分を表示するだけで本文は変更しない。
 # 更新するのは Related Releases の節のみ (Assets・タグには触れない)。
-name: Sync related releases
+name: R07. Sync related releases [manual]
 
 on:
   workflow_dispatch:
