@@ -34,7 +34,7 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           TAG="v${VERSION}"
 
-          git config user.name "361131824+danoniplus-ci-bot[bot]"
+          git config user.name "danoniplus-ci-bot[bot]"
           git config user.email "361131824+danoniplus-ci-bot[bot]@users.noreply.github.com"
 
           # 既にタグがある場合は二重発行しない
