@@ -3701,7 +3701,7 @@ const setReverseView = _btn => {
 	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.reverses[(g_settings.reverseNum + 1) % 2]}`],
 		g_cssObj[`button_Rev${g_settings.reverses[g_settings.reverseNum]}`]);
 	if (!g_settings.scrolls.includes(C_FLG_REVERSE) && g_headerObj.reverseUse) {
-		_btn.textContent = `${g_lblNameObj.Direction}:${g_stateObj.reverse === C_FLG_OFF ? '↑Default' : '↓Reverse'}`;
+		_btn.textContent = `${g_lblNameObj.Direction}:${g_stateObj.reverse === C_FLG_OFF ? 'Default' : 'Reverse'}`;
 	} else {
 		_btn.textContent = `X`;
 		setReverseDefault();
