@@ -105,7 +105,15 @@ function releaseDate(ver) {
 }
 
 // ---------------------------------------------------------------- Release 本文の読み取り
-const stripComments = (s) => s.replace(/<!--[\s\S]*?-->/g, '');
+function stripComments(s) {
+    let prev;
+    let out = s;
+    do {
+        prev = out;
+        out = out.replace(/<!--[\s\S]*?-->/g, '');
+    } while (out !== prev);
+    return out;
+}
 
 function sectionsOf(body) {
     const map = new Map();
