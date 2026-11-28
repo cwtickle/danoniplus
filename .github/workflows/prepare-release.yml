@@ -59,7 +59,7 @@ jobs:
 
       - name: Configure git
         run: |
-          git config user.name "361131824+danoniplus-ci-bot[bot]"
+          git config user.name "danoniplus-ci-bot[bot]"
           git config user.email "361131824+danoniplus-ci-bot[bot]@users.noreply.github.com"
 
       - name: Bump version

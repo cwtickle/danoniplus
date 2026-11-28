@@ -1,0 +1,147 @@
+# .github/workflows/release-assets.yml
+#
+# タグ作成後に、Assets を生成・検証して「ドラフト」の Release を作る。
+# Release は immutable (公開後は Assets を変更できない) のため、公開は必ず人が行う。
+name: Release assets (draft)
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '対象タグ (例: v53.4.0)'
+        required: true
+      base:
+        description: '差分の基準タグ (空欄なら直前のタグを自動判定)'
+        required: false
+      skip_zip_compare:
+        description: '過去 zip との構成比較を省略する (通常は false)'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # ドラフト Release の作成・Assets の添付
+
+concurrency:
+  group: draft-release-writes
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  draft:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+      BASE_INPUT: ${{ github.event.inputs.base }}
+      SKIP_ZIP_COMPARE: ${{ github.event.inputs.skip_zip_compare }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Validate tag name
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::タグ名が vX.Y.Z 形式ではありません: ${TAG}"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ github.event.inputs.tag || github.ref_name }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.x'
+
+      - name: Decide diff base
+        id: base
+        run: |
+          if [ -n "$BASE_INPUT" ]; then
+            BASE="$BASE_INPUT"
+          else
+            # タグの親コミットから辿った直前のタグ (サポート版・最新版とも同じ考え方)
+            stable_tags=$(git tag --list)
+            MATCHES=()
+            while IFS= read -r candidate; do
+              if [[ "$candidate" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                MATCHES+=(--match "$candidate")
+              fi
+            done <<< "$stable_tags"
+            if (( ${#MATCHES[@]} == 0 )); then
+              echo "::error::vX.Y.Z 形式のタグがありません"
+              exit 1
+            fi
+            BASE=$(git describe --tags --abbrev=0 "${MATCHES[@]}" "${TAG}^")
+          fi
+          echo "base=${BASE}" >> "$GITHUB_OUTPUT"
+          echo "diff: ${BASE} -> ${TAG}"
+
+      - name: Build and verify assets
+        env:
+          BASE: ${{ steps.base.outputs.base }}
+        run: |
+          ARGS=(--tag "$TAG" --base "$BASE" --out release-assets --manifest release-manifest.json)
+          if [ "$SKIP_ZIP_COMPARE" = "true" ]; then ARGS+=(--skip-zip-compare); fi
+          node .github/scripts/build-release-assets.mjs "${ARGS[@]}"
+
+      - name: Create draft release
+        run: |
+          # 既存の Release (ドラフトを含む) は変更しない
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::${TAG} の Release は既に存在します"
+            exit 1
+          fi
+
+          printf '%s\n' "**[DRAFT]** Release Notes は公開前にここへ記載してください。" > release-notes-draft.md
+          gh release create "$TAG" release-assets/* \
+            --draft --verify-tag \
+            --title "$TAG" \
+            --notes-file release-notes-draft.md
+
+      - name: Verify uploaded assets against manifest
+        run: |
+          jq -r '.assets[] | "\(.name) \(.size)"' release-manifest.json | sort > expected.txt
+          gh release view "$TAG" --json assets --jq '.assets[] | "\(.name) \(.size)"' | sort > actual.txt
+          if ! diff expected.txt actual.txt; then
+            echo "::error::添付された Assets が期待と一致しません。ドラフトを公開せず確認してください"
+            exit 1
+          fi
+          {
+            echo ""
+            echo "ドラフト Release を作成しました。内容を確認し、Release Notes を記載してから手動で Publish してください。"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Release Notes / Changelog の下書き用データ。失敗しても Assets のドラフト作成は止めない
+      # サポート版は取り込む PR・項目の指定が必要なため、ここでは自動でスキップされる
+      # (release-facts.yml を手動実行して prs を指定する)
+      - name: Collect release facts
+        continue-on-error: true
+        env:
+          BASE: ${{ steps.base.outputs.base }}
+        run: node .github/scripts/collect-release-facts.mjs --tag "$TAG" --base "$BASE" --out release-facts.json
+
+      # facts から Release Notes 本文を組み立て、ドラフトの Release 本文を置き換える (サポート版は facts が無いためスキップ)
+      - name: Render release notes
+        id: notes
+        if: hashFiles('release-facts.json') != ''
+        continue-on-error: true
+        run: node .github/scripts/render-release-notes.mjs --facts release-facts.json --date "$(TZ=Asia/Tokyo date +%F)" --out release-notes.md
+
+      - name: Update draft release notes
+        if: steps.notes.outcome == 'success'
+        continue-on-error: true
+        run: |
+          # 公開済みの Release 本文は上書きしない (ドラフトのみ)
+          if [ "$(gh release view "$TAG" --json isDraft --jq .isDraft)" = "true" ]; then
+            gh release edit "$TAG" --notes-file release-notes.md
+          fi
+
+      - name: Upload release facts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-facts-${{ env.TAG }}
+          path: |
+            release-facts.json
+            release-notes.md
+          if-no-files-found: warn
