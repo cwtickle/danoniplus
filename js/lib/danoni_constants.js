@@ -4929,8 +4929,8 @@ const g_lblNameObj = {
 
     'u_OFF': `OFF`,
     'u_ON': `ON`,
-    'u2_OFF': `Up↑ (Default)`,
-    'u2_ON': `Down↓ (Reverse)`,
+    'u2_OFF': `Default`,
+    'u2_ON': `Reverse`,
     'u_Boost': `Boost`,
     'u_Hi-Boost': `Hi-Boost`,
     'u_Brake': `Brake`,
@@ -5290,7 +5290,7 @@ const g_lang_msgObj = {
             `[Magnet] Fountainに似ていますが、画面中央で折り返します。\n`,
         reverse: `矢印の流れる向きを設定します。`,
         scroll: `各レーンのスクロール方向をパターンに沿って設定します。基本は下から上へ流れます。\n` +
-            `Direction: ↓Reverse でスクロール方向を反転します。\n` +
+            `Direction: Reverse でスクロール方向を反転します。\n` +
             `[Cross] 正、逆、正の順に流れるよう設定します。\n` +
             `[Split] 中央を境界として、スクロール方向を反転します。 \n` +
             `[Alternate] 交互にスクロール方向が反転するよう設定します。\n` +
@@ -5483,7 +5483,7 @@ const g_lang_msgObj = {
             `[Magnet] Similar to Fountain, but turns back at the center of the screen.\n`,
         reverse: `Set the flow direction of the sequences.`,
         scroll: `Set the scroll direction for each lane according to the pattern. Generally, it flows from the bottom to the top.\n` +
-            `If "Direction: ↓Reverse" sets, reverse the scroll direction.\n` +
+            `If "Direction: Reverse" sets, reverse the scroll direction.\n` +
             `[Cross] Generally, set the flow to be default, reverse, and default.\n` +
             `[Split] Reverses the scroll direction with the center as the boundary.\n` +
             `[Alternate] Set the scroll direction to be reversed alternately.\n` +
