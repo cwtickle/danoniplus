@@ -1,4 +1,4 @@
-name: Publish Package
+name: R04. Publish Package [auto]
 
 on:
   push:
