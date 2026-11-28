@@ -4849,7 +4849,7 @@ const g_lblNameObj = {
     Speed: `Speed`,
     Motion: `Motion`,
     Scroll: `Scroll`,
-    Reverse: `Reverse`,
+    Reverse: `Direction`,
     Shuffle: `Shuffle`,
     AutoPlay: `AutoPlay`,
     Gauge: `Gauge`,
@@ -4928,6 +4928,8 @@ const g_lblNameObj = {
 
     'u_OFF': `OFF`,
     'u_ON': `ON`,
+    'u2_OFF': `Up↑ (Default)`,
+    'u2_ON': `Down↓ (Reverse)`,
     'u_Boost': `Boost`,
     'u_Hi-Boost': `Hi-Boost`,
     'u_Brake': `Brake`,

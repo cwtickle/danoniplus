@@ -1536,7 +1536,7 @@ const setDifficulty = (_chartChangeFlg) => {
 		const [visibleScr, hiddenScr] = (g_settings.scrolls.length > 1 ? [`scroll`, `reverse`] : [`reverse`, `scroll`]);
 		document.getElementById(`${visibleScr}Sprite`).style.display = C_DIS_INHERIT;
 		document.getElementById(`${hiddenScr}Sprite`).style.display = C_DIS_NONE;
-		setSetting(0, visibleScr);
+		setSetting(0, visibleScr, { secondNameFlg: true });
 
 		g_shortcutObj.option.KeyR.id = g_settings.scrolls.includes(C_FLG_REVERSE) ?
 			g_shortcutObj.option.KeyR.exId : g_shortcutObj.option.KeyR.dfId;
@@ -1546,7 +1546,7 @@ const setDifficulty = (_chartChangeFlg) => {
 		}
 	} else {
 		g_settings.scrolls = structuredClone(g_keyObj.scrollName_def);
-		setSetting(0, `reverse`);
+		setSetting(0, `reverse`, { secondNameFlg: true });
 	}
 
 	// ゲージ設定
@@ -1891,7 +1891,8 @@ const createOptionWindow = _sprite => {
 			if (g_headerObj.scrollUse && g_settings.scrolls.length > 1) {
 				setReverseView(document.getElementById(`btnReverse`));
 			}
-		}
+		},
+		secondNameFlg: true,
 	});
 	if (g_headerObj.scrollUse) {
 		createGeneralSetting(spriteList.scroll, `scroll`, { scLabel: g_lblNameObj.sc_scroll });
@@ -1900,7 +1901,7 @@ const createOptionWindow = _sprite => {
 		];
 
 		spriteList.scroll.appendChild(
-			createCss2Button(`btnReverse`, `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`, evt => setReverse(evt.target), {
+			createCss2Button(`btnReverse`, ``, evt => setReverse(evt.target), {
 				...g_lblPosObj.btnReverse,
 				cxtFunc: evt => setReverse(evt.target),
 			}, g_cssObj.button_Default, g_cssObj[`button_Rev${g_stateObj.reverse}`])
@@ -2043,11 +2044,11 @@ const createOptionWindow = _sprite => {
  */
 const createGeneralSetting = (_obj, _settingName, { unitName = ``,
 	skipTerms = fillArray(3, 1), hiddenBtn = false, addRFunc = () => { }, addLFunc = addRFunc,
-	settingLabel = _settingName, displayName = g_currentPage, scLabel = ``, roundNum = 0, adjY = 0 } = {}) => {
+	settingLabel = _settingName, displayName = g_currentPage, scLabel = ``, roundNum = 0, adjY = 0, secondNameFlg = false } = {}) => {
 
 	const settingUpper = toCapitalize(_settingName);
 	const linkId = `lnk${settingUpper}`;
-	const initName = `${getStgDetailName(g_stateObj[_settingName])}${unitName}`;
+	const initName = `${getStgDetailName(g_stateObj[_settingName], secondNameFlg)}${unitName}`;
 	_obj.appendChild(createLblSetting(settingUpper, adjY, toCapitalize(settingLabel)));
 
 	if (g_headerObj[`${_settingName}Use`] === undefined || g_headerObj[`${_settingName}Use`]) {
@@ -2055,27 +2056,27 @@ const createGeneralSetting = (_obj, _settingName, { unitName = ``,
 		multiAppend(_obj,
 			makeSettingLblCssButton(linkId, `${initName}${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`, 0,
 				() => {
-					setSetting(skipTerms[1], _settingName, { func: () => addRFunc(), unitName, roundNum });
+					setSetting(skipTerms[1], _settingName, { func: () => addRFunc(), unitName, roundNum, secondNameFlg });
 				}, {
 				cxtFunc: () => {
-					setSetting(skipTerms[1] * (-1), _settingName, { func: () => addLFunc(), unitName, roundNum });
+					setSetting(skipTerms[1] * (-1), _settingName, { func: () => addLFunc(), unitName, roundNum, secondNameFlg });
 				}
 			}),
 
 			// 右回し・左回しボタン（外側）
 			makeMiniCssButton(linkId, `R`, 0, () =>
-				setSetting(skipTerms[0], _settingName, { func: () => addRFunc(), unitName, roundNum })),
+				setSetting(skipTerms[0], _settingName, { func: () => addRFunc(), unitName, roundNum, secondNameFlg })),
 			makeMiniCssButton(linkId, `L`, 0, () =>
-				setSetting(skipTerms[0] * (-1), _settingName, { func: () => addLFunc(), unitName, roundNum })),
+				setSetting(skipTerms[0] * (-1), _settingName, { func: () => addLFunc(), unitName, roundNum, secondNameFlg })),
 		);
 
 		// 右回し・左回しボタン（内側）
 		if (skipTerms[1] > 1) {
 			multiAppend(_obj,
 				makeMiniCssButton(linkId, `RR`, 0, () =>
-					setSetting(skipTerms[1], _settingName, { func: () => addRFunc(), unitName, roundNum })),
+					setSetting(skipTerms[1], _settingName, { func: () => addRFunc(), unitName, roundNum, secondNameFlg })),
 				makeMiniCssButton(linkId, `LL`, 0, () =>
-					setSetting(skipTerms[1] * (-1), _settingName, { func: () => addLFunc(), unitName, roundNum })),
+					setSetting(skipTerms[1] * (-1), _settingName, { func: () => addLFunc(), unitName, roundNum, secondNameFlg })),
 			);
 		}
 
@@ -2083,10 +2084,10 @@ const createGeneralSetting = (_obj, _settingName, { unitName = ``,
 		if (skipTerms[2] > 1) {
 			multiAppend(_obj,
 				makeMiniCssButton(linkId, `RRR`, 0, () =>
-					setSetting(skipTerms[2], _settingName, { func: () => addRFunc(), unitName, roundNum })
+					setSetting(skipTerms[2], _settingName, { func: () => addRFunc(), unitName, roundNum, secondNameFlg })
 					, { dw: -g_limitObj.setMiniWidth / 2 }),
 				makeMiniCssButton(linkId, `LLL`, 0, () =>
-					setSetting(skipTerms[2] * (-1), _settingName, { func: () => addLFunc(), unitName, roundNum })
+					setSetting(skipTerms[2] * (-1), _settingName, { func: () => addLFunc(), unitName, roundNum, secondNameFlg })
 					, { dw: -g_limitObj.setMiniWidth / 2 }),
 			);
 		}
@@ -2095,9 +2096,9 @@ const createGeneralSetting = (_obj, _settingName, { unitName = ``,
 		if (hiddenBtn) {
 			multiAppend(_obj,
 				makeMiniCssButton(linkId, `HR`, 0, () =>
-					setSetting(1, _settingName, { func: () => addRFunc(), unitName, roundNum }), { visibility: `hidden` }),
+					setSetting(1, _settingName, { func: () => addRFunc(), unitName, roundNum, secondNameFlg }), { visibility: `hidden` }),
 				makeMiniCssButton(linkId, `HL`, 0, () =>
-					setSetting(-1, _settingName, { func: () => addLFunc(), unitName, roundNum }), { visibility: `hidden` }),
+					setSetting(-1, _settingName, { func: () => addLFunc(), unitName, roundNum, secondNameFlg }), { visibility: `hidden` }),
 			);
 		}
 
@@ -3596,14 +3597,18 @@ const makeRingHelpPreview = (_parent, _key, _top, _height) => {
 /**
  * 設定名の置き換え処理（未指定時は原則g_lblNameObjの値を使用、明示的な指定がある場合のみ元の名前を返却）
  * @param {string} _name 
+ * @param {boolean} _secondNameFlg
  * @returns {string}
  */
-const getStgDetailName = _name => {
+const getStgDetailName = (_name, _secondNameFlg = false) => {
 	return g_lblNameObj[`u_${_name}`] !== undefined && (
 		g_presetObj.lblRenames === undefined ||
 		g_presetObj.lblRenames[g_currentPage] === undefined ||
 		g_presetObj.lblRenames[g_currentPage]
-	) ? g_lblNameObj[`u_${_name}`] : _name;
+	) ? (
+		_secondNameFlg && g_lblNameObj[`u2_${_name}`] !== undefined
+			? g_lblNameObj[`u2_${_name}`] : g_lblNameObj[`u_${_name}`]
+	) : _name;
 };
 
 /**
@@ -3614,7 +3619,9 @@ const getStgDetailName = _name => {
  * @param {string} [unitName=''] 設定の単位名
  * @param {number} [roundNum=0] 設定スキップ間隔の丸め基準数
  */
-const setSetting = (_scrollNum, _settingName, { func = () => true, unitName = ``, roundNum = 0, maxSiz = g_limitObj.setLblSiz } = {}) => {
+const setSetting = (_scrollNum, _settingName, {
+	func = () => true, unitName = ``, roundNum = 0, maxSiz = g_limitObj.setLblSiz, secondNameFlg = false
+} = {}) => {
 	let settingNum = g_settings[`${_settingName}Num`];
 	const settingList = g_settings[`${_settingName}s`];
 	const settingMax = settingList.length - 1;
@@ -3634,10 +3641,11 @@ const setSetting = (_scrollNum, _settingName, { func = () => true, unitName = ``
 	g_stateObj[_settingName] = settingList[settingNum];
 	g_settings[`${_settingName}Num`] = settingNum;
 
-	const settingName = `${getStgDetailName(g_stateObj[_settingName])}${unitName}` +
+	const settingName = `${getStgDetailName(g_stateObj[_settingName], secondNameFlg)}${unitName}` +
 		`${g_localStorage[_settingName] === g_stateObj[_settingName] ? ' *' : ''}`;
 	const lnkName = `lnk${toCapitalize(_settingName)}`;
 	document.getElementById(lnkName).textContent = settingName;
+	console.log(secondNameFlg)
 	$id(lnkName).fontSize = wUnit(getFontSize2(settingName, parseFloat($id(lnkName).width), { maxSiz }));
 
 	func();
@@ -3694,7 +3702,7 @@ const setReverseView = _btn => {
 	_btn.classList.replace(g_cssObj[`button_Rev${g_settings.reverses[(g_settings.reverseNum + 1) % 2]}`],
 		g_cssObj[`button_Rev${g_settings.reverses[g_settings.reverseNum]}`]);
 	if (!g_settings.scrolls.includes(C_FLG_REVERSE) && g_headerObj.reverseUse) {
-		_btn.textContent = `${g_lblNameObj.Reverse}:${getStgDetailName(g_stateObj.reverse)}`;
+		_btn.textContent = `${g_lblNameObj.Reverse}:${g_stateObj.reverse === C_FLG_OFF ? '↑' : '↓'}`;
 	} else {
 		_btn.textContent = `X`;
 		setReverseDefault();
@@ -4956,9 +4964,11 @@ const exSettingInit = () => {
  * @param {string} [options.displayName='exSetting']
  * @param {Function} [options.func=()=>true] 通常ボタン用追加関数
  * @param {Function} [options.funcEx=()=>true] 拡張ボタン用追加関数
+ * @param {boolean} [secondNameFlg=false]
+ * @param {boolean} [secondNameExFlg=false]
  */
 const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF], displayName = `exSetting`,
-	func = () => true, funcEx = () => true } = {}) => {
+	func = () => true, funcEx = () => true, secondNameFlg = false, secondNameExFlg = false } = {}) => {
 	if (_spriteList?.[_name] === undefined) return;
 
 	/**
@@ -4987,16 +4997,16 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 	 * @returns {HTMLDivElement}
 	 */
 	const createExpandedBtn = () =>
-		createCss2Button(`lnk${toCapitalize(_name)}Type`, getStgDetailName(g_stateObj[`${_name}Type`]),
+		createCss2Button(`lnk${toCapitalize(_name)}Type`, getStgDetailName(g_stateObj[`${_name}Type`], secondNameExFlg),
 			() => {
-				setSetting(1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz });
+				setSetting(1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz, secondNameFlg: secondNameExFlg });
 				funcEx();
 				createExpandedScView(_name);
 			},
 			{
 				...g_lblPosObj.btnReverse,
 				cxtFunc: () => {
-					setSetting(-1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz });
+					setSetting(-1, `${_name}Type`, { maxSiz: g_limitObj.difSelectorSiz, secondNameFlg: secondNameExFlg });
 					funcEx();
 					createExpandedScView(_name);
 				},
@@ -5031,6 +5041,7 @@ const createGeneralSettingEx = (_spriteList, _name, { defaultList = [C_FLG_OFF],
 			}
 			func();
 		},
+		secondNameFlg,
 	});
 	if (typeEnabled) {
 		_spriteList[_name].appendChild(createExpandedBtn());
