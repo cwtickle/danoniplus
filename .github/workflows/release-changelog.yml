@@ -10,7 +10,7 @@
 #
 # 実行順の目安: サポート版 → 最新版の順に公開したあと、サポート版 → 最新版の順に実行する
 #   (最新版の実行時に、サポート版エントリへ 🎣 Related Releases の行を後追いで追記する)。
-name: Release changelog (wiki)
+name: R08. Release changelog (wiki) [manual]
 
 on:
   workflow_dispatch:

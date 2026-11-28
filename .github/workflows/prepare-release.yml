@@ -1,5 +1,5 @@
 # .github/workflows/prepare-release.yml
-name: Prepare release
+name: R01. Prepare release [manual]
 
 on:
   workflow_dispatch:

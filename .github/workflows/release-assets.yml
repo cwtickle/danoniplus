@@ -2,7 +2,7 @@
 #
 # タグ作成後に、Assets を生成・検証して「ドラフト」の Release を作る。
 # Release は immutable (公開後は Assets を変更できない) のため、公開は必ず人が行う。
-name: Release assets (draft)
+name: R05. Release assets (draft) [auto/manual]
 
 on:
   push:

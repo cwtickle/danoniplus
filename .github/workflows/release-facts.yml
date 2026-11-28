@@ -4,7 +4,7 @@
 # - サポート版: 取り込む PR・項目を prs で指定する (必須)
 # - 最新版: 再実行したいとき (prs は空欄なら自動検出)
 # update_draft を指定した場合だけ、ドラフトの Release 本文を更新する。
-name: Release facts
+name: R06. Release facts [manual]
 
 on:
   workflow_dispatch:
